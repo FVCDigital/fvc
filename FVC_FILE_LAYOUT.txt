@@ -1,0 +1,40 @@
+/contracts/                       # All Solidity smart contracts
+  └─ Bonding.sol                 # Bonding contract logic
+  └─ Staking.sol                # Staking and reward distribution
+  └─ Governance.sol             # DAO / voting mechanisms
+  └─ Compliance.sol             # Whitelist / KYC/AML integration
+  └─ Treasury.sol               # Vault and payment flows
+  └─ interfaces/                # Interface definitions for modular contracts
+  └─ libraries/                 # Shared contract libraries (e.g., SafeMath)
+
+/dapp/                           # Next.js frontend application
+  └─ pages/                     # Next.js page routes
+      └─ index.tsx             # Landing page
+      └─ dashboard/            # User dashboard views
+      └─ bonding.tsx          # Bonding UI
+      └─ staking.tsx          # Staking UI
+      └─ governance.tsx       # DAO & voting
+      └─ compliance.tsx       # Whitelist onboarding
+  └─ components/ui/            # UI atoms and molecules (Button, Card, etc.)
+  └─ screens/                  # High-level screen containers
+  └─ screen-view/              # Screen state handlers (loading, errors)
+  └─ utils/hooks/              # React hooks (e.g., useBonding, useStaking)
+  └─ utils/handlers/           # Logic handlers (bondingHandler, stakeHandler)
+  └─ constants/                # Constants for APY, bonding terms, durations
+  └─ types/                    # Frontend type definitions
+  └─ lib/                      # Client-side services (e.g., wallet, API)
+  └─ styles/                   # Tailwind config and global styles
+
+/packages/shared/               # Shared packages across backend/frontend
+  └─ types/                    # Universal TypeScript types
+  └─ constants/                # Global constants
+  └─ utils/                    # Shared logic functions
+
+/scripts/                       # Deployment and testing scripts
+  └─ deploy.ts                 # Contract deployment logic
+  └─ verify.ts                 # Contract verification
+  └─ setup.ts                  # Initial treasury / DAO setup
+
+/hardhat.config.ts              # Hardhat project config
+/next.config.js                 # Next.js config
+/tailwind.config.js             # Tailwind CSS config

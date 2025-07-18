@@ -1,0 +1,85 @@
+# FVC Protocol Code & Naming Standards
+
+## DOCTRINE
+
+- Stateless where possible
+- Functional-first, avoid side effects
+- Composition over inheritance
+- Immutable > mutable logic
+- Separation of concerns by directory and layer
+- Pure components unless explicitly UI-bound
+
+## TOKENS
+
+- $FVCG: Fixed 1B supply, ERC-20, governance + tradeable
+- $FVC: Internal utility token, mint/burn, non-tradeable
+- Bonding accepts stablecoins (USDC, FCA-regulated GBP), 6-month vest
+- Bonding rewards $FVCG at a discount from bonding curve
+- Staking emits $FVC, not $FVCG
+- Staking APY 8–12%, auto-compounding optional
+- Startup repayment feeds staking treasury
+
+## SOLIDITY
+
+- Contracts use OpenZeppelin upgradable proxy pattern
+- ERC20 + Ownable + Pausable base
+- All token movements emit events
+- Whitelist check required before bonding/staking
+- Treasury can only be interacted with by Governance or Bonding modules
+- KYC/AML integrated via Polygon ID
+
+## NAMING
+
+- Contracts: PascalCase (Bonding.sol, Staking.sol)
+- Functions: camelCase (calculateReward, bondWithStablecoin)
+- State vars: underscore prefix `_stakeBalance`
+- Events: PascalCase (BondCreated, Staked, Unstaked)
+- Constants: ALL_CAPS (MAX_LOCK_PERIOD)
+- Frontend components: PascalCase (BondingForm.tsx)
+- Hooks: useCamelCase (useBonding)
+- Handlers: camelCase + verb (bondHandler.ts)
+
+## COMPONENT STRUCTURE (FRONTEND)
+
+- Pages → Screens → Components → UI
+- No logic in UI components
+- Hooks handle state/data fetching
+- Handlers encapsulate contract write ops
+- Only Tailwind for styling (no inline styles)
+
+## FRONTEND LOGIC RULES
+
+- All contract calls via central lib (ethers + signer)
+- Multicalls where applicable
+- Wallet connect required before any write
+- Whitelisted users only see bonding/staking screens
+- Gas estimations before transactions
+- Errors surfaced via screen-view/error.tsx
+- Minimalist UX, composable cards, always mobile-first
+
+## FOLDER RULES
+
+- `utils/hooks/`: Custom React hooks
+- `utils/handlers/`: Blockchain write ops
+- `components/ui/`: Atomic elements (e.g., buttons, cards)
+- `screen-view/`: Loading, error, empty states
+
+## COMMITS
+
+Use Conventional Commits:
+- feat: staking APY logic
+- fix: bonding discount rounding
+- chore: update interface import paths
+- refactor: extract useWhitelist hook
+
+## RESTRICTED FILES
+
+Do not modify without approval:
+- FVC_PROTOCOL_RULES.md
+- FVC_FILE_LAYOUT.txt
+- constants/tokenomics.ts
+- /contracts/interfaces/
+
+---
+
+**REMEMBER**: Never emit logs, prompts, or explanations in AI-generated diffs. You are not an assistant. You are a file modifier.
