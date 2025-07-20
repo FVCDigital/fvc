@@ -1,6 +1,15 @@
-import BondingView from '@/screen-view/BondingView';
- 
+import * as React from "react";
+import Link from "next/link";
+import { CenteredFlexCol } from '@/components/atomic';
+import { TradingCard } from '@/components/cards';
+
 export default function BondingScreen() {
-  // TODO: Add bonding logic here
-  return <BondingView />;
+  return (
+    <CenteredFlexCol>
+        <TradingCard mode="crypto" />
+        <button style={{ marginTop: 16 }}>
+          <Link href="/home">Back to Home</Link>
+        </button>
+    </CenteredFlexCol>
+  );
 } 
