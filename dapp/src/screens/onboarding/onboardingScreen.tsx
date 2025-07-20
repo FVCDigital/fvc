@@ -22,6 +22,9 @@ const OnboardingScreen: React.FC = () => {
     if (!isConnected && wasConnected) {
       setWasConnected(false);
       setStep(1);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('kycComplete');
+      }
     }
   }, [isConnected, step, wasConnected]);
 
@@ -29,10 +32,22 @@ const OnboardingScreen: React.FC = () => {
   const handleCompleteKYC = async () => {
     await simulateKYCCompletion();
     setStep(3);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('kycComplete', 'true');
+    }
   };
 
   // Handler for finishing onboarding
-  const handleFinish = () => router.push('/welcome');
+  const handleFinish = () => {
+    if (isConnected) {
+      router.push('/home');
+    }
+  };
+
+  // Handler for skipping KYC
+  const handleSkipKYC = () => {
+    setStep(3);
+  };
 
   return (
     <OnboardingView
@@ -41,6 +56,7 @@ const OnboardingScreen: React.FC = () => {
       isConnected={isConnected}
       onCompleteKYC={handleCompleteKYC}
       onFinish={handleFinish}
+      onSkipKYC={handleSkipKYC}
     />
   );
 };
