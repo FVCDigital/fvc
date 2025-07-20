@@ -1,8 +1,10 @@
-// Centralized theme colors for FVC Protocol
+// Centralised theme colours for FVC Protocol
 export const theme = {
-  background: '#0f172a', // dark navy
-  backgroundAlt: '#1e293b', // deep blue
-  primary: '#0ea5e9', // cyan
-  accent: '#38bdf8', // light blue
-  text: '#e0e7ef', // off-white
+  modalBackground: '#FFFFFF08', // transparent backgrounds of modals
+  modalButton: '#28282C',      // buttons inside modals
+  generalButton: '#F7F8F8',    // general button
+  secondaryText: '#8A8F98',    // secondary text
+  primaryText: '#F7F8F8',      // primary text
+  buttonText: '#08090A',       // general button text
+  appBackground: '#08090A',    // background of the entire dapp
 }; 
