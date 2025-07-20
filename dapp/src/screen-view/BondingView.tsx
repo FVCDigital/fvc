@@ -1,10 +1,13 @@
 import React from 'react';
+import { CenteredFlexCol } from '@/components/atomic/CenteredFlexCol';
+import { HomeTitle } from '@/components/atomic/HomeTitle';
+import { Paragraph } from '@/components/atomic/Paragraph';
 
 const BondingView: React.FC = () => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold mb-4">Bonding</h1>
-    <p>Bonding functionality coming soon.</p>
-  </div>
+  <CenteredFlexCol>
+    <HomeTitle>Bonding</HomeTitle>
+    <Paragraph>Bonding functionality coming soon.</Paragraph>
+  </CenteredFlexCol>
 );
 
 export default BondingView; 
