@@ -1,10 +1,13 @@
 import React from 'react';
+import { CenteredFlexCol } from '@/components/atomic/CenteredFlexCol';
+import { HomeTitle } from '@/components/atomic/HomeTitle';
+import { Paragraph } from '@/components/atomic/Paragraph';
 
 const StakingView: React.FC = () => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold mb-4">Staking</h1>
-    <p>Staking functionality coming soon.</p>
-  </div>
+  <CenteredFlexCol>
+    <HomeTitle>Staking</HomeTitle>
+    <Paragraph>Staking functionality coming soon.</Paragraph>
+  </CenteredFlexCol>
 );
 
 export default StakingView; 
