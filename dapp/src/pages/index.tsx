@@ -1,11 +1,20 @@
 import * as React from "react";
-import Link from "next/link";
+import { useRouter } from 'next/router';
+import { useAccount } from 'wagmi';
+import LandingModal from '@/components/modals/LandingModal';
 
-export default function HomePage() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-2xl font-bold mb-4">FVC Protocol Home</h1>
-      <Link href="/onboarding" className="text-blue-600 underline">Go to Onboarding</Link>
-    </div>
-  );
+export default function LandingPage() {
+  const router = useRouter();
+  const { isConnected } = useAccount();
+
+  React.useEffect(() => {
+    if (isConnected) {
+      router.replace('/home');
+    }
+  }, [isConnected, router]);
+
+  // Optionally, render nothing while redirecting
+  if (isConnected) return null;
+
+  return <LandingModal />;
 } 
