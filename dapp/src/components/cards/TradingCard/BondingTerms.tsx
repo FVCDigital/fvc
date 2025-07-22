@@ -18,7 +18,7 @@ const BondingTerms: React.FC = () => (
     ...interFont,
   }}>
     <b>Bonding Terms & Conditions</b><br/>
-    • $FVCG is sold at a discount (20% initial, decaying to 5% over 30 days).<br/>
+    • $FVC is sold at a discount (20% initial, decaying to 5% over 30 days).<br/>
     • 90-day vesting lock after purchase.<br/>
     • Max 1% of total supply per wallet during bonding.<br/>
     • KYC required via Polygon ID.<br/>
