@@ -2,3 +2,4 @@ node_modules.cursor/
 node_modules
 .dapp/.next/
 .next/
+.yarn/install-state.gz
