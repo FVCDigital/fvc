@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import BaseCard from '@/components/cards/BaseCard';
 import { CenteredFlexCol } from '@/components/atomic';
 import { HomeTitle } from '@/components/atomic/HomeTitle';
-import { Paragraph } from '@/components/atomic/Paragraph';
 import { useRouter } from 'next/router';
+import { useAccount } from 'wagmi';
+import usePolygonId from '@/utils/hooks/usePolygonID';
+import { KYCPolygonIdCard } from '@/components/cards';
 
 const bondingGraphic = (
   <span style={{
@@ -25,23 +27,40 @@ const stakingGraphic = (
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { isConnected } = useAccount();
+  const { isVerified, triggerVerification, QrModal } = usePolygonId();
+  const [showKycModal, setShowKycModal] = React.useState(false);
+
+  const handleKyc = () => {
+    setShowKycModal(true);
+    setTimeout(() => { triggerVerification(); }, 0);
+  };
+
+  useEffect(() => {
+    if (!isConnected) {
+      router.replace('/onboarding');
+    }
+  }, [isConnected, router]);
+
   return (
     <CenteredFlexCol>
       <HomeTitle>Welcome to FVC Protocol!</HomeTitle>
       <br/>
-      <BaseCard
-        title="Bonding"
-        description="Swap stablecoins for discounted $FVCG"
-        graphic={bondingGraphic}
-        onClick={() => router.push('/bonding')}
-      />
-      <br/>
-      <BaseCard
-        title="Staking"
-        description="Lock $FVCG to earn yield from protocol revenue and repayments"
-        graphic={stakingGraphic}
-        onClick={() => router.push('/staking')}
-      />
+      <div style={{ width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <KYCPolygonIdCard onClick={handleKyc} showKycModal={showKycModal} QrModal={showKycModal && <QrModal onClose={() => setShowKycModal(false)} />} />
+        <BaseCard
+          title="Bonding"
+          description="Swap stablecoins for discounted $FVC"
+          graphic={bondingGraphic}
+          onClick={() => router.push('/bonding')}
+        />
+        <BaseCard
+          title="Staking"
+          description="Lock $FVC to earn from protocol revenue"
+          graphic={stakingGraphic}
+          onClick={() => router.push('/staking')}
+        />
+      </div>
     </CenteredFlexCol>
   );
 }
