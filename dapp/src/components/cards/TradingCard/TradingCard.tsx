@@ -8,6 +8,8 @@ import AmountInput from './AmountInput';
 import FVCGOutput from './FVCGOutput';
 import CardPaymentForm from './CardPaymentForm';
 import BondingTerms from './BondingTerms';
+import usePolygonId from '@/utils/hooks/usePolygonID';
+import { KYCButton } from '@/components/cards';
 
 const ASSETS = [
   { symbol: 'ETH', name: 'Ethereum', address: undefined },
@@ -28,6 +30,10 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
+
+  // Polygon ID KYC
+  const { isVerified, triggerVerification, QrModal } = usePolygonId();
+  const [showKycModal, setShowKycModal] = useState(false);
 
   // Placeholder bonding round data
   const bondingProgress = 0.6; // 60% sold
@@ -67,13 +73,35 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: 340 }}>
           <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Crypto Bonding</div>
           <div style={{ fontSize: 16, color: theme.secondaryText, marginBottom: 16, textAlign: 'center' }}>
-            Swap from your connected wallet for discounted <b>$FVCG</b>.<br/>
+            Swap from your connected wallet for discounted <b>$FVC</b>.<br/>
             (Trading UI coming soon)
           </div>
-          <AssetSelector assets={ASSETS} selectedAsset={selectedAsset} setSelectedAsset={setSelectedAsset} />
-          <BondingProgressBar progress={bondingProgress} />
-          <AmountInput input={input} setInput={setInput} balance={balance} isLoading={isLoading} selectedAsset={selectedAsset} handlePercent={handlePercent} />
-          <FVCGOutput fvcgAmount={fvcgAmount} currentDiscount={currentDiscount} />
+          {!isVerified ? (
+            <>
+              <KYCButton
+                onClick={() => {
+                  setShowKycModal(true);
+                  setTimeout(() => { triggerVerification(); }, 0);
+                }}
+                style={{
+                  fontWeight: 600,
+                  fontSize: 18,
+                  padding: '12px 24px',
+                  margin: '24px 0',
+                }}
+              >
+                Verify KYC
+              </KYCButton>
+              {showKycModal && <QrModal onClose={() => setShowKycModal(false)} />}
+            </>
+          ) : (
+            <>
+              <AssetSelector assets={ASSETS} selectedAsset={selectedAsset} setSelectedAsset={setSelectedAsset} />
+              <BondingProgressBar progress={bondingProgress} />
+              <AmountInput input={input} setInput={setInput} balance={balance} isLoading={isLoading} selectedAsset={selectedAsset} handlePercent={handlePercent} />
+              <FVCGOutput fvcgAmount={fvcgAmount} currentDiscount={currentDiscount} />
+            </>
+          )}
         </div>
       )}
       {tab === 'card' && (
