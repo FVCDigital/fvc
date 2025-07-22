@@ -25,6 +25,7 @@ const cardStyle: React.CSSProperties = {
   border: 'none',
   outline: `1px solid ${theme.modalButton}`,
   transition: 'box-shadow 0.2s',
+  fontFamily: 'Inter, sans-serif',
 };
 
 const contentRowStyle: React.CSSProperties = {
@@ -43,6 +44,7 @@ const titleStyle: React.CSSProperties = {
   color: theme.primaryText,
   display: 'block',
   margin: 0,
+  fontFamily: 'Inter, sans-serif',
 };
 
 const descStyle: React.CSSProperties = {
@@ -50,6 +52,7 @@ const descStyle: React.CSSProperties = {
   color: theme.secondaryText,
   margin: 0,
   marginTop: 4,
+  fontFamily: 'Inter, sans-serif',
 };
 
 // Responsive helper
