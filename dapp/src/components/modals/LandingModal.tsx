@@ -22,6 +22,7 @@ const cardStyle: React.CSSProperties = {
   alignItems: 'center',
   outline: `1px solid ${theme.modalButton}`,
   outlineOffset: 0,
+  fontFamily: 'Inter, sans-serif',
 };
 
 const overlayStyle: React.CSSProperties = {
@@ -49,14 +50,15 @@ const logoStyle: React.CSSProperties = {
   fontSize: 24,
   color: theme.primaryText,
   letterSpacing: 2,
+  fontFamily: 'Inter, sans-serif',
 };
 
 const titleStyle: React.CSSProperties = {
-  fontWeight: 700, fontSize: 22, color: theme.primaryText, textAlign: 'center'
+  fontWeight: 700, fontSize: 22, color: theme.primaryText, textAlign: 'center', fontFamily: 'Inter, sans-serif'
 };
 
 const subtitleStyle: React.CSSProperties = {
-  fontSize: 16, color: theme.secondaryText, textAlign: 'center', maxWidth: 340
+  fontSize: 16, color: theme.secondaryText, textAlign: 'center', maxWidth: 340, fontFamily: 'Inter, sans-serif'
 };
 
 const buttonStyle: React.CSSProperties = {
@@ -73,6 +75,9 @@ const buttonStyle: React.CSSProperties = {
   marginTop: 8,
   boxShadow: '0 2px 8px rgba(56,189,248,0.08)',
   transition: 'background 0.2s',
+  fontFamily: 'Inter, sans-serif',
+  border: 'none',
+  cursor: 'pointer',
 };
 
 const socialsStyle: React.CSSProperties = {
@@ -80,7 +85,7 @@ const socialsStyle: React.CSSProperties = {
 };
 
 const disclaimerStyle: React.CSSProperties = {
-  fontSize: 12, color: theme.secondaryText, textAlign: 'center', marginTop: 8
+  fontSize: 12, color: theme.secondaryText, textAlign: 'center', marginTop: 8, fontFamily: 'Inter, sans-serif'
 };
 
 const LandingModal: React.FC = () => (
