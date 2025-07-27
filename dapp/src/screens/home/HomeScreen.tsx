@@ -4,31 +4,17 @@ import { CenteredFlexCol } from '@/components/atomic';
 import { HomeTitle } from '@/components/atomic/HomeTitle';
 import { useRouter } from 'next/router';
 import { useAccount } from 'wagmi';
-import usePolygonId from '@/utils/hooks/usePolygonID';
-import { KYCPolygonIdCard } from '@/components/cards';
-
-const bondingGraphic = (
-  <span style={{
-    fontSize: 48,
-    filter: 'drop-shadow(0 0 16px #38bdf8) drop-shadow(0 0 32px #0ea5e9)',
-    color: '#38bdf8',
-    display: 'inline-block',
-  }}>🔄</span>
-);
-
-const stakingGraphic = (
-  <span style={{
-    fontSize: 48,
-    filter: 'drop-shadow(0 0 16px #a21caf) drop-shadow(0 0 32px #38bdf8)',
-    color: '#a21caf',
-    display: 'inline-block',
-  }}>💎</span>
-);
+import useKYC from '@/utils/hooks/useKYC';
+import { KYCCard } from '@/components/cards';
+import AppBar from '@/components/layout/AppBar';
+import { theme } from '@/constants/theme';
+import BondingGraphic from '@/components/graphics/BondingGraphic';
+import StakingGraphic from '@/components/graphics/StakingGraphic';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { isConnected } = useAccount();
-  const { isVerified, triggerVerification, QrModal } = usePolygonId();
+  const { isVerified, triggerVerification, QrModal } = useKYC();
   const [showKycModal, setShowKycModal] = React.useState(false);
 
   const handleKyc = () => {
@@ -37,30 +23,31 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    if (!isConnected) {
-      router.replace('/onboarding');
-    }
-  }, [isConnected, router]);
+    // No redirect
+  }, []);
 
   return (
-    <CenteredFlexCol>
-      <HomeTitle>Welcome to FVC Protocol!</HomeTitle>
-      <br/>
-      <div style={{ width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <KYCPolygonIdCard onClick={handleKyc} showKycModal={showKycModal} QrModal={showKycModal && <QrModal onClose={() => setShowKycModal(false)} />} />
-        <BaseCard
-          title="Bonding"
-          description="Swap stablecoins for discounted $FVC"
-          graphic={bondingGraphic}
-          onClick={() => router.push('/bonding')}
-        />
-        <BaseCard
-          title="Staking"
-          description="Lock $FVC to earn from protocol revenue"
-          graphic={stakingGraphic}
-          onClick={() => router.push('/staking')}
-        />
-      </div>
-    </CenteredFlexCol>
+    <div className="min-h-screen flex flex-col" style={{ background: theme.appBackground }}>
+      <AppBar />
+      <main className="flex-1 flex flex-col items-center justify-center">
+        <HomeTitle>Welcome to FVC Protocol!</HomeTitle>
+        <br/>
+        <div style={{ width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <KYCCard onClick={handleKyc} showKycModal={showKycModal} QrModal={showKycModal && <QrModal onClose={() => setShowKycModal(false)} />} />
+          <BaseCard
+            title="Bonding"
+            description="Swap stablecoins for discounted $FVC"
+            graphic={<BondingGraphic />}
+            onClick={() => router.push('/bonding')}
+          />
+          <BaseCard
+            title="Staking"
+            description="Lock $FVC to earn from protocol revenue"
+            graphic={<StakingGraphic />}
+            onClick={() => router.push('/staking')}
+          />
+        </div>
+      </main>
+    </div>
   );
 }

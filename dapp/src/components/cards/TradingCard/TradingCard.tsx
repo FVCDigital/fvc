@@ -8,7 +8,7 @@ import AmountInput from './AmountInput';
 import FVCGOutput from './FVCGOutput';
 import CardPaymentForm from './CardPaymentForm';
 import BondingTerms from './BondingTerms';
-import usePolygonId from '@/utils/hooks/usePolygonID';
+import usePolygonId from '@/utils/hooks/useKYC';
 import { KYCButton } from '@/components/cards';
 
 const ASSETS = [
@@ -31,7 +31,7 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
 
-  // Polygon ID KYC
+  // KYC KYC
   const { isVerified, triggerVerification, QrModal } = usePolygonId();
   const [showKycModal, setShowKycModal] = useState(false);
 
