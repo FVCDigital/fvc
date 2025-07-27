@@ -1,0 +1,10 @@
+yarn hardhat run scripts/test-fvc.ts --network localhost
+q
+cd contracts && yarn hardhat console --network localhost
+q
+fvc.name()
+fvc.name
+name
+exit
+quit
+test
