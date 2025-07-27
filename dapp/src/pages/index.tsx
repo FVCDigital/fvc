@@ -7,14 +7,6 @@ export default function LandingPage() {
   const router = useRouter();
   const { isConnected } = useAccount();
 
-  React.useEffect(() => {
-    if (isConnected) {
-      router.replace('/home');
-    }
-  }, [isConnected, router]);
-
-  // Optionally, render nothing while redirecting
-  if (isConnected) return null;
-
+  // No redirect
   return <LandingModal />;
 } 
