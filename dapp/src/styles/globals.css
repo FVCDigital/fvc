@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,7 +8,25 @@ html, body {
     margin: 0 !important;
     padding: 0 !important;
     background: #000 !important;
-    width: 100vw;
+    /* width: 100vw; */
     height: 100vh;
     box-sizing: border-box;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Override ONLY the RainbowKit modal background (main modal container) */
+div[data-rk] .ju367v15 {
+  background: #08090A !important;
+  color: #F7F8F8 !important;
+}
+
+div[data-rk] .ju367v5p,
+div[data-rk] .ju367vgu.ju367v16.ju367v2v,
+div[data-rk] .ju367vgu.ju367v16.ju367v2u,
+div[data-rk] .ju367vh0.ju367v16.ju367v19.ju367v1f.ju367v2v {
+  color: #F7F8F8 !important;
+}
+
+div[data-rk] .ju367vf0.ju367v16.ju367v17.ju367v1f.ju367v2v {
+  color: #8A8F98 !important;
 }

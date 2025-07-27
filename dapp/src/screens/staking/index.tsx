@@ -2,10 +2,10 @@ import * as React from "react";
 import Link from "next/link";
 import { CenteredFlexCol } from '@/components/atomic/CenteredFlexCol';
 import Card from '@/components/cards/BaseCard';
-import usePolygonId from '@/utils/hooks/usePolygonID';
+import useKYC from '@/utils/hooks/useKYC';
 
 export default function StakingScreen() {
-  const { isVerified, triggerVerification, QrModal } = usePolygonId();
+  const { isVerified, triggerVerification, QrModal } = useKYC();
   const [showKycModal, setShowKycModal] = React.useState(false);
   const handleKyc = () => {
     setShowKycModal(true);
@@ -29,7 +29,7 @@ export default function StakingScreen() {
           <span style={{ fontSize: 40, marginRight: 16 }}>🛡️</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, fontSize: 20, color: '#a259ff' }}>KYC Required</div>
-            <div style={{ fontSize: 15, color: '#7c3aed', marginTop: 2 }}>You must complete KYC with Polygon ID to interact with staking.</div>
+            <div style={{ fontSize: 15, color: '#7c3aed', marginTop: 2 }}>You must complete KYC with KYC to interact with staking.</div>
           </div>
           <button
             onClick={handleKyc}

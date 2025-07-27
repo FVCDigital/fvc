@@ -1,6 +1,7 @@
 import React from 'react';
 import { theme } from '@/constants/theme';
 import { FaDiscord, FaTelegram, FaXTwitter } from 'react-icons/fa6';
+import { useRouter } from 'next/router';
 
 const socials = [
   { icon: <FaDiscord size={20} />, label: 'Discord' },
@@ -88,49 +89,52 @@ const disclaimerStyle: React.CSSProperties = {
   fontSize: 12, color: theme.secondaryText, textAlign: 'center', marginTop: 8, fontFamily: 'Inter, sans-serif'
 };
 
-const LandingModal: React.FC = () => (
-  <div style={overlayStyle}>
-    <div style={cardStyle}>
-      <div style={logoStyle}>
-        FVC
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
-        <div style={titleStyle}>Your Wallet. Your Vote. Your Venture Fund.</div>
-        <div style={subtitleStyle}>
-          Join the world’s first interest-free, community-governed protocol for startup funding.
+const LandingModal: React.FC = () => {
+  const router = useRouter();
+  return (
+    <div style={overlayStyle}>
+      <div style={cardStyle}>
+        <div style={logoStyle}>
+          FVC
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+          <div style={titleStyle}>Your Wallet. Your Vote. Your Venture Fund.</div>
+          <div style={subtitleStyle}>
+            Join the world’s first interest-free, community-governed protocol for startup funding.
+          </div>
+        </div>
+        <button
+          style={buttonStyle}
+          onClick={() => router.push('/home')}
+        >
+          Get Started
+        </button>
+        <div style={socialsStyle}>
+          {socials.map(({ icon, label }) => (
+            <button
+              key={label}
+              aria-label={label}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: theme.secondaryText,
+                fontSize: 20,
+                cursor: 'pointer',
+                padding: 0,
+                transition: 'color 0.2s',
+              }}
+              tabIndex={-1}
+            >
+              {icon}
+            </button>
+          ))}
+        </div>
+        <div style={disclaimerStyle}>
+          FCA Disclaimer: This protocol is designed for FCA-compliant, community-governed venture funding. Participation may be subject to regulatory requirements in your jurisdiction.
         </div>
       </div>
-      <a
-        href="/onboarding"
-        style={buttonStyle}
-      >
-        Get Started
-      </a>
-      <div style={socialsStyle}>
-        {socials.map(({ icon, label }) => (
-          <button
-            key={label}
-            aria-label={label}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: theme.secondaryText,
-              fontSize: 20,
-              cursor: 'pointer',
-              padding: 0,
-              transition: 'color 0.2s',
-            }}
-            tabIndex={-1}
-          >
-            {icon}
-          </button>
-        ))}
-      </div>
-      <div style={disclaimerStyle}>
-        FCA Disclaimer: This protocol is designed for FCA-compliant, community-governed venture funding. Participation may be subject to regulatory requirements in your jurisdiction.
-      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default LandingModal;
