@@ -105,7 +105,9 @@ const LandingModal: React.FC = () => {
         </div>
         <button
           style={buttonStyle}
-          onClick={() => router.push('/home')}
+          onClick={() => {
+            window.location.hash = '#/dashboard';
+          }}
         >
           Get Started
         </button>
