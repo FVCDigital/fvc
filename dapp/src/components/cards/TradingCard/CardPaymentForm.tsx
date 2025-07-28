@@ -12,7 +12,6 @@ const CardPaymentForm: React.FC<{
   setCvc: (v: string) => void
 }> = ({ cardNumber, setCardNumber, expiry, setExpiry, cvc, setCvc }) => (
   <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Inter, sans-serif' }}>
-    <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Pay with Card</div>
     <div style={{ fontSize: 16, color: theme.secondaryText, marginBottom: 16, textAlign: 'center' }}>
       Enter your card details to purchase FVCG.<br/>
       (Stripe or similar coming soon)
@@ -30,25 +29,28 @@ const CardPaymentForm: React.FC<{
         background: theme.appBackground,
         color: theme.primaryText,
         fontSize: 18,
-        marginBottom: 6,
-        ...interFont,
+        marginBottom: 8,
+        boxSizing: 'border-box',
+        fontFamily: 'Inter, sans-serif',
       }}
     />
-    <div style={{ display: 'flex', gap: 8, width: '100%', marginBottom: 10 }}>
+    <div style={{ display: 'flex', gap: 8, width: '100%', marginBottom: 10, boxSizing: 'border-box' }}>
       <input
         type="text"
         placeholder="MM/YY"
         value={expiry}
         onChange={e => setExpiry(e.target.value)}
         style={{
-          width: '46%',
+          width: 'calc(50% - 4px)',
           padding: '10px 12px',
           borderRadius: 8,
           border: `1px solid ${theme.modalButton}`,
           background: theme.appBackground,
           color: theme.primaryText,
           fontSize: 18,
-          ...interFont,
+          boxSizing: 'border-box',
+          fontFamily: 'Inter, sans-serif',
+          height: '44px',
         }}
       />
       <input
@@ -57,14 +59,16 @@ const CardPaymentForm: React.FC<{
         value={cvc}
         onChange={e => setCvc(e.target.value)}
         style={{
-          width: '46%',
+          width: 'calc(50% - 4px)',
           padding: '10px 12px',
           borderRadius: 8,
           border: `1px solid ${theme.modalButton}`,
           background: theme.appBackground,
           color: theme.primaryText,
           fontSize: 18,
-          ...interFont,
+          boxSizing: 'border-box',
+          fontFamily: 'Inter, sans-serif',
+          height: '44px',
         }}
       />
     </div>
