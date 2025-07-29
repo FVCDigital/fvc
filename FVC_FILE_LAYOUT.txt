@@ -1,3 +1,6 @@
+# NOTE: This file layout is subject to change as the project evolves
+# All paths, structures, and naming conventions may be updated
+
 /contracts/                       # All Solidity smart contracts
   └─ Bonding.sol                 # Bonding contract logic
   └─ Staking.sol                # Staking and reward distribution
