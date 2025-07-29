@@ -51,8 +51,8 @@ export const useApproveUSDC = (amount: string) => {
   };
 };
 
-// Hook for bonding
-export const useBond = (amount: string) => {
+// Hook for bonding with different assets
+export const useBond = (amount: string, asset: any) => {
   const { address } = useAccount();
   
   const { data: hash, writeContract, isPending, error } = useWriteContract();
@@ -64,12 +64,24 @@ export const useBond = (amount: string) => {
   const handleBond = async () => {
     if (!amount || !address) return;
     
-    writeContract({
-      address: MOCK_CONTRACTS.BONDING as `0x${string}`,
-      abi: BONDING_ABI,
-      functionName: 'bond',
-      args: [parseUnits(amount, 6)], // USDC has 6 decimals
-    });
+    if (asset.symbol === 'ETH') {
+      // For ETH, send as value
+      writeContract({
+        address: MOCK_CONTRACTS.BONDING as `0x${string}`,
+        abi: BONDING_ABI,
+        functionName: 'bondETH',
+        args: [],
+        value: parseUnits(amount, 18), // ETH has 18 decimals
+      });
+    } else {
+      // For USDC, send amount as parameter
+      writeContract({
+        address: MOCK_CONTRACTS.BONDING as `0x${string}`,
+        abi: BONDING_ABI,
+        functionName: 'bond',
+        args: [parseUnits(amount, 6)], // USDC has 6 decimals
+      });
+    }
   };
 
   return {
@@ -83,13 +95,13 @@ export const useBond = (amount: string) => {
 };
 
 // Complete bonding flow handler
-export const useBondingFlow = () => {
+export const useBondingFlow = (selectedAsset?: any) => {
   const { address } = useAccount();
   const [bondAmount, setBondAmount] = useState('');
   const [step, setStep] = useState<'input' | 'approving' | 'bonding' | 'success' | 'error'>('input');
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Approval hook
+  // Only use approval for USDC
   const {
     approve,
     isLoading: isApproving,
@@ -98,19 +110,25 @@ export const useBondingFlow = () => {
     error: approvalError,
   } = useApproveUSDC(bondAmount);
 
-  // Bonding hook
+  // Bonding hook with asset parameter
   const {
     bond,
     isLoading: isBonding,
     isSuccess: isBonded,
     isError: isBondError,
     error: bondError,
-  } = useBond(bondAmount);
+  } = useBond(bondAmount, selectedAsset);
 
-  // Handle approval
+  // Handle approval (only for USDC)
   const handleApprove = async () => {
     if (!bondAmount || !address) {
       setErrorMessage('Please enter an amount and connect wallet');
+      return;
+    }
+
+    if (selectedAsset?.symbol === 'ETH') {
+      // Skip approval for ETH, go directly to bonding
+      handleBond();
       return;
     }
 
@@ -150,9 +168,9 @@ export const useBondingFlow = () => {
     setBondAmount('');
   };
 
-  // Auto-proceed to bonding after approval
+  // Auto-proceed to bonding after approval (only for USDC)
   useEffect(() => {
-    if (isApproved && step === 'approving') {
+    if (isApproved && step === 'approving' && selectedAsset?.symbol === 'USDC') {
       setStep('bonding');
       handleBond();
     }
