@@ -32,6 +32,13 @@ export const BONDING_ABI = [
   },
   {
     "inputs": [],
+    "name": "bondETH",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getCurrentDiscount",
     "outputs": [
       {
