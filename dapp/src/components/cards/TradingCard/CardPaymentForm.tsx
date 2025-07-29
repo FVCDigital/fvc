@@ -12,10 +12,6 @@ const CardPaymentForm: React.FC<{
   setCvc: (v: string) => void
 }> = ({ cardNumber, setCardNumber, expiry, setExpiry, cvc, setCvc }) => (
   <div style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', alignItems: 'center', fontFamily: 'Inter, sans-serif' }}>
-    <div style={{ fontSize: 16, color: theme.secondaryText, marginBottom: 16, textAlign: 'center' }}>
-      Enter your card details to purchase FVCG.<br/>
-      (Stripe or similar coming soon)
-    </div>
     <input
       type="text"
       placeholder="Card Number"
