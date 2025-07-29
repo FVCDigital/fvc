@@ -1,19 +1,34 @@
+/**
+ * Vesting card component
+ * Displays detailed vesting information and progress
+ * @module components/cards/VestingCard
+ */
+
 import React from 'react';
 import { useAccount } from 'wagmi';
 import { useVestingSchedule, useIsLocked } from '@/utils/contracts/bondingContract';
 import { theme } from '@/constants/theme';
 import { formatUnits } from 'viem';
+import { 
+  calculateVestingProgress, 
+  calculateTimeRemaining,
+  calculateVestingProgressInfo 
+} from '@/services/bondingService';
+import { BaseCardProps, VestingSchedule, VestingProgress } from '@/types';
 
-interface VestingCardProps {
+/**
+ * Props for the VestingCard component
+ */
+interface VestingCardProps extends BaseCardProps {
+  /** Additional CSS class names */
   className?: string;
 }
 
-interface VestingSchedule {
-  amount: bigint;
-  startTime: bigint;
-  endTime: bigint;
-}
-
+/**
+ * Vesting card component that displays detailed vesting information and progress
+ * @param props - Component props
+ * @returns Vesting card JSX element
+ */
 const VestingCard: React.FC<VestingCardProps> = ({ className = '' }) => {
   const { address } = useAccount();
   const { vestingSchedule, isLoading: isLoadingSchedule } = useVestingSchedule(address);
@@ -22,45 +37,13 @@ const VestingCard: React.FC<VestingCardProps> = ({ className = '' }) => {
   // Cast vestingSchedule to proper type
   const schedule = vestingSchedule as VestingSchedule | undefined;
 
-  // Calculate vesting progress
-  const calculateVestingProgress = () => {
-    if (!schedule || !schedule.startTime || !schedule.endTime) {
-      return 0;
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    const startTime = Number(schedule.startTime);
-    const endTime = Number(schedule.endTime);
-    
-    if (now >= endTime) return 100;
-    if (now <= startTime) return 0;
-    
-    const totalDuration = endTime - startTime;
-    const elapsed = now - startTime;
-    return (elapsed / totalDuration) * 100;
-  };
-
-  // Calculate time remaining
-  const calculateTimeRemaining = () => {
-    if (!schedule || !schedule.endTime) {
-      return { days: 0, hours: 0, minutes: 0 };
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    const endTime = Number(schedule.endTime);
-    const remaining = Math.max(0, endTime - now);
-
-    const days = Math.floor(remaining / (24 * 60 * 60));
-    const hours = Math.floor((remaining % (24 * 60 * 60)) / (60 * 60));
-    const minutes = Math.floor((remaining % (60 * 60)) / 60);
-
-    return { days, hours, minutes };
-  };
-
-  const progress = calculateVestingProgress();
-  const timeRemaining = calculateTimeRemaining();
+  // Calculate vesting progress and time remaining using service functions
+  const progress = calculateVestingProgress(schedule);
+  const timeRemaining = calculateTimeRemaining(schedule);
+  const vestingInfo: VestingProgress = calculateVestingProgressInfo(schedule, isLocked as boolean);
   const isVesting = schedule && schedule.amount > 0n;
 
+  // Render loading state
   if (isLoadingSchedule || isLoadingLocked) {
     return (
       <div style={{
@@ -90,6 +73,7 @@ const VestingCard: React.FC<VestingCardProps> = ({ className = '' }) => {
     );
   }
 
+  // Render no vesting state
   if (!isVesting) {
     return (
       <div style={{
@@ -121,7 +105,7 @@ const VestingCard: React.FC<VestingCardProps> = ({ className = '' }) => {
   }
 
   const fvcAmount = formatUnits(schedule.amount, 18);
-  const isFullyVested = progress >= 100;
+  const isFullyVested = vestingInfo.isFullyVested;
 
   return (
     <div style={{
@@ -161,7 +145,7 @@ const VestingCard: React.FC<VestingCardProps> = ({ className = '' }) => {
           marginBottom: 16,
         }}>
           {isFullyVested ? 'Fully Vested' : 'Vesting'}
-      </div>
+        </div>
 
         {/* FVC Amount */}
         <div style={{
@@ -245,14 +229,14 @@ const VestingCard: React.FC<VestingCardProps> = ({ className = '' }) => {
         }}>
           <span style={{ fontSize: 16, color: theme.secondaryText }}>Transfer Status</span>
           <div style={{
-            background: isLocked ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
-            color: isLocked ? '#ef4444' : '#10b981',
+            background: vestingInfo.isLocked ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
+            color: vestingInfo.isLocked ? '#ef4444' : '#10b981',
             padding: '4px 12px',
             borderRadius: 6,
             fontSize: 14,
             fontWeight: 600,
           }}>
-              {isLocked ? 'Locked' : 'Unlocked'}
+            {vestingInfo.isLocked ? 'Locked' : 'Unlocked'}
           </div>
         </div>
       </div>
