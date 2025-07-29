@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { theme } from '@/constants/theme';
-import { FaDiscord, FaTelegram, FaXTwitter } from 'react-icons/fa6';
+import { FaDiscord, FaTelegram, FaXTwitter, FaXmark } from 'react-icons/fa6';
+import { TabId } from '@/constants/tabs';
 
 interface SidebarProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab: TabId;
+  onTabChange: (tab: TabId) => void;
+  isMobile?: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
+const Sidebar: React.FC<SidebarProps> = ({ 
+  activeTab, 
+  onTabChange, 
+  isMobile = false, 
+  isOpen = false, 
+  onClose 
+}) => {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'bonding', label: 'Bonding' },
@@ -23,34 +33,63 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
     { name: 'Telegram', icon: <FaTelegram size={18} />, url: 'https://t.me/fvcprotocol' },
   ];
 
-  return (
+  const handleTabClick = (tabId: TabId) => {
+    onTabChange(tabId);
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
+
+  const sidebarContent = (
     <div style={{
       position: 'fixed',
       left: 0,
       top: 0,
       bottom: 0,
       width: 280,
-      background: theme.modalBackground,
+      background: '#08090A',
       borderRight: `1px solid ${theme.modalButton}`,
       display: 'flex',
       flexDirection: 'column',
-      zIndex: 1000,
+      zIndex: 1002,
       fontFamily: 'Inter, sans-serif',
+      transform: isMobile && !isOpen ? 'translateX(-100%)' : 'translateX(0)',
+      transition: 'transform 0.3s ease',
     }}>
-      {/* FVC Logo */}
+      {/* Header with FVC Logo and Mobile Close Button */}
       <div style={{
         padding: '32px 24px',
         borderBottom: `1px solid ${theme.modalButton}`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
       }}>
-        <div style={{
-          fontSize: 24,
-          fontWeight: 700,
-          color: theme.primaryText,
-          display: 'flex',
-          alignItems: 'center',
-        }}>
-          FVC Protocol
-        </div>
+        {!isMobile && (
+          <div style={{
+            fontSize: 24,
+            fontWeight: 700,
+            color: theme.primaryText,
+            display: 'flex',
+            alignItems: 'center',
+          }}>
+            FVC Protocol
+          </div>
+        )}
+        {isMobile && onClose && (
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: theme.primaryText,
+              cursor: 'pointer',
+              padding: 8,
+              borderRadius: 4,
+            }}
+          >
+            <FaXmark size={20} />
+          </button>
+        )}
       </div>
 
       {/* Navigation Tabs */}
@@ -58,7 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => onTabChange(tab.id)}
+            onClick={() => handleTabClick(tab.id as TabId)}
             style={{
               width: '100%',
               display: 'flex',
@@ -100,27 +139,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 40,
-                height: 40,
-                borderRadius: 8,
-                background: 'rgba(255,255,255,0.05)',
                 color: theme.secondaryText,
                 textDecoration: 'none',
-                fontSize: 18,
-                transition: 'all 0.2s ease',
-                cursor: 'pointer',
+                transition: 'color 0.2s ease',
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(56,189,248,0.1)';
-                e.currentTarget.style.color = theme.primaryText;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                e.currentTarget.style.color = theme.secondaryText;
-              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = theme.primaryText}
+              onMouseLeave={(e) => e.currentTarget.style.color = theme.secondaryText}
             >
               {link.icon}
             </a>
@@ -129,6 +153,34 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
       </div>
     </div>
   );
+
+  if (isMobile) {
+    return (
+      <>
+        {/* Mobile Overlay with Blur */}
+        {isOpen && (
+          <div
+            onClick={onClose}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(4px)',
+              zIndex: 1001,
+            }}
+          />
+        )}
+
+        {/* Mobile Sidebar */}
+        {sidebarContent}
+      </>
+    );
+  }
+
+  return sidebarContent;
 };
 
 export default Sidebar; 
