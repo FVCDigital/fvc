@@ -423,6 +423,19 @@ export const FVC_ABI = [
   },
   {
     "inputs": [],
+    "name": "bondingContract",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "decimals",
     "outputs": [
       {
@@ -601,6 +614,19 @@ export const FVC_ABI = [
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_bondingContract",
+        "type": "address"
+      }
+    ],
+    "name": "setBondingContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes4",
         "name": "interfaceId",
         "type": "bytes4"
@@ -652,7 +678,7 @@ export const FVC_ABI = [
       },
       {
         "internalType": "uint256",
-        "name": "value",
+        "name": "amount",
         "type": "uint256"
       }
     ],
@@ -681,7 +707,7 @@ export const FVC_ABI = [
       },
       {
         "internalType": "uint256",
-        "name": "value",
+        "name": "amount",
         "type": "uint256"
       }
     ],
@@ -715,4 +741,4 @@ export const FVC_ABI = [
     "type": "function"
   }
 ];
-export const FVC_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+export const FVC_ADDRESS = "0x0165878A594ca255338adfa4d48449f69242Eb8F";
