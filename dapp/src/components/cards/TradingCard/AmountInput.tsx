@@ -38,7 +38,7 @@ const AmountInput: React.FC<{
     />
     <div style={{ width: '100%', maxWidth: 340, margin: '-8px 0 8px 0', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
       <span style={{ fontSize: 13, color: theme.secondaryText, ...interFont, flex: 1 }}>
-        Balance: {isLoading ? '...' : balance ? `${Number(balance.formatted).toFixed(4)} ${selectedAsset.symbol}` : '0'}
+        Balance: {isLoading ? '...' : balance?.data ? `${Number(balance.data.formatted).toFixed(4)} ${selectedAsset.symbol}` : '0'}
       </span>
       <div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1 }}>
         {percentButtons.map(pct => (
