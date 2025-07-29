@@ -1,15 +1,16 @@
 import React from 'react';
 import { theme } from '@/constants/theme';
+import { TabId } from '@/constants/tabs';
 
 interface TabItem {
-  id: string;
+  id: TabId;
   label: string;
   icon?: React.ReactNode;
 }
 
 interface BottomTabBarProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab: TabId;
+  onTabChange: (tab: TabId) => void;
   tabs: TabItem[];
 }
 
