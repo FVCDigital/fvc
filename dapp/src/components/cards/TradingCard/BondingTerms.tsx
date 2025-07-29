@@ -18,10 +18,12 @@ const BondingTerms: React.FC = () => (
     ...interFont,
   }}>
     <b>Bonding Terms & Conditions</b><br/>
-    • $FVC is sold at a discount (20% initial, decaying to 5% over 30 days).<br/>
+    • $FVC is sold at a premium (0% initial, increasing to 20% over epoch).<br/>
+    • Target valuation: $1.00 - $1.20 per FVC in Round 1.<br/>
     • 90-day vesting lock after purchase.<br/>
-    • Max 1% of total supply per wallet during bonding.<br/>
-    • KYC required.<br/>
+    • Max 8M FVC per wallet during bonding (1% of total supply).<br/>
+    • KYC required for all transactions.<br/>
+    • Premium increases as epoch progresses (early buyers get better rates).<br/>
     • See Litepaper for full details.
   </div>
 );
