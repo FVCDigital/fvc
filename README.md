@@ -1,25 +1,49 @@
 # FVC Protocol
 
-A composable, upgradable DeFi protocol for governance, staking, and bonding on Polygon.
+First Venture Capital Protocol - DeFi's first interest-free, community-governed protocol for venture capital and business grants.
 
-## Structure
+## Overview
 
-- `contracts/`: Solidity smart contracts (upgradable, modular)
-- `dapp/`: Next.js frontend (TypeScript, TailwindCSS)
-- `packages/shared/`: Shared types, constants, utils
-- `scripts/`: Deployment and setup scripts
+FVC Protocol provides the solution small Web3 businesses have been waiting for: access to capital. Instead of giving away 30% equity for $200k, receive funding through community governance. The community that funds you becomes your biggest supporters.
 
-## Tokens
+## Token Architecture
 
-- **$FVCG**: Governance, fixed supply, tradeable
-- **$FVC**: Utility, mint/burn, non-tradeable
+- **$FVC**: Governance, fixed supply, tradeable
+- **fTokens**: Internal utility token, mint/burn, non-tradeable
+
+## Core Features
+
+- **Bonding**: Purchase $FVC at a premium through USDC bonding
+- **Staking**: Stake $FVC to earn fTokens and protocol fees
+- **Governance**: Vote on startup funding and protocol parameters
+- **KYC Integration**: FCA-compliant identity verification
+- **Revenue Sharing**: Earn from successful startup investments
+
+## Technology Stack
+
+- **Smart Contracts**: Solidity, OpenZeppelin, Hardhat
+- **Frontend**: Next.js, TypeScript, TailwindCSS
+- **Blockchain**: Polygon, Ethereum
+- **Wallet Integration**: RainbowKit, Wagmi
 
 ## Development
 
-- `yarn install`
-- `yarn build`
-- `yarn test`
+```bash
+# Install dependencies
+yarn install
 
-## Contributing
+# Start development
+yarn workspace dapp dev
 
-See `CONTRIBUTING.md`
+# Test contracts
+yarn workspace contracts test
+
+# Deploy contracts
+yarn workspace contracts deploy
+```
+
+## Documentation
+
+- [Litepaper](./docs/litepaper.pdf)
+- [Technical Architecture](./docs/architecture.md)
+- [Smart Contract Documentation](./contracts/README.md)
