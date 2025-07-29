@@ -1,3 +1,6 @@
+# NOTE: This protocol rules document is subject to change as the project evolves
+# All standards, naming conventions, and architectural decisions may be updated
+
 # FVC Protocol Code & Naming Standards
 
 ## DOCTRINE
@@ -11,12 +14,12 @@
 
 ## TOKENS
 
-- $FVCG: Fixed 1B supply, ERC-20, governance + tradeable
-- $FVC: Internal utility token, mint/burn, non-tradeable
-- Bonding accepts stablecoins (USDC, FCA-regulated GBP), 6-month vest
-- Bonding rewards $FVCG at a discount from bonding curve
-- Staking emits $FVC, not $FVCG
-- Staking APY 8–12%, auto-compounding optional
+- $FVC: Fixed 1B supply, ERC-20, governance + tradeable
+- fTokens: Internal utility token, mint/burn, non-tradeable
+- Bonding accepts stablecoins (USDC), 90-day vest
+- Bonding rewards $FVC at a premium from bonding curve
+- Staking emits fTokens, not $FVC
+- Staking APY 4–10%, auto-compounding optional
 - Startup repayment feeds staking treasury
 
 ## SOLIDITY
@@ -26,7 +29,7 @@
 - All token movements emit events
 - Whitelist check required before bonding/staking
 - Treasury can only be interacted with by Governance or Bonding modules
-- KYC/AML integrated via Polygon ID
+- KYC/AML integrated via external compliance provider
 
 ## NAMING
 
@@ -60,9 +63,13 @@
 ## FOLDER RULES
 
 - `utils/hooks/`: Custom React hooks
-- `utils/handlers/`: Blockchain write ops
-- `components/ui/`: Atomic elements (e.g., buttons, cards)
-- `screen-view/`: Loading, error, empty states
+- `utils/handlers/`: Contract interaction handlers
+- `components/cards/`: Reusable card components
+- `components/layout/`: Layout components (AppBar, Sidebar)
+- `components/graphics/`: SVG icons and graphics
+- `screens/`: Page-level components
+- `constants/`: App constants and theme
+- `types/`: TypeScript type definitions
 
 ## COMMITS
 
