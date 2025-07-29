@@ -1,19 +1,30 @@
+/**
+ * Dashboard card component
+ * Displays user's FVC balance and vesting status
+ * @module components/cards/DashboardCard
+ */
+
 import React from 'react';
 import { useAccount } from 'wagmi';
 import { useVestingSchedule, useIsLocked } from '@/utils/contracts/bondingContract';
 import { theme } from '@/constants/theme';
 import { formatUnits } from 'viem';
+import { calculateVestingProgress } from '@/services/bondingService';
+import { BaseCardProps, VestingSchedule } from '@/types';
 
-interface DashboardCardProps {
+/**
+ * Props for the DashboardCard component
+ */
+interface DashboardCardProps extends BaseCardProps {
+  /** Additional CSS class names */
   className?: string;
 }
 
-interface VestingSchedule {
-  amount: bigint;
-  startTime: bigint;
-  endTime: bigint;
-}
-
+/**
+ * Dashboard card component that displays user's FVC balance and vesting status
+ * @param props - Component props
+ * @returns Dashboard card JSX element
+ */
 const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
   const { address } = useAccount();
   const { vestingSchedule, isLoading: isLoadingSchedule } = useVestingSchedule(address);
@@ -22,28 +33,12 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
   // Cast vestingSchedule to proper type
   const schedule = vestingSchedule as VestingSchedule | undefined;
 
-  // Calculate vesting progress
-  const calculateVestingProgress = () => {
-    if (!schedule || !schedule.startTime || !schedule.endTime) {
-      return 0;
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    const startTime = Number(schedule.startTime);
-    const endTime = Number(schedule.endTime);
-    
-    if (now >= endTime) return 100;
-    if (now <= startTime) return 0;
-    
-    const totalDuration = endTime - startTime;
-    const elapsed = now - startTime;
-    return (elapsed / totalDuration) * 100;
-  };
-
-  const progress = calculateVestingProgress();
+  // Calculate vesting progress using service function
+  const progress = calculateVestingProgress(schedule);
   const isVesting = schedule && schedule.amount > 0n;
   const fvcAmount = isVesting ? formatUnits(schedule.amount, 18) : '0';
 
+  // Render disconnected state
   if (!address) {
     return (
       <div style={{
