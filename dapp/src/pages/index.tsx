@@ -7,10 +7,27 @@ import HomeScreen from '@/screens/home/HomeScreen';
 export default function LandingPage() {
   const router = useRouter();
   const { isConnected } = useAccount();
+  const [isHashRoute, setIsHashRoute] = React.useState(false);
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+    const checkHashRoute = () => {
+      setIsHashRoute(window.location.hash.startsWith('#/'));
+    };
+    checkHashRoute();
+    
+    // Listen for hash changes
+    window.addEventListener('hashchange', checkHashRoute);
+    return () => window.removeEventListener('hashchange', checkHashRoute);
+  }, []);
+
+  // Show loading state during SSR
+  if (!isClient) {
+    return <div style={{ background: '#08090A', minHeight: '100vh' }} />;
+  }
 
   // Check if we're accessing a hash route (main app)
-  const isHashRoute = typeof window !== 'undefined' && window.location.hash.startsWith('#/');
-  
   if (isHashRoute) {
     return <HomeScreen />;
   }
