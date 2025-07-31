@@ -19,16 +19,16 @@ async function main() {
     const fvcAddress = await fvcProxy.getAddress();
     console.log("FVC Token deployed to:", fvcAddress);
 
-    // Deploy Bonding contract with Round 1 configuration ($1 target)
+    // Deploy Bonding contract with Round 0 configuration ($1 target)
     const Bonding = await ethers.getContractFactory("Bonding");
     const bondingProxy = await upgrades.deployProxy(Bonding, [
         fvcAddress, // FVC token address
         "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC on Polygon
         deployer.address, // Treasury address
-        0, // Initial premium: 0% (1 USDC = 1 FVC = $1)
-        20, // Final premium: 20% (1.2 USDC = 1 FVC = $1.20)
-        ethers.parseEther("80000000"), // Epoch cap: 80M tokens
-        ethers.parseEther("8000000"), // Wallet cap: 8M tokens
+        20, // Initial discount: 20% (1 USDC = 1.25 FVC = $0.80)
+        10, // Final discount: 10% (1 USDC = 1.11 FVC = $0.90)
+        ethers.parseEther("10000000"), // Epoch cap: 10M tokens (Round 0)
+        ethers.parseEther("1000000"), // Wallet cap: 1M tokens
         90 * 24 * 60 * 60 // Vesting period: 90 days
     ], {
         initializer: "initialize"
@@ -51,11 +51,11 @@ async function main() {
 
     // Calculate total allocation across all rounds
     const rounds = [
-        { name: "Round 1 - Genesis", initialPremium: 0, finalPremium: 20, epochCap: "80000000", walletCap: "8000000" },
-        { name: "Round 2 - Early Adopters", initialPremium: 10, finalPremium: 30, epochCap: "60000000", walletCap: "6000000" },
-        { name: "Round 3 - Community", initialPremium: 20, finalPremium: 40, epochCap: "40000000", walletCap: "4000000" },
-        { name: "Round 4 - Public", initialPremium: 30, finalPremium: 50, epochCap: "15000000", walletCap: "2000000" },
-        { name: "Round 5 - Final", initialPremium: 40, finalPremium: 60, epochCap: "5000000", walletCap: "1000000" }
+        { name: "Round 0 - Soft Launch", initialDiscount: 20, finalDiscount: 10, epochCap: "10000000", walletCap: "1000000" },
+        { name: "Round 1 - Genesis", initialDiscount: 10, finalDiscount: 5, epochCap: "80000000", walletCap: "8000000" },
+        { name: "Round 2 - Early Adopters", initialDiscount: 5, finalDiscount: 2, epochCap: "60000000", walletCap: "6000000" },
+        { name: "Round 3 - Community", initialDiscount: 2, finalDiscount: 1, epochCap: "40000000", walletCap: "4000000" },
+        { name: "Round 4 - Public", initialDiscount: 1, finalDiscount: 0, epochCap: "15000000", walletCap: "2000000" }
     ];
 
     const totalAllocation = rounds.reduce((sum, round) => sum + parseFloat(round.epochCap), 0);
@@ -71,49 +71,49 @@ export const USDC_ADDRESS = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
 // Round configurations for $1 FVC target valuation
 export const ROUND_CONFIGS = [
     {
+        name: "Round 0 - Soft Launch",
+        initialDiscount: 20,
+        finalDiscount: 10,
+        epochCap: "10000000",
+        walletCap: "1000000",
+        vestingPeriod: 90 * 24 * 60 * 60,
+        targetPrice: "$0.80 - $0.90"
+    },
+    {
         name: "Round 1 - Genesis",
-        initialPremium: 0,
-        finalPremium: 20,
+        initialDiscount: 10,
+        finalDiscount: 5,
         epochCap: "80000000",
         walletCap: "8000000",
         vestingPeriod: 90 * 24 * 60 * 60,
-        targetPrice: "$1.00 - $1.20"
+        targetPrice: "$0.90 - $0.95"
     },
     {
         name: "Round 2 - Early Adopters", 
-        initialPremium: 10,
-        finalPremium: 30,
+        initialDiscount: 5,
+        finalDiscount: 2,
         epochCap: "60000000",
         walletCap: "6000000",
         vestingPeriod: 90 * 24 * 60 * 60,
-        targetPrice: "$1.10 - $1.30"
+        targetPrice: "$0.95 - $0.98"
     },
     {
         name: "Round 3 - Community",
-        initialPremium: 20,
-        finalPremium: 40,
+        initialDiscount: 2,
+        finalDiscount: 1,
         epochCap: "40000000",
         walletCap: "4000000",
         vestingPeriod: 90 * 24 * 60 * 60,
-        targetPrice: "$1.20 - $1.40"
+        targetPrice: "$0.98 - $0.99"
     },
     {
         name: "Round 4 - Public",
-        initialPremium: 30,
-        finalPremium: 50,
+        initialDiscount: 1,
+        finalDiscount: 0,
         epochCap: "15000000",
         walletCap: "2000000",
         vestingPeriod: 90 * 24 * 60 * 60,
-        targetPrice: "$1.30 - $1.50"
-    },
-    {
-        name: "Round 5 - Final",
-        initialPremium: 40,
-        finalPremium: 60,
-        epochCap: "5000000",
-        walletCap: "1000000",
-        vestingPeriod: 90 * 24 * 60 * 60,
-        targetPrice: "$1.40 - $1.60"
+        targetPrice: "$0.99 - $1.00"
     }
 ];
 `.trim());

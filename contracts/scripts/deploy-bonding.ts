@@ -25,8 +25,8 @@ async function main() {
         fvcAddress, // FVC token address
         "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC on Polygon
         deployer.address, // Treasury address
-        0, // Initial premium: 0% (1 USDC = 1 FVC = $1)
-        20, // Final premium: 20% (1.2 USDC = 1 FVC = $1.20)
+        20, // Initial discount: 20% (1 USDC = 1.25 FVC)
+        0, // Final discount: 0% (1 USDC = 1 FVC)
         ethers.parseEther("80000000"), // Epoch cap: 80M tokens
         ethers.parseEther("8000000"), // Wallet cap: 8M tokens
         90 * 24 * 60 * 60 // Vesting period: 90 days
