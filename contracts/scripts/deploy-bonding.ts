@@ -19,16 +19,16 @@ async function main() {
     const fvcAddress = await fvcProxy.getAddress();
     console.log("FVC Token deployed to:", fvcAddress);
 
-    // Deploy Bonding contract with premium-based pricing for $1 FVC target
+    // Deploy Bonding contract with Round 0 soft launch configuration
     const Bonding = await ethers.getContractFactory("Bonding");
     const bondingProxy = await upgrades.deployProxy(Bonding, [
         fvcAddress, // FVC token address
-        "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174", // USDC on Polygon
+        "0x5FbDB2315678afecb367f032d93F642f64180aa3", // Mock USDC for testing
         deployer.address, // Treasury address
-        20, // Initial discount: 20% (1 USDC = 1.25 FVC)
-        0, // Final discount: 0% (1 USDC = 1 FVC)
-        ethers.parseEther("80000000"), // Epoch cap: 80M tokens
-        ethers.parseEther("8000000"), // Wallet cap: 8M tokens
+        20, // Initial discount: 20% (1 USDC = 1.25 FVC = $0.80)
+        10, // Final discount: 10% (1 USDC = 1.11 FVC = $0.90)
+        ethers.parseEther("10000000"), // Epoch cap: 10M tokens (Round 0)
+        ethers.parseEther("1000000"), // Wallet cap: 1M tokens
         90 * 24 * 60 * 60 // Vesting period: 90 days
     ], {
         initializer: "initialize"
@@ -55,7 +55,7 @@ async function main() {
 `export const BONDING_ABI = ${JSON.stringify(bondingArtifact.abi, null, 2)};
 export const BONDING_ADDRESS = "${bondingAddress}";
 export const FVC_ADDRESS = "${fvcAddress}";
-export const USDC_ADDRESS = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+export const USDC_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 `.trim());
     
     console.log(`Bonding ABI and address written to: ${bondingOutputPath}`);
@@ -73,14 +73,15 @@ export const FVC_ADDRESS = "${fvcAddress}";
     console.log("\n=== DEPLOYMENT SUMMARY ===");
     console.log("FVC Token:", fvcAddress);
     console.log("Bonding Contract:", bondingAddress);
-    console.log("USDC Address:", "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174");
+    console.log("USDC Address:", "0x5FbDB2315678afecb367f032d93F642f64180aa3");
     console.log("Treasury:", deployer.address);
-    console.log("Initial Premium: 0% (1 USDC = 1 FVC = $1)");
-    console.log("Final Premium: 20% (1.2 USDC = 1 FVC = $1.20)");
-    console.log("Epoch Cap: 80M tokens");
-    console.log("Wallet Cap: 8M tokens");
+    console.log("Round: 0 - Soft Launch");
+    console.log("Initial Discount: 20% (1 USDC = 1.25 FVC = $0.80)");
+    console.log("Final Discount: 10% (1 USDC = 1.11 FVC = $0.90)");
+    console.log("Epoch Cap: 10M tokens");
+    console.log("Wallet Cap: 1M tokens");
     console.log("Vesting Period: 90 days");
-    console.log("Target FVC Price: $1.00");
+    console.log("Target Price Range: $0.80 - $0.90");
     console.log("========================\n");
 
     // Verify contracts on PolygonScan (if not on localhost)
