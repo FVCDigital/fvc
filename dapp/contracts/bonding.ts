@@ -42,6 +42,11 @@ export const BONDING_ABI = [
   },
   {
     "inputs": [],
+    "name": "Bonding__NoMoreRounds",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "Bonding__RoundAlreadyActive",
     "type": "error"
   },
@@ -762,6 +767,13 @@ export const BONDING_ABI = [
   },
   {
     "inputs": [],
+    "name": "startNextRound",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "totalBonded",
     "outputs": [
       {
@@ -910,50 +922,6 @@ export const BONDING_ABI = [
     "type": "function"
   }
 ];
-export const BONDING_ADDRESS = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
-export const FVC_ADDRESS = "0x0165878A594ca255338adfa4d48449f69242Eb8F";
-export const USDC_ADDRESS = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
-
-// Round configurations
-export const ROUND_CONFIGS = [
-    {
-        name: "Round 1 - Genesis",
-        initialDiscount: 25,
-        finalDiscount: 5,
-        epochCap: "80000000",
-        walletCap: "8000000",
-        vestingPeriod: 90 * 24 * 60 * 60
-    },
-    {
-        name: "Round 2 - Early Adopters", 
-        initialDiscount: 20,
-        finalDiscount: 3,
-        epochCap: "60000000",
-        walletCap: "6000000",
-        vestingPeriod: 90 * 24 * 60 * 60
-    },
-    {
-        name: "Round 3 - Community",
-        initialDiscount: 15,
-        finalDiscount: 2,
-        epochCap: "40000000",
-        walletCap: "4000000",
-        vestingPeriod: 90 * 24 * 60 * 60
-    },
-    {
-        name: "Round 4 - Public",
-        initialDiscount: 10,
-        finalDiscount: 1,
-        epochCap: "15000000",
-        walletCap: "2000000",
-        vestingPeriod: 90 * 24 * 60 * 60
-    },
-    {
-        name: "Round 5 - Final",
-        initialDiscount: 5,
-        finalDiscount: 0,
-        epochCap: "5000000",
-        walletCap: "1000000",
-        vestingPeriod: 90 * 24 * 60 * 60
-    }
-];
+export const BONDING_ADDRESS = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+export const FVC_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+export const USDC_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
