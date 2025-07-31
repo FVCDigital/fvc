@@ -1098,8 +1098,8 @@
       ]
     },
     "/home/steak/Desktop/fvc-protocol/contracts/src/libraries/BondingMath.sol": {
-      "lastModificationDate": 1753708673982,
-      "contentHash": "6a95971c416ca9a5c970084b83bf8e43",
+      "lastModificationDate": 1753790560201,
+      "contentHash": "c2a8fc538506fd37832ecd383ef706b8",
       "sourceName": "src/libraries/BondingMath.sol",
       "solcConfig": {
         "version": "0.8.24",

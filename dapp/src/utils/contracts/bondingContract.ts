@@ -15,6 +15,20 @@ export const MAINNET_CONTRACTS = {
   FVC: '0x...', // Will be set after deployment
 };
 
+// Testnet contract addresses (for Amoy deployment)
+export const TESTNET_CONTRACTS = {
+  BONDING: '0x...', // Will be set after deployment
+  USDC: '0x...', // Testnet USDC or mock
+  FVC: '0x...', // Will be set after deployment
+};
+
+// Use this to switch between environments
+export const CONTRACTS = process.env.NODE_ENV === 'production' 
+  ? MAINNET_CONTRACTS 
+  : process.env.NEXT_PUBLIC_NETWORK === 'testnet'
+  ? TESTNET_CONTRACTS
+  : MOCK_CONTRACTS;
+
 // Bonding contract ABI (minimal for bonding operations)
 export const BONDING_ABI = [
   {
@@ -259,7 +273,7 @@ export const FVC_ABI = [
 // Hook to get current bonding round
 export const useCurrentRound = () => {
   const { data: currentRound, isLoading, error } = useReadContract({
-    address: MOCK_CONTRACTS.BONDING as `0x${string}`,
+    address: CONTRACTS.BONDING as `0x${string}`,
     abi: BONDING_ABI,
     functionName: 'getCurrentRound',
   });
@@ -270,7 +284,7 @@ export const useCurrentRound = () => {
 // Hook to get current discount
 export const useCurrentDiscount = () => {
   const { data: discount, isLoading, error } = useReadContract({
-    address: MOCK_CONTRACTS.BONDING as `0x${string}`,
+    address: CONTRACTS.BONDING as `0x${string}`,
     abi: BONDING_ABI,
     functionName: 'getCurrentDiscount',
   });
@@ -281,7 +295,7 @@ export const useCurrentDiscount = () => {
 // Hook to get vesting schedule
 export const useVestingSchedule = (userAddress?: string) => {
   const { data: vestingSchedule, isLoading, error } = useReadContract({
-    address: MOCK_CONTRACTS.BONDING as `0x${string}`,
+    address: CONTRACTS.BONDING as `0x${string}`,
     abi: BONDING_ABI,
     functionName: 'getVestingSchedule',
     args: userAddress ? [userAddress as `0x${string}`] : undefined,
@@ -296,7 +310,7 @@ export const useVestingSchedule = (userAddress?: string) => {
 // Hook to check if user is locked
 export const useIsLocked = (userAddress?: string) => {
   const { data: isLocked, isLoading, error } = useReadContract({
-    address: MOCK_CONTRACTS.BONDING as `0x${string}`,
+    address: CONTRACTS.BONDING as `0x${string}`,
     abi: BONDING_ABI,
     functionName: 'isLocked',
     args: userAddress ? [userAddress as `0x${string}`] : undefined,
