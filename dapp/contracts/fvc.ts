@@ -1,6 +1,11 @@
 export const FVC_ABI = [
   {
     "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
     "name": "AccessControlBadConfirmation",
     "type": "error"
   },
@@ -187,6 +192,19 @@ export const FVC_ABI = [
       }
     ],
     "name": "Approval",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "bondingContract",
+        "type": "address"
+      }
+    ],
+    "name": "BondingContractSet",
     "type": "event"
   },
   {
@@ -512,12 +530,12 @@ export const FVC_ABI = [
     "inputs": [
       {
         "internalType": "string",
-        "name": "name",
+        "name": "_name",
         "type": "string"
       },
       {
         "internalType": "string",
-        "name": "symbol",
+        "name": "_symbol",
         "type": "string"
       },
       {
@@ -741,4 +759,4 @@ export const FVC_ABI = [
     "type": "function"
   }
 ];
-export const FVC_ADDRESS = "0x0165878A594ca255338adfa4d48449f69242Eb8F";
+export const FVC_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
