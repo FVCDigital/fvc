@@ -15,11 +15,11 @@ export const MAINNET_CONTRACTS = {
   FVC: '0x...', // Will be set after deployment
 };
 
-// Testnet contract addresses (for Amoy deployment)
+// Testnet contract addresses (for Amoy deployment) - REAL DEPLOYED CONTRACTS
 export const TESTNET_CONTRACTS = {
-  BONDING: '0x...', // Will be set after deployment
-  USDC: '0x...', // Testnet USDC or mock
-  FVC: '0x...', // Will be set after deployment
+  BONDING: '0xD5C5532494D2fA3e1BaC504f10F62a052Ef36155', // Deployed on Amoy
+  USDC: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', // Amoy USDC
+  FVC: '0x530DF46ED657f13cd6F6E5bAAf6aE9b60e2Aa136', // Deployed on Amoy
 };
 
 // Use this to switch between environments
