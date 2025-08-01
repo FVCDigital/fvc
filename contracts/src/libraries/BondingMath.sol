@@ -1,12 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
+/**
+ * @title BondingMath
+ * @notice Mathematical utilities for FVC Protocol bonding calculations
+ * @dev Provides pure functions for discount, premium, and vesting calculations
+ * @custom:security All functions are pure and stateless
+ */
 library BondingMath {
     /**
-     * @dev Calculate FVC tokens to mint based on USDC amount and discount
-     * @param usdcAmount Amount of USDC being bonded
+     * @notice Calculate FVC tokens to mint based on USDC amount and discount
+     * @dev Uses discount-based pricing: FVC = USDC * (100 - discount) / 100
+     * @param usdcAmount Amount of USDC being bonded (in 6 decimals)
      * @param discount Current discount percentage (0-100)
-     * @return fvcAmount Amount of FVC tokens to mint
+     * @return fvcAmount Amount of FVC tokens to mint (in 18 decimals)
+     * @custom:security Validates discount is <= 100%
      */
     function calculateFVCAmount(uint256 usdcAmount, uint256 discount) internal pure returns (uint256 fvcAmount) {
         require(discount <= 100, "Discount cannot exceed 100%");
@@ -15,10 +23,12 @@ library BondingMath {
     }
     
     /**
-     * @dev Calculate FVC tokens with premium-based pricing (targeting $1 FVC)
-     * @param usdcAmount Amount of USDC being bonded
+     * @notice Calculate FVC tokens with premium-based pricing (targeting $1 FVC)
+     * @dev Uses premium-based pricing: FVC = USDC / (1 + premium/100)
+     * @param usdcAmount Amount of USDC being bonded (in 6 decimals)
      * @param premium Current premium percentage (0-100)
-     * @return fvcAmount Amount of FVC tokens to mint
+     * @return fvcAmount Amount of FVC tokens to mint (in 18 decimals)
+     * @custom:security Validates premium is <= 100%
      */
     function calculateFVCAmountWithPremium(uint256 usdcAmount, uint256 premium) internal pure returns (uint256 fvcAmount) {
         require(premium <= 100, "Premium cannot exceed 100%");
@@ -29,12 +39,14 @@ library BondingMath {
     }
     
     /**
-     * @dev Calculate current premium based on progress through epoch
-     * @param totalBonded Total USDC bonded so far
-     * @param epochCap Total USDC that can be bonded in this epoch
-     * @param initialPremium Starting premium percentage
-     * @param finalPremium Final premium percentage
-     * @return currentPremium Current premium percentage
+     * @notice Calculate current premium based on progress through epoch
+     * @dev Linear interpolation between initial and final premium
+     * @param totalBonded Total USDC bonded so far (in 6 decimals)
+     * @param epochCap Total USDC that can be bonded in this epoch (in 6 decimals)
+     * @param initialPremium Starting premium percentage (0-100)
+     * @param finalPremium Final premium percentage (0-100)
+     * @return currentPremium Current premium percentage (0-100)
+     * @custom:security Uses 10000 precision to avoid integer division loss
      */
     function calculateCurrentPremium(
         uint256 totalBonded,
@@ -59,12 +71,14 @@ library BondingMath {
     }
     
     /**
-     * @dev Calculate current discount based on progress through epoch
-     * @param totalBonded Total USDC bonded so far
-     * @param epochCap Total USDC that can be bonded in this epoch
-     * @param initialDiscount Starting discount percentage
-     * @param finalDiscount Final discount percentage
-     * @return currentDiscount Current discount percentage
+     * @notice Calculate current discount based on progress through epoch
+     * @dev Linear interpolation between initial and final discount
+     * @param totalBonded Total USDC bonded so far (in 6 decimals)
+     * @param epochCap Total USDC that can be bonded in this epoch (in 6 decimals)
+     * @param initialDiscount Starting discount percentage (0-100)
+     * @param finalDiscount Final discount percentage (0-100)
+     * @return currentDiscount Current discount percentage (0-100)
+     * @custom:security Uses 10000 precision to avoid integer division loss
      */
     function calculateCurrentDiscount(
         uint256 totalBonded,
@@ -89,30 +103,33 @@ library BondingMath {
     }
     
     /**
-     * @dev Calculate vesting end time
-     * @param startTime Vesting start time
+     * @notice Calculate vesting end time
+     * @dev Simple addition of vesting period to start time
+     * @param startTime Vesting start timestamp
      * @param vestingPeriod Vesting period in seconds
-     * @return endTime Vesting end time
+     * @return endTime Vesting end timestamp
      */
     function calculateVestingEndTime(uint256 startTime, uint256 vestingPeriod) internal pure returns (uint256 endTime) {
         return startTime + vestingPeriod;
     }
     
     /**
-     * @dev Check if tokens are still locked in vesting
+     * @notice Check if tokens are still locked in vesting
+     * @dev Compares current time with vesting end time
      * @param currentTime Current timestamp
-     * @param endTime Vesting end time
-     * @return isLocked True if tokens are still locked
+     * @param endTime Vesting end timestamp
+     * @return isLocked True if tokens are still locked, false if unlocked
      */
     function isVestingLocked(uint256 currentTime, uint256 endTime) internal pure returns (bool isLocked) {
         return currentTime < endTime;
     }
     
     /**
-     * @dev Calculate remaining vesting time
+     * @notice Calculate remaining vesting time
+     * @dev Returns 0 if vesting period has ended
      * @param currentTime Current timestamp
-     * @param endTime Vesting end time
-     * @return remainingTime Remaining vesting time in seconds
+     * @param endTime Vesting end timestamp
+     * @return remainingTime Remaining vesting time in seconds (0 if ended)
      */
     function calculateRemainingVestingTime(uint256 currentTime, uint256 endTime) internal pure returns (uint256 remainingTime) {
         if (currentTime >= endTime) {
