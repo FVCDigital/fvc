@@ -27,7 +27,7 @@ const config: HardhatUserConfig = {
       url: process.env.AMOY_RPC_URL || "https://polygon-amoy.drpc.org",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       chainId: 80002,
-      gasPrice: 150000000000, // 150 gwei (current Amoy gas price)
+      gasPrice: 50000000000, // 50 gwei (much lower than current 352 gwei)
       gas: 5000000, // 5M gas limit
       timeout: 600000, // 10 minutes
       httpHeaders: {
