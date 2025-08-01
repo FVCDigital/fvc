@@ -15,7 +15,7 @@ import {
   AppError,
   Result 
 } from '@/types';
-import { MOCK_CONTRACTS, BONDING_ABI, USDC_ABI } from '@/utils/contracts/bondingContract';
+import { CONTRACTS, BONDING_ABI, USDC_ABI } from '@/utils/contracts/bondingContract';
 
 // =============================================================================
 // CONSTANTS
@@ -43,16 +43,32 @@ export const DEFAULT_BONDING_CONFIG = {
 
 /**
  * Calculates FVC tokens to mint based on USDC amount and discount
- * @param usdcAmount - Amount of USDC being bonded
- * @param discount - Current discount percentage (0-100)
+ * @param usdcAmount - Amount of USDC being bonded (or ETH converted to USDC)
+ * @param discount - Current discount percentage (0-100) - treated as premium
+ * @param asset - Asset being bonded (for ETH conversion)
  * @returns Amount of FVC tokens to mint
  */
-export function calculateFVCAmount(usdcAmount: string, discount: bigint | undefined): string {
+export function calculateFVCAmount(usdcAmount: string, discount: bigint | undefined, asset?: any): string {
+  console.log('calculateFVCAmount called with:', { usdcAmount, discount, asset });
+  
   if (!usdcAmount || !discount) return '';
   
-  const numAmount = parseFloat(usdcAmount);
+  let numAmount = parseFloat(usdcAmount);
+  
+  // If bonding ETH, convert to USDC equivalent (assuming 1 ETH = $3000 for now)
+  // In a real implementation, you'd use a price oracle like Chainlink
+  if (asset?.symbol === 'ETH') {
+    const ETH_TO_USDC_RATE = 3000; // This should come from a price oracle
+    numAmount = numAmount * ETH_TO_USDC_RATE;
+    console.log('ETH converted to USDC equivalent:', numAmount);
+  }
+  
   const discountPercent = Number(discount) / 100;
-  const fvcAmount = numAmount / (1 - discountPercent);
+  // Use premium-based pricing: FVC = USDC / (1 + premium/100)
+  // This ensures 1 USDC = 1 FVC when discount = 0
+  const fvcAmount = numAmount / (1 + discountPercent);
+  
+  console.log('Calculation:', { numAmount, discountPercent, fvcAmount });
   
   return fvcAmount.toFixed(4);
 }
@@ -258,7 +274,7 @@ export function getActionButtonText(
   isApproving: boolean
 ): string {
   if (asset.symbol === 'ETH') {
-    return isBonding ? 'Bonding...' : 'Bond ETH';
+    return isBonding ? 'Bonding...' : 'Bond ETH (Convert to USDC)';
   }
   return isApproved 
     ? (isBonding ? 'Bonding...' : 'Bond USDC') 
@@ -284,7 +300,7 @@ export function prepareApprovalTransaction(
     abi: asset.symbol === 'USDC' ? USDC_ABI : [],
     functionName: 'approve',
     args: [
-      MOCK_CONTRACTS.BONDING as `0x${string}`,
+      CONTRACTS.BONDING as `0x${string}`,
       parseUnits(amount, asset.decimals)
     ],
   };
@@ -307,16 +323,22 @@ export function prepareBondingTransaction(
   value?: bigint;
 } {
   if (asset.symbol === 'ETH') {
+    // For ETH, we need to convert to USDC first
+    // This would require integration with a DEX like Uniswap
+    // For now, we'll just return USDC bonding parameters
+    const ETH_TO_USDC_RATE = 3000; // This should come from a price oracle
+    const usdcEquivalent = parseFloat(amount) * ETH_TO_USDC_RATE;
+    
     return {
-      address: MOCK_CONTRACTS.BONDING as `0x${string}`,
+      address: CONTRACTS.BONDING as `0x${string}`,
       abi: BONDING_ABI,
-      functionName: 'bondETH',
-      args: [],
-      value: parseUnits(amount, asset.decimals),
+      functionName: 'bond',
+      args: [parseUnits(usdcEquivalent.toString(), 6)], // Convert to USDC equivalent
     };
   } else {
+    // Only USDC bonding is supported
     return {
-      address: MOCK_CONTRACTS.BONDING as `0x${string}`,
+      address: CONTRACTS.BONDING as `0x${string}`,
       abi: BONDING_ABI,
       functionName: 'bond',
       args: [parseUnits(amount, asset.decimals)],
