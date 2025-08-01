@@ -23,7 +23,7 @@ async function main() {
     const Bonding = await ethers.getContractFactory("Bonding");
     const bondingProxy = await upgrades.deployProxy(Bonding, [
         fvcAddress, // FVC token address
-        "0x5FbDB2315678afecb367f032d93F642f64180aa3", // Mock USDC for testing
+        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // USDC on Polygon Amoy testnet
         deployer.address, // Treasury address
         20, // Initial discount: 20% (1 USDC = 1.25 FVC = $0.80)
         10, // Final discount: 10% (1 USDC = 1.11 FVC = $0.90)
@@ -55,7 +55,7 @@ async function main() {
 `export const BONDING_ABI = ${JSON.stringify(bondingArtifact.abi, null, 2)};
 export const BONDING_ADDRESS = "${bondingAddress}";
 export const FVC_ADDRESS = "${fvcAddress}";
-export const USDC_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+export const USDC_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
 `.trim());
     
     console.log(`Bonding ABI and address written to: ${bondingOutputPath}`);
@@ -73,7 +73,7 @@ export const FVC_ADDRESS = "${fvcAddress}";
     console.log("\n=== DEPLOYMENT SUMMARY ===");
     console.log("FVC Token:", fvcAddress);
     console.log("Bonding Contract:", bondingAddress);
-    console.log("USDC Address:", "0x5FbDB2315678afecb367f032d93F642f64180aa3");
+    console.log("USDC Address:", "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238");
     console.log("Treasury:", deployer.address);
     console.log("Round: 0 - Soft Launch");
     console.log("Initial Discount: 20% (1 USDC = 1.25 FVC = $0.80)");
