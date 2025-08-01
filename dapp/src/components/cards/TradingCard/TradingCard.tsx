@@ -11,7 +11,7 @@ import BondingTerms from './BondingTerms';
 import useKYC from '@/utils/hooks/useKYC';
 import KYCButton from '@/components/cards/KYCButton';
 import { useBondingFlow, useMockUSDCBalance } from '@/utils/handlers/bondingHandler';
-import { useCurrentDiscount, useCurrentRound, MOCK_CONTRACTS } from '@/utils/contracts/bondingContract';
+import { useCurrentDiscount, useCurrentRound, CONTRACTS } from '@/utils/contracts/bondingContract';
 import { parseUnits, formatUnits } from 'viem';
 import { 
   calculateFVCAmount, 
@@ -26,7 +26,7 @@ const ASSETS: Asset[] = [
   { 
     symbol: 'USDC', 
     name: 'USD Coin', 
-    address: MOCK_CONTRACTS.MOCK_USDC as `0x${string}`, 
+    address: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`, 
     decimals: 6,
     logo: '/assets/usdc-logo.png',
     color: '#2775CA'
@@ -94,7 +94,7 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   
   const usdcBalance = useBalance({ 
     address: address as `0x${string}` | undefined,
-    token: MOCK_CONTRACTS.MOCK_USDC as `0x${string}`,
+    token: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`,
     query: { enabled: !!address }
   });
   
@@ -108,7 +108,13 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   const [showKycModal, setShowKycModal] = useState(false);
 
   // Calculate FVC output based on current discount
-  const fvcAmount = calculateFVCAmount(bondAmount, discount as bigint | undefined);
+  const fvcAmount = calculateFVCAmount(bondAmount, discount as bigint | undefined, selectedAsset);
+  
+  // Debug logging
+  console.log('Bond Amount:', bondAmount);
+  console.log('Discount:', discount);
+  console.log('Calculated FVC Amount:', fvcAmount);
+  console.log('Contract Addresses:', CONTRACTS);
 
   const handlePercent = (pct: number) => {
     if (!balance?.data) return;
@@ -290,6 +296,31 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
           ) : (
             <CardPaymentForm cardNumber={cardNumber} setCardNumber={setCardNumber} expiry={expiry} setExpiry={setExpiry} cvc={cvc} setCvc={setCvc} />
           )}
+
+          {/* Bonding Terms for Card Tab */}
+          <div style={{
+            background: 'rgba(56,189,248,0.1)',
+            padding: '16px',
+            borderRadius: 10,
+            marginTop: 16,
+            width: '100%',
+            fontSize: 14,
+            color: theme.secondaryText,
+            lineHeight: 1.5
+          }}>
+            <div style={{ fontWeight: 600, marginBottom: 8, color: theme.primaryText }}>
+              Bonding Terms & Conditions
+            </div>
+            <ul style={{ margin: 0, paddingLeft: '16px' }}>
+              <li>$FVC is sold at a premium (0% initial, increasing to 20% over epoch).</li>
+              <li>Target valuation: $1.00 - $1.20 per FVC in Round 1.</li>
+              <li>90-day vesting lock after purchase.</li>
+              <li>Max 8M FVC per wallet during bonding (1% of total supply).</li>
+              <li>KYC required for all transactions.</li>
+              <li>Premium increases as epoch progresses (early buyers get better rates).</li>
+              <li>See Litepaper for full details.</li>
+            </ul>
+          </div>
         </div>
       )}
     </div>
