@@ -10,15 +10,17 @@ pragma solidity ^0.8.24;
 library BondingMath {
     /**
      * @notice Calculate FVC tokens to mint based on USDC amount and discount
-     * @dev Uses discount-based pricing: FVC = USDC * (100 - discount) / 100
+     * @dev Uses premium-based pricing: FVC = USDC / (1 + premium/100) where premium = discount
      * @param usdcAmount Amount of USDC being bonded (in 6 decimals)
-     * @param discount Current discount percentage (0-100)
+     * @param discount Current discount percentage (0-100) - treated as premium
      * @return fvcAmount Amount of FVC tokens to mint (in 18 decimals)
      * @custom:security Validates discount is <= 100%
      */
     function calculateFVCAmount(uint256 usdcAmount, uint256 discount) internal pure returns (uint256 fvcAmount) {
         require(discount <= 100, "Discount cannot exceed 100%");
-        fvcAmount = usdcAmount * (100 - discount) / 100;
+        // Use premium-based pricing: FVC = USDC / (1 + premium/100)
+        // This ensures 1 USDC = 1 FVC when discount = 0
+        fvcAmount = usdcAmount * 100 / (100 + discount);
         return fvcAmount;
     }
     
