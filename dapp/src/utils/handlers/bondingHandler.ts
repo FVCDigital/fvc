@@ -1,6 +1,6 @@
 import { useAccount } from 'wagmi';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { MOCK_CONTRACTS, BONDING_ABI, USDC_ABI } from '../contracts/bondingContract';
+import { CONTRACTS, BONDING_ABI, USDC_ABI } from '../contracts/bondingContract';
 import { parseUnits, formatUnits } from 'viem';
 import { useState, useEffect } from 'react';
 
@@ -30,12 +30,15 @@ export const useApproveUSDC = (amount: string) => {
   const handleApprove = async () => {
     if (!amount || !address) return;
     
+    // Use the correct USDC address based on environment
+    const usdcAddress = 'USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC;
+    
     writeContract({
-      address: MOCK_CONTRACTS.MOCK_USDC as `0x${string}`,
+      address: usdcAddress as `0x${string}`,
       abi: USDC_ABI,
       functionName: 'approve',
       args: [
-        MOCK_CONTRACTS.BONDING as `0x${string}`,
+        CONTRACTS.BONDING as `0x${string}`,
         parseUnits(amount, 6) // USDC has 6 decimals
       ],
     });
@@ -65,18 +68,20 @@ export const useBond = (amount: string, asset: any) => {
     if (!amount || !address) return;
     
     if (asset.symbol === 'ETH') {
-      // For ETH, send as value
-      writeContract({
-        address: MOCK_CONTRACTS.BONDING as `0x${string}`,
-        abi: BONDING_ABI,
-        functionName: 'bondETH',
-        args: [],
-        value: parseUnits(amount, 18), // ETH has 18 decimals
-      });
+      // For ETH, we need to convert to USDC first
+      // This is a simplified version - in production you'd use a DEX or price oracle
+      const ETH_TO_USDC_RATE = 3000; // This should come from a price oracle
+      const usdcEquivalent = parseFloat(amount) * ETH_TO_USDC_RATE;
+      
+      // For now, we'll just show an error that ETH bonding requires USDC conversion
+      // In a real implementation, you'd integrate with a DEX like Uniswap
+      console.log('ETH bonding requires USDC conversion. USDC equivalent:', usdcEquivalent);
+      alert('ETH bonding requires USDC conversion. Please use USDC for bonding.');
+      return;
     } else {
       // For USDC, send amount as parameter
       writeContract({
-        address: MOCK_CONTRACTS.BONDING as `0x${string}`,
+        address: CONTRACTS.BONDING as `0x${string}`,
         abi: BONDING_ABI,
         functionName: 'bond',
         args: [parseUnits(amount, 6)], // USDC has 6 decimals
@@ -126,12 +131,6 @@ export const useBondingFlow = (selectedAsset?: any) => {
       return;
     }
 
-    if (selectedAsset?.symbol === 'ETH') {
-      // Skip approval for ETH, go directly to bonding
-      handleBond();
-      return;
-    }
-
     setStep('approving');
     setErrorMessage('');
     
@@ -168,9 +167,9 @@ export const useBondingFlow = (selectedAsset?: any) => {
     setBondAmount('');
   };
 
-  // Auto-proceed to bonding after approval (only for USDC)
+  // Auto-proceed to bonding after approval (USDC only)
   useEffect(() => {
-    if (isApproved && step === 'approving' && selectedAsset?.symbol === 'USDC') {
+    if (isApproved && step === 'approving') {
       setStep('bonding');
       handleBond();
     }
