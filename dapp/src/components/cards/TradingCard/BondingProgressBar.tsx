@@ -9,10 +9,10 @@ const BondingProgressBar: React.FC<{ progress: number }> = ({ progress }) => (
       Bonding Round Progress
     </div>
     <div style={{ width: '100%', height: 10, background: theme.modalButton, borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
-      <div style={{ width: `${progress * 100}%`, height: '100%', background: theme.generalButton, borderRadius: 6, transition: 'width 0.3s' }} />
+      <div style={{ width: `${progress}%`, height: '100%', background: theme.generalButton, borderRadius: 6, transition: 'width 0.3s' }} />
     </div>
     <div style={{ fontSize: 12, color: theme.secondaryText, marginTop: 2, textAlign: 'right', ...interFont }}>
-      {Math.round(progress * 100)}% sold
+      {progress.toFixed(2)}% of round allocated
     </div>
   </div>
 );
