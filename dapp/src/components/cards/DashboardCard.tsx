@@ -6,10 +6,9 @@
 
 import React from 'react';
 import { useAccount } from 'wagmi';
-import { useVestingSchedule, useIsLocked } from '@/utils/contracts/bondingContract';
+import { useVestingSchedule, useIsLocked, useCurrentRound } from '@/utils/contracts/bondingContract';
 import { theme } from '@/constants/theme';
 import { formatUnits } from 'viem';
-import { calculateVestingProgress } from '@/services/bondingService';
 import { BaseCardProps, VestingSchedule } from '@/types';
 
 /**
@@ -29,12 +28,19 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
   const { address } = useAccount();
   const { vestingSchedule, isLoading: isLoadingSchedule } = useVestingSchedule(address);
   const { isLocked, isLoading: isLoadingLocked } = useIsLocked(address);
+  const { currentRound, isLoading: isLoadingRound } = useCurrentRound();
 
   // Cast vestingSchedule to proper type
   const schedule = vestingSchedule as VestingSchedule | undefined;
 
-  // Calculate vesting progress using service function
-  const progress = calculateVestingProgress(schedule);
+  // Calculate round progress (same as bonding progress)
+  // Vesting lasts the entire bonding round, so progress should match
+  const roundProgress = currentRound && typeof currentRound === 'object' && currentRound !== null
+    ? Number((currentRound as any).totalBonded) / Number((currentRound as any).epochCap) * 100 
+    : 0;
+  
+  // Use round progress for vesting status (since tokens are locked until round concludes)
+  const progress = roundProgress;
   const isVesting = schedule && schedule.amount > 0n;
   const fvcAmount = isVesting ? formatUnits(schedule.amount, 18) : '0';
 
@@ -107,11 +113,13 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
         }}>
           <div style={{ fontSize: 14, color: theme.secondaryText, marginBottom: 8 }}>FVC Balance</div>
           <div style={{ fontSize: 24, fontWeight: 700, color: theme.primaryText }}>
-            {parseFloat(fvcAmount).toFixed(2)} FVC
+            {parseFloat(fvcAmount) < 0.01 && parseFloat(fvcAmount) > 0 
+              ? `${parseFloat(fvcAmount).toFixed(8)} FVC` 
+              : `${parseFloat(fvcAmount).toFixed(2)} FVC`}
           </div>
         </div>
 
-        {/* Vesting Status */}
+        {/* Vesting Status - Matches bonding round progress */}
         {isVesting ? (
           <div style={{
             width: '100%',
@@ -124,7 +132,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
             <div style={{ fontSize: 14, color: theme.secondaryText, marginBottom: 8 }}>Vesting Status</div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <span style={{ fontSize: 16, fontWeight: 600, color: theme.primaryText }}>
-                {progress >= 100 ? 'Fully Vested' : 'Vesting'}
+                {progress >= 100 ? 'Round Complete' : 'Round in Progress'}
               </span>
               <span style={{ fontSize: 14, color: theme.secondaryText }}>
                 {progress.toFixed(1)}%
@@ -132,17 +140,18 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
             </div>
             <div style={{
               width: '100%',
-              height: 6,
-              background: 'rgba(255,255,255,0.1)',
-              borderRadius: 3,
+              height: 10,
+              background: theme.modalButton,
+              borderRadius: 6,
               overflow: 'hidden',
+              position: 'relative',
             }}>
               <div style={{
-                height: '100%',
-                background: 'linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%)',
-                borderRadius: 3,
-                transition: 'width 0.3s ease',
                 width: `${progress}%`,
+                height: '100%',
+                background: theme.generalButton,
+                borderRadius: 6,
+                transition: 'width 0.3s',
               }} />
             </div>
           </div>
