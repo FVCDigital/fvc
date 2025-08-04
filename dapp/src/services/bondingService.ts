@@ -34,7 +34,7 @@ export const DEFAULT_BONDING_CONFIG = {
   /** Default initial discount percentage */
   INITIAL_DISCOUNT: 20n,
   /** Default final discount percentage */
-  FINAL_DISCOUNT: 5n,
+  FINAL_DISCOUNT: 10n,
 } as const;
 
 // =============================================================================
@@ -44,7 +44,7 @@ export const DEFAULT_BONDING_CONFIG = {
 /**
  * Calculates FVC tokens to mint based on USDC amount and discount
  * @param usdcAmount - Amount of USDC being bonded (or ETH converted to USDC)
- * @param discount - Current discount percentage (0-100) - treated as premium
+ * @param discount - Current discount percentage (0-100)
  * @param asset - Asset being bonded (for ETH conversion)
  * @returns Amount of FVC tokens to mint
  */
@@ -64,9 +64,9 @@ export function calculateFVCAmount(usdcAmount: string, discount: bigint | undefi
   }
   
   const discountPercent = Number(discount) / 100;
-  // Use premium-based pricing: FVC = USDC / (1 + premium/100)
+  // Use discount-based pricing: FVC = USDC * (1 + discount/100)
   // This ensures 1 USDC = 1 FVC when discount = 0
-  const fvcAmount = numAmount / (1 + discountPercent);
+  const fvcAmount = numAmount * (1 + discountPercent);
   
   console.log('Calculation:', { numAmount, discountPercent, fvcAmount });
   
