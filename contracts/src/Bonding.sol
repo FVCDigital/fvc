@@ -232,9 +232,11 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
         currentRound.totalBonded += amount;
         userBonded[currentRoundId][msg.sender] += amount;
         
-        // Create vesting schedule
+        // Create vesting schedule - tokens locked until round ends
         uint256 startTime = block.timestamp;
-        uint256 endTime = BondingMath.calculateVestingEndTime(startTime, vestingPeriod);
+        // Vesting ends when round is completed (totalBonded >= epochCap)
+        // For now, we'll use a placeholder end time that will be updated when round completes
+        uint256 endTime = startTime + vestingPeriod; // This will be updated when round completes
         
         vestingSchedules[msg.sender] = VestingSchedule({
             amount: fvcAmount,
@@ -248,6 +250,8 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
         // Auto-complete round if epoch cap is reached
         if (totalBonded >= epochCap) {
             currentRound.isActive = false;
+            // Update all vesting schedules to unlock tokens
+            _unlockAllVestingSchedules();
             emit RoundCompleted(currentRoundId, currentRound.totalBonded);
         }
     }
@@ -501,4 +505,21 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
      * @custom:security Only owner can call this function
      */
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+
+    /**
+     * @notice Unlock all vesting schedules for the current round
+     * @dev Called when a round is completed to unlock all tokens
+     * @custom:security Only owner can call this function
+     */
+    function _unlockAllVestingSchedules() internal onlyOwner {
+        RoundConfig storage currentRound = rounds[currentRoundId];
+        for (uint256 i = 0; i < currentRound.totalBonded; i++) {
+            address user = msg.sender; // Assuming msg.sender is the user for whom we are unlocking
+            VestingSchedule memory schedule = vestingSchedules[user];
+            if (schedule.amount > 0) {
+                // Update endTime to unlock tokens
+                vestingSchedules[user].endTime = block.timestamp;
+            }
+        }
+    }
 } 

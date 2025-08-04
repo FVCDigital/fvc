@@ -11,10 +11,10 @@ describe("Bonding Contract", function () {
   let user2: any;
   let treasury: any;
 
-  const INITIAL_DISCOUNT = 25; // 25%
-  const FINAL_DISCOUNT = 5; // 5%
-  const EPOCH_CAP = ethers.parseEther("80000000"); // 80M tokens (reduced for VC protocol)
-  const WALLET_CAP = ethers.parseEther("8000000"); // 8M tokens (reduced)
+  const INITIAL_DISCOUNT = 20; // 20%
+  const FINAL_DISCOUNT = 10; // 10%
+  const EPOCH_CAP = ethers.parseEther("10000000"); // 10M tokens (matches deployment)
+  const WALLET_CAP = ethers.parseEther("1000000"); // 1M tokens (matches deployment)
   const VESTING_PERIOD = 90 * 24 * 60 * 60; // 90 days in seconds
 
   beforeEach(async () => {
@@ -109,13 +109,17 @@ describe("Bonding Contract", function () {
       // Grant MINTER_ROLE to test bonding contract
       await fvc.grantRole(await fvc.MINTER_ROLE(), await testBonding.getAddress());
 
-      // Bond 5M USDC (50% of epoch cap)
-      const bondAmount = ethers.parseEther("5000000"); // 5M USDC
+      // Bond 5M USDC (50% of epoch cap, but we need to use multiple users due to wallet cap)
+      const bondAmount = ethers.parseEther("1000000"); // 1M USDC (max per wallet)
       await usdc.connect(user1).approve(await testBonding.getAddress(), bondAmount);
       await testBonding.connect(user1).bond(bondAmount);
+      
+      // Bond more with user2 to reach 50% of epoch cap
+      await usdc.connect(user2).approve(await testBonding.getAddress(), bondAmount);
+      await testBonding.connect(user2).bond(bondAmount);
 
       const discount = await testBonding.getCurrentDiscount();
-      // Should be significantly less than initial discount (around 12.5%)
+      // Should be significantly less than initial discount (around 15%)
       expect(discount).to.be.lt(INITIAL_DISCOUNT);
       expect(discount).to.be.gt(FINAL_DISCOUNT);
     });
@@ -181,7 +185,9 @@ describe("Bonding Contract", function () {
   describe("Bonding Functionality", function () {
     it("should bond USDC and mint FVC tokens", async () => {
       const bondAmount = ethers.parseEther("1000");
-      const expectedFVC = bondAmount * (BigInt(100) - BigInt(INITIAL_DISCOUNT)) / BigInt(100);
+      // Discount-based pricing: FVC = USDC * (1 + discount/100)
+      // With 20% discount: FVC = 1000 * (1 + 20/100) = 1000 * 1.20 = 1200
+      const expectedFVC = bondAmount * (BigInt(100) + BigInt(INITIAL_DISCOUNT)) / BigInt(100);
 
       await usdc.connect(user1).approve(await bonding.getAddress(), bondAmount);
       await bonding.connect(user1).bond(bondAmount);
@@ -299,7 +305,7 @@ describe("Bonding Contract", function () {
 
     it("should revert if epoch cap exceeded", async () => {
       // Bond a large amount first (but within wallet cap)
-      const largeAmount = ethers.parseEther("7000000"); // 7M USDC (within wallet cap of 8M)
+      const largeAmount = ethers.parseEther("800000"); // 800K USDC (within wallet cap of 1M)
       await usdc.connect(user1).approve(await bonding.getAddress(), largeAmount);
       await bonding.connect(user1).bond(largeAmount);
 
