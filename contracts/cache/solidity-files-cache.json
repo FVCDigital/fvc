@@ -742,8 +742,8 @@
       ]
     },
     "/home/steak/Desktop/fvc-protocol/contracts/src/Bonding.sol": {
-      "lastModificationDate": 1754056182633,
-      "contentHash": "93ce483c5ff9ac94ef15651b433d9ad0",
+      "lastModificationDate": 1754316907526,
+      "contentHash": "6bd4429980d2b9d9145e42b0eecdc020",
       "sourceName": "src/Bonding.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1098,8 +1098,8 @@
       ]
     },
     "/home/steak/Desktop/fvc-protocol/contracts/src/libraries/BondingMath.sol": {
-      "lastModificationDate": 1754072145081,
-      "contentHash": "b801495c68eeee023552aa9c4c10f717",
+      "lastModificationDate": 1754318412339,
+      "contentHash": "07a55b47c0f939819ca18ff6570b5b64",
       "sourceName": "src/libraries/BondingMath.sol",
       "solcConfig": {
         "version": "0.8.24",
