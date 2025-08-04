@@ -8,13 +8,12 @@ FVC Protocol provides the solution small Web3 businesses have been waiting for: 
 
 ## Token Architecture
 
-- **$FVC**: Governance, fixed supply, tradeable
-- **fTokens**: Internal utility token, mint/burn, non-tradeable
+- **$FVC**: Governance, fixed supply, tradeable, staking rewards
 
 ## Core Features
 
 - **Bonding**: Purchase $FVC at a premium through USDC bonding
-- **Staking**: Stake $FVC to earn fTokens and protocol fees
+- **Staking**: Stake $FVC to earn more FVC tokens and protocol fees
 - **Governance**: Vote on startup funding and protocol parameters
 - **KYC Integration**: FCA-compliant identity verification
 - **Revenue Sharing**: Earn from successful startup investments
