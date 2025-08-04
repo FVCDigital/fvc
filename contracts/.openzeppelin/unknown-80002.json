@@ -30,6 +30,46 @@
       "address": "0xD5C5532494D2fA3e1BaC504f10F62a052Ef36155",
       "txHash": "0x4583bdf8bfb37c5e52eb466eb4335dd42a8409dec91a47f9270ae0b7689c830f",
       "kind": "uups"
+    },
+    {
+      "address": "0x100630F3aE5a739598d5a6D9273d7B38054Cb91A",
+      "txHash": "0xfb2a1874a7b02e6b976c03a6353a7fc08f68665b394c3caea71a35dfb9e3b18a",
+      "kind": "uups"
+    },
+    {
+      "address": "0xE31355a5a06015242326a76a6097aF586b592c87",
+      "txHash": "0x5effd3dee3ee6cad99fbf3bfd18bb1d288f6dbfcbbaa24331342f6ba31b5ccac",
+      "kind": "uups"
+    },
+    {
+      "address": "0x13A6d17219E427D5B11BBbaa83171B2Ec4e90d9a",
+      "txHash": "0xa779972f338428b13036f9bf6b814730741eec261d07c43db14b45eecf7d2559",
+      "kind": "uups"
+    },
+    {
+      "address": "0x61844B1FB475d4ADfd92Ec91368FC90237e4E367",
+      "txHash": "0x1f3edc51b131ddb53fa96b3aecc02b9fee48d475b4fa4bf2e9a9331fceac0444",
+      "kind": "uups"
+    },
+    {
+      "address": "0xbC1A71287d6131ED8699F86228cd6fF38680b01e",
+      "txHash": "0x3411993d84058ddd7392d43276a25fa639b325c4e0bf9673fbc323eec44ffea0",
+      "kind": "uups"
+    },
+    {
+      "address": "0xE80f7844A933fdBf2b7f1f79a25f36243e54E490",
+      "txHash": "0xc6c00c7a620c23c112dea0fcb4a7301e1297c86456fe2798edd2053da463a170",
+      "kind": "uups"
+    },
+    {
+      "address": "0x8Bf97817B8354b960e26662c65F9d0b3732c9057",
+      "txHash": "0x33d46478e9fac27648b8cc05a7ba762e2476736c8bf1abf708f4553f89882834",
+      "kind": "uups"
+    },
+    {
+      "address": "0x0C81CCEB47507a1F030f13002325a6e8A99953E9",
+      "txHash": "0xc88210b5b2f7a143980fb6efadd5561b8196a692d3694911cf2dd121f49e9534",
+      "kind": "uups"
     }
   ],
   "impls": {
@@ -980,6 +1020,885 @@
             "numberOfBytes": "256"
           },
           "t_struct(VestingSchedule)3069_storage": {
+            "label": "struct IBonding.VestingSchedule",
+            "members": [
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "startTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "endTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "2c8978abc8e43a3debbd3628097b1d0dc0b952a6e515629651163ff797c14092": {
+      "address": "0x44f889F74940592d21aca82e8A3239FDcE7aCb32",
+      "txHash": "0x2b21d9730d365cbdc2879b7e6416400db70ee79e3e82c2aa9d04ae9d32de3c96",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "fvc",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(IFVC)3192",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:26"
+          },
+          {
+            "label": "usdc",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IERC20)1193",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:30"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:34"
+          },
+          {
+            "label": "currentRoundId",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:38"
+          },
+          {
+            "label": "rounds",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_uint256,t_struct(RoundConfig)3087_storage)",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:42"
+          },
+          {
+            "label": "initialDiscount",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:46"
+          },
+          {
+            "label": "finalDiscount",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:50"
+          },
+          {
+            "label": "epochCap",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:54"
+          },
+          {
+            "label": "walletCap",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:58"
+          },
+          {
+            "label": "vestingPeriod",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:62"
+          },
+          {
+            "label": "totalBonded",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:66"
+          },
+          {
+            "label": "userBonded",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:70"
+          },
+          {
+            "label": "vestingSchedules",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_mapping(t_address,t_struct(VestingSchedule)3069_storage)",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:74"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)73_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)13_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_contract(IERC20)1193": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IFVC)3192": {
+            "label": "contract IFVC",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_struct(VestingSchedule)3069_storage)": {
+            "label": "mapping(address => struct IBonding.VestingSchedule)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(uint256 => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(RoundConfig)3087_storage)": {
+            "label": "mapping(uint256 => struct IBonding.RoundConfig)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoundConfig)3087_storage": {
+            "label": "struct IBonding.RoundConfig",
+            "members": [
+              {
+                "label": "roundId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "initialDiscount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "finalDiscount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "epochCap",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "walletCap",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "vestingPeriod",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "isActive",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "totalBonded",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "7"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_struct(VestingSchedule)3069_storage": {
+            "label": "struct IBonding.VestingSchedule",
+            "members": [
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "startTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "endTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "8960548b7c6b5b6b668d79df789ec4c750c3e34a968226798d5ab4588b85e2a7": {
+      "address": "0x188A25DA41181588F0b593A56Faab995eE28B43e",
+      "txHash": "0xef0b4f69d6ae055e77225bd553d01a5c6398cbb3f78d3c385b57848511dc0046",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "fvc",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(IFVC)3246",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:26"
+          },
+          {
+            "label": "usdc",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IERC20)1193",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:30"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:34"
+          },
+          {
+            "label": "currentRoundId",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:38"
+          },
+          {
+            "label": "rounds",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_uint256,t_struct(RoundConfig)3141_storage)",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:42"
+          },
+          {
+            "label": "initialDiscount",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:46"
+          },
+          {
+            "label": "finalDiscount",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:50"
+          },
+          {
+            "label": "epochCap",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:54"
+          },
+          {
+            "label": "walletCap",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:58"
+          },
+          {
+            "label": "vestingPeriod",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:62"
+          },
+          {
+            "label": "totalBonded",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:66"
+          },
+          {
+            "label": "userBonded",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:70"
+          },
+          {
+            "label": "vestingSchedules",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_mapping(t_address,t_struct(VestingSchedule)3123_storage)",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:74"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)73_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)13_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_contract(IERC20)1193": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IFVC)3246": {
+            "label": "contract IFVC",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_struct(VestingSchedule)3123_storage)": {
+            "label": "mapping(address => struct IBonding.VestingSchedule)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(uint256 => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(RoundConfig)3141_storage)": {
+            "label": "mapping(uint256 => struct IBonding.RoundConfig)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoundConfig)3141_storage": {
+            "label": "struct IBonding.RoundConfig",
+            "members": [
+              {
+                "label": "roundId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "initialDiscount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "finalDiscount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "epochCap",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "walletCap",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "vestingPeriod",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "isActive",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "totalBonded",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "7"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_struct(VestingSchedule)3123_storage": {
+            "label": "struct IBonding.VestingSchedule",
+            "members": [
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "startTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "endTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "60cfb2a2efd9c4b9c15fdcb1f3d5c664063a55bfad57091e12e24661753462ee": {
+      "address": "0xC9e990183D508ceD9F951f4058de379b69e43c86",
+      "txHash": "0x61a8d66e2ba5ff3a0cfbd96202eba18bce3feb643358b5db38f16cd0dc9ee51e",
+      "layout": {
+        "solcVersion": "0.8.24",
+        "storage": [
+          {
+            "label": "fvc",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(IFVC)3246",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:26"
+          },
+          {
+            "label": "usdc",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IERC20)1193",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:30"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:34"
+          },
+          {
+            "label": "currentRoundId",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:38"
+          },
+          {
+            "label": "rounds",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_uint256,t_struct(RoundConfig)3141_storage)",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:42"
+          },
+          {
+            "label": "initialDiscount",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:46"
+          },
+          {
+            "label": "finalDiscount",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:50"
+          },
+          {
+            "label": "epochCap",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:54"
+          },
+          {
+            "label": "walletCap",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:58"
+          },
+          {
+            "label": "vestingPeriod",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:62"
+          },
+          {
+            "label": "totalBonded",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:66"
+          },
+          {
+            "label": "userBonded",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:70"
+          },
+          {
+            "label": "vestingSchedules",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_mapping(t_address,t_struct(VestingSchedule)3123_storage)",
+            "contract": "Bonding",
+            "src": "src/Bonding.sol:74"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)73_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)13_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_contract(IERC20)1193": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IFVC)3246": {
+            "label": "contract IFVC",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_struct(VestingSchedule)3123_storage)": {
+            "label": "mapping(address => struct IBonding.VestingSchedule)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(uint256 => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(RoundConfig)3141_storage)": {
+            "label": "mapping(uint256 => struct IBonding.RoundConfig)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoundConfig)3141_storage": {
+            "label": "struct IBonding.RoundConfig",
+            "members": [
+              {
+                "label": "roundId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "initialDiscount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "finalDiscount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "epochCap",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "walletCap",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "vestingPeriod",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "isActive",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "totalBonded",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "7"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_struct(VestingSchedule)3123_storage": {
             "label": "struct IBonding.VestingSchedule",
             "members": [
               {
