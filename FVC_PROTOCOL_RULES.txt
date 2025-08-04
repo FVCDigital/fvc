@@ -14,12 +14,10 @@
 
 ## TOKENS
 
-- $FVC: Fixed 1B supply, ERC-20, governance + tradeable
-- fTokens: Internal utility token, mint/burn, non-tradeable
+- $FVC: Fixed 1B supply, ERC-20, governance + tradeable + staking rewards
 - Bonding accepts stablecoins (USDC), 90-day vest
 - Bonding rewards $FVC at a premium from bonding curve
-- Staking emits fTokens, not $FVC
-- Staking APY 4–10%, auto-compounding optional
+- Staking rewards $FVC tokens, 8–12% APY
 - Startup repayment feeds staking treasury
 
 ## SOLIDITY
