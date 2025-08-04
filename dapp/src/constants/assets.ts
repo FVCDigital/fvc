@@ -42,25 +42,12 @@ export const FVC_ASSET: Asset = {
 };
 
 /**
- * fTokens asset configuration (internal utility token)
- */
-export const FTOKENS_ASSET: Asset = {
-  symbol: 'fTokens',
-  name: 'FVC Utility Tokens',
-  address: '0x0000000000000000000000000000000000000000', // Placeholder - will be deployed
-  decimals: 18,
-  logo: '/assets/ftokens.svg',
-  color: '#10B981',
-};
-
-/**
  * All available assets
  */
 export const ASSETS: Asset[] = [
   USDC_ASSET,
   ETH_ASSET,
   FVC_ASSET,
-  FTOKENS_ASSET,
 ];
 
 /**
@@ -70,7 +57,6 @@ export const ASSET_BY_SYMBOL: Record<string, Asset> = {
   USDC: USDC_ASSET,
   ETH: ETH_ASSET,
   FVC: FVC_ASSET,
-  fTokens: FTOKENS_ASSET,
 };
 
 /**
@@ -89,22 +75,4 @@ export function getAssetBySymbol(symbol: string): Asset | undefined {
  */
 export function getAssetByAddress(address: string): Asset | undefined {
   return ASSETS.find(asset => asset.address.toLowerCase() === address.toLowerCase());
-}
-
-/**
- * Validates if an asset is supported for bonding
- * @param asset - Asset to validate
- * @returns Whether the asset is supported for bonding
- */
-export function isBondingSupported(asset: Asset): boolean {
-  return asset.bondingSupported;
-}
-
-/**
- * Validates if an asset is supported for trading
- * @param asset - Asset to validate
- * @returns Whether the asset is supported for trading
- */
-export function isTradingSupported(asset: Asset): boolean {
-  return asset.tradingSupported;
 } 

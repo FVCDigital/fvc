@@ -17,9 +17,9 @@ export const MAINNET_CONTRACTS = {
 
 // Testnet contract addresses (for Amoy deployment) - REAL DEPLOYED CONTRACTS
 export const TESTNET_CONTRACTS = {
-  BONDING: '0xD5C5532494D2fA3e1BaC504f10F62a052Ef36155', // Deployed on Amoy
-  USDC: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', // Amoy USDC
-  FVC: '0x530DF46ED657f13cd6F6E5bAAf6aE9b60e2Aa136', // Deployed on Amoy
+  BONDING: '0x0C81CCEB47507a1F030f13002325a6e8A99953E9', // New bonding contract with decimal fix
+  USDC: '0x11Cf72a75e284B61548B87fB5ad8B8693FCfB1fb', // Mock USDC
+  FVC: '0x8Bf97817B8354b960e26662c65F9d0b3732c9057', // New FVC token
 };
 
 // Use this to switch between environments
@@ -46,74 +46,12 @@ export const BONDING_ABI = [
   },
   {
     "inputs": [],
-    "name": "bondETH",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "getCurrentDiscount",
     "outputs": [
       {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "getVestingSchedule",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "amount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "startTime",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "endTime",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct IBonding.VestingSchedule",
-        "name": "",
-        "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "isLocked",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -173,10 +111,65 @@ export const BONDING_ABI = [
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getVestingSchedule",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "startTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "endTime",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IBonding.VestingSchedule",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "isLocked",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ];
 
-// USDC ABI (for approval)
+// USDC ABI (minimal for approval operations)
 export const USDC_ABI = [
   {
     "inputs": [
@@ -206,35 +199,11 @@ export const USDC_ABI = [
     "inputs": [
       {
         "internalType": "address",
-        "name": "account",
+        "name": "owner",
         "type": "address"
       }
     ],
     "name": "balanceOf",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "spender",
-        "type": "address"
-      }
-    ],
-    "name": "allowance",
     "outputs": [
       {
         "internalType": "uint256",
