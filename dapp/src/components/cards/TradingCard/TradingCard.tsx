@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { theme } from '@/constants/theme';
 import { useAccount, useBalance } from 'wagmi';
 import TabSwitcher from './TabSwitcher';
@@ -21,6 +21,8 @@ import {
   calculatePercentageAmount 
 } from '@/utils';
 import { Asset } from '@/types';
+import BondingStats from './BondingStats';
+import QrModal from '../QrModal';
 
 const ASSETS: Asset[] = [
   { 
@@ -193,6 +195,15 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
             />
           )}
 
+          {/* Bonding Stats */}
+          {round && (
+            <BondingStats
+              totalBonded={round.totalBonded}
+              epochCap={round.epochCap}
+              currentDiscount={discount ? Number(discount) : 0}
+            />
+          )}
+
           {/* Amount Input */}
           <AmountInput 
             input={bondAmount}
@@ -312,12 +323,12 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
               Bonding Terms & Conditions
             </div>
             <ul style={{ margin: 0, paddingLeft: '16px' }}>
-              <li>$FVC is sold at a premium (0% initial, increasing to 20% over epoch).</li>
-              <li>Target valuation: $1.00 - $1.20 per FVC in Round 1.</li>
-              <li>90-day vesting lock after purchase.</li>
-              <li>Max 8M FVC per wallet during bonding (1% of total supply).</li>
+              <li>$FVC is sold at a discount (20% initial, decreasing to 10% over epoch).</li>
+              <li>Target valuation: $0.80 - $0.90 per FVC in Round 1.</li>
+              <li>Tokens are locked until the bonding round concludes.</li>
+              <li>Max 1M FVC per wallet during bonding (0.1% of total supply).</li>
               <li>KYC required for all transactions.</li>
-              <li>Premium increases as epoch progresses (early buyers get better rates).</li>
+              <li>Discount decreases as epoch progresses (early buyers get better rates).</li>
               <li>See Litepaper for full details.</li>
             </ul>
           </div>

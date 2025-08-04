@@ -18,7 +18,7 @@ const FVCOutput: React.FC<{ fvcAmount: string, currentDiscount: number }> = ({ f
     boxSizing: 'border-box',
     ...interFont,
   }}>
-    {fvcAmount ? `${fvcAmount} FVC (${currentDiscount}% premium)` : `FVC (${currentDiscount}% premium)`}
+    {fvcAmount ? `${fvcAmount} FVC (${currentDiscount}% discount)` : `FVC (${currentDiscount}% discount)`}
   </div>
 );
 
