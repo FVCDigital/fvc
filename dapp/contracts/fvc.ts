@@ -759,4 +759,4 @@ export const FVC_ABI = [
     "type": "function"
   }
 ];
-export const FVC_ADDRESS = "0x530DF46ED657f13cd6F6E5bAAf6aE9b60e2Aa136";
+export const FVC_ADDRESS = "0x13A6d17219E427D5B11BBbaa83171B2Ec4e90d9a";

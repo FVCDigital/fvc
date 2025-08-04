@@ -1,927 +1,117 @@
 export const BONDING_ABI = [
-  {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      }
-    ],
-    "name": "AddressEmptyCode",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "Bonding__AmountMustBeGreaterThanZero",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "Bonding__EpochCapExceeded",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "Bonding__ExceedsWalletCap",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "Bonding__InvalidDiscountRange",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "Bonding__InvalidVestingPeriod",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "Bonding__NoMoreRounds",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "Bonding__RoundAlreadyActive",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "Bonding__RoundNotActive",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "Bonding__TokensLockedInVesting",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "implementation",
-        "type": "address"
-      }
-    ],
-    "name": "ERC1967InvalidImplementation",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ERC1967NonPayable",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "FailedCall",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "InvalidInitialization",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "NotInitializing",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnableInvalidOwner",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "OwnableUnauthorizedAccount",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "token",
-        "type": "address"
-      }
-    ],
-    "name": "SafeERC20FailedOperation",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "UUPSUnauthorizedCallContext",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "slot",
-        "type": "bytes32"
-      }
-    ],
-    "name": "UUPSUnsupportedProxiableUUID",
-    "type": "error"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "Bonded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newCap",
-        "type": "uint256"
-      }
-    ],
-    "name": "EpochCapUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint64",
-        "name": "version",
-        "type": "uint64"
-      }
-    ],
-    "name": "Initialized",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "roundId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "totalBonded",
-        "type": "uint256"
-      }
-    ],
-    "name": "RoundCompleted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "roundId",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "initialDiscount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "finalDiscount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "epochCap",
-        "type": "uint256"
-      }
-    ],
-    "name": "RoundStarted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "implementation",
-        "type": "address"
-      }
-    ],
-    "name": "Upgraded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newPeriod",
-        "type": "uint256"
-      }
-    ],
-    "name": "VestingPeriodUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "startTime",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "endTime",
-        "type": "uint256"
-      }
-    ],
-    "name": "VestingScheduleCreated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "newCap",
-        "type": "uint256"
-      }
-    ],
-    "name": "WalletCapUpdated",
-    "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "UPGRADE_INTERFACE_VERSION",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "bond",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "completeCurrentRound",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "currentRoundId",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "epochCap",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "finalDiscount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "fvc",
-    "outputs": [
-      {
-        "internalType": "contract IFVC",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getCurrentDiscount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getCurrentRound",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "roundId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "initialDiscount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "finalDiscount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "epochCap",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "walletCap",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "vestingPeriod",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "isActive",
-            "type": "bool"
-          },
-          {
-            "internalType": "uint256",
-            "name": "totalBonded",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct IBonding.RoundConfig",
-        "name": "",
-        "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "getVestingSchedule",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "amount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "startTime",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "endTime",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct IBonding.VestingSchedule",
-        "name": "",
-        "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "initialDiscount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_fvc",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_usdc",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_treasury",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_initialDiscount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_finalDiscount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_epochCap",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_walletCap",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_vestingPeriod",
-        "type": "uint256"
-      }
-    ],
-    "name": "initialize",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "isLocked",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "proxiableUUID",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "rounds",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "roundId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "initialDiscount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "finalDiscount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "epochCap",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "walletCap",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "vestingPeriod",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "isActive",
-        "type": "bool"
-      },
-      {
-        "internalType": "uint256",
-        "name": "totalBonded",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_epochCap",
-        "type": "uint256"
-      }
-    ],
-    "name": "setEpochCap",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_treasury",
-        "type": "address"
-      }
-    ],
-    "name": "setTreasury",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_vestingPeriod",
-        "type": "uint256"
-      }
-    ],
-    "name": "setVestingPeriod",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_walletCap",
-        "type": "uint256"
-      }
-    ],
-    "name": "setWalletCap",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_initialDiscount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_finalDiscount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_epochCap",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_walletCap",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_vestingPeriod",
-        "type": "uint256"
-      }
-    ],
-    "name": "startNewRound",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "startNextRound",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "totalBonded",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "treasury",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newImplementation",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes",
-        "name": "data",
-        "type": "bytes"
-      }
-    ],
-    "name": "upgradeToAndCall",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "usdc",
-    "outputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "userBonded",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "vestingPeriod",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "vestingSchedules",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "startTime",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "endTime",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "walletCap",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
+  "constructor()",
+  "error AddressEmptyCode(address target)",
+  "error Bonding__AmountMustBeGreaterThanZero()",
+  "error Bonding__EpochCapExceeded()",
+  "error Bonding__ExceedsWalletCap()",
+  "error Bonding__InvalidDiscountRange()",
+  "error Bonding__InvalidVestingPeriod()",
+  "error Bonding__NoMoreRounds()",
+  "error Bonding__RoundAlreadyActive()",
+  "error Bonding__RoundNotActive()",
+  "error Bonding__TokensLockedInVesting()",
+  "error ERC1967InvalidImplementation(address implementation)",
+  "error ERC1967NonPayable()",
+  "error FailedCall()",
+  "error InvalidInitialization()",
+  "error NotInitializing()",
+  "error OwnableInvalidOwner(address owner)",
+  "error OwnableUnauthorizedAccount(address account)",
+  "error SafeERC20FailedOperation(address token)",
+  "error UUPSUnauthorizedCallContext()",
+  "error UUPSUnsupportedProxiableUUID(bytes32 slot)",
+  "event Bonded(address indexed user, uint256 amount)",
+  "event EpochCapUpdated(uint256 newCap)",
+  "event Initialized(uint64 version)",
+  "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
+  "event RoundCompleted(uint256 indexed roundId, uint256 totalBonded)",
+  "event RoundStarted(uint256 indexed roundId, uint256 initialDiscount, uint256 finalDiscount, uint256 epochCap)",
+  "event Upgraded(address indexed implementation)",
+  "event VestingPeriodUpdated(uint256 newPeriod)",
+  "event VestingScheduleCreated(address indexed user, uint256 amount, uint256 startTime, uint256 endTime)",
+  "event WalletCapUpdated(uint256 newCap)",
+  "function UPGRADE_INTERFACE_VERSION() view returns (string)",
+  "function bond(uint256 amount)",
+  "function completeCurrentRound()",
+  "function currentRoundId() view returns (uint256)",
+  "function epochCap() view returns (uint256)",
+  "function finalDiscount() view returns (uint256)",
+  "function fvc() view returns (address)",
+  "function getCurrentDiscount() view returns (uint256)",
+  "function getCurrentRound() view returns ((uint256 roundId, uint256 initialDiscount, uint256 finalDiscount, uint256 epochCap, uint256 walletCap, uint256 vestingPeriod, bool isActive, uint256 totalBonded))",
+  "function getVestingSchedule(address user) view returns ((uint256 amount, uint256 startTime, uint256 endTime))",
+  "function initialDiscount() view returns (uint256)",
+  "function initialize(address _fvc, address _usdc, address _treasury, uint256 _initialDiscount, uint256 _finalDiscount, uint256 _epochCap, uint256 _walletCap, uint256 _vestingPeriod)",
+  "function isLocked(address user) view returns (bool)",
+  "function owner() view returns (address)",
+  "function proxiableUUID() view returns (bytes32)",
+  "function renounceOwnership()",
+  "function rounds(uint256) view returns (uint256 roundId, uint256 initialDiscount, uint256 finalDiscount, uint256 epochCap, uint256 walletCap, uint256 vestingPeriod, bool isActive, uint256 totalBonded)",
+  "function setEpochCap(uint256 _epochCap)",
+  "function setTreasury(address _treasury)",
+  "function setVestingPeriod(uint256 _vestingPeriod)",
+  "function setWalletCap(uint256 _walletCap)",
+  "function startNewRound(uint256 _initialDiscount, uint256 _finalDiscount, uint256 _epochCap, uint256 _walletCap, uint256 _vestingPeriod)",
+  "function startNextRound()",
+  "function totalBonded() view returns (uint256)",
+  "function transferOwnership(address newOwner)",
+  "function treasury() view returns (address)",
+  "function upgradeToAndCall(address newImplementation, bytes data) payable",
+  "function usdc() view returns (address)",
+  "function userBonded(uint256, address) view returns (uint256)",
+  "function vestingPeriod() view returns (uint256)",
+  "function vestingSchedules(address) view returns (uint256 amount, uint256 startTime, uint256 endTime)",
+  "function walletCap() view returns (uint256)"
 ];
-export const BONDING_ADDRESS = "0xD5C5532494D2fA3e1BaC504f10F62a052Ef36155";
-export const FVC_ADDRESS = "0x530DF46ED657f13cd6F6E5bAAf6aE9b60e2Aa136";
-export const USDC_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
+export const BONDING_ADDRESS = "0x0C81CCEB47507a1F030f13002325a6e8A99953E9";
+export const FVC_ADDRESS = "0x8Bf97817B8354b960e26662c65F9d0b3732c9057";
+export const USDC_ADDRESS = "0x11Cf72a75e284B61548B87fB5ad8B8693FCfB1fb";
+
+// Round configurations for $1 FVC target valuation
+export const ROUND_CONFIGS = [
+    {
+        name: "Round 0 - Soft Launch",
+        initialDiscount: 20,
+        finalDiscount: 10,
+        epochCap: "10000000",
+        walletCap: "1000000",
+        vestingPeriod: 90 * 24 * 60 * 60,
+        targetPrice: "$0.80 - $0.90"
+    },
+    {
+        name: "Round 1 - Genesis",
+        initialDiscount: 10,
+        finalDiscount: 5,
+        epochCap: "80000000",
+        walletCap: "8000000",
+        vestingPeriod: 90 * 24 * 60 * 60,
+        targetPrice: "$0.90 - $0.95"
+    },
+    {
+        name: "Round 2 - Early Adopters", 
+        initialDiscount: 5,
+        finalDiscount: 2,
+        epochCap: "60000000",
+        walletCap: "6000000",
+        vestingPeriod: 90 * 24 * 60 * 60,
+        targetPrice: "$0.95 - $0.98"
+    },
+    {
+        name: "Round 3 - Community",
+        initialDiscount: 2,
+        finalDiscount: 1,
+        epochCap: "40000000",
+        walletCap: "4000000",
+        vestingPeriod: 90 * 24 * 60 * 60,
+        targetPrice: "$0.98 - $0.99"
+    },
+    {
+        name: "Round 4 - Public",
+        initialDiscount: 1,
+        finalDiscount: 0,
+        epochCap: "15000000",
+        walletCap: "2000000",
+        vestingPeriod: 90 * 24 * 60 * 60,
+        targetPrice: "$0.99 - $1.00"
+    }
+];
