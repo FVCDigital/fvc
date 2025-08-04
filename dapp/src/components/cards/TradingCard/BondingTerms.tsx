@@ -5,26 +5,29 @@ const interFont: React.CSSProperties = { fontFamily: 'Inter, sans-serif' };
 
 const BondingTerms: React.FC = () => (
   <div style={{
-    background: theme.appBackground,
-    color: theme.secondaryText,
-    borderRadius: 8,
-    padding: '16px 16px',
-    fontSize: 13,
+    background: 'rgba(56,189,248,0.1)',
+    padding: '16px',
+    borderRadius: 10,
     marginTop: 20,
     width: '100%',
-    maxWidth: 420,
-    textAlign: 'left',
-    border: `1px solid ${theme.modalButton}`,
+    fontSize: 14,
+    color: theme.secondaryText,
+    lineHeight: 1.5,
+    border: 'none',
     ...interFont,
   }}>
-    <b>Bonding Terms & Conditions</b><br/>
-    • $FVC is sold at a premium (0% initial, increasing to 20% over epoch).<br/>
-    • Target valuation: $1.00 - $1.20 per FVC in Round 1.<br/>
-    • 90-day vesting lock after purchase.<br/>
-    • Max 8M FVC per wallet during bonding (1% of total supply).<br/>
-    • KYC required for all transactions.<br/>
-    • Premium increases as epoch progresses (early buyers get better rates).<br/>
-    • See Litepaper for full details.
+    <div style={{ fontWeight: 600, marginBottom: 8, color: theme.primaryText }}>
+      Bonding Terms & Conditions
+    </div>
+    <ul style={{ margin: 0, paddingLeft: '16px' }}>
+      <li>$FVC is sold at a discount (20% initial, decreasing to 10% over epoch).</li>
+      <li>Target valuation: $0.80 - $0.90 per FVC in Round 1.</li>
+      <li>Tokens are locked until the bonding round concludes.</li>
+      <li>Max 1M FVC per wallet during bonding (0.1% of total supply).</li>
+      <li>KYC required for all transactions.</li>
+      <li>Discount decreases as epoch progresses (early buyers get better rates).</li>
+      <li>See Litepaper for full details.</li>
+    </ul>
   </div>
 );
 
