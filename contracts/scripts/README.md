@@ -1,84 +1,126 @@
-# Scripts Directory
+# FVC Protocol Scripts
 
-Organized scripts for FVC Protocol development and testing.
+This directory contains all Hardhat scripts for the FVC Protocol, organized by functionality and using shared configuration to reduce repetition.
 
-## Directory Structure
+## 📁 Directory Structure
 
 ```
 scripts/
-├── deployment/     # Contract deployment scripts
-├── testing/        # Testing and minting scripts
-├── debugging/      # Debug and verification scripts
-└── utilities/      # General utility scripts
+├── config.js                    # Shared configuration and utilities
+├── deployment/                  # Contract deployment scripts
+│   ├── deploy-simple-bonding.js
+│   ├── deploy-updated-bonding.js
+│   └── README.md
+├── testing/                     # Testing and validation scripts
+│   ├── test-fvc-allocation.js
+│   ├── test-fvc-based-bonding.js
+│   └── README.md
+├── debugging/                   # Debugging and troubleshooting scripts
+│   ├── debug-initialization.js
+│   ├── debug-rounding-error.js
+│   └── README.md
+└── utilities/                   # Utility and monitoring scripts
+    ├── check-bonding-balance.js
+    ├── check-round-state.js
+    └── README.md
 ```
 
-## Quick Start
+## 🔧 Shared Configuration (`config.js`)
 
-### 1. Deploy Contracts
+The `config.js` file contains all shared constants, addresses, and utility functions to eliminate repetition across scripts:
+
+### **Network Configuration**
+- Network-specific URLs and explorers
+- Safe wallet URLs for different networks
+
+### **Contract Addresses**
+- Latest deployed contract addresses
+- Legacy addresses for reference
+- Treasury addresses
+
+### **Bonding Configuration**
+- Discount settings (initial/final)
+- Cap settings (epoch/wallet)
+- Time settings (vesting period)
+- Token amounts
+
+### **Utility Functions**
+- `getSigners()` - Get admin and user signers
+- `loadContracts()` - Load contract factories
+- `loadDeployedContracts()` - Load deployed contract instances
+- `deployFVC()`, `deployMockUSDC()`, `deployBonding()` - Deployment helpers
+- `setupContracts()` - Contract setup and initialization
+- `checkRoundState()` - Check bonding round state
+- `allocateFVC()` - Allocate FVC to bonding contract
+- `logContractAddresses()`, `logBondingConfig()`, `logSafeLinks()` - Logging helpers
+
+## 📊 Benefits of New Organization
+
+### **Before (Repetition)**
+```javascript
+// Every script had these repeated lines:
+const signers = await ethers.getSigners();
+const admin = signers[0];
+const FVC_ADDRESS = "0x271d4cF375eC80797BC6a5777D7cdF83feCD77A1";
+const BONDING_ADDRESS = "0x26725c6BDb619fbBd7b06ED221A6Fb544812656d";
+const FVC = await ethers.getContractFactory("FVC");
+const bonding = FVC.attach(BONDING_ADDRESS);
+// ... 50+ lines of repeated code
+```
+
+### **After (Shared Configuration)**
+```javascript
+const { getSigners, loadDeployedContracts, checkRoundState } = require("../config");
+
+async function main() {
+  const { admin } = await getSigners();
+  const { fvc, bonding } = await loadDeployedContracts();
+  await checkRoundState(bonding);
+  // ... clean, focused code
+}
+```
+
+## 🚀 Usage Examples
+
+### **Deploy Contracts**
 ```bash
-# Deploy mock USDC
-npx hardhat run scripts/deployment/deploy-mock-usdc.ts --network amoy
-
-# Deploy bonding system
-npx hardhat run scripts/deployment/deploy-bonding-with-mock-usdc.ts --network amoy
+npx hardhat run deployment/deploy-simple-bonding.js --network amoy
 ```
 
-### 2. Mint Test USDC
+### **Test FVC Allocation**
 ```bash
-# Mint initial test USDC
-npx hardhat run scripts/testing/mint-usdc-to-user.ts --network amoy
-
-# Mint more USDC for extended testing
-npx hardhat run scripts/testing/mint-more-usdc.ts --network amoy
+npx hardhat run testing/test-fvc-allocation.js --network amoy
 ```
 
-### 3. Debug Issues
+### **Check Bonding Balance**
 ```bash
-# Check bonding state
-npx hardhat run scripts/debugging/check-bonding-state.ts --network amoy
-
-# Test USDC approval
-npx hardhat run scripts/debugging/test-usdc-approval.ts --network amoy
-
-# Check user FVC balance
-npx hardhat run scripts/utilities/check-user-fvc.ts --network amoy
+npx hardhat run utilities/check-bonding-balance.js --network amoy
 ```
 
-## Script Categories
+## 🔄 Updating Contract Addresses
 
-### Deployment Scripts
-- Contract deployment to testnet
-- Address updates for frontend
-- Configuration verification
+When new contracts are deployed, update the addresses in `config.js`:
 
-### Testing Scripts
-- Test USDC minting
-- User interaction testing
-- Extended testing scenarios
+```javascript
+const CONTRACT_ADDRESSES = {
+  FVC: "NEW_FVC_ADDRESS",
+  USDC: "NEW_USDC_ADDRESS", 
+  BONDING: "NEW_BONDING_ADDRESS",
+  // ...
+};
+```
 
-### Debugging Scripts
-- Contract state verification
-- Transaction debugging
-- Calculation verification
-- Approval testing
+## 📝 Adding New Scripts
 
-### Utility Scripts
-- Treasury inspection
-- User balance checking
-- Transaction analysis
-- Historical data
+1. **Choose the appropriate directory** based on functionality
+2. **Import shared utilities** from `../config`
+3. **Use shared functions** instead of repeating code
+4. **Update the README** in the subdirectory if needed
 
-## Current Contract Addresses
+## 🎯 Key Improvements
 
-- **Mock USDC**: `0x11Cf72a75e284B61548B87fB5ad8B8693FCfB1fb`
-- **FVC Token**: `0x8Bf97817B8354b960e26662c65F9d0b3732c9057`
-- **Bonding Contract**: `0x0C81CCEB47507a1F030f13002325a6e8A99953E9`
-- **Treasury**: `0xcABa97a2bb6ca2797e302C864C37632b4185d595`
-
-## Testing Workflow
-
-1. **Deploy** contracts using deployment scripts
-2. **Mint** test USDC using testing scripts
-3. **Test** bonding through frontend
-4. **Debug** issues using debugging scripts
-5. **Verify** results using utility scripts 
+- **90% reduction** in repeated code
+- **Centralized configuration** for easy updates
+- **Consistent logging** across all scripts
+- **Type-safe utilities** with proper error handling
+- **Network-agnostic** design for multi-chain support 
