@@ -139,4 +139,20 @@ library BondingMath {
         }
         return endTime - currentTime;
     }
+
+    /**
+     * @notice Calculate USDC amount needed for a given FVC amount and discount
+     * @dev Reverse calculation: USDC = FVC / (1 + discount/100)
+     * @param fvcAmount Amount of FVC tokens desired (in 18 decimals)
+     * @param discount Current discount percentage (0-100)
+     * @return usdcAmount Amount of USDC needed (in 6 decimals)
+     * @custom:security Validates discount is <= 100%
+     */
+    function calculateUSDCAmount(uint256 fvcAmount, uint256 discount) internal pure returns (uint256 usdcAmount) {
+        require(discount <= 100, "Discount cannot exceed 100%");
+        // Reverse calculation: USDC = FVC / (1 + discount/100)
+        // Convert from FVC (18 decimals) to USDC (6 decimals) by dividing by 10^12
+        usdcAmount = fvcAmount / (100 + discount) * 100 / 1e12;
+        return usdcAmount;
+    }
 } 
