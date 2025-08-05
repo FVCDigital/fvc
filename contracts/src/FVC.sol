@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
  * @title FVC
  * @notice FVC Protocol governance token with vesting integration
  * @dev ERC20 token with access controls and vesting schedule checks
- * @custom:security Uses OpenZeppelin upgradeable pattern with role-based access
+ * @custom:security Uses OpenZeppelin pattern with role-based access
  */
-contract FVC is Initializable, ERC20Upgradeable, AccessControlUpgradeable, UUPSUpgradeable {
+contract FVC is ERC20, AccessControl {
     /// @notice Role identifier for minting FVC tokens
     /// @dev Only addresses with this role can mint new tokens
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -25,11 +23,6 @@ contract FVC is Initializable, ERC20Upgradeable, AccessControlUpgradeable, UUPSU
     /// @param bondingContract Address of the bonding contract
     event BondingContractSet(address indexed bondingContract);
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
     /**
      * @notice Initialize the FVC token contract
      * @dev Sets up token with name, symbol, and admin role
@@ -38,11 +31,7 @@ contract FVC is Initializable, ERC20Upgradeable, AccessControlUpgradeable, UUPSU
      * @param admin Admin address with DEFAULT_ADMIN_ROLE and MINTER_ROLE
      * @custom:security Grants admin role to specified address
      */
-    function initialize(string memory _name, string memory _symbol, address admin) public initializer {
-        __ERC20_init(_name, _symbol);
-        __AccessControl_init();
-        __UUPSUpgradeable_init();
-        
+    constructor(string memory _name, string memory _symbol, address admin) ERC20(_name, _symbol) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(MINTER_ROLE, admin);
     }
@@ -112,12 +101,4 @@ contract FVC is Initializable, ERC20Upgradeable, AccessControlUpgradeable, UUPSU
             }
         }
     }
-
-    /**
-     * @notice Authorize contract upgrades
-     * @dev Only addresses with DEFAULT_ADMIN_ROLE can upgrade
-     * @param newImplementation Address of new implementation
-     * @custom:security Only DEFAULT_ADMIN_ROLE can upgrade contract
-     */
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(DEFAULT_ADMIN_ROLE) {}
 } 

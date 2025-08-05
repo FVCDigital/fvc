@@ -24,11 +24,13 @@ interface IBonding {
      * @notice Round configuration structure
      * @dev Contains all parameters for a bonding round
      * @param roundId Unique identifier for the round
-     * @param initialDiscount Starting discount percentage (0-100)
-     * @param finalDiscount Ending discount percentage (0-100)
-     * @param epochCap Total tokens that can be bonded in this round
-     * @param walletCap Maximum tokens per wallet for this round
+     * @param initialDiscount Starting discount percentage
+     * @param finalDiscount Ending discount percentage
+     * @param epochCap Total USDC that can be bonded in this round
+     * @param walletCap Maximum USDC per wallet for this round
      * @param vestingPeriod Vesting period in seconds
+     * @param fvcAllocated Total FVC tokens allocated to this round
+     * @param fvcSold Total FVC tokens sold in this round
      * @param isActive Whether the round is currently active
      * @param totalBonded Total USDC bonded in this round
      */
@@ -39,6 +41,8 @@ interface IBonding {
         uint256 epochCap;
         uint256 walletCap;
         uint256 vestingPeriod;
+        uint256 fvcAllocated;  // Total FVC allocated to this round
+        uint256 fvcSold;       // Total FVC sold in this round
         bool isActive;
         uint256 totalBonded;
     }
@@ -46,9 +50,31 @@ interface IBonding {
     /**
      * @notice Bond USDC for FVC tokens
      * @dev Main bonding function with dynamic discount pricing
-     * @param amount Amount of USDC to bond
+     * @param fvcAmount Amount of FVC tokens to purchase
      */
-    function bond(uint256 amount) external;
+    function bond(uint256 fvcAmount) external;
+
+    /**
+     * @notice Allocate FVC tokens to the current bonding round
+     * @dev Only owner can allocate FVC tokens for bonding
+     * @param fvcAmount Amount of FVC tokens to allocate
+     */
+    function allocateFVC(uint256 fvcAmount) external;
+
+    /**
+     * @notice Get remaining FVC tokens available for bonding
+     * @dev Returns the difference between allocated and sold FVC
+     * @return Remaining FVC tokens available
+     */
+    function getRemainingFVC() external view returns (uint256);
+
+    /**
+     * @notice Calculate USDC amount needed for a given FVC amount
+     * @dev Uses current discount to calculate USDC required
+     * @param fvcAmount Amount of FVC tokens desired
+     * @return usdcAmount Amount of USDC needed
+     */
+    function calculateUSDCAmount(uint256 fvcAmount) external view returns (uint256 usdcAmount);
 
     /**
      * @notice Get current discount based on bonding progress
@@ -128,4 +154,11 @@ interface IBonding {
      * @param totalBonded Total USDC bonded in the completed round
      */
     event RoundCompleted(uint256 indexed roundId, uint256 totalBonded);
+
+    /**
+     * @notice Emitted when FVC tokens are allocated to the current round
+     * @param roundId The round ID
+     * @param fvcAmount The amount of FVC tokens allocated
+     */
+    event FVCAllocated(uint256 roundId, uint256 fvcAmount);
 } 

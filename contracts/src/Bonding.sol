@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IBonding.sol";
@@ -14,9 +12,9 @@ import "./libraries/BondingMath.sol";
  * @title Bonding
  * @notice FVC Protocol bonding contract implementing Olympus-style token distribution
  * @dev Manages USDC bonding for FVC tokens with dynamic discount pricing and vesting schedules
- * @custom:security Uses OpenZeppelin upgradeable pattern with access controls
+ * @custom:security Uses OpenZeppelin access controls
  */
-contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable {
+contract Bonding is IBonding, Ownable {
     using SafeERC20 for IERC20;
 
     // ============ STATE VARIABLES ============
@@ -61,8 +59,16 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
     /// @dev Tokens are locked during this period
     uint256 public vestingPeriod;
     
-    /// @notice Total USDC bonded in current epoch
-    /// @dev Used to calculate current discount rate
+    /// @notice Total FVC tokens allocated to current round
+    /// @dev Direct allocation of FVC tokens for bonding
+    uint256 public fvcAllocated;
+
+    /// @notice Total FVC tokens sold in current round
+    /// @dev Tracks how much FVC has been distributed
+    uint256 public fvcSold;
+
+    /// @notice Total USDC collected in current round
+    /// @dev Tracks USDC received for treasury
     uint256 public totalBonded;
     
     /// @notice Mapping of round ID to user address to bonded amount
@@ -126,24 +132,7 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
     error Bonding__NoMoreRounds();
     
     /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitialisers();
-    }
-    
-    /**
-     * @notice Initialise the bonding contract with initial parameters
-     * @dev Sets up first round with specified discount and cap parameters
-     * @param _fvc FVC token contract address
-     * @param _usdc USDC token contract address
-     * @param _treasury Treasury address for USDC collection
-     * @param _initialDiscount Initial discount percentage (0-100)
-     * @param _finalDiscount Final discount percentage (0-100)
-     * @param _epochCap Total tokens that can be bonded in this epoch
-     * @param _walletCap Maximum tokens per wallet for this round
-     * @param _vestingPeriod Vesting period in seconds
-     * @custom:security Validates discount range and vesting period
-     */
-    function initialise(
+    constructor(
         address _fvc,
         address _usdc,
         address _treasury,
@@ -152,10 +141,7 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
         uint256 _epochCap,
         uint256 _walletCap,
         uint256 _vestingPeriod
-    ) public initialiser {
-        __Ownable_init(msg.sender);
-        __UUPSUpgradeable_init();
-        
+    ) Ownable(msg.sender) {
         fvc = IFVC(_fvc);
         usdc = IERC20(_usdc);
         treasury = _treasury;
@@ -175,6 +161,9 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
         epochCap = _epochCap;
         walletCap = _walletCap;
         vestingPeriod = _vestingPeriod;
+        fvcAllocated = 0;  // Initialize FVC allocation
+        fvcSold = 0;       // Initialize FVC sold
+        totalBonded = 0;   // Initialize total bonded
         
         // Create first round
         rounds[currentRoundId] = RoundConfig({
@@ -184,6 +173,8 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
             epochCap: _epochCap,
             walletCap: _walletCap,
             vestingPeriod: _vestingPeriod,
+            fvcAllocated: 0,  // Will be set when FVC is allocated
+            fvcSold: 0,        // Starts at 0
             isActive: true,
             totalBonded: 0
         });
@@ -194,11 +185,11 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
     /**
      * @notice Bond USDC for FVC tokens with dynamic discount pricing
      * @dev Implements Olympus-style bonding with vesting schedules
-     * @param amount Amount of USDC to bond (in 6 decimals)
-     * @custom:security Checks epoch cap, wallet cap, and vesting locks
+     * @param fvcAmount Amount of FVC tokens to purchase (in 18 decimals)
+     * @custom:security Checks FVC availability, wallet cap, and vesting locks
      */
-    function bond(uint256 amount) external {
-        if (amount == 0) {
+    function bond(uint256 fvcAmount) external {
+        if (fvcAmount == 0) {
             revert Bonding__AmountMustBeGreaterThanZero();
         }
         
@@ -207,35 +198,36 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
             revert Bonding__RoundNotActive();
         }
         
-        // Check epoch cap
-        if (totalBonded + amount > epochCap) {
+        // Check if enough FVC is available
+        if (fvcSold + fvcAmount > fvcAllocated) {
             revert Bonding__EpochCapExceeded();
         }
         
-        // Check wallet cap
-        if (userBonded[currentRoundId][msg.sender] + amount > walletCap) {
+        // Calculate USDC amount needed based on current discount
+        uint256 currentDiscount = getCurrentDiscount();
+        uint256 usdcAmount = BondingMath.calculateUSDCAmount(fvcAmount, currentDiscount);
+        
+        // Check wallet cap (in USDC terms)
+        if (userBonded[currentRoundId][msg.sender] + usdcAmount > walletCap) {
             revert Bonding__ExceedsWalletCap();
         }
         
-        // Calculate discount
-        uint256 currentDiscount = getCurrentDiscount();
-        uint256 fvcAmount = BondingMath.calculateFVCAmount(amount, currentDiscount);
-        
         // Transfer USDC to treasury
-        usdc.safeTransferFrom(msg.sender, treasury, amount);
+        usdc.safeTransferFrom(msg.sender, treasury, usdcAmount);
         
-        // Mint FVC tokens to user
-        fvc.mint(msg.sender, fvcAmount);
+        // Transfer FVC tokens from contract to user
+        IERC20(address(fvc)).safeTransfer(msg.sender, fvcAmount);
         
         // Update state
-        totalBonded += amount;
-        currentRound.totalBonded += amount;
-        userBonded[currentRoundId][msg.sender] += amount;
+        totalBonded += usdcAmount;
+        currentRound.totalBonded += usdcAmount;
+        currentRound.fvcSold += fvcAmount;
+        fvcSold += fvcAmount;
+        userBonded[currentRoundId][msg.sender] += usdcAmount;
         
         // Create vesting schedule - tokens locked until round ends
         uint256 startTime = block.timestamp;
-        // Vesting ends when round is completed (totalBonded >= epochCap)
-        // For now, we'll use a placeholder end time that will be updated when round completes
+        // Vesting ends when round is completed (fvcSold >= fvcAllocated)
         uint256 endTime = startTime + vestingPeriod; // This will be updated when round completes
         
         vestingSchedules[msg.sender] = VestingSchedule({
@@ -244,11 +236,11 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
             endTime: endTime
         });
         
-        emit Bonded(msg.sender, amount);
+        emit Bonded(msg.sender, usdcAmount);
         emit VestingScheduleCreated(msg.sender, fvcAmount, startTime, endTime);
         
-        // Auto-complete round if epoch cap is reached
-        if (totalBonded >= epochCap) {
+        // Auto-complete round if all FVC is sold
+        if (fvcSold >= fvcAllocated) {
             currentRound.isActive = false;
             // Update all vesting schedules to unlock tokens
             _unlockAllVestingSchedules();
@@ -329,6 +321,8 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
             epochCap: _epochCap,
             walletCap: _walletCap,
             vestingPeriod: _vestingPeriod,
+            fvcAllocated: 0,  // Will be set when FVC is allocated
+            fvcSold: 0,        // Starts at 0
             isActive: true,
             totalBonded: 0
         });
@@ -491,6 +485,8 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
             epochCap: epochCaps[currentRoundId - 1],
             walletCap: walletCaps[currentRoundId - 1],
             vestingPeriod: vestingPeriod,
+            fvcAllocated: 0,  // Will be set when FVC is allocated
+            fvcSold: 0,        // Starts at 0
             isActive: true,
             totalBonded: 0
         });
@@ -499,13 +495,51 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
     }
     
     /**
-     * @notice Authorise contract upgrades
-     * @dev Only owner can upgrade the contract
-     * @param newImplementation Address of new implementation
+     * @notice Allocate FVC tokens to the current bonding round
+     * @dev Only owner can allocate FVC tokens for bonding
+     * @param fvcAmount Amount of FVC tokens to allocate (in 18 decimals)
      * @custom:security Only owner can call this function
      */
-    function _authoriseUpgrade(address newImplementation) internal override onlyOwner {}
-
+    function allocateFVC(uint256 fvcAmount) external onlyOwner {
+        RoundConfig storage currentRound = rounds[currentRoundId];
+        if (!currentRound.isActive) {
+            revert Bonding__RoundNotActive();
+        }
+        
+        if (fvcAmount == 0) {
+            revert Bonding__AmountMustBeGreaterThanZero();
+        }
+        
+        // Transfer FVC tokens from owner to this contract
+        IERC20(address(fvc)).safeTransferFrom(msg.sender, address(this), fvcAmount);
+        
+        // Update FVC allocation
+        fvcAllocated += fvcAmount;
+        currentRound.fvcAllocated += fvcAmount;
+        
+        emit FVCAllocated(currentRoundId, fvcAmount);
+    }
+    
+    /**
+     * @notice Get remaining FVC tokens available for bonding
+     * @dev Returns the difference between allocated and sold FVC
+     * @return Remaining FVC tokens available
+     */
+    function getRemainingFVC() public view returns (uint256) {
+        return fvcAllocated - fvcSold;
+    }
+    
+    /**
+     * @notice Calculate USDC amount needed for a given FVC amount
+     * @dev Uses current discount to calculate USDC required
+     * @param fvcAmount Amount of FVC tokens desired (in 18 decimals)
+     * @return usdcAmount Amount of USDC needed (in 6 decimals)
+     */
+    function calculateUSDCAmount(uint256 fvcAmount) public view returns (uint256 usdcAmount) {
+        uint256 currentDiscount = getCurrentDiscount();
+        return BondingMath.calculateUSDCAmount(fvcAmount, currentDiscount);
+    }
+    
     /**
      * @notice Unlock all vesting schedules for the current round
      * @dev Called when a round is completed to unlock all tokens
