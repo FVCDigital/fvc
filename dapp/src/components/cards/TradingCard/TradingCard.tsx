@@ -201,6 +201,7 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
               totalBonded={round.totalBonded}
               epochCap={round.epochCap}
               currentDiscount={discount ? Number(discount) : 0}
+              initialDiscount={round.initialDiscount ? Number(round.initialDiscount) : 20}
             />
           )}
 
