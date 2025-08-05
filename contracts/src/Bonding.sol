@@ -127,11 +127,11 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
     
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
-        _disableInitializers();
+        _disableInitialisers();
     }
     
     /**
-     * @notice Initialize the bonding contract with initial parameters
+     * @notice Initialise the bonding contract with initial parameters
      * @dev Sets up first round with specified discount and cap parameters
      * @param _fvc FVC token contract address
      * @param _usdc USDC token contract address
@@ -143,7 +143,7 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
      * @param _vestingPeriod Vesting period in seconds
      * @custom:security Validates discount range and vesting period
      */
-    function initialize(
+    function initialise(
         address _fvc,
         address _usdc,
         address _treasury,
@@ -152,7 +152,7 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
         uint256 _epochCap,
         uint256 _walletCap,
         uint256 _vestingPeriod
-    ) public initializer {
+    ) public initialiser {
         __Ownable_init(msg.sender);
         __UUPSUpgradeable_init();
         
@@ -168,7 +168,7 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
             revert Bonding__InvalidVestingPeriod();
         }
         
-        // Initialize first round
+        // Initialise first round
         currentRoundId = 1;
         initialDiscount = _initialDiscount;
         finalDiscount = _finalDiscount;
@@ -499,12 +499,12 @@ contract Bonding is IBonding, Initializable, OwnableUpgradeable, UUPSUpgradeable
     }
     
     /**
-     * @notice Authorize contract upgrades
+     * @notice Authorise contract upgrades
      * @dev Only owner can upgrade the contract
      * @param newImplementation Address of new implementation
      * @custom:security Only owner can call this function
      */
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    function _authoriseUpgrade(address newImplementation) internal override onlyOwner {}
 
     /**
      * @notice Unlock all vesting schedules for the current round
