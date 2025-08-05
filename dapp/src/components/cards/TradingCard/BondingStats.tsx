@@ -8,15 +8,15 @@ interface BondingStatsProps {
   totalBonded: bigint;
   epochCap: bigint;
   currentDiscount: number;
+  initialDiscount: number; // Add initial discount parameter
 }
 
-const BondingStats: React.FC<BondingStatsProps> = ({ totalBonded, epochCap, currentDiscount }) => {
+const BondingStats: React.FC<BondingStatsProps> = ({ totalBonded, epochCap, currentDiscount, initialDiscount }) => {
   // Calculate FVC tokens bought (with current discount)
   const fvcBought = totalBonded * BigInt(100 + currentDiscount) / BigInt(100) * BigInt(1e12);
   
-  // Calculate total FVC that can be bought in this round (with average discount)
-  const averageDiscount = 15; // Average of initial (20%) and final (10%) discount
-  const totalFVCAvailable = epochCap * BigInt(100 + averageDiscount) / BigInt(100) * BigInt(1e12);
+  // Calculate total FVC that can be bought in this round (with initial discount)
+  const totalFVCAvailable = epochCap * BigInt(100 + initialDiscount) / BigInt(100) * BigInt(1e12);
   
   // Calculate remaining FVC
   const fvcRemaining = totalFVCAvailable - fvcBought;
