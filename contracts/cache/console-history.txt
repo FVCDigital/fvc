@@ -1,3 +1,12 @@
+clear
+console.log("User address:", user.address);
+console.log("Admin address:", admin.address);
+const [admin, user] = await ethers.getSigners();
+// Get signers
+const MockUSDC = await ethers.getContractFactory("MockUSDC");
+const Bonding = await ethers.getContractFactory("Bonding");
+const FVC = await ethers.getContractFactory("FVC");
+// Load contract factories
 exit
 quit()
 quit

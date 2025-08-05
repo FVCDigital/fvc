@@ -26,6 +26,25 @@
       "anonymous": false,
       "inputs": [
         {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "roundId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "fvcAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "FVCAllocated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": true,
           "internalType": "uint256",
           "name": "roundId",
@@ -107,13 +126,45 @@
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "amount",
+          "name": "fvcAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "allocateFVC",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "fvcAmount",
           "type": "uint256"
         }
       ],
       "name": "bond",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "fvcAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "calculateUSDCAmount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "usdcAmount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -166,6 +217,16 @@
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "fvcAllocated",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "fvcSold",
+              "type": "uint256"
+            },
+            {
               "internalType": "bool",
               "name": "isActive",
               "type": "bool"
@@ -179,6 +240,19 @@
           "internalType": "struct IBonding.RoundConfig",
           "name": "",
           "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getRemainingFVC",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
