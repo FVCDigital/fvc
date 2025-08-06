@@ -10,7 +10,7 @@ import CardPaymentForm from './CardPaymentForm';
 import BondingTerms from './BondingTerms';
 import useKYC from '@/utils/hooks/useKYC';
 import KYCButton from '@/components/cards/KYCButton';
-import { useBondingFlow, useMockUSDCBalance } from '@/utils/handlers/bondingHandler';
+import { useBondingFlow, useMockUSDCBalance, useBondingContractBalance } from '@/utils/handlers/bondingHandler';
 import { useCurrentDiscount, useCurrentRound, CONTRACTS } from '@/utils/contracts/bondingContract';
 import { parseUnits, formatUnits } from 'viem';
 import { 
@@ -52,6 +52,8 @@ interface RoundConfig {
   epochCap: bigint;
   walletCap: bigint;
   vestingPeriod: bigint;
+  fvcAllocated: bigint;
+  fvcSold: bigint;
   isActive: boolean;
   totalBonded: bigint;
 }
@@ -84,9 +86,20 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   // Contract data
   const { discount, isLoading: isLoadingDiscount } = useCurrentDiscount();
   const { currentRound, isLoading: isLoadingRound } = useCurrentRound();
+  const { bondingContractBalance, isLoading: isLoadingBalance } = useBondingContractBalance();
 
   // Cast currentRound to proper type
   const round = currentRound as RoundConfig | undefined;
+
+  // Debug logging for contract data
+  console.log('Contract Data Debug:');
+  console.log('currentRound:', currentRound);
+  console.log('round:', round);
+  console.log('discount:', discount);
+  console.log('bondingContractBalance:', bondingContractBalance);
+  console.log('isLoadingRound:', isLoadingRound);
+  console.log('isLoadingDiscount:', isLoadingDiscount);
+  console.log('isLoadingBalance:', isLoadingBalance);
 
   // Balance - Use real balance for both ETH and USDC
   const ethBalance = useBalance({ 
@@ -103,7 +116,6 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   const balance = selectedAsset.symbol === 'ETH' 
     ? ethBalance
     : usdcBalance;
-  const isLoadingBalance = false;
 
   // KYC
   const { isVerified, triggerVerification, QrModal } = useKYC();
@@ -202,6 +214,9 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
               epochCap={round.epochCap}
               currentDiscount={discount ? Number(discount) : 0}
               initialDiscount={round.initialDiscount ? Number(round.initialDiscount) : 20}
+              fvcAllocated={round.fvcAllocated}
+              fvcSold={round.fvcSold}
+              bondingContractBalance={bondingContractBalance}
             />
           )}
 
