@@ -1,8 +1,9 @@
-import { useAccount } from 'wagmi';
+import { useAccount, useBalance, useContractRead } from 'wagmi';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { CONTRACTS, BONDING_ABI, USDC_ABI } from '../contracts/bondingContract';
 import { parseUnits, formatUnits } from 'viem';
 import { useState, useEffect } from 'react';
+import { FVC_ABI } from '../contracts/fvcContract';
 
 // Mock balance provider for testing
 export const useMockUSDCBalance = () => {
@@ -206,5 +207,19 @@ export const useBondingFlow = (selectedAsset?: any) => {
     isBonding,
     isApproved,
     isBonded,
+  };
+}; 
+
+export const useBondingContractBalance = () => {
+  const { data: balance, isLoading, error } = useBalance({
+    address: CONTRACTS.BONDING.address as `0x${string}`,
+    token: CONTRACTS.FVC.address as `0x${string}`,
+    watch: true,
+  });
+
+  return {
+    bondingContractBalance: balance?.value || 0n,
+    isLoading,
+    error,
   };
 }; 
