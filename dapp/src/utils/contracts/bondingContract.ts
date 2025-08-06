@@ -94,6 +94,16 @@ export const BONDING_ABI = [
             "type": "uint256"
           },
           {
+            "internalType": "uint256",
+            "name": "fvcAllocated",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "fvcSold",
+            "type": "uint256"
+          },
+          {
             "internalType": "bool",
             "name": "isActive",
             "type": "bool"
