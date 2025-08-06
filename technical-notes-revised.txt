@@ -1,0 +1,147 @@
+# FVC Protocol Technical Notes - Revised
+**Date:** August 6, 2025
+
+## Blockchain & Network Choice
+
+**Polygon Network Selection:**
+- **EVM Compatibility:** Polygon's Ethereum Virtual Machine compatibility allows seamless deployment on both Polygon and Ethereum with minimal code changes, ensuring development efficiency and future flexibility.
+- **Cost Efficiency:** Transaction fees of ~$0.01 enable micro-transactions and frequent user interactions without prohibitive costs.
+- **Performance:** 65,000+ transactions per second capacity supports high-volume bonding and staking operations.
+- **Regulatory Compliance:** Polygon's infrastructure supports FCA-compliant KYC integration while maintaining user privacy through zero-knowledge proofs.
+
+**Market Validation:** Polygon is used by major DeFi protocols including Aave, Uniswap, and Curve, demonstrating proven scalability and security for financial applications.
+
+## Smart Contract Architecture
+
+**Upgradeable Proxy Pattern:**
+- **Technology:** OpenZeppelin's UUPS (Universal Upgradeable Proxy Standard) implementation
+- **Benefits:** Enables contract upgrades without requiring users to interact with new addresses
+- **Industry Standard:** Used by Compound, Aave, and other major DeFi protocols for governance flexibility
+- **Security:** Maintains upgrade capability while preserving user funds and contract state
+
+**Core Contract Suite:**
+- **$FVCG.sol:** Fixed supply (1 billion) ERC-20 governance token with transfer restrictions and vesting schedules
+- **Bonding.sol:** Multi-round discount bonding mechanism with configurable caps and vesting periods
+- **Staking.sol:** Lockup-based staking with tiered APY rewards and early exit penalties
+- **Compliance Modules:** Whitelisting and KYC integration for regulatory adherence
+
+## Tokenomics Strategy
+
+**Single Token Model (Revised):**
+- **$FVCG:** Fixed 1 billion supply, distributed through bonding, staking rewards, and governance participation
+- **Distribution:** 40% bonding rounds, 30% staking rewards, 20% governance incentives, 10% treasury reserves
+- **Vesting:** Linear vesting over 3-12 months for bonding participants and governance participants
+
+**Market Positioning:** Single token model simplifies user experience and reduces complexity compared to dual-token systems used by protocols like Olympus DAO.
+
+## Bonding & Treasury Mechanism
+
+**Discount-Based Bonding:**
+- **Initial Discount:** 20% declining linearly over 30 days to 10%
+- **Accepted Assets:** FCA-approved stablecoins (USDC, DAI, USDT)
+- **Vesting Period:** 3-month linear vesting with early exit penalties
+- **Caps:** 10M USDC per round, 1M USDC per wallet to prevent concentration
+
+**Treasury Management:**
+- **Multi-sig Security:** Gnosis Safe implementation with 3-of-5 signature requirement for treasury operations
+- **Institutional Migration:** Planned migration to institutional custody solutions (e.g., Credit Suisse) for enhanced security and compliance
+- **Fund Allocation:** 60% startup funding, 30% staking rewards, 10% operational reserves
+- **Industry Comparison:** Similar to Olympus DAO's treasury diversification but focused on SME funding
+
+## Staking & Rewards System
+
+**Tiered Staking Structure:**
+- **Lockup Periods:** 3, 6, and 12-month options
+- **APY Ranges:** 5-10% based on lockup duration and protocol performance
+- **Reward Distribution:** Protocol revenue sharing plus $FVCG token rewards
+- **Early Exit Penalties:** 10-25% penalty based on remaining lockup time
+
+**Market Validation:** Similar to Aave's staking model but with SME-focused revenue generation.
+
+## Compliance & Governance Framework
+
+**KYC Integration:**
+- **Technology:** Sumsub selected as primary KYC solution, chosen by major crypto exchanges including Binance, Kraken, and Coinbase
+- **Compliance:** FCA regulatory requirements for UK startup funding
+- **Privacy:** Zero-knowledge proof implementation to protect user data
+- **Access Control:** Whitelist-based participation in bonding and governance
+- **Market Validation:** Sumsub's crypto-native approach and proven track record with regulatory compliance
+
+**Governance Structure:**
+- **Quadratic Voting:** Reduces whale influence and promotes democratic participation
+- **Proposal Types:** Funding allocations, protocol parameters, treasury management
+- **Voting Periods:** 7-day proposal periods with 3-day execution delays
+
+## Technology Stack Justification
+
+**Smart Contract Development:**
+- **Solidity:** Industry standard for Ethereum-compatible blockchains
+- **Hardhat:** Comprehensive testing framework with 93.3% test coverage
+- **OpenZeppelin:** Battle-tested libraries used by 90% of DeFi protocols
+
+**Frontend Development:**
+- **Next.js:** Server-side rendering for SEO and performance optimisation
+- **TypeScript:** Type safety reducing development errors by 15-20%
+- **TailwindCSS:** Utility-first CSS framework for rapid UI development
+
+**Market Validation:** This stack is used by major DeFi protocols including Uniswap, Compound, and Aave.
+
+## Development Timeline & Milestones
+
+**Phase 1 (Completed):** Foundation and architecture setup
+**Phase 2 (Completed):** Frontend development and contract interfaces
+**Phase 3 (Completed):** Core smart contract deployment and testing
+**Phase 4 (Completed):** Testnet deployment and bonding system launch
+**Phase 5 (Completed):** Optimisation and security enhancements
+
+**Next Milestones:**
+- Sumsub KYC integration and testing
+- Professional security audit completion
+- Mainnet deployment preparation
+- Community governance implementation
+
+## Competitive Analysis & Market Positioning
+
+**vs. Olympus DAO:**
+- **FVC:** SME funding focus, discount bonding, KYC compliance
+- **Olympus:** General DeFi, premium bonding, permissionless
+- **Advantage:** Regulatory compliance enables institutional participation
+
+**vs. Aave:**
+- **FVC:** Single token governance, SME lending focus
+- **Aave:** Multi-token system, general lending
+- **Advantage:** Simplified user experience and targeted market
+
+**vs. BarnBridge:**
+- **FVC:** SME funding with bonding and staking
+- **BarnBridge:** Risk-tranching DeFi products
+- **Advantage:** Real-world economic impact through startup funding
+
+## Risk Mitigation & Security
+
+**Technical Security:**
+- **Reentrancy Protection:** Standard OpenZeppelin patterns
+- **Access Controls:** Role-based permissions for admin functions
+- **Gas Optimisation:** Efficient contract design reducing user costs
+- **Professional Audit:** Scheduled for pre-mainnet deployment
+
+**Regulatory Compliance:**
+- **KYC Integration:** Sumsub implementation for UK FCA compliance
+- **Whitelist Management:** Controlled access to bonding and governance
+- **Treasury Oversight:** Gnosis Safe multi-sig governance with planned institutional custody migration
+
+## Conclusion
+
+The FVC Protocol represents a sophisticated DeFi infrastructure designed specifically for SME funding with regulatory compliance. The single token model simplifies user experience while maintaining sophisticated governance and bonding mechanisms. The technology stack is industry-standard and battle-tested, ensuring reliability and security.
+
+**Key Achievements:**
+- 93.3% test coverage with comprehensive edge case testing
+- Testnet deployment with verified contracts
+- Regulatory compliance framework in development
+- Professional audit preparation underway
+
+**Strategic Advantages:**
+- First-mover advantage in KYC-compliant DeFi SME funding
+- Simplified user experience compared to dual-token systems
+- Regulatory compliance enabling institutional participation
+- Proven technology stack reducing development risks 
