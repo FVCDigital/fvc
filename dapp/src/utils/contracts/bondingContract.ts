@@ -1,5 +1,4 @@
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-
 // Mock contract addresses (deployed to localhost)
 export const MOCK_CONTRACTS = {
   BONDING: '0x5FbDB2315678afecb367f032d93F642f64180aa3', // Will be deployed
@@ -27,21 +26,283 @@ export const CONTRACTS = process.env.NODE_ENV === 'production'
   ? MAINNET_CONTRACTS 
   : process.env.NEXT_PUBLIC_NETWORK === 'testnet'
   ? TESTNET_CONTRACTS
-  : MOCK_CONTRACTS;
+  : TESTNET_CONTRACTS; // Default to testnet for now
 
-// Bonding contract ABI (minimal for bonding operations)
 export const BONDING_ABI = [
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_fvc",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_usdc",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_treasury",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_initialDiscount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_finalDiscount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_epochCap",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_walletCap",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_vestingPeriod",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
         "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Bonded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "FVCAllocated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "initialDiscount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "finalDiscount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "epochCap",
+        "type": "uint256"
+      }
+    ],
+    "name": "RoundStarted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "startTime",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "endTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "VestingScheduleCreated",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "fvcAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "allocateFVC",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "fvcAmount",
         "type": "uint256"
       }
     ],
     "name": "bond",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "fvcAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "calculateUSDCAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "usdcAmount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "completeCurrentRound",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "emergencyUnlockAllVesting",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "emergencyUnlockVesting",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "epochCap",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "fvc",
+    "outputs": [
+      {
+        "internalType": "contract IFVC",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "fvcAllocated",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "fvcSold",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -62,61 +323,67 @@ export const BONDING_ABI = [
     "name": "getCurrentRound",
     "outputs": [
       {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "roundId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "initialDiscount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "finalDiscount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "epochCap",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "walletCap",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "vestingPeriod",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "fvcAllocated",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "fvcSold",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bool",
-            "name": "isActive",
-            "type": "bool"
-          },
-          {
-            "internalType": "uint256",
-            "name": "totalBonded",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct IBonding.RoundConfig",
+        "internalType": "uint256",
+        "name": "roundId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "initialDiscount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "finalDiscount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "epochCap",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "walletCap",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "vestingPeriod",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fvcAllocated",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fvcSold",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isActive",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalBonded",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getRemainingFVC",
+    "outputs": [
+      {
+        "internalType": "uint256",
         "name": "",
-        "type": "tuple"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -159,6 +426,19 @@ export const BONDING_ABI = [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "initialDiscount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -176,8 +456,135 @@ export const BONDING_ABI = [
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_initialDiscount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_finalDiscount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_epochCap",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_walletCap",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_vestingPeriod",
+        "type": "uint256"
+      }
+    ],
+    "name": "startNewRound",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_vestingPeriod",
+        "type": "uint256"
+      }
+    ],
+    "name": "setVestingPeriod",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalBonded",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "treasury",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "usdc",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "vestingPeriod",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "walletCap",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
-];
+] as const;
+
+// Bonding contract address - using the existing deployed contract
+export const BONDING_CONTRACT = CONTRACTS.BONDING as `0x${string}`;
 
 // USDC ABI (minimal for approval operations)
 export const USDC_ABI = [
@@ -299,4 +706,16 @@ export const useIsLocked = (userAddress?: string) => {
   });
 
   return { isLocked, isLoading, error };
+};
+
+// Hook to get FVC balance of bonding contract
+export const useBondingContractFVCBalance = () => {
+  const { data: balance, isLoading, error } = useReadContract({
+    address: CONTRACTS.FVC as `0x${string}`,
+    abi: FVC_ABI,
+    functionName: 'balanceOf',
+    args: [CONTRACTS.BONDING as `0x${string}`],
+  });
+
+  return { bondingContractFVCBalance: balance || 0n, isLoading, error };
 }; 

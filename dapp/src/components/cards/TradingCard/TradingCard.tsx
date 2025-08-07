@@ -22,7 +22,7 @@ import {
 } from '@/utils';
 import { Asset } from '@/types';
 import BondingStats from './BondingStats';
-import QrModal from '../QrModal';
+
 
 const ASSETS: Asset[] = [
   { 
@@ -88,8 +88,19 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   const { currentRound, isLoading: isLoadingRound } = useCurrentRound();
   const { bondingContractBalance, isLoading: isLoadingBalance } = useBondingContractBalance();
 
-  // Cast currentRound to proper type
-  const round = currentRound as RoundConfig | undefined;
+  // Handle the new contract structure - currentRound is now an array
+  const round = currentRound && Array.isArray(currentRound) ? {
+    roundId: currentRound[0],
+    initialDiscount: currentRound[1],
+    finalDiscount: currentRound[2],
+    epochCap: currentRound[3],
+    walletCap: currentRound[4],
+    vestingPeriod: currentRound[5],
+    fvcAllocated: currentRound[6],
+    fvcSold: currentRound[7],
+    isActive: currentRound[8],
+    totalBonded: currentRound[9]
+  } as RoundConfig : undefined;
 
   // Debug logging for contract data
   console.log('Contract Data Debug:');
@@ -100,6 +111,10 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   console.log('isLoadingRound:', isLoadingRound);
   console.log('isLoadingDiscount:', isLoadingDiscount);
   console.log('isLoadingBalance:', isLoadingBalance);
+  console.log('CONTRACTS:', CONTRACTS);
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('NEXT_PUBLIC_NETWORK:', process.env.NEXT_PUBLIC_NETWORK);
+  console.log('User address:', address);
 
   // Balance - Use real balance for both ETH and USDC
   const ethBalance = useBalance({ 
@@ -156,7 +171,7 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
       fontSize: 20,
       boxShadow: '0 4px 24px rgba(56,189,248,0.10)',
       margin: '16px auto',
-      maxWidth: 420,
+      maxWidth: 'min(600px, 90vw)',
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
@@ -175,7 +190,7 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
       <TabSwitcher tab={tab} setTab={setTab} />
       
       {tab === 'wallet' && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: 340 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '100%' }}>
           <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Wallet Payment</div>
           <div style={{ fontSize: 16, color: theme.secondaryText, marginBottom: 16, textAlign: 'center' }}>
             Connect your wallet to bond {getAssetDisplayName(selectedAsset)} for FVC tokens
@@ -208,17 +223,17 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
           )}
 
           {/* Bonding Stats */}
-          {round && (
-            <BondingStats
-              totalBonded={round.totalBonded}
-              epochCap={round.epochCap}
-              currentDiscount={discount ? Number(discount) : 0}
-              initialDiscount={round.initialDiscount ? Number(round.initialDiscount) : 20}
-              fvcAllocated={round.fvcAllocated}
-              fvcSold={round.fvcSold}
-              bondingContractBalance={bondingContractBalance}
-            />
-          )}
+          <BondingStats
+            totalBonded={round?.totalBonded || 0n}
+            epochCap={round?.epochCap || 0n}
+            currentDiscount={discount ? Number(discount) : 0}
+            initialDiscount={round?.initialDiscount ? Number(round.initialDiscount) : 20}
+            fvcAllocated={round?.fvcAllocated || 0n}
+            fvcSold={round?.fvcSold || 0n}
+            bondingContractBalance={bondingContractBalance}
+          />
+
+
 
           {/* Amount Input */}
           <AmountInput 
