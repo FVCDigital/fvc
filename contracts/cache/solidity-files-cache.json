@@ -740,8 +740,8 @@
       ]
     },
     "/home/steak/Desktop/fvc-protocol/contracts/src/Bonding.sol": {
-      "lastModificationDate": 1754395824676,
-      "contentHash": "6c4e273ee3872ee29299828145644dfb",
+      "lastModificationDate": 1754598268472,
+      "contentHash": "3df7b47566c6522a5d6c3bdeaacde5d8",
       "sourceName": "src/Bonding.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1363,6 +1363,130 @@
       ],
       "artifacts": [
         "Ownable"
+      ]
+    },
+    "/home/steak/Desktop/fvc-protocol/contracts/src/EmergencyUnlocker.sol": {
+      "lastModificationDate": 1754597862862,
+      "contentHash": "ea12de7b732991ef524692bce4ab2929",
+      "sourceName": "src/EmergencyUnlocker.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "./interfaces/IBonding.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "EmergencyUnlocker"
+      ]
+    },
+    "/home/steak/Desktop/fvc-protocol/contracts/src/BondingV2.sol": {
+      "lastModificationDate": 1754597989939,
+      "contentHash": "996470da934e6b3b5b2f9a74b7399b5b",
+      "sourceName": "src/BondingV2.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "./interfaces/IBonding.sol",
+        "./interfaces/IFVC.sol",
+        "./libraries/BondingMath.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "BondingV2"
+      ]
+    },
+    "/home/steak/Desktop/fvc-protocol/contracts/src/FVCUnlocked.sol": {
+      "lastModificationDate": 1754598722415,
+      "contentHash": "49943973bd5dfae7af71a0b2f6512d8e",
+      "sourceName": "src/FVCUnlocked.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata",
+                "storageLayout"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "FVCUnlocked"
       ]
     }
   }
