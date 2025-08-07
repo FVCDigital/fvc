@@ -3,7 +3,6 @@ import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { CONTRACTS, BONDING_ABI, USDC_ABI } from '../contracts/bondingContract';
 import { parseUnits, formatUnits } from 'viem';
 import { useState, useEffect } from 'react';
-import { FVC_ABI } from '../contracts/fvcContract';
 
 // Mock balance provider for testing
 export const useMockUSDCBalance = () => {
@@ -211,10 +210,17 @@ export const useBondingFlow = (selectedAsset?: any) => {
 }; 
 
 export const useBondingContractBalance = () => {
+  // Determine correct FVC address for all environments
+  let fvcAddress: string = '';
+  if ('FVC' in CONTRACTS) {
+    fvcAddress = CONTRACTS.FVC;
+  } else if ('MOCK_FVC' in CONTRACTS) {
+    fvcAddress = CONTRACTS.MOCK_FVC;
+  }
+
   const { data: balance, isLoading, error } = useBalance({
-    address: CONTRACTS.BONDING.address as `0x${string}`,
-    token: CONTRACTS.FVC.address as `0x${string}`,
-    watch: true,
+    address: CONTRACTS.BONDING as `0x${string}`,
+    token: fvcAddress as `0x${string}`,
   });
 
   return {
