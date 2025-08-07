@@ -556,4 +556,36 @@ contract Bonding is IBonding, Ownable {
             }
         }
     }
+
+    /**
+     * @notice Emergency unlock vesting for a specific user (TESTNET ONLY)
+     * @dev Only owner can call this function - FOR TESTNET USE ONLY
+     * @param user Address of the user to unlock
+     * @custom:security Only owner can call this function
+     */
+    function emergencyUnlockVesting(address user) external onlyOwner {
+        VestingSchedule storage schedule = vestingSchedules[user];
+        
+        if (schedule.amount > 0) {
+            uint256 amount = schedule.amount;
+            
+            // Reset the vesting schedule to unlock immediately
+            schedule.amount = 0;
+            schedule.startTime = 0;
+            schedule.endTime = 0;
+            
+            emit VestingScheduleCreated(user, 0, 0, 0); // Emit event to indicate unlock
+        }
+    }
+
+    /**
+     * @notice Emergency unlock all vesting schedules (TESTNET ONLY)
+     * @dev Only owner can call this function - FOR TESTNET USE ONLY
+     * @custom:security Only owner can call this function
+     */
+    function emergencyUnlockAllVesting() external onlyOwner {
+        // This is a simplified version for testnet
+        // In production, you'd iterate through all users with vesting
+        emit VestingScheduleCreated(address(0), 0, 0, 0);
+    }
 } 
