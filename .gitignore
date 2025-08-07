@@ -6,3 +6,5 @@ node_modules
 .cursor/
 .yarn/
 .github/
+litepaper-revised.tex
+FVC_ALLOCATION.md
