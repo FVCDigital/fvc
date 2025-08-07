@@ -7,6 +7,7 @@ import DashboardCard from '@/components/cards/DashboardCard';
 import { TradingCard } from '@/components/cards';
 import TradeFVCCard from '@/components/cards/TradeFVCCard';
 import ComingSoonCard from '@/components/cards/ComingSoonCard';
+import FVCAllocationChart from '@/components/cards/FVCAllocationChart/FVCAllocationChart';
 import { TabId } from '@/constants/tabs';
 
 /**
@@ -26,7 +27,12 @@ interface TabContentProps {
 export default function TabContent({ activeTab }: TabContentProps): React.JSX.Element {
   switch (activeTab) {
     case 'dashboard':
-      return <DashboardCard />;
+      return (
+        <div>
+          <DashboardCard />
+          <FVCAllocationChart />
+        </div>
+      );
     case 'bonding':
       return <TradingCard />;
     case 'buy':

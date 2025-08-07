@@ -56,7 +56,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
         fontSize: 20,
         boxShadow: '0 4px 24px rgba(56,189,248,0.10)',
         margin: '16px auto',
-        maxWidth: 420,
+        maxWidth: 800,
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
@@ -68,9 +68,11 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
         fontFamily: 'Inter, sans-serif',
       }}>
         <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Dashboard</div>
-        <div style={{ fontSize: 16, color: theme.secondaryText, textAlign: 'center' }}>
+        <div style={{ fontSize: 16, color: theme.secondaryText, textAlign: 'center', marginBottom: 24 }}>
           Connect your wallet to view your FVC balance
         </div>
+        
+
       </div>
     );
   }
@@ -85,7 +87,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
       fontSize: 20,
       boxShadow: '0 4px 24px rgba(56,189,248,0.10)',
       margin: '16px auto',
-      maxWidth: 420,
+      maxWidth: 800,
       width: '100%',
       display: 'flex',
       flexDirection: 'column',
