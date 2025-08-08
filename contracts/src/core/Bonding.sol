@@ -322,7 +322,6 @@ contract Bonding is IBonding, Ownable, ReentrancyGuard {
     function setVestingPeriod(uint256 _vestingPeriod) external onlyOwner {
         if (_vestingPeriod == 0) revert Bonding__InvalidVestingPeriod();
         
-        uint256 oldPeriod = vestingPeriod;
         vestingPeriod = _vestingPeriod;
         emit VestingPeriodUpdated(_vestingPeriod);
     }
