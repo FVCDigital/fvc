@@ -1,108 +1,75 @@
-import { ethers, upgrades } from "hardhat";
-import * as fs from "fs";
-import { HardhatRuntimeEnvironment } from "hardhat/types";
-import * as path from "path";
+import { ethers } from "hardhat";
 
 async function main() {
-    const hre: HardhatRuntimeEnvironment = require("hardhat");
-    const [deployer] = await ethers.getSigners();
-    
-    console.log("Deploying Bonding contract with $1 FVC target valuation");
-    console.log("Deployer:", deployer.address);
-
-    // Deploy FVC token first
-    const FVC = await ethers.getContractFactory("FVC");
-    const fvcProxy = await upgrades.deployProxy(FVC, ["First Venture Capital", "FVC", deployer.address], {
-        initializer: "initialize"
-    });
-    await fvcProxy.waitForDeployment();
-    const fvcAddress = await fvcProxy.getAddress();
-    console.log("FVC Token deployed to:", fvcAddress);
-
-    // Deploy Bonding contract with Round 0 soft launch configuration
-    const Bonding = await ethers.getContractFactory("Bonding");
-    const bondingProxy = await upgrades.deployProxy(Bonding, [
-        fvcAddress, // FVC token address
-        "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // USDC on Polygon Amoy testnet
-        deployer.address, // Treasury address
-        20, // Initial discount: 20% (1 USDC = 1.25 FVC = $0.80)
-        10, // Final discount: 10% (1 USDC = 1.11 FVC = $0.90)
-        ethers.parseEther("10000000"), // Epoch cap: 10M tokens (Round 0)
-        ethers.parseEther("1000000"), // Wallet cap: 1M tokens
-        90 * 24 * 60 * 60 // Vesting period: 90 days
-    ], {
-        initializer: "initialize"
-    });
-    await bondingProxy.waitForDeployment();
-    const bondingAddress = await bondingProxy.getAddress();
-    console.log("Bonding contract deployed to:", bondingAddress);
-
-    // Grant MINTER_ROLE to bonding contract
-    await fvcProxy.grantRole(await fvcProxy.MINTER_ROLE(), bondingAddress);
-    console.log("Granted MINTER_ROLE to bonding contract");
-
-    // Set bonding contract in FVC token for vesting checks
-    await (fvcProxy as any).setBondingContract(bondingAddress);
-    console.log("Set bonding contract in FVC token");
-
-    // Get contract artifacts
-    const bondingArtifact = await hre.artifacts.readArtifact("Bonding");
-    const fvcArtifact = await hre.artifacts.readArtifact("FVC");
-
-    // Write bonding contract ABI and address
-    const bondingOutputPath = path.join(__dirname, "..", "..", "dapp", "contracts", "bonding.ts");
-    fs.writeFileSync(bondingOutputPath, 
-`export const BONDING_ABI = ${JSON.stringify(bondingArtifact.abi, null, 2)};
-export const BONDING_ADDRESS = "${bondingAddress}";
-export const FVC_ADDRESS = "${fvcAddress}";
-export const USDC_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
-`.trim());
-    
-    console.log(`Bonding ABI and address written to: ${bondingOutputPath}`);
-
-    // Write updated FVC contract ABI and address
-    const fvcOutputPath = path.join(__dirname, "..", "..", "dapp", "contracts", "fvc.ts");
-    fs.writeFileSync(fvcOutputPath, 
-`export const FVC_ABI = ${JSON.stringify(fvcArtifact.abi, null, 2)};
-export const FVC_ADDRESS = "${fvcAddress}";
-`.trim());
-    
-    console.log(`FVC ABI and address written to: ${fvcOutputPath}`);
-
-    // Log deployment summary
-    console.log("\n=== DEPLOYMENT SUMMARY ===");
-    console.log("FVC Token:", fvcAddress);
-    console.log("Bonding Contract:", bondingAddress);
-    console.log("USDC Address:", "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238");
-    console.log("Treasury:", deployer.address);
-    console.log("Round: 0 - Soft Launch");
-    console.log("Initial Discount: 20% (1 USDC = 1.25 FVC = $0.80)");
-    console.log("Final Discount: 10% (1 USDC = 1.11 FVC = $0.90)");
-    console.log("Epoch Cap: 10M tokens");
-    console.log("Wallet Cap: 1M tokens");
-    console.log("Vesting Period: 90 days");
-    console.log("Target Price Range: $0.80 - $0.90");
-    console.log("========================\n");
-
-    // Verify contracts on PolygonScan (if not on localhost)
-    if (hre.network.name !== "localhost" && hre.network.name !== "hardhat") {
-        console.log("Waiting for block confirmations...");
-        await bondingProxy.deploymentTransaction()?.wait(5);
-        
-        console.log("Verifying contracts on PolygonScan...");
-        try {
-            await hre.run("verify:verify", {
-                address: bondingAddress,
-                constructorArguments: [],
-            });
-            console.log("Bonding contract verified on PolygonScan");
-        } catch (error) {
-            console.log("Verification failed:", error);
-        }
-    }
+  console.log("=== DEPLOYING BONDING V2 CONTRACT ===");
+  
+  // Contract addresses (existing)
+  const fvcAddress = "0x8Bf97817B8354b960e26662c65F9d0b3732c9057";
+  const usdcAddress = "0x11Cf72a75e284B61548B87fB5ad8B8693FCfB1fb";
+  const treasuryAddress = "0xcABa97a2bb6ca2797e302C864C37632b4185d595"; // Your wallet as treasury
+  
+  console.log("FVC Address:", fvcAddress);
+  console.log("USDC Address:", usdcAddress);
+  console.log("Treasury Address:", treasuryAddress);
+  
+  // Deploy Bonding contract
+  const Bonding = await ethers.getContractFactory("Bonding");
+  
+  // Initial parameters for first round
+  const initialDiscount = 20; // 20%
+  const finalDiscount = 10;   // 10%
+  const epochCap = ethers.parseUnits("1000000", 6); // 1M USDC
+  const walletCap = ethers.parseUnits("100000", 6);  // 100k USDC per wallet
+  const vestingPeriod = 0; // 0 seconds for immediate unlock (testnet)
+  
+  console.log("Deploying Bonding with parameters:");
+  console.log("- Initial Discount:", initialDiscount, "%");
+  console.log("- Final Discount:", finalDiscount, "%");
+  console.log("- Epoch Cap:", ethers.formatUnits(epochCap, 6), "USDC");
+  console.log("- Wallet Cap:", ethers.formatUnits(walletCap, 6), "USDC");
+  console.log("- Vesting Period:", vestingPeriod, "seconds");
+  
+  const bonding = await Bonding.deploy(
+    fvcAddress,
+    usdcAddress,
+    treasuryAddress,
+    initialDiscount,
+    finalDiscount,
+    epochCap,
+    walletCap,
+    vestingPeriod
+  );
+  
+  await bonding.waitForDeployment();
+  
+  const bondingAddress = await bonding.getAddress();
+  console.log("✅ Bonding deployed at:", bondingAddress);
+  
+  // Verify the deployment
+  console.log("\n=== VERIFYING DEPLOYMENT ===");
+  
+  const owner = await bonding.owner();
+  console.log("Contract owner:", owner);
+  
+  const fvc = await bonding.fvc();
+  console.log("FVC address:", fvc);
+  
+  const usdc = await bonding.usdc();
+  console.log("USDC address:", usdc);
+  
+  const treasury = await bonding.treasury();
+  console.log("Treasury address:", treasury);
+  
+  const currentRound = await bonding.getCurrentRound();
+  console.log("Current round ID:", currentRound.roundId);
+  console.log("Current round active:", currentRound.isActive);
+  
+  console.log("\n=== DEPLOYMENT COMPLETE ===");
+  console.log("Bonding Address:", bondingAddress);
+  console.log("You can now use the emergency unlock functions!");
 }
 
 main().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-}); 
+  console.error(error);
+  process.exit(1);
+});
