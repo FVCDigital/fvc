@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../interfaces/IBonding.sol";
 import "../interfaces/IFVC.sol";
 import "../libraries/BondingMath.sol";
@@ -12,117 +13,97 @@ import "../libraries/BondingMath.sol";
  * @title Bonding
  * @notice FVC Protocol bonding contract with emergency unlock function
  * @dev Manages USDC bonding for FVC tokens with dynamic discount pricing and vesting schedules
- * @custom:security Uses OpenZeppelin access controls
+ * @custom:security Uses OpenZeppelin access controls and reentrancy protection
  */
-contract Bonding is IBonding, Ownable {
+contract Bonding is IBonding, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
+
+    // ============ CUSTOM ERRORS ============
+    
+    /// @notice Error thrown when bonding amount is zero
+    error Bonding__AmountMustBeGreaterThanZero();
+    
+    /// @notice Error thrown when round is not active
+    error Bonding__RoundNotActive();
+    
+    /// @notice Error thrown when epoch cap is exceeded
+    error Bonding__EpochCapExceeded();
+    
+    /// @notice Error thrown when wallet cap is exceeded
+    error Bonding__ExceedsWalletCap();
+    
+    /// @notice Error thrown when tokens are locked in vesting
+    error Bonding__TokensLockedInVesting();
+    
+    /// @notice Error thrown when vesting period is zero
+    error Bonding__InvalidVestingPeriod();
+    
+    /// @notice Error thrown when address is zero
+    error Bonding__ZeroAddress();
 
     // ============ STATE VARIABLES ============
 
     /// @notice FVC token contract address
-    /// @dev Used for minting FVC tokens to bonded users
-    IFVC public fvc;
+    IFVC public immutable fvc;
 
     /// @notice USDC token contract address
-    /// @dev Stablecoin used for bonding purchases
-    IERC20 public usdc;
+    IERC20 public immutable usdc;
 
     /// @notice Treasury address for USDC collection
-    /// @dev Only owner can update this address
     address public treasury;
     
     /// @notice Current bonding round identifier
-    /// @dev Increments with each new round, starts at 1
     uint256 public currentRoundId;
 
     /// @notice Mapping of round ID to round configuration
-    /// @dev Stores historical and current round parameters
     mapping(uint256 => RoundConfig) public rounds;
     
     /// @notice Initial discount percentage for current round (e.g., 20%)
-    /// @dev Higher discount = more FVC tokens per USDC
     uint256 public initialDiscount;
 
     /// @notice Final discount percentage for current round (e.g., 5%)
-    /// @dev Lower discount = fewer FVC tokens per USDC
     uint256 public finalDiscount;
 
     /// @notice Total tokens that can be bonded in current epoch
-    /// @dev Prevents over-allocation of FVC tokens
     uint256 public epochCap;
 
     /// @notice Maximum tokens per wallet for current round
-    /// @dev Prevents whale dominance in early rounds
     uint256 public walletCap;
 
     /// @notice Vesting period in seconds for current round
-    /// @dev Tokens are locked during this period
     uint256 public vestingPeriod;
     
     /// @notice Total FVC tokens allocated to current round
-    /// @dev Direct allocation of FVC tokens for bonding
     uint256 public fvcAllocated;
 
     /// @notice Total FVC tokens sold in current round
-    /// @dev Tracks how much FVC has been distributed
     uint256 public fvcSold;
 
     /// @notice Total USDC collected in current round
-    /// @dev Tracks USDC received for treasury
     uint256 public totalBonded;
     
     /// @notice Mapping of round ID to user address to bonded amount
-    /// @dev Tracks user participation per round
     mapping(uint256 => mapping(address => uint256)) public userBonded;
     
     /// @notice Mapping of user address to vesting schedule
-    /// @dev Tracks token lock periods for each user
     mapping(address => VestingSchedule) public vestingSchedules;
     
     // ============ EVENTS ============
 
     /// @notice Emitted when epoch cap is updated
-    /// @param newCap New epoch cap value
-    event EpochCapUpdated(uint256 newCap);
+    event EpochCapUpdated(uint256 indexed newCap);
 
     /// @notice Emitted when wallet cap is updated
-    /// @param newCap New wallet cap value
-    event WalletCapUpdated(uint256 newCap);
+    event WalletCapUpdated(uint256 indexed newCap);
 
     /// @notice Emitted when vesting period is updated
-    /// @param newPeriod New vesting period in seconds
-    event VestingPeriodUpdated(uint256 newPeriod);
+    event VestingPeriodUpdated(uint256 indexed newPeriod);
 
     /// @notice Emitted when emergency unlock is performed
-    /// @param user Address of the user whose vesting was unlocked
-    /// @param amount Amount of tokens unlocked
     event EmergencyUnlock(address indexed user, uint256 amount);
     
-    // ============ CUSTOM ERRORS ============
-
-    /// @notice Error thrown when bonding amount is zero
-    /// @dev Prevents empty bonding transactions
-    error Bonding__AmountMustBeGreaterThanZero();
-
-    /// @notice Error thrown when round is not active
-    /// @dev Prevents bonding outside of active rounds
-    error Bonding__RoundNotActive();
-
-    /// @notice Error thrown when epoch cap is exceeded
-    /// @dev Prevents over-allocation of FVC tokens
-    error Bonding__EpochCapExceeded();
-
-    /// @notice Error thrown when wallet cap is exceeded
-    /// @dev Prevents whale dominance in early rounds
-    error Bonding__ExceedsWalletCap();
-
-    /// @notice Error thrown when tokens are locked in vesting
-    /// @dev Prevents transfer of locked tokens
-    error Bonding__TokensLockedInVesting();
-
-    /// @notice Error thrown when vesting period is zero
-    /// @dev Ensures vesting period is set
-    error Bonding__InvalidVestingPeriod();
+    /// @notice Emitted when treasury is updated
+    event TreasuryUpdated(address indexed oldTreasury, address indexed newTreasury);
 
     // ============ CONSTRUCTOR ============
 
@@ -148,14 +129,15 @@ contract Bonding is IBonding, Ownable {
         uint256 _epochCap,
         uint256 _walletCap,
         uint256 _vestingPeriod
-    ) Ownable(msg.sender) {
+    ) payable Ownable(msg.sender) {
+        if (_fvc == address(0)) revert Bonding__ZeroAddress();
+        if (_usdc == address(0)) revert Bonding__ZeroAddress();
+        if (_treasury == address(0)) revert Bonding__ZeroAddress();
+        if (_vestingPeriod == 0) revert Bonding__InvalidVestingPeriod();
+        
         fvc = IFVC(_fvc);
         usdc = IERC20(_usdc);
         treasury = _treasury;
-        
-        if (_vestingPeriod == 0) {
-            revert Bonding__InvalidVestingPeriod();
-        }
         
         initialDiscount = _initialDiscount;
         finalDiscount = _finalDiscount;
@@ -188,6 +170,8 @@ contract Bonding is IBonding, Ownable {
      * @custom:security Only owner can call this function
      */
     function emergencyUnlockVesting(address user) external onlyOwner {
+        if (user == address(0)) revert Bonding__ZeroAddress();
+        
         VestingSchedule storage schedule = vestingSchedules[user];
         
         if (schedule.amount > 0) {
@@ -221,18 +205,20 @@ contract Bonding is IBonding, Ownable {
      * @param fvcAmount Amount of FVC tokens to receive (in 18 decimals)
      * @custom:security Checks FVC availability, wallet cap, and vesting locks
      */
-    function bond(uint256 fvcAmount) external {
-        if (fvcAmount == 0) {
-            revert Bonding__AmountMustBeGreaterThanZero();
-        }
+    function bond(uint256 fvcAmount) external nonReentrant {
+        if (fvcAmount == 0) revert Bonding__AmountMustBeGreaterThanZero();
         
         RoundConfig storage currentRound = rounds[currentRoundId];
-        if (!currentRound.isActive) {
-            revert Bonding__RoundNotActive();
-        }
+        if (!currentRound.isActive) revert Bonding__RoundNotActive();
+        
+        // Cache storage variables to save gas
+        uint256 _fvcSold = fvcSold;
+        uint256 _fvcAllocated = fvcAllocated;
+        uint256 _walletCap = walletCap;
+        uint256 _currentRoundId = currentRoundId;
         
         // Check if enough FVC is available
-        if (fvcSold + fvcAmount > fvcAllocated) {
+        if (_fvcSold + fvcAmount > _fvcAllocated) {
             revert Bonding__EpochCapExceeded();
         }
         
@@ -241,33 +227,30 @@ contract Bonding is IBonding, Ownable {
         uint256 usdcAmount = BondingMath.calculateUSDCAmount(fvcAmount, currentDiscount);
         
         // Check wallet cap (in USDC terms)
-        if (userBonded[currentRoundId][msg.sender] + usdcAmount > walletCap) {
+        if (userBonded[_currentRoundId][msg.sender] + usdcAmount > _walletCap) {
             revert Bonding__ExceedsWalletCap();
         }
         
-        // Transfer USDC to treasury
-        usdc.safeTransferFrom(msg.sender, treasury, usdcAmount);
-        
-        // Transfer FVC tokens from contract to user
-        IERC20(address(fvc)).safeTransfer(msg.sender, fvcAmount);
-        
-        // Update state
-        totalBonded += usdcAmount;
-        currentRound.totalBonded += usdcAmount;
-        currentRound.fvcSold += fvcAmount;
-        fvcSold += fvcAmount;
-        userBonded[currentRoundId][msg.sender] += usdcAmount;
+        // Update state BEFORE external calls (reentrancy protection)
+        totalBonded = totalBonded + usdcAmount;
+        currentRound.totalBonded = currentRound.totalBonded + usdcAmount;
+        currentRound.fvcSold = currentRound.fvcSold + fvcAmount;
+        fvcSold = _fvcSold + fvcAmount;
+        userBonded[_currentRoundId][msg.sender] = userBonded[_currentRoundId][msg.sender] + usdcAmount;
         
         // Create vesting schedule - tokens locked until round ends
         uint256 startTime = block.timestamp;
-        // Vesting ends when round is completed (fvcSold >= fvcAllocated)
-        uint256 endTime = startTime + vestingPeriod; // This will be updated when round completes
+        uint256 endTime = startTime + vestingPeriod;
         
         vestingSchedules[msg.sender] = VestingSchedule({
             amount: fvcAmount,
             startTime: startTime,
             endTime: endTime
         });
+        
+        // External calls AFTER state updates (reentrancy protection)
+        usdc.safeTransferFrom(msg.sender, treasury, usdcAmount);
+        IERC20(address(fvc)).safeTransfer(msg.sender, fvcAmount);
         
         emit Bonded(msg.sender, usdcAmount);
         emit VestingScheduleCreated(msg.sender, fvcAmount, startTime, endTime);
@@ -277,16 +260,25 @@ contract Bonding is IBonding, Ownable {
 
     /**
      * @notice Get current discount percentage
-     * @dev Calculates discount based on bonding progress
+     * @dev Calculates discount based on bonding progress with precision handling
      * @return Current discount percentage
      */
     function getCurrentDiscount() public view returns (uint256) {
-        if (totalBonded >= epochCap) {
-            return finalDiscount;
+        uint256 _totalBonded = totalBonded;
+        uint256 _epochCap = epochCap;
+        uint256 _initialDiscount = initialDiscount;
+        uint256 _finalDiscount = finalDiscount;
+        
+        if (_totalBonded >= _epochCap) {
+            return _finalDiscount;
         }
         
-        uint256 progress = (totalBonded * 100) / epochCap;
-        return initialDiscount - ((initialDiscount - finalDiscount) * progress) / 100;
+        // Use higher precision arithmetic to avoid precision loss
+        uint256 progress = (_totalBonded * 10000) / _epochCap; // 4 decimal precision
+        uint256 discountRange = _initialDiscount - _finalDiscount;
+        uint256 discountReduction = (discountRange * progress) / 10000;
+        
+        return _initialDiscount - discountReduction;
     }
 
     /**
@@ -316,7 +308,7 @@ contract Bonding is IBonding, Ownable {
      */
     function isLocked(address user) external view returns (bool) {
         VestingSchedule memory schedule = vestingSchedules[user];
-        return schedule.amount > 0 && BondingMath.isVestingLocked(block.timestamp, schedule.endTime);
+        return schedule.amount != 0 && BondingMath.isVestingLocked(block.timestamp, schedule.endTime);
     }
 
     // ============ ADMIN FUNCTIONS ============
@@ -328,11 +320,25 @@ contract Bonding is IBonding, Ownable {
      * @custom:security Only owner can call this function
      */
     function setVestingPeriod(uint256 _vestingPeriod) external onlyOwner {
-        if (_vestingPeriod == 0) {
-            revert Bonding__InvalidVestingPeriod();
-        }
+        if (_vestingPeriod == 0) revert Bonding__InvalidVestingPeriod();
+        
+        uint256 oldPeriod = vestingPeriod;
         vestingPeriod = _vestingPeriod;
         emit VestingPeriodUpdated(_vestingPeriod);
+    }
+
+    /**
+     * @notice Update treasury address
+     * @dev Only owner can call this function
+     * @param _treasury New treasury address
+     * @custom:security Only owner can call this function
+     */
+    function setTreasury(address _treasury) external onlyOwner {
+        if (_treasury == address(0)) revert Bonding__ZeroAddress();
+        
+        address oldTreasury = treasury;
+        treasury = _treasury;
+        emit TreasuryUpdated(oldTreasury, _treasury);
     }
 
     /**
@@ -352,16 +358,14 @@ contract Bonding is IBonding, Ownable {
         uint256 _walletCap,
         uint256 _vestingPeriod
     ) external onlyOwner {
-        if (_vestingPeriod == 0) {
-            revert Bonding__InvalidVestingPeriod();
-        }
+        if (_vestingPeriod == 0) revert Bonding__InvalidVestingPeriod();
         
         // Complete current round
         RoundConfig storage currentRound = rounds[currentRoundId];
         currentRound.isActive = false;
         
         // Start new round
-        currentRoundId++;
+        currentRoundId = currentRoundId + 1;
         initialDiscount = _initialDiscount;
         finalDiscount = _finalDiscount;
         epochCap = _epochCap;
@@ -394,21 +398,17 @@ contract Bonding is IBonding, Ownable {
      * @custom:security Only owner can call this function
      */
     function allocateFVC(uint256 fvcAmount) external onlyOwner {
-        RoundConfig storage currentRound = rounds[currentRoundId];
-        if (!currentRound.isActive) {
-            revert Bonding__RoundNotActive();
-        }
+        if (fvcAmount == 0) revert Bonding__AmountMustBeGreaterThanZero();
         
-        if (fvcAmount == 0) {
-            revert Bonding__AmountMustBeGreaterThanZero();
-        }
+        RoundConfig storage currentRound = rounds[currentRoundId];
+        if (!currentRound.isActive) revert Bonding__RoundNotActive();
         
         // Transfer FVC tokens from owner to this contract
         IERC20(address(fvc)).safeTransferFrom(msg.sender, address(this), fvcAmount);
         
         // Update FVC allocation
-        fvcAllocated += fvcAmount;
-        currentRound.fvcAllocated += fvcAmount;
+        fvcAllocated = fvcAllocated + fvcAmount;
+        currentRound.fvcAllocated = currentRound.fvcAllocated + fvcAmount;
         
         emit FVCAllocated(currentRoundId, fvcAmount);
     }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity 0.8.24;
 
 /**
  * @title BondingMath
@@ -17,7 +17,7 @@ library BondingMath {
      * @custom:security Validates discount is <= 100%
      */
     function calculateFVCAmount(uint256 usdcAmount, uint256 discount) internal pure returns (uint256 fvcAmount) {
-        require(discount <= 100, "Discount cannot exceed 100%");
+        if (discount > 100) revert("Discount cannot exceed 100%");
         // Use discount-based pricing: FVC = USDC * (1 + discount/100)
         // Convert from USDC (6 decimals) to FVC (18 decimals) by multiplying by 10^12
         fvcAmount = usdcAmount * (100 + discount) / 100 * 1e12;
@@ -33,7 +33,7 @@ library BondingMath {
      * @custom:security Validates premium is <= 100%
      */
     function calculateFVCAmountWithPremium(uint256 usdcAmount, uint256 premium) internal pure returns (uint256 fvcAmount) {
-        require(premium <= 100, "Premium cannot exceed 100%");
+        if (premium > 100) revert("Premium cannot exceed 100%");
         // Formula: FVC = USDC / (1 + premium/100)
         // This ensures 1 USDC = 1 FVC when premium = 0
         fvcAmount = usdcAmount * 100 / (100 + premium);
@@ -149,7 +149,7 @@ library BondingMath {
      * @custom:security Validates discount is <= 100%
      */
     function calculateUSDCAmount(uint256 fvcAmount, uint256 discount) internal pure returns (uint256 usdcAmount) {
-        require(discount <= 100, "Discount cannot exceed 100%");
+        if (discount > 100) revert("Discount cannot exceed 100%");
         // Reverse calculation: USDC = FVC / (1 + discount/100)
         // Convert from FVC (18 decimals) to USDC (6 decimals) by dividing by 10^12
         usdcAmount = fvcAmount / (100 + discount) * 100 / 1e12;
