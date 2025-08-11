@@ -24,7 +24,9 @@ contract FVCUnlocked is ERC20, Ownable {
      * @param _owner Owner address with minting rights
      * @custom:security Grants ownership to specified address
      */
-    constructor(string memory _name, string memory _symbol, address _owner) ERC20(_name, _symbol) Ownable(_owner) {}
+    constructor(string memory _name, string memory _symbol, address _owner) ERC20(_name, _symbol) Ownable() {
+        _transferOwnership(_owner);
+    }
 
     /**
      * @notice Mint new FVC tokens to specified address
