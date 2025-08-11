@@ -129,7 +129,7 @@ contract Bonding is IBonding, Ownable, ReentrancyGuard {
         uint256 _epochCap,
         uint256 _walletCap,
         uint256 _vestingPeriod
-    ) payable Ownable(msg.sender) {
+    ) payable Ownable() {
         if (_fvc == address(0)) revert Bonding__ZeroAddress();
         if (_usdc == address(0)) revert Bonding__ZeroAddress();
         if (_treasury == address(0)) revert Bonding__ZeroAddress();

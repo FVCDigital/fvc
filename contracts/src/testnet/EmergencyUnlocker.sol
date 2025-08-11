@@ -14,7 +14,7 @@ contract EmergencyUnlocker is Ownable {
     
     event VestingUnlocked(address indexed user, uint256 amount);
     
-    constructor(address _bondingContract) Ownable(msg.sender) {
+    constructor(address _bondingContract) Ownable() {
         bondingContract = IBonding(_bondingContract);
     }
     
