@@ -14,3 +14,7 @@ FVC_BONDING.md
 FVC_PROTOCOL_VERIFICATION_REPORT.md
 ON_CHAIN_PROOF_INSTRUCTIONS.md
 ON_CHAIN_PROOF_SUPPLEMENT.md
+
+# Hardhat compilation artifacts
+contracts/artifacts/
+contracts/cache/
