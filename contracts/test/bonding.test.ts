@@ -1,4 +1,4 @@
-import { ethers, upgrades } from "hardhat";
+import { ethers } from "hardhat";
 import { expect } from "chai";
 import { Contract } from "ethers";
 
@@ -22,9 +22,7 @@ describe("Bonding Contract", function () {
 
     // Deploy FVC token
     const FVC = await ethers.getContractFactory("FVC");
-    fvc = await upgrades.deployProxy(FVC, ["First Venture Capital", "FVC", admin.address], {
-      initializer: "initialize"
-    });
+    fvc = await FVC.deploy("First Venture Capital", "FVC", admin.address);
     await fvc.waitForDeployment();
 
     // Deploy mock USDC
@@ -34,7 +32,7 @@ describe("Bonding Contract", function () {
 
     // Deploy Bonding contract
     const Bonding = await ethers.getContractFactory("Bonding");
-    bonding = await upgrades.deployProxy(Bonding, [
+    bonding = await Bonding.deploy(
       await fvc.getAddress(),
       await usdc.getAddress(),
       treasury.address,
@@ -43,13 +41,12 @@ describe("Bonding Contract", function () {
       EPOCH_CAP,
       WALLET_CAP,
       VESTING_PERIOD
-    ], {
-      initializer: "initialize"
-    });
+    );
     await bonding.waitForDeployment();
 
     // Grant MINTER_ROLE to bonding contract
-    await fvc.grantRole(await fvc.MINTER_ROLE(), await bonding.getAddress());
+    const minterRole = await fvc.getMinterRole();
+    await fvc.grantRole(minterRole, await bonding.getAddress());
     
     // Set bonding contract in FVC token for vesting checks
     await (fvc as any).setBondingContract(await bonding.getAddress());
@@ -92,7 +89,7 @@ describe("Bonding Contract", function () {
     it("should demonstrate discount decay with smaller epoch cap", async () => {
       // Create a new bonding contract with smaller epoch cap for testing
       const Bonding = await ethers.getContractFactory("Bonding");
-      const testBonding: any = await upgrades.deployProxy(Bonding, [
+      const testBonding: any = await Bonding.deploy(
         await fvc.getAddress(),
         await usdc.getAddress(),
         treasury.address,
@@ -101,13 +98,12 @@ describe("Bonding Contract", function () {
         ethers.parseEther("10000000"), // 10M epoch cap (much smaller)
         WALLET_CAP,
         VESTING_PERIOD
-      ], {
-        initializer: "initialize"
-      });
+      );
       await testBonding.waitForDeployment();
 
       // Grant MINTER_ROLE to test bonding contract
-      await fvc.grantRole(await fvc.MINTER_ROLE(), await testBonding.getAddress());
+      const minterRole = await fvc.getMinterRole();
+      await fvc.grantRole(minterRole, await testBonding.getAddress());
 
       // Bond 5M USDC (50% of epoch cap, but we need to use multiple users due to wallet cap)
       const bondAmount = ethers.parseEther("1000000"); // 1M USDC (max per wallet)
