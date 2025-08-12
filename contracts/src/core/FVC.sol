@@ -95,6 +95,15 @@ contract FVC is ERC20, AccessControl {
         emit BondingContractSet(_bondingContract);
     }
 
+    /**
+     * @notice Get the MINTER_ROLE identifier
+     * @dev Returns the bytes32 identifier for the minter role
+     * @return The MINTER_ROLE bytes32 identifier
+     */
+    function getMinterRole() external pure returns (bytes32) {
+        return MINTER_ROLE;
+    }
+
     // ============ PUBLIC FUNCTIONS ============
 
     /**

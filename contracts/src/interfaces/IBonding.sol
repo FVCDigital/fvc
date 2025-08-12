@@ -107,37 +107,32 @@ interface IBonding {
     function getCurrentRound() external view returns (RoundConfig memory);
 
     /**
-     * @notice Start a new bonding round with custom parameters
-     * @dev Allows owner to manually start rounds with specific parameters
-     * @param _initialDiscount Initial discount for the round (0-100)
-     * @param _finalDiscount Final discount for the round (0-100)
-     * @param _epochCap Total tokens that can be bonded in this round
-     * @param _walletCap Max tokens per wallet for this round
-     * @param _vestingPeriod Vesting period for this round in seconds
+     * @notice Complete the current bonding round
+     * @dev Only owner can call this function. Sets current round to inactive.
      */
-    function startNewRound(
-        uint256 _initialDiscount,
-        uint256 _finalDiscount,
-        uint256 _epochCap,
-        uint256 _walletCap,
-        uint256 _vestingPeriod
-    ) external;
+    function completeCurrentRound() external;
+
+    /**
+     * @notice Start the next round with predefined parameters
+     * @dev Only owner can call this function. Uses hardcoded round parameters.
+     */
+    function startNextRound() external;
     
     /**
      * @notice Emitted when a user bonds USDC
      * @param user Address of the bonding user
-     * @param amount Amount of USDC bonded
+     * @param usdcAmount Amount of USDC bonded
      */
-    event Bonded(address indexed user, uint256 amount);
+    event Bonded(address indexed user, uint256 usdcAmount);
 
     /**
      * @notice Emitted when a vesting schedule is created
      * @param user Address of the user with vesting schedule
-     * @param amount Amount of FVC tokens in vesting
+     * @param fvcAmount Amount of FVC tokens in vesting
      * @param startTime Vesting start timestamp
      * @param endTime Vesting end timestamp
      */
-    event VestingScheduleCreated(address indexed user, uint256 amount, uint256 startTime, uint256 endTime);
+    event VestingScheduleCreated(address indexed user, uint256 fvcAmount, uint256 startTime, uint256 endTime);
 
     /**
      * @notice Emitted when a new round starts
@@ -151,14 +146,15 @@ interface IBonding {
     /**
      * @notice Emitted when a round is completed
      * @param roundId Unique identifier for the completed round
+     * @param fvcSold Total FVC tokens sold in the completed round
      * @param totalBonded Total USDC bonded in the completed round
      */
-    event RoundCompleted(uint256 indexed roundId, uint256 totalBonded);
+    event RoundCompleted(uint256 indexed roundId, uint256 fvcSold, uint256 totalBonded);
 
     /**
      * @notice Emitted when FVC tokens are allocated to the current round
      * @param roundId The round ID
-     * @param fvcAmount The amount of FVC tokens allocated
+     * @param amount The amount of FVC tokens allocated
      */
-    event FVCAllocated(uint256 roundId, uint256 fvcAmount);
+    event FVCAllocated(uint256 indexed roundId, uint256 amount);
 } 
