@@ -15,6 +15,8 @@ interface MainLayoutProps {
   isMobile: boolean;
   /** Whether the client has loaded */
   isClient: boolean;
+  /** Whether to use full width (for roadmap) */
+  fullWidth?: boolean;
 }
 
 /**
@@ -23,7 +25,7 @@ interface MainLayoutProps {
  * @param props - Component props
  * @returns React.JSX.Element
  */
-export default function MainLayout({ children, isMobile, isClient }: MainLayoutProps): React.JSX.Element {
+export default function MainLayout({ children, isMobile, isClient, fullWidth = false }: MainLayoutProps): React.JSX.Element {
   const mainStyle: React.CSSProperties = {
     marginLeft: isClient && !isMobile ? 280 : 0,
     minHeight: '100vh',
@@ -43,7 +45,7 @@ export default function MainLayout({ children, isMobile, isClient }: MainLayoutP
         <br/>
         <div style={{ 
           width: '100%', 
-          maxWidth: 520, 
+          maxWidth: fullWidth ? '100%' : 520, 
           display: 'flex', 
           flexDirection: 'column', 
           gap: 20 
