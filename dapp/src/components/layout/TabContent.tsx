@@ -8,6 +8,7 @@ import { TradingCard } from '@/components/cards';
 import TradeFVCCard from '@/components/cards/TradeFVCCard';
 import ComingSoonCard from '@/components/cards/ComingSoonCard';
 import FVCAllocationChart from '@/components/cards/FVCAllocationChart/FVCAllocationChart';
+import { RoadmapFlowchart } from '@/components/roadmap';
 import { TabId } from '@/constants/tabs';
 
 /**
@@ -42,7 +43,7 @@ export default function TabContent({ activeTab }: TabContentProps): React.JSX.El
     case 'governance':
       return <ComingSoonCard title="Governance" />;
     case 'roadmap':
-      return <ComingSoonCard title="Roadmap" />;
+      return <RoadmapFlowchart />;
     default:
       return <ComingSoonCard title="Not Found" description="This tab is not available." />;
   }
