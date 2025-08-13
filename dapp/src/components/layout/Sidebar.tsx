@@ -21,7 +21,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'bonding', label: 'Bonding' },
-    { id: 'buy', label: 'Buy FVC' },
     { id: 'staking', label: 'Staking' },
     { id: 'governance', label: 'Governance' },
     { id: 'roadmap', label: 'Roadmap' },
