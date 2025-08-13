@@ -36,8 +36,6 @@ export default function TabContent({ activeTab }: TabContentProps): React.JSX.El
       );
     case 'bonding':
       return <TradingCard />;
-    case 'buy':
-      return <TradeFVCCard />;
     case 'staking':
       return <ComingSoonCard title="Staking" />;
     case 'governance':
