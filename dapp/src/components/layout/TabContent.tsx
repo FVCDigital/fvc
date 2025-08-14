@@ -21,7 +21,7 @@ interface TabContentProps {
 
 /**
  * Component for rendering the appropriate content based on the active tab
- * Centralizes all tab content rendering logic
+ * Centralises all tab content rendering logic
  * @param props - Component props
  * @returns React.JSX.Element
  */
