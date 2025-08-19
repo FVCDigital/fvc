@@ -5,7 +5,6 @@
 import React from 'react';
 import DashboardCard from '@/components/cards/DashboardCard';
 import { TradingCard } from '@/components/cards';
-import TradeFVCCard from '@/components/cards/TradeFVCCard';
 import ComingSoonCard from '@/components/cards/ComingSoonCard';
 import FVCAllocationChart from '@/components/cards/FVCAllocationChart/FVCAllocationChart';
 import { RoadmapFlowchart } from '@/components/roadmap';
