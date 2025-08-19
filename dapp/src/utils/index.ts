@@ -4,6 +4,18 @@
  * @module utils
  */
 
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+/**
+ * Utility function to combine class names with Tailwind CSS optimization
+ * @param inputs - Class names to combine
+ * @returns Optimized class string
+ */
+export const cn = (...inputs: ClassValue[]) => {
+  return twMerge(clsx(inputs));
+};
+
 // Re-export bonding service functions
 export {
   calculateFVCAmount,
