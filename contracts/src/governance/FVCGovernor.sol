@@ -240,7 +240,6 @@ contract FVCGovernor is
      * @param values Array of values to send
      * @param calldatas Array of function call data
      * @param descriptionHash Hash of proposal description
-     * @return Proposal ID
      */
     function _execute(
         uint256, /* proposalId */
@@ -294,7 +293,7 @@ contract FVCGovernor is
      */
     function _authorizeUpgrade(address newImplementation)
         internal
-        override
+        override(UUPSUpgradeable)
         onlyRole(GOVERNANCE_ADMIN_ROLE)
     {}
 
@@ -309,7 +308,7 @@ contract FVCGovernor is
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(GovernorUpgradeable, AccessControlUpgradeable)
+        override(GovernorUpgradeable, GovernorTimelockControlUpgradeable, AccessControlUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
