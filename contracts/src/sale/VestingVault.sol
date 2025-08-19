@@ -636,4 +636,20 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
         // This check could be enhanced to verify the caller
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
+
+    /**
+     * @notice Override supportsInterface to resolve conflict between ERC1155 and AccessControl
+     * @dev Both contracts implement supportsInterface, so we need to override
+     * @param interfaceId The interface identifier
+     * @return True if the interface is supported
+     */
+    function supportsInterface(bytes4 interfaceId) 
+        public 
+        view 
+        virtual 
+        override(ERC1155, AccessControl) 
+        returns (bool) 
+    {
+        return super.supportsInterface(interfaceId);
+    }
 }
