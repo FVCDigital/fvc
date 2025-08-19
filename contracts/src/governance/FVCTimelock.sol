@@ -33,8 +33,7 @@ contract FVCTimelock is TimelockController {
     /// @notice Critical operations delay (7 days)
     uint256 public constant CRITICAL_DELAY = 7 days;
     
-    /// @notice Role identifier for timelock admin
-    bytes32 public constant TIMELOCK_ADMIN_ROLE = keccak256("TIMELOCK_ADMIN_ROLE");
+    /// @notice Role identifier for timelock admin (inherited from TimelockController)
 
     // ============ STATE VARIABLES ============
     
@@ -297,7 +296,8 @@ contract FVCTimelock is TimelockController {
     /**
      * @notice Get all operation delays for debugging
      * @dev Returns configured delays for common function selectors
-     * @return Arrays of selectors and their corresponding delays
+     * @return selectors Array of function selectors
+     * @return delays Array of corresponding delays
      */
     function getConfiguredDelays() external view returns (bytes4[] memory selectors, uint256[] memory delays) {
         // This would return configured delays - implementation depends on storage pattern
