@@ -625,7 +625,8 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
     /**
      * @notice Get daily transfer usage
      * @dev Returns current daily transfer amount
-     * @return Used amount and limit
+     * @return used Current daily transfer amount
+     * @return limit Maximum daily transfer limit
      */
     function getDailyTransferUsage() external view returns (uint256 used, uint256 limit) {
         uint256 today = block.timestamp / 1 days;
