@@ -21,7 +21,15 @@ interface TabContentProps {
 
 /**
  * Component for rendering the appropriate content based on the active tab
- * Centralises all tab content rendering logic
+ * Centralis- **Vesting schedules**: Detailed cliffs and unlocks for each allocation
+- **Distribution infrastructure**: How tokens actually get distributed
+- **Market making strategy**: Initial liquidity provision
+- **CEX listing strategy**: Timeline and requirements
+- **Geographic restrictions**: Where tokens can't be sold- **Vesting schedules**: Detailed cliffs and unlocks for each allocation
+- **Distribution infrastructure**: How tokens actually get distributed
+- **Market making strategy**: Initial liquidity provision
+- **CEX listing strategy**: Timeline and requirements
+- **Geographic restrictions**: Where tokens can't be soldes all tab content rendering logic
  * @param props - Component props
  * @returns React.JSX.Element
  */
