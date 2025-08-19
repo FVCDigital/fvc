@@ -9,6 +9,7 @@ import ComingSoonCard from '@/components/cards/ComingSoonCard';
 import FVCAllocationChart from '@/components/cards/FVCAllocationChart/FVCAllocationChart';
 import { RoadmapFlowchart } from '@/components/roadmap';
 import { TabId } from '@/constants/tabs';
+import VestingView from '@/screen-view/VestingView';
 
 /**
  * Props for TabContent component
@@ -16,23 +17,19 @@ import { TabId } from '@/constants/tabs';
 interface TabContentProps {
   /** The active tab ID */
   activeTab: TabId;
+  /** Whether the user is connected */
+  isConnected: boolean;
+  /** User's wallet address */
+  address?: string;
 }
 
 /**
  * Component for rendering the appropriate content based on the active tab
- * Centralis- **Vesting schedules**: Detailed cliffs and unlocks for each allocation
-- **Distribution infrastructure**: How tokens actually get distributed
-- **Market making strategy**: Initial liquidity provision
-- **CEX listing strategy**: Timeline and requirements
-- **Geographic restrictions**: Where tokens can't be sold- **Vesting schedules**: Detailed cliffs and unlocks for each allocation
-- **Distribution infrastructure**: How tokens actually get distributed
-- **Market making strategy**: Initial liquidity provision
-- **CEX listing strategy**: Timeline and requirements
-- **Geographic restrictions**: Where tokens can't be soldes all tab content rendering logic
+ * Centralises all tab content rendering logic
  * @param props - Component props
  * @returns React.JSX.Element
  */
-export default function TabContent({ activeTab }: TabContentProps): React.JSX.Element {
+export default function TabContent({ activeTab, isConnected, address }: TabContentProps): React.JSX.Element {
   switch (activeTab) {
     case 'dashboard':
       return (
@@ -45,6 +42,8 @@ export default function TabContent({ activeTab }: TabContentProps): React.JSX.El
       return <TradingCard />;
     case 'staking':
       return <ComingSoonCard title="Staking" />;
+    case 'vesting':
+      return <VestingView isConnected={isConnected} address={address} />;
     case 'governance':
       return <ComingSoonCard title="Governance" />;
     case 'roadmap':
