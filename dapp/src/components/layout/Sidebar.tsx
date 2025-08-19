@@ -22,6 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'bonding', label: 'Bonding' },
     { id: 'staking', label: 'Staking' },
+    { id: 'vesting', label: 'Vesting' },
     { id: 'governance', label: 'Governance' },
     { id: 'roadmap', label: 'Roadmap' },
   ];
