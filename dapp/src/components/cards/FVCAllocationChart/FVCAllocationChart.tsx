@@ -36,23 +36,44 @@ const FVCAllocationChart = () => {
 
   useEffect(() => {
     if (fvcTotalSupply && bondingBalance) {
-      // Show target allocation: 1B total, 300M bonding, 700M unallocated
+      // Show target allocation based on updated whitepaper
       const TARGET_TOTAL_SUPPLY = parseEther("1000000000"); // 1B
-      const TARGET_BONDING = parseEther("300000000"); // 300M
-      const TARGET_UNALLOCATED = parseEther("700000000"); // 700M
+      const TARGET_BONDING = parseEther("205000000"); // 205M (20.5%)
+      const TARGET_FOUNDERS_TEAM = parseEther("170000000"); // 170M (17.0%)
+      const TARGET_TREASURY = parseEther("270000000"); // 270M (27.0%)
+      const TARGET_MARKETING = parseEther("305000000"); // 305M (30.5%)
+      const TARGET_LIQUIDITY = parseEther("50000000"); // 50M (5.0%)
 
       const data: AllocationData[] = [
         {
-          name: 'Bonding Contract',
+          name: 'Bonding (20.5%)',
           value: Number(formatEther(TARGET_BONDING)),
           percentage: Number((TARGET_BONDING * 100n) / TARGET_TOTAL_SUPPLY),
           color: '#3B82F6', // Blue
         },
         {
-          name: 'Unallocated',
-          value: Number(formatEther(TARGET_UNALLOCATED)),
-          percentage: Number((TARGET_UNALLOCATED * 100n) / TARGET_TOTAL_SUPPLY),
+          name: 'Founders, Team & Partners (17.0%)',
+          value: Number(formatEther(TARGET_FOUNDERS_TEAM)),
+          percentage: Number((TARGET_FOUNDERS_TEAM * 100n) / TARGET_TOTAL_SUPPLY),
           color: '#10B981', // Green
+        },
+        {
+          name: 'Treasury & Reserve Buffer (27.0%)',
+          value: Number(formatEther(TARGET_TREASURY)),
+          percentage: Number((TARGET_TREASURY * 100n) / TARGET_TOTAL_SUPPLY),
+          color: '#F59E0B', // Amber
+        },
+        {
+          name: 'Marketing & Community (30.5%)',
+          value: Number(formatEther(TARGET_MARKETING)),
+          percentage: Number((TARGET_MARKETING * 100n) / TARGET_TOTAL_SUPPLY),
+          color: '#EF4444', // Red
+        },
+        {
+          name: 'Liquidity Provision (5.0%)',
+          value: Number(formatEther(TARGET_LIQUIDITY)),
+          percentage: Number((TARGET_LIQUIDITY * 100n) / TARGET_TOTAL_SUPPLY),
+          color: '#8B5CF6', // Purple
         },
       ];
 
@@ -248,8 +269,9 @@ const FVCAllocationChart = () => {
         </div>
         <div style={{ marginTop: 16, padding: 12, background: 'rgba(56,189,248,0.1)', borderRadius: 8 }}>
           <div style={{ fontSize: 12, color: theme.secondaryText, lineHeight: 1.4 }}>
-            <strong>Note:</strong> This shows the target allocation. 
-            Total supply: 1B FVC, Bonding: 300M FVC (30%), Unallocated: 700M FVC (70%).
+            <strong>Note:</strong> This shows the updated allocation from the latest whitepaper. 
+            Total supply: 1B FVC, Bonding: 205M FVC (20.5%), Founders & Team: 170M FVC (17.0%), 
+            Treasury: 270M FVC (27.0%), Marketing: 305M FVC (30.5%), Liquidity: 50M FVC (5.0%).
             The current blockchain state has excess tokens due to testnet minting.
           </div>
         </div>
