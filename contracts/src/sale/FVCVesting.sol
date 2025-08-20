@@ -8,12 +8,12 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../interfaces/IFVC.sol";
 
 /**
- * @title SimpleFVCVesting
- * @notice Simple, audited-pattern vesting contract for FVC tokens
- * @dev Based on OpenZeppelin patterns but simplified for production use
+ * @title FVCVesting
+ * @notice Production vesting contract for FVC token private sales
+ * @dev Based on OpenZeppelin patterns with industry-standard cliff and linear vesting
  * @custom:security Uses proven patterns from successful token projects
  */
-contract SimpleFVCVesting is AccessControl, ReentrancyGuard {
+contract FVCVesting is AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     // ============ CONSTANTS ============
