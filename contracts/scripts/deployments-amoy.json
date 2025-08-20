@@ -2,12 +2,12 @@
   "network": "Polygon Amoy Testnet",
   "chainId": "80002",
   "deployer": "0xcABa97a2bb6ca2797e302C864C37632b4185d595",
-  "timestamp": "2025-08-20T13:38:12.287Z",
+  "timestamp": "2025-08-20T14:32:02.937Z",
   "contracts": {
-    "fvcToken": "0x65d741E8758255B923Cf4796BC76aFfe739FEb4B",
-    "mockUSDC": "0x9Eee7deA26a3Da859C18bF7063F58e9e46535a0a",
-    "vestingContract": "0x581D1751fBB0a3EDbb66Ffa32BA74A3dC0643CD8",
-    "bondingContract": "0x63eE25f4d0a42603de8e61dB6904fd8B9583841e"
+    "fvcToken": "0xc2D176fdDd2952a12267e5eD6a2B63211F3D674C",
+    "mockUSDC": "0x79a3c7c1459B4d68C39A6db2716C0f4BaE190dfc",
+    "vestingContract": "0x471d9c9653FabeeA49DecB5A1DF4aED26178af8B",
+    "bondingContract": "0x3b50f7287C97Fe3dBE913c52F0070dBD2aC43172"
   },
   "config": {
     "network": "Polygon Amoy Testnet",
