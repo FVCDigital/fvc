@@ -24,11 +24,11 @@ contract SimpleFVCVesting is AccessControl, ReentrancyGuard {
     /// @notice Role for vesting admin
     bytes32 public constant VESTING_ADMIN_ROLE = keccak256("VESTING_ADMIN_ROLE");
     
-    /// @notice Cliff duration (6 months)
-    uint256 public constant CLIFF_DURATION = 180 days;
+    /// @notice Cliff duration (12 months) - industry standard for private investors
+    uint256 public constant CLIFF_DURATION = 365 days;
     
-    /// @notice Vesting duration after cliff (12 months)
-    uint256 public constant VESTING_DURATION = 365 days;
+    /// @notice Vesting duration after cliff (24 months) - total 36 months
+    uint256 public constant VESTING_DURATION = 730 days;
 
     // ============ STRUCTS ============
 
