@@ -90,8 +90,8 @@ async function main() {
 
   // Deploy Vesting Contract
   console.log("📦 Deploying Vesting Contract...");
-  const SimpleFVCVesting = await ethers.getContractFactory("SimpleFVCVesting");
-  const vestingContract = await SimpleFVCVesting.deploy(deployments.fvcToken, deployer.address);
+  const FVCVesting = await ethers.getContractFactory("FVCVesting");
+  const vestingContract = await FVCVesting.deploy(deployments.fvcToken, deployer.address);
   await vestingContract.waitForDeployment();
   deployments.vestingContract = await vestingContract.getAddress();
   console.log("✅ Vesting Contract:", deployments.vestingContract);
