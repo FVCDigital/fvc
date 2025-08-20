@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { theme } from '@/constants/theme';
+import { useVestingSchedule, useReleasableAmount, useIsCliffPassed, useVestedAmount } from '@/utils/contracts/vestingContract';
+import { formatEther } from 'viem';
 
 // Private investor vesting schedule interface
 interface VestingSchedule {
@@ -72,18 +74,42 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
   const [schedules, setSchedules] = useState<VestingSchedule[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Real contract calls
+  const { data: vestingSchedule, isLoading: isLoadingSchedule } = useVestingSchedule(address);
+  const { data: releasableAmount, isLoading: isLoadingReleasable } = useReleasableAmount(address);
+  const { data: isCliffPassed, isLoading: isLoadingCliff } = useIsCliffPassed(address);
+  const { data: vestedAmount, isLoading: isLoadingVested } = useVestedAmount(address);
+
   useEffect(() => {
     if (isConnected && address) {
-      // Simulate loading delay
-      setTimeout(() => {
-        setSchedules(getMockVestingSchedules(address));
-        setLoading(false);
-      }, 1500);
+      // Check if user has a vesting schedule
+      if (vestingSchedule && vestingSchedule[0] > 0n) {
+        // User has a vesting schedule - convert to our format
+        const schedule: VestingSchedule = {
+          id: '1',
+          roundName: 'Private Sale',
+          totalAmount: formatEther(vestingSchedule[0]),
+          releasedAmount: formatEther(vestingSchedule[1]),
+          claimedAmount: formatEther(vestingSchedule[1]),
+          startDate: new Date(Number(vestingSchedule[2]) * 1000),
+          cliffDate: new Date(Number(vestingSchedule[3]) * 1000),
+          endDate: new Date(Number(vestingSchedule[4]) * 1000),
+          isCliffPassed: isCliffPassed || false,
+          claimableAmount: releasableAmount ? formatEther(releasableAmount) : '0',
+          vestingType: 'linear',
+          discount: 'N/A'
+        };
+        setSchedules([schedule]);
+      } else {
+        // No vesting schedule found
+        setSchedules([]);
+      }
+      setLoading(isLoadingSchedule || isLoadingReleasable || isLoadingCliff || isLoadingVested);
     } else {
       setSchedules([]);
       setLoading(false);
     }
-  }, [isConnected, address]);
+  }, [isConnected, address, vestingSchedule, releasableAmount, isCliffPassed, vestedAmount]);
 
   const formatAmount = (amount: string | number) => {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
@@ -117,19 +143,11 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
 
   const handleClaim = async (scheduleId: string) => {
     try {
-      // TODO: Implement real contract call
       console.log(`Claiming tokens for schedule ${scheduleId}`);
-      
-      // Update mock data
-      setSchedules(prev => prev.map(s => 
-        s.id === scheduleId 
-          ? { 
-              ...s, 
-              claimedAmount: (parseFloat(s.claimedAmount) + parseFloat(s.claimableAmount)).toString(),
-              claimableAmount: '0'
-            }
-          : s
-      ));
+      // TODO: Implement writeContract call to SimpleFVCVesting.release()
+      // For now, show that the function is called
+      alert('Claiming functionality will be implemented with writeContract. Check console for details.');
+      console.log('Would call: writeContract({ address: VESTING_CONTRACT, abi: VESTING_ABI, functionName: "release" })');
     } catch (error) {
       console.error('Failed to claim tokens:', error);
     }
@@ -267,7 +285,7 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
             textAlign: 'center',
             marginBottom: 24
           }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>💼</div>
+
             <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, color: theme.primaryText }}>
               No Private Sale Allocations
             </div>
