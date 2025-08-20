@@ -31,7 +31,7 @@ async function main() {
 
   // Get contract instances
   const fvcToken = await ethers.getContractAt("FVC", deployments.contracts.fvcToken);
-  const vestingContract = await ethers.getContractAt("SimpleFVCVesting", deployments.contracts.vestingContract);
+  const vestingContract = await ethers.getContractAt("FVCVesting", deployments.contracts.vestingContract);
   const bondingContract = await ethers.getContractAt("Bonding", deployments.contracts.bondingContract);
   
   console.log("\n📊 Initial State:");
