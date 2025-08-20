@@ -7,18 +7,20 @@ export const MOCK_CONTRACTS = {
   MOCK_FVC: '0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0', // Deployed
 };
 
-// Real contract addresses (for mainnet deployment)
+// Mainnet contract addresses (from environment variables)
 export const MAINNET_CONTRACTS = {
-  BONDING: '0x...', // Will be set after deployment
-  USDC: '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174', // Polygon USDC
-  FVC: '0x...', // Will be set after deployment
+  BONDING: process.env.NEXT_PUBLIC_MAINNET_BONDING_ADDRESS || '',
+  USDC: process.env.NEXT_PUBLIC_MAINNET_USDC_ADDRESS || '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  FVC: process.env.NEXT_PUBLIC_MAINNET_FVC_ADDRESS || '',
+  VESTING: process.env.NEXT_PUBLIC_MAINNET_VESTING_ADDRESS || '',
 };
 
-// Testnet contract addresses (for Amoy deployment) - REAL DEPLOYED CONTRACTS
+// Testnet contract addresses (from environment variables)
 export const TESTNET_CONTRACTS = {
-  BONDING: '0x0C81CCEB47507a1F030f13002325a6e8A99953E9', // New bonding contract with decimal fix
-  USDC: '0x11Cf72a75e284B61548B87fB5ad8B8693FCfB1fb', // Mock USDC
-  FVC: '0x8Bf97817B8354b960e26662c65F9d0b3732c9057', // New FVC token
+  BONDING: process.env.NEXT_PUBLIC_BONDING_ADDRESS || '',
+  USDC: process.env.NEXT_PUBLIC_MOCK_USDC_ADDRESS || '',
+  FVC: process.env.NEXT_PUBLIC_FVC_ADDRESS || '',
+  VESTING: process.env.NEXT_PUBLIC_VESTING_ADDRESS || '',
 };
 
 // Use this to switch between environments
