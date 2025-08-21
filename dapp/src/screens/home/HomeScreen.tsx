@@ -15,6 +15,7 @@ import TabContent from '@/components/layout/TabContent';
 import { theme } from '@/constants/theme';
 import { useHashRouting } from '@/hooks/useHashRouting';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
+import { Toaster } from '@/components/ui/toaster';
 
 /**
  * Main home screen component that orchestrates the application layout
@@ -40,12 +41,8 @@ export default function HomeScreen(): React.JSX.Element {
     setTimeout(() => { triggerVerification(); }, 0);
   };
 
-  const handleMenuClick = () => {
-    setIsMobileMenuOpen(true);
-  };
-
-  const handleMenuClose = () => {
-    setIsMobileMenuOpen(false);
+  const handleMenuToggle = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   return (
@@ -54,7 +51,7 @@ export default function HomeScreen(): React.JSX.Element {
       {isClient && (
         <AppBar 
           isMobile={isMobile} 
-          onMenuClick={handleMenuClick}
+          onMenuToggle={handleMenuToggle}
         />
       )}
       
@@ -65,7 +62,7 @@ export default function HomeScreen(): React.JSX.Element {
           onTabChange={setActiveTab} 
           isMobile={isMobile}
           isOpen={isMobileMenuOpen}
-          onClose={handleMenuClose}
+          onClose={() => setIsMobileMenuOpen(false)}
         />
       )}
       
@@ -77,6 +74,9 @@ export default function HomeScreen(): React.JSX.Element {
           address={address}
         />
       </MainLayout>
+      
+      {/* Toast Notifications */}
+      <Toaster />
     </div>
   );
 }
