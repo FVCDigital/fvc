@@ -26,6 +26,7 @@ contracts/cache/
 # Dependencies and build files
 package-lock.json
 yarn.lock
+dapp/package.json
 dapp/package-lock.json
 dapp/yarn.lock
 
