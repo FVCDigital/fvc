@@ -22,3 +22,15 @@ contracts/QUESTIONS_GOV_GTM_TOKEN.md
 # Hardhat compilation artifacts
 contracts/artifacts/
 contracts/cache/
+
+# Dependencies and build files
+package-lock.json
+yarn.lock
+dapp/package-lock.json
+dapp/yarn.lock
+
+# Development and test scripts
+contracts/scripts/*.ts
+contracts/scripts/*.json
+contracts/src/sale/Test*.sol
+contracts/src/sale/Custom*.sol
