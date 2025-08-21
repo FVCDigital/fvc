@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { theme } from '@/constants/theme';
-import { useVestingSchedule, useReleasableAmount, useIsCliffPassed, useVestedAmount } from '@/utils/contracts/vestingContract';
+import { useVestingSchedule, useReleasableAmount, useIsCliffPassed, useVestedAmount, useVestingProgress, VESTING_CONTRACT, VESTING_ABI } from '@/utils/contracts/vestingContract';
 import { formatEther } from 'viem';
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useToast } from '@/hooks/use-toast';
 
 // Private investor vesting schedule interface
 interface VestingSchedule {
@@ -73,12 +75,22 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
 }) => {
   const [schedules, setSchedules] = useState<VestingSchedule[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Toast hook
+  const { toast } = useToast();
 
   // Real contract calls
   const { data: vestingSchedule, isLoading: isLoadingSchedule } = useVestingSchedule(address);
   const { data: releasableAmount, isLoading: isLoadingReleasable } = useReleasableAmount(address);
   const { data: isCliffPassed, isLoading: isLoadingCliff } = useIsCliffPassed(address);
   const { data: vestedAmount, isLoading: isLoadingVested } = useVestedAmount(address);
+  const { data: vestingProgress, isLoading: isLoadingProgress } = useVestingProgress(address);
+  
+  // Write contract for releasing tokens
+  const { data: hash, writeContract, isPending } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   useEffect(() => {
     if (isConnected && address) {
@@ -87,7 +99,7 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
         // User has a vesting schedule - convert to our format
         const schedule: VestingSchedule = {
           id: '1',
-          roundName: 'Private Sale',
+          roundName: 'Test Vesting',
           totalAmount: formatEther(vestingSchedule[0]),
           releasedAmount: formatEther(vestingSchedule[1]),
           claimedAmount: formatEther(vestingSchedule[1]),
@@ -97,19 +109,50 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
           isCliffPassed: isCliffPassed || false,
           claimableAmount: releasableAmount ? formatEther(releasableAmount) : '0',
           vestingType: 'linear',
-          discount: 'N/A'
+          discount: '0 cliff, 10min vesting'
         };
         setSchedules([schedule]);
       } else {
         // No vesting schedule found
         setSchedules([]);
       }
-      setLoading(isLoadingSchedule || isLoadingReleasable || isLoadingCliff || isLoadingVested);
+      setLoading(isLoadingSchedule || isLoadingReleasable || isLoadingCliff || isLoadingVested || isLoadingProgress);
     } else {
       setSchedules([]);
       setLoading(false);
     }
-  }, [isConnected, address, vestingSchedule, releasableAmount, isCliffPassed, vestedAmount]);
+  }, [isConnected, address, vestingSchedule, releasableAmount, isCliffPassed, vestedAmount, vestingProgress, isConfirmed]);
+
+  // Show transaction status and handle automatic updates
+  useEffect(() => {
+    if (isPending) {
+      console.log('Transaction pending...');
+      toast({
+        title: "Processing transaction...",
+        description: "Please wait while we process your request.",
+      });
+    }
+    if (isConfirming) {
+      console.log('Transaction confirming...');
+      toast({
+        title: "Confirming transaction...",
+        description: "Your transaction is being confirmed on the blockchain.",
+      });
+    }
+    if (isConfirmed) {
+      console.log('Transaction confirmed!');
+      toast({
+        title: "Success!",
+        description: "Tokens successfully claimed! Your balance will update shortly.",
+      });
+      
+      // Trigger a refresh of the contract data after successful claim
+      // This will automatically update the FVC ready to claim
+      setTimeout(() => {
+        window.location.reload(); // Simple refresh for now, could be optimized later
+      }, 2000);
+    }
+  }, [isPending, isConfirming, isConfirmed, toast]);
 
   const formatAmount = (amount: string | number) => {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
@@ -130,6 +173,11 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
   };
 
   const calculateProgress = (schedule: VestingSchedule) => {
+    // Use contract progress if available, otherwise calculate manually
+    if (vestingProgress !== undefined) {
+      return Number(vestingProgress);
+    }
+    
     const now = new Date();
     const start = schedule.startDate.getTime();
     const end = schedule.endDate.getTime();
@@ -142,14 +190,26 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
   };
 
   const handleClaim = async (scheduleId: string) => {
+    if (!address) return;
+    
     try {
       console.log(`Claiming tokens for schedule ${scheduleId}`);
-      // TODO: Implement writeContract call to SimpleFVCVesting.release()
-      // For now, show that the function is called
-      alert('Claiming functionality will be implemented with writeContract. Check console for details.');
-      console.log('Would call: writeContract({ address: VESTING_CONTRACT, abi: VESTING_ABI, functionName: "release" })');
+      
+      // Call the release function on the vesting contract
+      writeContract({
+        address: VESTING_CONTRACT,
+        abi: VESTING_ABI,
+        functionName: 'release',
+        args: [address as `0x${string}`],
+      });
+      
     } catch (error) {
       console.error('Failed to claim tokens:', error);
+      toast({
+        title: "Error",
+        description: "Failed to claim tokens. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -185,7 +245,7 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
         boxSizing: 'border-box',
         fontFamily: 'Inter, sans-serif',
       }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>🔐</div>
         <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: theme.primaryText }}>
           Connect Your Wallet
         </div>
@@ -433,20 +493,22 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
                     </div>
                     <button
                       onClick={() => handleClaim(schedule.id)}
-                      disabled={claimable === 0}
+                      disabled={claimable === 0 || isPending || isConfirming}
                       style={{
                         padding: '10px 20px',
                         borderRadius: 8,
                         fontWeight: 600,
                         border: 'none',
-                        cursor: claimable > 0 ? 'pointer' : 'not-allowed',
-                        opacity: claimable === 0 ? 0.5 : 1,
+                        cursor: (claimable > 0 && !isPending && !isConfirming) ? 'pointer' : 'not-allowed',
+                        opacity: (claimable === 0 || isPending || isConfirming) ? 0.5 : 1,
                         background: claimable > 0 ? '#3B82F6' : theme.modalButton,
                         color: claimable > 0 ? 'white' : theme.secondaryText,
                         transition: 'all 0.2s',
                       }}
                     >
-                      {claimable > 0 ? 'Claim Tokens' : 'No Tokens Available'}
+                      {isPending ? 'Confirming...' :
+                       isConfirming ? 'Processing...' :
+                       claimable > 0 ? 'Harvest FVC' : 'No Tokens Available'}
                     </button>
                   </div>
                 </div>
@@ -456,42 +518,8 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
         )}
       </div>
 
-      {/* Quick Actions */}
-      {schedules.length > 0 && stats.claimable > 0 && (
-        <div style={{
-          background: theme.appBackground,
-          borderRadius: 12,
-          padding: 20,
-          border: `1px solid ${theme.modalButton}`,
-          width: '100%'
-        }}>
-          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: theme.primaryText }}>
-            🚀 Quick Actions
-          </div>
-          <button
-            onClick={() => {
-              schedules.forEach(s => {
-                if (parseFloat(s.claimableAmount) > 0) {
-                  handleClaim(s.id);
-                }
-              });
-            }}
-            style={{
-              padding: '12px 24px',
-              borderRadius: 8,
-              fontWeight: 600,
-              background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%)',
-              color: 'white',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              marginRight: 12
-            }}
-          >
-            Claim All Available ({formatAmount(stats.claimable)})
-          </button>
-        </div>
-      )}
+
+
     </div>
   );
 };
