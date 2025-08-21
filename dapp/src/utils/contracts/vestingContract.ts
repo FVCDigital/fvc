@@ -6,43 +6,36 @@ export const VESTING_ABI = [
     "inputs": [
       {
         "internalType": "address",
-        "name": "beneficiary",
+        "name": "",
         "type": "address"
       }
     ],
-    "name": "getVestingSchedule",
+    "name": "vestingSchedules",
     "outputs": [
       {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "totalAmount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "releasedAmount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "startTime",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "cliffTime",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "endTime",
-            "type": "uint256"
-          }
-        ],
-                    "internalType": "struct FVCVesting.VestingSchedule",
-        "name": "",
-        "type": "tuple"
+        "internalType": "uint256",
+        "name": "totalAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "releasedAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "startTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "cliffTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "endTime",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -106,7 +99,13 @@ export const VESTING_ABI = [
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "beneficiary",
+        "type": "address"
+      }
+    ],
     "name": "release",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -137,19 +136,41 @@ export const VESTING_ABI = [
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "beneficiary",
+        "type": "address"
+      }
+    ],
+    "name": "getVestingProgress",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ] as const;
 
 // Get vesting contract address from environment
 import { CONTRACTS } from './bondingContract';
-export const VESTING_CONTRACT = CONTRACTS.VESTING as `0x${string}`;
+
+// Use the test vesting contract that has claimable tokens for testing
+export const VESTING_CONTRACT = "0xaf656599C1AA60C9Eb49e0B8ccB76E7C18d35AdB" as `0x${string}`;
+// export const VESTING_CONTRACT = CONTRACTS.VESTING as `0x${string}`; // Production contract
 
 // Hook to check if user has a vesting schedule
 export function useVestingSchedule(address?: string) {
   return useReadContract({
     address: VESTING_CONTRACT,
     abi: VESTING_ABI,
-    functionName: 'getVestingSchedule',
+    functionName: 'vestingSchedules',
     args: address ? [address as `0x${string}`] : undefined,
     query: {
       enabled: !!address && !!VESTING_CONTRACT,
@@ -189,6 +210,19 @@ export function useVestedAmount(address?: string) {
     address: VESTING_CONTRACT,
     abi: VESTING_ABI,
     functionName: 'calculateVestedAmount',
+    args: address ? [address as `0x${string}`] : undefined,
+    query: {
+      enabled: !!address && !!VESTING_CONTRACT,
+    },
+  });
+}
+
+// Hook to get vesting progress percentage
+export function useVestingProgress(address?: string) {
+  return useReadContract({
+    address: VESTING_CONTRACT,
+    abi: VESTING_ABI,
+    functionName: 'getVestingProgress',
     args: address ? [address as `0x${string}`] : undefined,
     query: {
       enabled: !!address && !!VESTING_CONTRACT,
