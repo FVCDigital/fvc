@@ -4,12 +4,11 @@
  */
 import React from 'react';
 import DashboardCard from '@/components/cards/DashboardCard';
-import { TradingCard } from '@/components/cards';
+import { TradingCard, PrivateSaleCard } from '@/components/cards';
 import ComingSoonCard from '@/components/cards/ComingSoonCard';
 import FVCAllocationChart from '@/components/cards/FVCAllocationChart/FVCAllocationChart';
 import { RoadmapFlowchart } from '@/components/roadmap';
 import { TabId } from '@/constants/tabs';
-import VestingView from '@/screen-view/VestingView';
 
 /**
  * Props for TabContent component
@@ -38,12 +37,10 @@ export default function TabContent({ activeTab, isConnected, address }: TabConte
           <FVCAllocationChart />
         </div>
       );
-    case 'bonding':
-      return <TradingCard />;
+    case 'private-sale':
+      return <PrivateSaleCard />;
     case 'staking':
       return <ComingSoonCard title="Staking" />;
-    case 'vesting':
-      return <VestingView isConnected={isConnected} address={address} />;
     case 'governance':
       return <ComingSoonCard title="Governance" />;
     case 'roadmap':
