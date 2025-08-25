@@ -12,19 +12,19 @@ const cardStyle: React.CSSProperties = {
   aspectRatio: '1024 / 336',
   width: '100%',
   maxWidth: 520,
-  minHeight: 200, // ensure enough space for icon on desktop
+  minHeight: 200,
   borderRadius: 20,
-  boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+  boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
   background: theme.modalBackground,
   padding: 0,
-  margin: '0 auto 12px auto', // add bottom margin for spacing
+  margin: '0 auto 12px auto',
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
   cursor: 'pointer',
   border: 'none',
-  outline: `1px solid ${theme.modalButton}`,
-  transition: 'box-shadow 0.2s',
+  outline: `1px solid ${theme.darkBorder}`,
+  transition: 'all 0.2s ease',
   fontFamily: 'Inter, sans-serif',
 };
 

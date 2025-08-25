@@ -35,7 +35,7 @@ export default function ComingSoonCard({
     padding: 28,
     fontWeight: 500,
     fontSize: 20,
-    boxShadow: '0 4px 24px rgba(56,189,248,0.10)',
+    boxShadow: `0 4px 24px ${theme.accentGlow}`,
     margin: '16px auto',
     maxWidth: 420,
     width: '100%',
@@ -44,9 +44,10 @@ export default function ComingSoonCard({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 200,
-    border: `1px solid ${theme.modalButton}`,
+    border: `1px solid ${theme.darkBorder}`,
     boxSizing: 'border-box',
     fontFamily: 'Inter, sans-serif',
+    transition: 'all 0.2s ease',
     ...style,
   };
 
