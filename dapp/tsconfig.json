@@ -21,11 +21,13 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@/contracts/*": ["contracts/*"]
     }
   },
   "include": [
     "src",
+    "contracts",
     "next-env.d.ts"
   ],
   "exclude": [
