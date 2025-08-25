@@ -67,51 +67,50 @@ export const BONDING_ADDRESS = "0x0C81CCEB47507a1F030f13002325a6e8A99953E9";
 export const FVC_ADDRESS = "0x8Bf97817B8354b960e26662c65F9d0b3732c9057";
 export const USDC_ADDRESS = "0x11Cf72a75e284B61548B87fB5ad8B8693FCfB1fb";
 
-// Round configurations for $1 FVC target valuation
+// Round configurations for private rounds targeting $0.025-$0.1 FVC valuation
 export const ROUND_CONFIGS = [
     {
-        name: "Round 0 - Soft Launch",
+        name: "Round 0 - Private Alpha",
+        initialDiscount: 25,
+        finalDiscount: 15,
+        epochCap: "5000000",
+        walletCap: "500000",
+        vestingPeriod: 180 * 24 * 60 * 60, // 6 months
+        targetPrice: "$0.025 - $0.035"
+    },
+    {
+        name: "Round 1 - Private Beta",
         initialDiscount: 20,
         finalDiscount: 10,
         epochCap: "10000000",
         walletCap: "1000000",
-        vestingPeriod: 90 * 24 * 60 * 60,
-        targetPrice: "$0.80 - $0.90"
+        vestingPeriod: 180 * 24 * 60 * 60, // 6 months
+        targetPrice: "$0.035 - $0.050"
     },
     {
-        name: "Round 1 - Genesis",
-        initialDiscount: 10,
+        name: "Round 2 - Strategic Partners",
+        initialDiscount: 15,
         finalDiscount: 5,
-        epochCap: "80000000",
-        walletCap: "8000000",
-        vestingPeriod: 90 * 24 * 60 * 60,
-        targetPrice: "$0.90 - $0.95"
-    },
-    {
-        name: "Round 2 - Early Adopters", 
-        initialDiscount: 5,
-        finalDiscount: 2,
-        epochCap: "60000000",
-        walletCap: "6000000",
-        vestingPeriod: 90 * 24 * 60 * 60,
-        targetPrice: "$0.95 - $0.98"
-    },
-    {
-        name: "Round 3 - Community",
-        initialDiscount: 2,
-        finalDiscount: 1,
-        epochCap: "40000000",
-        walletCap: "4000000",
-        vestingPeriod: 90 * 24 * 60 * 60,
-        targetPrice: "$0.98 - $0.99"
-    },
-    {
-        name: "Round 4 - Public",
-        initialDiscount: 1,
-        finalDiscount: 0,
         epochCap: "15000000",
         walletCap: "2000000",
-        vestingPeriod: 90 * 24 * 60 * 60,
-        targetPrice: "$0.99 - $1.00"
+        vestingPeriod: 180 * 24 * 60 * 60, // 6 months
+        targetPrice: "$0.050 - $0.075"
+    },
+    {
+        name: "Round 3 - Pre-Public",
+        initialDiscount: 10,
+        finalDiscount: 2,
+        epochCap: "20000000",
+        walletCap: "3000000",
+        vestingPeriod: 180 * 24 * 60 * 60, // 6 months
+        targetPrice: "$0.075 - $0.100"
     }
 ];
+
+// Public launch configuration (after private rounds complete)
+export const PUBLIC_LAUNCH_CONFIG = {
+    name: "Public Launch",
+    targetPrice: "Market Determined",
+    vestingPeriod: 0, // No vesting for public launch
+    notes: "Price determined by market after private rounds complete"
+};
