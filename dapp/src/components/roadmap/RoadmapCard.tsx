@@ -38,23 +38,23 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
   
   if (isCurrent) {
     statusStyles = {
-      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)',
-      borderColor: 'rgba(255, 255, 255, 0.8)',
-      color: theme.background,
-      boxShadow: '0 8px 25px -5px rgba(255, 255, 255, 0.3), 0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+      background: 'linear-gradient(135deg, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0.08) 100%)',
+      borderColor: '#38BDF8',
+      color: '#FFFFFF',
+      boxShadow: '0 8px 25px -5px rgba(56,189,248,0.3), 0 10px 15px -3px rgba(0, 0, 0, 0.4)',
       animation: 'subtle-pulse 3s ease-in-out infinite',
     };
   } else if (isCompleted) {
     statusStyles = {
-      background: 'linear-gradient(135deg, rgba(243, 244, 246, 0.95) 0%, rgba(229, 231, 235, 0.9) 100%)',
-      borderColor: 'rgba(243, 244, 246, 0.8)',
-      color: '#374151',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+      background: 'linear-gradient(135deg, rgba(56,189,248,0.08) 0%, rgba(56,189,248,0.03) 100%)',
+      borderColor: '#2A2A2A',
+      color: '#9CA3AF',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)',
     };
   } else {
     statusStyles = {
-      background: 'linear-gradient(135deg, rgba(107, 114, 128, 0.2) 0%, rgba(75, 85, 99, 0.15) 100%)',
-      borderColor: 'rgba(107, 114, 128, 0.3)',
+      background: 'linear-gradient(135deg, rgba(42,42,42,0.2) 0%, rgba(26,26,26,0.15) 100%)',
+      borderColor: '#2A2A2A',
       color: '#9CA3AF',
       opacity: 0.7,
       filter: 'grayscale(0.3)',
@@ -64,10 +64,10 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
   const hoverStyle: React.CSSProperties = {
     transform: 'translateY(-4px)',
     boxShadow: isCurrent 
-      ? '0 12px 32px -8px rgba(255, 255, 255, 0.4), 0 15px 25px -5px rgba(0, 0, 0, 0.1)'
+      ? '0 12px 32px -8px rgba(56,189,248,0.4), 0 15px 25px -5px rgba(0, 0, 0, 0.3)'
       : isCompleted
-      ? '0 8px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 15px -3px rgba(0, 0, 0, 0.1)'
-      : '0 8px 25px -5px rgba(107, 114, 128, 0.2), 0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+      ? '0 8px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 15px -3px rgba(0, 0, 0, 0.2)'
+      : '0 8px 25px -5px rgba(42,42,42,0.3), 0 10px 15px -3px rgba(0, 0, 0, 0.2)',
   };
 
   // Icon styles - more compact
@@ -84,7 +84,7 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
     fontWeight: 600,
     margin: '0 0 3px 0',
     textAlign: 'center',
-    color: isCurrent ? theme.appBackground : isCompleted ? '#374151' : '#9CA3AF',
+    color: isCurrent ? '#FFFFFF' : isCompleted ? '#9CA3AF' : '#9CA3AF',
   };
 
   // Subtitle styles - more compact
@@ -93,7 +93,7 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
     fontWeight: 500,
     margin: '0 0 8px 0',
     textAlign: 'center',
-    color: isCurrent ? theme.appBackground : isCompleted ? '#6B7280' : '#9CA3AF',
+    color: isCurrent ? '#E5E7EB' : isCompleted ? '#9CA3AF' : '#9CA3AF',
     opacity: 0.8,
   };
 
@@ -102,7 +102,7 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
     fontSize: 'clamp(9px, 1.8vw, 10px)',
     lineHeight: 1.3,
     textAlign: 'center',
-    color: isCurrent ? theme.appBackground : isCompleted ? '#6B7280' : '#9CA3AF',
+    color: isCurrent ? '#D1D5DB' : isCompleted ? '#9CA3AF' : '#9CA3AF',
     opacity: 0.7,
     display: '-webkit-box',
     WebkitLineClamp: 2,
@@ -129,23 +129,24 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
   let badgeStyles: React.CSSProperties = {};
   if (isCurrent) {
     badgeStyles = {
-      background: '#1E40AF', // Dark blue background for contrast against white card
-      color: 'white',
-      borderColor: '#1E40AF',
-      boxShadow: '0 2px 8px rgba(30, 64, 175, 0.3)',
+      background: '#38BDF8',
+      color: '#FFFFFF',
+      borderColor: '#38BDF8',
+      boxShadow: '0 2px 8px rgba(56,189,248,0.4)',
     };
   } else if (isCompleted) {
     badgeStyles = {
-      background: '#22C55E',
-      color: 'white',
-      borderColor: '#22C55E',
-      boxShadow: '0 2px 8px rgba(34, 197, 94, 0.3)',
+      background: '#10B981',
+      color: '#FFFFFF',
+      borderColor: '#10B981',
+      boxShadow: '0 2px 8px rgba(16,185,129,0.3)',
     };
   } else {
     badgeStyles = {
       background: '#6B7280',
-      color: 'white',
+      color: '#FFFFFF',
       borderColor: '#6B7280',
+      boxShadow: '0 2px 8px rgba(107,114,128,0.3)',
     };
   }
 
