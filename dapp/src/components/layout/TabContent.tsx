@@ -35,7 +35,6 @@ export default function TabContent({ activeTab, isConnected, address }: TabConte
         <div>
           <DashboardCard />
           <FVCAllocationChart />
-          <FVCProtocolFeatures />
         </div>
       );
     case 'private-sale':
@@ -43,18 +42,16 @@ export default function TabContent({ activeTab, isConnected, address }: TabConte
     case 'staking':
       return (
         <FVCFeatureCard
-          title="FVC Staking Vaults"
-          subtitle="Earn 8-12% APY on your FVC tokens"
-          description="Lock your FVC tokens in our staking vaults to earn rewards and gain governance power. Multiple lock periods available with bonus rewards for early stakers."
+          title="FVC Staking"
+          subtitle="Staking features coming soon"
+          description="FVC Protocol staking features and details will be displayed here. Please provide the actual staking mechanics, rewards, and features."
           features={[
-            "Earn 8-12% APY on staked FVC tokens",
-            "Multiple vault options: Flexible, 3-month, 6-month, 12-month",
-            "Early stakers get bonus rewards and higher APY",
-            "Staking duration affects governance voting power",
-            "Lock FVC to participate in protocol decisions",
-            "Real-time rewards tracking and compound options"
+            "Staking details to be confirmed",
+            "Reward structure to be defined",
+            "Lock periods to be determined",
+            "Governance integration to be specified"
           ]}
-          launchDate="Q1 2025"
+          launchDate="TBD"
           icon="🔒"
           accentColor="#38BDF8"
         />
@@ -62,18 +59,16 @@ export default function TabContent({ activeTab, isConnected, address }: TabConte
     case 'governance':
       return (
         <FVCFeatureCard
-          title="FVC DAO Governance"
-          subtitle="Stake FVC to participate in protocol decisions"
-          description="Join the FVC DAO and help shape the future of the protocol. Vote on treasury allocation, staking rewards, and new features."
+          title="FVC Governance"
+          subtitle="Governance features coming soon"
+          description="FVC Protocol governance features and details will be displayed here. Please provide the actual governance mechanics, voting power, and features."
           features={[
-            "Stake FVC to participate in protocol decisions",
-            "Vote on treasury allocation and protocol upgrades",
-            "Proposal submission requires 100K FVC minimum",
-            "Governance power based on staking duration",
-            "Weekly voting rounds with transparent results",
-            "Delegate voting power to trusted representatives"
+            "Governance details to be confirmed",
+            "Voting mechanisms to be defined",
+            "Proposal requirements to be determined",
+            "Staking integration to be specified"
           ]}
-          launchDate="Q2 2025"
+          launchDate="TBD"
           icon="🗳️"
           accentColor="#10B981"
         />
