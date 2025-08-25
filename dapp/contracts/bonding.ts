@@ -67,50 +67,28 @@ export const BONDING_ADDRESS = "0x0C81CCEB47507a1F030f13002325a6e8A99953E9";
 export const FVC_ADDRESS = "0x8Bf97817B8354b960e26662c65F9d0b3732c9057";
 export const USDC_ADDRESS = "0x11Cf72a75e284B61548B87fB5ad8B8693FCfB1fb";
 
-// Round configurations for private rounds targeting $0.025-$0.1 FVC valuation
-export const ROUND_CONFIGS = [
-    {
-        name: "Round 0 - Private Alpha",
-        initialDiscount: 25,
-        finalDiscount: 15,
-        epochCap: "5000000",
-        walletCap: "500000",
-        vestingPeriod: 180 * 24 * 60 * 60, // 6 months
-        targetPrice: "$0.025 - $0.035"
-    },
-    {
-        name: "Round 1 - Private Beta",
-        initialDiscount: 20,
-        finalDiscount: 10,
-        epochCap: "10000000",
-        walletCap: "1000000",
-        vestingPeriod: 180 * 24 * 60 * 60, // 6 months
-        targetPrice: "$0.035 - $0.050"
-    },
-    {
-        name: "Round 2 - Strategic Partners",
-        initialDiscount: 15,
-        finalDiscount: 5,
-        epochCap: "15000000",
-        walletCap: "2000000",
-        vestingPeriod: 180 * 24 * 60 * 60, // 6 months
-        targetPrice: "$0.050 - $0.075"
-    },
-    {
-        name: "Round 3 - Pre-Public",
-        initialDiscount: 10,
-        finalDiscount: 2,
-        epochCap: "20000000",
-        walletCap: "3000000",
-        vestingPeriod: 180 * 24 * 60 * 60, // 6 months
-        targetPrice: "$0.075 - $0.100"
-    }
-];
+// Single private seeding round configuration
+export const PRIVATE_SEEDING_CONFIG = {
+    name: "Private Seeding Round",
+    fvcAllocation: "225000000",     // 225M FVC (22.5%)
+    epochCap: "20000000",           // 20M USDC target
+    walletCap: "2000000",           // 2M USDC per wallet
+    vestingPeriod: 1080 * 24 * 60 * 60, // 36 months (12-month cliff + 24-month vesting)
+    milestones: [
+        { usdcSold: "0", discount: 20, name: "Early Bird" },
+        { usdcSold: "5000000", discount: 15, name: "Early Adopters" },
+        { usdcSold: "10000000", discount: 10, name: "Strategic" },
+        { usdcSold: "15000000", discount: 5, name: "Final Tier" },
+        { usdcSold: "20000000", discount: 0, name: "Round Complete" }
+    ],
+    targetPrice: "$0.025 - $0.1",
+    notes: "Single private seeding round with milestone-based discounts"
+};
 
-// Public launch configuration (after private rounds complete)
+// Public launch configuration (after private round completes)
 export const PUBLIC_LAUNCH_CONFIG = {
     name: "Public Launch",
     targetPrice: "Market Determined",
     vestingPeriod: 0, // No vesting for public launch
-    notes: "Price determined by market after private rounds complete"
+    notes: "Price determined by market after private round completes"
 };
