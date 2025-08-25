@@ -1,10 +1,7 @@
 'use client';
 
-import { useReadContract } from 'wagmi';
-import { FVC_ABI, FVC_CONTRACT } from '@/utils/contracts/fvc';
-import { BONDING_ABI, BONDING_CONTRACT } from '@/utils/contracts/bondingContract';
 import { useState, useEffect } from 'react';
-import { formatEther, parseEther } from 'viem';
+import { parseEther } from 'viem';
 import { theme } from '@/constants/theme';
 
 interface AllocationData {
@@ -17,71 +14,52 @@ interface AllocationData {
 const FVCAllocationChart = () => {
   const [allocationData, setAllocationData] = useState<AllocationData[]>([]);
   const [totalSupply, setTotalSupply] = useState<bigint>(0n);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Read total FVC supply
-  const { data: fvcTotalSupply } = useReadContract({
-    address: FVC_CONTRACT,
-    abi: FVC_ABI,
-    functionName: 'totalSupply',
-  });
-
-  // Read bonding contract FVC balance
-  const { data: bondingBalance } = useReadContract({
-    address: FVC_CONTRACT,
-    abi: FVC_ABI,
-    functionName: 'balanceOf',
-    args: [BONDING_CONTRACT],
-  });
 
   useEffect(() => {
-    if (fvcTotalSupply && bondingBalance) {
-      // Show target allocation based on updated whitepaper
-      const TARGET_TOTAL_SUPPLY = parseEther("1000000000"); // 1B
-      const TARGET_BONDING = parseEther("205000000"); // 205M (20.5%)
-      const TARGET_FOUNDERS_TEAM = parseEther("170000000"); // 170M (17.0%)
-      const TARGET_TREASURY = parseEther("270000000"); // 270M (27.0%)
-      const TARGET_MARKETING = parseEther("305000000"); // 305M (30.5%)
-      const TARGET_LIQUIDITY = parseEther("50000000"); // 50M (5.0%)
+    // Use hardcoded target allocation based on updated whitepaper
+    const TARGET_TOTAL_SUPPLY = parseEther("1000000000"); // 1B
+    const TARGET_BONDING = parseEther("225000000"); // 225M (22.5%) - Updated for single round
+    const TARGET_FOUNDERS_TEAM = parseEther("170000000"); // 170M (17.0%)
+    const TARGET_TREASURY = parseEther("362500000"); // 362.5M (36.25%) - Updated
+    const TARGET_MARKETING = parseEther("305000000"); // 305M (30.5%)
+    const TARGET_LIQUIDITY = parseEther("50000000"); // 50M (5.0%)
 
-      const data: AllocationData[] = [
-        {
-          name: 'Bonding (20.5%)',
-          value: Number(formatEther(TARGET_BONDING)),
-          percentage: Number((TARGET_BONDING * 100n) / TARGET_TOTAL_SUPPLY),
-          color: '#3B82F6', // Blue
-        },
-        {
-          name: 'Founders, Team & Partners (17.0%)',
-          value: Number(formatEther(TARGET_FOUNDERS_TEAM)),
-          percentage: Number((TARGET_FOUNDERS_TEAM * 100n) / TARGET_TOTAL_SUPPLY),
-          color: '#10B981', // Green
-        },
-        {
-          name: 'Treasury & Reserve Buffer (27.0%)',
-          value: Number(formatEther(TARGET_TREASURY)),
-          percentage: Number((TARGET_TREASURY * 100n) / TARGET_TOTAL_SUPPLY),
-          color: '#F59E0B', // Amber
-        },
-        {
-          name: 'Marketing & Community (30.5%)',
-          value: Number(formatEther(TARGET_MARKETING)),
-          percentage: Number((TARGET_MARKETING * 100n) / TARGET_TOTAL_SUPPLY),
-          color: '#EF4444', // Red
-        },
-        {
-          name: 'Liquidity Provision (5.0%)',
-          value: Number(formatEther(TARGET_LIQUIDITY)),
-          percentage: Number((TARGET_LIQUIDITY * 100n) / TARGET_TOTAL_SUPPLY),
-          color: '#8B5CF6', // Purple
-        },
-      ];
+    const data: AllocationData[] = [
+      {
+        name: 'Private Sale (22.5%)',
+        value: Number(formatEther(TARGET_BONDING)),
+        percentage: Number((TARGET_BONDING * 100n) / TARGET_TOTAL_SUPPLY),
+        color: '#3B82F6', // Blue
+      },
+      {
+        name: 'Founders, Team & Partners (17.0%)',
+        value: Number(formatEther(TARGET_FOUNDERS_TEAM)),
+        percentage: Number((TARGET_FOUNDERS_TEAM * 100n) / TARGET_TOTAL_SUPPLY),
+        color: '#10B981', // Green
+      },
+      {
+        name: 'Treasury & Reserve Buffer (36.25%)',
+        value: Number(formatEther(TARGET_TREASURY)),
+        percentage: Number((TARGET_TREASURY * 100n) / TARGET_TOTAL_SUPPLY),
+        color: '#F59E0B', // Amber
+      },
+      {
+        name: 'Marketing & Community (30.5%)',
+        value: Number(formatEther(TARGET_MARKETING)),
+        percentage: Number((TARGET_MARKETING * 100n) / TARGET_TOTAL_SUPPLY),
+        color: '#EF4444', // Red
+      },
+      {
+        name: 'Liquidity Provision (5.0%)',
+        value: Number(formatEther(TARGET_LIQUIDITY)),
+        percentage: Number((TARGET_LIQUIDITY * 100n) / TARGET_TOTAL_SUPPLY),
+        color: '#8B5CF6', // Purple
+      },
+    ];
 
-      setAllocationData(data);
-      setTotalSupply(TARGET_TOTAL_SUPPLY);
-      setIsLoading(false);
-    }
-  }, [fvcTotalSupply, bondingBalance]);
+    setAllocationData(data);
+    setTotalSupply(TARGET_TOTAL_SUPPLY);
+  }, []); // Empty dependency array - runs once on mount
 
   const formatNumber = (num: number) => {
     if (num >= 1_000_000_000) {
@@ -94,42 +72,10 @@ const FVCAllocationChart = () => {
     return num.toLocaleString();
   };
 
-  if (isLoading) {
-    return (
-      <div style={{
-        background: theme.modalBackground,
-        color: theme.primaryText,
-        borderRadius: 16,
-        padding: 28,
-        fontWeight: 500,
-        fontSize: 20,
-        boxShadow: '0 4px 24px rgba(56,189,248,0.10)',
-        margin: '16px auto',
-        maxWidth: 'min(600px, 90vw)',
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 200,
-        border: `1px solid ${theme.modalButton}`,
-        boxSizing: 'border-box',
-        fontFamily: 'Inter, sans-serif',
-      }}>
-        <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>FVC Allocation Distribution</div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 256 }}>
-          <div style={{ 
-            animation: 'spin 1s linear infinite',
-            borderRadius: '50%',
-            height: 32,
-            width: 32,
-            border: `2px solid ${theme.modalButton}`,
-            borderTopColor: theme.generalButton,
-          }}></div>
-        </div>
-      </div>
-    );
-  }
+  // Helper function to format ether values
+  const formatEther = (value: bigint) => {
+    return Number(value) / 1e18;
+  };
 
   return (
     <div style={{
@@ -139,7 +85,7 @@ const FVCAllocationChart = () => {
       padding: 28,
       fontWeight: 500,
       fontSize: 20,
-      boxShadow: '0 4px 24px rgba(56,189,248,0.10)',
+      boxShadow: `0 4px 24px ${theme.accentGlow}`,
       margin: '16px auto',
       maxWidth: 'min(600px, 90vw)',
       width: '100%',
@@ -148,7 +94,7 @@ const FVCAllocationChart = () => {
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: 200,
-      border: `1px solid ${theme.modalButton}`,
+      border: `1px solid ${theme.darkBorder}`,
       boxSizing: 'border-box',
       fontFamily: 'Inter, sans-serif',
     }}>
