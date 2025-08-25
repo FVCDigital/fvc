@@ -266,7 +266,7 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
       padding: 28,
       fontWeight: 500,
       fontSize: 20,
-      boxShadow: '0 4px 24px rgba(56,189,248,0.10)',
+      boxShadow: `0 4px 24px ${theme.accentGlow}`,
       margin: '16px auto',
       maxWidth: 800,
       width: '100%',
@@ -275,9 +275,10 @@ export const VestingDashboard: React.FC<VestingDashboardProps> = ({
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: 200,
-      border: `1px solid ${theme.modalButton}`,
+      border: `1px solid ${theme.darkBorder}`,
       boxSizing: 'border-box',
       fontFamily: 'Inter, sans-serif',
+      transition: 'all 0.2s ease',
     }}>
       <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Private Sale Vesting</div>
       <div style={{ fontSize: 16, color: theme.secondaryText, marginBottom: 24, textAlign: 'center' }}>
