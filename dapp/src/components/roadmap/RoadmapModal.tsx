@@ -59,8 +59,8 @@ const RoadmapModal: React.FC<RoadmapModalProps> = ({ stage, isOpen, onClose }) =
   }
 
   const modalStyle: React.CSSProperties = {
-    background: modalBackground,
-    border: `1px solid ${modalBorderColor}`,
+    background: theme.modalBackground,
+    border: `1px solid ${theme.darkBorder}`,
     borderRadius: isMobile ? '12px' : '16px',
     padding: isMobile ? '20px' : isNarrowScreen ? '24px' : '32px',
     maxWidth: isMobile ? '90vw' : isNarrowScreen ? '400px' : '500px',
@@ -69,14 +69,13 @@ const RoadmapModal: React.FC<RoadmapModalProps> = ({ stage, isOpen, onClose }) =
     overflow: 'auto',
     position: 'relative',
     boxShadow: isCurrent 
-      ? '0 20px 60px rgba(255, 255, 255, 0.2), 0 8px 25px rgba(0, 0, 0, 0.15)'
+      ? '0 20px 60px rgba(56,189,248,0.2), 0 8px 25px rgba(0, 0, 0, 0.3)'
       : isCompleted
-      ? '0 20px 60px rgba(0, 0, 0, 0.1), 0 8px 25px rgba(0, 0, 0, 0.1)'
-      : '0 20px 60px rgba(107, 114, 128, 0.1), 0 8px 25px rgba(0, 0, 0, 0.1)',
+      ? '0 20px 60px rgba(0, 0, 0, 0.3), 0 8px 25px rgba(0, 0, 0, 0.2)'
+      : '0 20px 60px rgba(42,42,42,0.2), 0 8px 25px rgba(0, 0, 0, 0.2)',
     backdropFilter: 'blur(10px)',
     fontFamily: 'Inter, sans-serif',
     boxSizing: 'border-box',
-    // Maintain aspect ratio on mobile
     minHeight: isMobile ? '300px' : 'auto',
   };
 
