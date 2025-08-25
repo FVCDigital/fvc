@@ -32,9 +32,8 @@ export default function TabContent({ activeTab, isConnected, address }: TabConte
   switch (activeTab) {
     case 'dashboard':
       return (
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <DashboardCard />
-          <FVCAllocationChart />
         </div>
       );
     case 'private-sale':
