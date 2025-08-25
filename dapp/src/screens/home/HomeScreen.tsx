@@ -7,7 +7,6 @@ import { useRouter } from 'next/router';
 import { useAccount } from 'wagmi';
 import useKYC from '@/utils/hooks/useKYC';
 import { KYCCard } from '@/components/cards';
-import VestingCard from '@/components/cards/VestingCard';
 import AppBar from '@/components/layout/AppBar';
 import Sidebar from '@/components/layout/Sidebar';
 import MainLayout from '@/components/layout/MainLayout';
