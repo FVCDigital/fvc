@@ -30,6 +30,10 @@ dapp/package.json
 dapp/package-lock.json
 dapp/yarn.lock
 
+# TypeScript build artifacts
+*.tsbuildinfo
+dapp/tsconfig.tsbuildinfo
+
 # Development and test scripts
 contracts/scripts/*.ts
 contracts/scripts/*.json
