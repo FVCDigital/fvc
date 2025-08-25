@@ -18,41 +18,46 @@ const FVCAllocationChart = () => {
   useEffect(() => {
     // Use hardcoded target allocation based on updated whitepaper
     const TARGET_TOTAL_SUPPLY = parseEther("1000000000"); // 1B
-    const TARGET_BONDING = parseEther("225000000"); // 225M (22.5%) - Updated for single round
+    const TARGET_BONDING = parseEther("225000000"); // 225M (22.5%)
     const TARGET_FOUNDERS_TEAM = parseEther("170000000"); // 170M (17.0%)
-    const TARGET_TREASURY = parseEther("362500000"); // 362.5M (36.25%) - Updated
+    const TARGET_TREASURY = parseEther("250000000"); // 250M (25.0%) - Adjusted to make total = 1B
     const TARGET_MARKETING = parseEther("305000000"); // 305M (30.5%)
     const TARGET_LIQUIDITY = parseEther("50000000"); // 50M (5.0%)
 
+    // Verify total adds up to 1B
+    const totalAllocated = TARGET_BONDING + TARGET_FOUNDERS_TEAM + TARGET_TREASURY + TARGET_MARKETING + TARGET_LIQUIDITY;
+    console.log('Total allocated:', formatEther(totalAllocated), 'FVC'); // Should be 1B
+
+    // Calculate actual percentages based on real values
     const data: AllocationData[] = [
       {
-        name: 'Private Sale (22.5%)',
+        name: 'Private Sale',
         value: Number(formatEther(TARGET_BONDING)),
-        percentage: Number((TARGET_BONDING * 100n) / TARGET_TOTAL_SUPPLY),
+        percentage: Number((TARGET_BONDING * 10000n) / TARGET_TOTAL_SUPPLY) / 100, // Preserve 2 decimal places
         color: '#3B82F6', // Blue
       },
       {
-        name: 'Founders, Team & Partners (17.0%)',
+        name: 'Founders, Team & Partners',
         value: Number(formatEther(TARGET_FOUNDERS_TEAM)),
-        percentage: Number((TARGET_FOUNDERS_TEAM * 100n) / TARGET_TOTAL_SUPPLY),
+        percentage: Number((TARGET_FOUNDERS_TEAM * 10000n) / TARGET_TOTAL_SUPPLY) / 100, // Preserve 2 decimal places
         color: '#10B981', // Green
       },
       {
-        name: 'Treasury & Reserve Buffer (36.25%)',
+        name: 'Treasury & Reserve Buffer',
         value: Number(formatEther(TARGET_TREASURY)),
-        percentage: Number((TARGET_TREASURY * 100n) / TARGET_TOTAL_SUPPLY),
+        percentage: Number((TARGET_TREASURY * 10000n) / TARGET_TOTAL_SUPPLY) / 100, // Preserve 2 decimal places
         color: '#F59E0B', // Amber
       },
       {
-        name: 'Marketing & Community (30.5%)',
+        name: 'Marketing & Community',
         value: Number(formatEther(TARGET_MARKETING)),
-        percentage: Number((TARGET_MARKETING * 100n) / TARGET_TOTAL_SUPPLY),
+        percentage: Number((TARGET_MARKETING * 10000n) / TARGET_TOTAL_SUPPLY) / 100, // Preserve 2 decimal places
         color: '#EF4444', // Red
       },
       {
-        name: 'Liquidity Provision (5.0%)',
+        name: 'Liquidity Provision',
         value: Number(formatEther(TARGET_LIQUIDITY)),
-        percentage: Number((TARGET_LIQUIDITY * 100n) / TARGET_TOTAL_SUPPLY),
+        percentage: Number((TARGET_LIQUIDITY * 10000n) / TARGET_TOTAL_SUPPLY) / 100, // Preserve 2 decimal places
         color: '#8B5CF6', // Purple
       },
     ];
@@ -194,7 +199,7 @@ const FVCAllocationChart = () => {
                 {formatNumber(item.value)} FVC
               </div>
               <div style={{ fontSize: 12, color: theme.secondaryText }}>
-                {item.percentage.toFixed(1)}%
+                {item.percentage}%
               </div>
             </div>
           </div>
@@ -207,8 +212,8 @@ const FVCAllocationChart = () => {
           <div style={{ fontSize: 12, color: theme.secondaryText, lineHeight: 1.4 }}>
             <strong>Note:</strong> This shows the updated allocation from the latest whitepaper. 
             Total supply: 1B FVC, Private Sale: 225M FVC (22.5%), Founders & Team: 170M FVC (17.0%), 
-            Treasury: 362.5M FVC (36.25%), Marketing: 305M FVC (30.5%), Liquidity: 50M FVC (5.0%).
-            The allocation has been updated to reflect the single private seeding round structure.
+            Treasury: 250M FVC (25.0%), Marketing: 305M FVC (30.5%), Liquidity: 50M FVC (5.0%).
+            Total: 1B FVC (100%).
           </div>
         </div>
       </div>
