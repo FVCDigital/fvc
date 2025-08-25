@@ -30,9 +30,18 @@
 html, body {
     margin: 0 !important;
     padding: 0 !important;
-    background: #000 !important;
-    /* width: 100vw; */
+    background: #0A0A0A !important;
     height: 100vh;
     box-sizing: border-box;
     font-family: 'Inter', sans-serif !important;
+    color: #FFFFFF !important;
+}
+
+* {
+  transition: all 0.2s ease;
+}
+
+*:focus {
+  outline: 2px solid #38BDF8;
+  outline-offset: 2px;
 }
