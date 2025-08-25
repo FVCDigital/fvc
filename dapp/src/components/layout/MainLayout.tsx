@@ -31,12 +31,15 @@ export default function MainLayout({ children, isMobile, isClient, fullWidth = f
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
+    background: theme.appBackground,
+    color: theme.primaryText,
   };
 
   const contentStyle: React.CSSProperties = {
     paddingBottom: isClient && isMobile ? 80 : 20,
     paddingLeft: isClient && isMobile ? 16 : 32,
     paddingRight: isClient && isMobile ? 16 : 32,
+    background: theme.appBackground,
   };
 
   return (
