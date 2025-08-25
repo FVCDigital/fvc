@@ -1,4 +1,5 @@
 import React from 'react';
+import { theme } from '@/theme';
 
 export interface HomeContainerProps {
   children: React.ReactNode;
@@ -14,6 +15,8 @@ const homeContainer: React.CSSProperties = {
   minHeight: '100vh',
   width: '100%',
   fontFamily: 'Inter, sans-serif',
+  background: theme.appBackground,
+  color: theme.primaryText,
 };
 
 export const HomeContainer: React.FC<HomeContainerProps> = ({ children, className, style }) => (

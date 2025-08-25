@@ -11,7 +11,7 @@ export const VestingContainer: React.FC<VestingContainerProps> = ({
   className 
 }) => (
   <div className={cn(
-    "min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50",
+    "min-h-screen bg-[#0A0A0A]",
     "p-4 sm:p-6 lg:p-8",
     "max-w-7xl mx-auto",
     className
