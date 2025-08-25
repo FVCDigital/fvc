@@ -1,14 +1,14 @@
 /**
  * Dashboard card component
- * Displays user's FVC balance and vesting status
+ * Displays user's FVC balance and basic portfolio status
  * @module components/cards/DashboardCard
  */
 
 import React from 'react';
 import { useAccount } from 'wagmi';
-import { useVestingSchedule, useIsLocked, useCurrentRound } from '@/utils/contracts/bondingContract';
 import { theme } from '@/constants/theme';
 import { formatUnits } from 'viem';
+import { useVestingSchedule } from '@/utils/contracts/bondingContract';
 import { BaseCardProps, VestingSchedule } from '@/types';
 
 /**
@@ -20,27 +20,16 @@ interface DashboardCardProps extends BaseCardProps {
 }
 
 /**
- * Dashboard card component that displays user's FVC balance and vesting status
+ * Dashboard card component that displays user's FVC balance and basic portfolio status
  * @param props - Component props
  * @returns Dashboard card JSX element
  */
 const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
   const { address } = useAccount();
   const { vestingSchedule, isLoading: isLoadingSchedule } = useVestingSchedule(address);
-  const { isLocked, isLoading: isLoadingLocked } = useIsLocked(address);
-  const { currentRound, isLoading: isLoadingRound } = useCurrentRound();
 
   // Cast vestingSchedule to proper type
   const schedule = vestingSchedule as VestingSchedule | undefined;
-
-  // Calculate round progress (same as bonding progress)
-  // Vesting lasts the entire bonding round, so progress should match
-  const roundProgress = currentRound && typeof currentRound === 'object' && currentRound !== null
-    ? Number((currentRound as any).totalBonded) / Number((currentRound as any).epochCap) * 100 
-    : 0;
-  
-  // Use round progress for vesting status (since tokens are locked until round concludes)
-  const progress = roundProgress;
   const isVesting = schedule && schedule.amount > 0n;
   const fvcAmount = isVesting ? formatUnits(schedule.amount, 18) : '0';
 
@@ -54,7 +43,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
         padding: 28,
         fontWeight: 500,
         fontSize: 20,
-        boxShadow: '0 4px 24px rgba(56,189,248,0.10)',
+        boxShadow: `0 4px 24px ${theme.accentGlow}`,
         margin: '16px auto',
         maxWidth: 800,
         width: '100%',
@@ -63,7 +52,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: 200,
-        border: `1px solid ${theme.modalButton}`,
+        border: `1px solid ${theme.darkBorder}`,
         boxSizing: 'border-box',
         fontFamily: 'Inter, sans-serif',
       }}>
@@ -71,8 +60,6 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
         <div style={{ fontSize: 16, color: theme.secondaryText, textAlign: 'center', marginBottom: 24 }}>
           Connect your wallet to view your FVC balance
         </div>
-        
-
       </div>
     );
   }
@@ -93,7 +80,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      minHeight: 340,
+      minHeight: 300,
       border: `1px solid ${theme.darkBorder}`,
       boxSizing: 'border-box',
       fontFamily: 'Inter, sans-serif',
@@ -108,99 +95,64 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
         {/* FVC Balance */}
         <div style={{
           width: '100%',
-          padding: '16px',
-          borderRadius: 10,
-          border: `1.5px solid ${theme.modalButton}`,
-          background: theme.appBackground,
-          marginBottom: 16,
+          padding: '20px',
+          borderRadius: 12,
+          border: `1px solid ${theme.darkBorder}`,
+          background: theme.cardHover,
+          marginBottom: 20,
         }}>
           <div style={{ fontSize: 14, color: theme.secondaryText, marginBottom: 8 }}>FVC Balance</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: theme.primaryText }}>
+          <div style={{ fontSize: 28, fontWeight: 700, color: theme.primaryText }}>
             {parseFloat(fvcAmount) < 0.01 && parseFloat(fvcAmount) > 0 
               ? `${parseFloat(fvcAmount).toFixed(8)} FVC` 
               : `${parseFloat(fvcAmount).toFixed(2)} FVC`}
           </div>
         </div>
 
-        {/* Vesting Status - Matches bonding round progress */}
-        {isVesting ? (
-          <div style={{
-            width: '100%',
-            padding: '16px',
-            borderRadius: 10,
-            border: `1.5px solid ${theme.modalButton}`,
-            background: theme.appBackground,
-            marginBottom: 16,
-          }}>
-            <div style={{ fontSize: 14, color: theme.secondaryText, marginBottom: 8 }}>Vesting Status</div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-              <span style={{ fontSize: 16, fontWeight: 600, color: theme.primaryText }}>
-                {progress >= 100 ? 'Round Complete' : 'Round in Progress'}
-              </span>
-              <span style={{ fontSize: 14, color: theme.secondaryText }}>
-                {progress.toFixed(1)}%
-              </span>
-            </div>
-            <div style={{
-              width: '100%',
-              height: 10,
-              background: theme.modalButton,
-              borderRadius: 6,
-              overflow: 'hidden',
-              position: 'relative',
-            }}>
-              <div style={{
-                width: `${progress}%`,
-                height: '100%',
-                background: theme.generalButton,
-                borderRadius: 6,
-                transition: 'width 0.3s',
-              }} />
-            </div>
-          </div>
-        ) : (
-          <div style={{
-            width: '100%',
-            padding: '16px',
-            borderRadius: 10,
-            border: `1.5px solid ${theme.modalButton}`,
-            background: theme.appBackground,
-            marginBottom: 16,
-          }}>
-            <div style={{ fontSize: 14, color: theme.secondaryText, marginBottom: 8 }}>Vesting Status</div>
-            <div style={{ fontSize: 16, color: theme.secondaryText }}>
-              No tokens in vesting
-            </div>
-          </div>
-        )}
-
-        {/* Transfer Status */}
+        {/* Portfolio Status */}
         <div style={{
           width: '100%',
-          padding: '16px',
-          borderRadius: 10,
-          border: `1.5px solid ${theme.modalButton}`,
-          background: theme.appBackground,
+          padding: '20px',
+          borderRadius: 12,
+          border: `1px solid ${theme.darkBorder}`,
+          background: theme.cardHover,
         }}>
-          <div style={{ fontSize: 14, color: theme.secondaryText, marginBottom: 8 }}>Transfer Status</div>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-            <span style={{ fontSize: 16, color: theme.primaryText }}>
-              {isLocked ? 'Locked' : 'Unlocked'}
-            </span>
-            <div style={{
-              background: isLocked ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)',
-              color: isLocked ? '#ef4444' : '#10b981',
-              padding: '4px 12px',
-              borderRadius: 6,
-              fontSize: 12,
-              fontWeight: 600,
-            }}>
-              {isLocked ? 'Locked' : 'Unlocked'}
+          <div style={{ fontSize: 16, fontWeight: 600, marginBottom: 16, color: theme.primaryText }}>
+            Portfolio Status
+          </div>
+          
+          {isVesting ? (
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: theme.modalButton,
+                marginRight: 12,
+              }} />
+              <span style={{ fontSize: 14, color: theme.secondaryText }}>
+                FVC tokens locked in vesting schedule
+              </span>
             </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+              <div style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: theme.darkBorder,
+                marginRight: 12,
+              }} />
+              <span style={{ fontSize: 14, color: theme.secondaryText }}>
+                No FVC tokens in vesting
+              </span>
+            </div>
+          )}
+          
+          <div style={{ fontSize: 12, color: theme.secondaryText, lineHeight: 1.5 }}>
+            {isVesting 
+              ? 'Your FVC tokens are locked and will unlock gradually over the vesting period.'
+              : 'Participate in the private sale to start building your FVC portfolio.'}
           </div>
         </div>
       </div>
