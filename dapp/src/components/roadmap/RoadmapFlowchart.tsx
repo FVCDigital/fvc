@@ -231,9 +231,9 @@ const RoadmapFlowchart: React.FC = () => {
       <div style={{
         marginTop: '40px',
         padding: '20px',
-        background: theme.cardBackground,
+        background: theme.modalBackground,
         borderRadius: '12px',
-        border: `1px solid ${theme.border}`,
+        border: `1px solid ${theme.darkBorder}`,
         textAlign: 'center',
       }}>
         <h3 style={{
