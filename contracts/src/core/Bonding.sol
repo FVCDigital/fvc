@@ -43,6 +43,9 @@ contract Bonding is IBonding, Ownable, ReentrancyGuard {
     
     /// @notice Error thrown when trying to start new round while current is active
     error Bonding__RoundAlreadyActive();
+    
+    /// @notice Error thrown when trying to bond after public launch
+    error Bonding__BondingDisabledAfterPublicLaunch();
 
     // ============ STATE VARIABLES ============
 
@@ -57,6 +60,12 @@ contract Bonding is IBonding, Ownable, ReentrancyGuard {
     
     /// @notice Current bonding round identifier
     uint256 public currentRoundId;
+    
+    /// @notice Whether public launch has occurred (disables bonding)
+    bool public publicLaunchOccurred;
+    
+    /// @notice Public launch timestamp
+    uint256 public publicLaunchTime;
 
     /// @notice Mapping of round ID to round configuration
     mapping(uint256 => RoundConfig) public rounds;
@@ -101,6 +110,12 @@ contract Bonding is IBonding, Ownable, ReentrancyGuard {
 
     /// @notice Emitted when emergency unlock is performed
     event EmergencyUnlock(address indexed user, uint256 amount);
+
+    /// @notice Emitted when a new bonding round is started
+    event RoundStarted(uint256 indexed roundId, uint256 initialDiscount, uint256 finalDiscount, uint256 epochCap);
+    
+    /// @notice Emitted when public launch occurs (disables bonding)
+    event PublicLaunchOccurred(uint256 timestamp);
 
     // ============ CONSTRUCTOR ============
 
@@ -192,12 +207,12 @@ contract Bonding is IBonding, Ownable, ReentrancyGuard {
 
     /**
      * @notice Bond USDC for FVC tokens
-     * @dev Implements Olympus-style bonding with vesting schedules
-     * @param fvcAmount Amount of FVC tokens to receive (in 18 decimals)
-     * @custom:security Checks FVC availability, wallet cap, and vesting locks
+     * @dev Main bonding function with dynamic discount pricing
+     * @param fvcAmount Amount of FVC tokens to purchase
      */
     function bond(uint256 fvcAmount) external nonReentrant {
         if (fvcAmount == 0) revert Bonding__AmountMustBeGreaterThanZero();
+        if (publicLaunchOccurred) revert Bonding__BondingDisabledAfterPublicLaunch();
         
         RoundConfig storage currentRound = rounds[currentRoundId];
         if (!currentRound.isActive) revert Bonding__RoundNotActive();
@@ -452,5 +467,24 @@ contract Bonding is IBonding, Ownable, ReentrancyGuard {
         });
         
         emit RoundStarted(currentRoundId, _initialDiscount, _finalDiscount, _epochCap);
+    }
+
+    /**
+     * @notice Mark public launch as occurred (disables future bonding)
+     * @dev Only owner can call this function. Cannot be undone.
+     * @custom:security Only owner can call this function
+     */
+    function markPublicLaunch() external onlyOwner {
+        if (publicLaunchOccurred) revert Bonding__RoundAlreadyActive();
+        
+        publicLaunchOccurred = true;
+        publicLaunchTime = block.timestamp;
+        
+        // Complete current round if active
+        if (rounds[currentRoundId].isActive) {
+            rounds[currentRoundId].isActive = false;
+        }
+        
+        emit PublicLaunchOccurred(block.timestamp);
     }
 }

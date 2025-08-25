@@ -157,4 +157,16 @@ interface IBonding {
      * @param amount The amount of FVC tokens allocated
      */
     event FVCAllocated(uint256 indexed roundId, uint256 amount);
+
+    /// @notice Emitted when emergency unlock is performed
+    event EmergencyUnlock(address indexed user, uint256 amount);
+    
+    /// @notice Emitted when public launch occurs (disables bonding)
+    event PublicLaunchOccurred(uint256 timestamp);
+
+    /**
+     * @notice Mark public launch as occurred (disables future bonding)
+     * @dev Only owner can call this function. Cannot be undone.
+     */
+    function markPublicLaunch() external;
 } 
