@@ -202,23 +202,13 @@ const FVCAllocationChart = () => {
       </div>
 
       {/* Additional Info */}
-      <div style={{ marginTop: 24, paddingTop: 16, borderTop: `1px solid ${theme.modalButton}`, width: '100%' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, fontSize: 12 }}>
-          <div>
-            <div style={{ color: theme.secondaryText, marginBottom: 4 }}>Bonding Contract</div>
-            <div style={{ fontWeight: 600, color: theme.primaryText, fontSize: 11, wordBreak: 'break-all' }}>{BONDING_CONTRACT}</div>
-          </div>
-          <div>
-            <div style={{ color: theme.secondaryText, marginBottom: 4 }}>FVC Contract</div>
-            <div style={{ fontWeight: 600, color: theme.primaryText, fontSize: 11, wordBreak: 'break-all' }}>{FVC_CONTRACT}</div>
-          </div>
-        </div>
-        <div style={{ marginTop: 16, padding: 12, background: 'rgba(56,189,248,0.1)', borderRadius: 8 }}>
+      <div style={{ marginTop: 24, paddingTop: 16, borderTop: `1px solid ${theme.darkBorder}`, width: '100%' }}>
+        <div style={{ padding: 12, background: theme.accentGlow, borderRadius: 8 }}>
           <div style={{ fontSize: 12, color: theme.secondaryText, lineHeight: 1.4 }}>
             <strong>Note:</strong> This shows the updated allocation from the latest whitepaper. 
-            Total supply: 1B FVC, Bonding: 205M FVC (20.5%), Founders & Team: 170M FVC (17.0%), 
-            Treasury: 270M FVC (27.0%), Marketing: 305M FVC (30.5%), Liquidity: 50M FVC (5.0%).
-            The current blockchain state has excess tokens due to testnet minting.
+            Total supply: 1B FVC, Private Sale: 225M FVC (22.5%), Founders & Team: 170M FVC (17.0%), 
+            Treasury: 362.5M FVC (36.25%), Marketing: 305M FVC (30.5%), Liquidity: 50M FVC (5.0%).
+            The allocation has been updated to reflect the single private seeding round structure.
           </div>
         </div>
       </div>
