@@ -4,6 +4,7 @@ import { theme } from '@/constants/theme';
 import { parseUnits, formatUnits } from 'viem';
 import { PRIVATE_SEEDING_CONFIG } from '@/contracts/bonding';
 import { BaseCardProps } from '@/types';
+import FVCAllocationChart from './FVCAllocationChart/FVCAllocationChart';
 
 interface PrivateSaleCardProps extends BaseCardProps {
   className?: string;
@@ -315,30 +316,25 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
         )}
       </div>
 
-      {/* Vesting Information */}
-      <div style={{
-        background: theme.cardHover,
-        padding: 20,
-        borderRadius: 12,
-        border: `1px solid ${theme.darkBorder}`,
-      }}>
-        <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16, color: theme.primaryText }}>
-          Vesting Schedule
-        </h3>
-        <div style={{ fontSize: 14, color: theme.secondaryText, lineHeight: 1.6 }}>
+      {/* Vesting Schedule Summary */}
+      <div style={{ marginTop: 24, padding: 16, background: theme.modalBackground, borderRadius: 8, border: `1px solid ${theme.darkBorder}` }}>
+        <h3 style={{ margin: '0 0 12px 0', fontSize: 16, fontWeight: 600, color: theme.primaryText }}>Vesting Schedule</h3>
+        <div style={{ fontSize: 14, color: theme.secondaryText, lineHeight: 1.5 }}>
           <div style={{ marginBottom: 8 }}>
-            • <strong>Lock Period:</strong> 12-month cliff (no tokens unlock)
+            <strong>Cliff Period:</strong> 12 months - No tokens released
           </div>
           <div style={{ marginBottom: 8 }}>
-            • <strong>Vesting Period:</strong> 24-month linear release after cliff
+            <strong>Vesting Period:</strong> 24 months - Linear release after cliff
           </div>
-          <div style={{ marginBottom: 8 }}>
-            • <strong>Total Duration:</strong> 36 months from investment
-          </div>
-          <div>
-            • <strong>Early Unlock:</strong> Not available
+          <div style={{ fontSize: 12, color: theme.secondaryText, fontStyle: 'italic' }}>
+            Total vesting duration: 36 months (12-month cliff + 24-month linear release)
           </div>
         </div>
+      </div>
+
+      {/* FVC Allocation Chart */}
+      <div style={{ marginTop: 24 }}>
+        <FVCAllocationChart />
       </div>
     </div>
   );
