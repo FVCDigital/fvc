@@ -15,7 +15,7 @@ const cardStyle: React.CSSProperties = {
   maxWidth: 420,
   width: '100%',
   borderRadius: 20,
-  boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+  boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
   background: theme.modalBackground,
   padding: 36,
   margin: '0 16px',
@@ -23,8 +23,9 @@ const cardStyle: React.CSSProperties = {
   flexDirection: 'column',
   gap: 24,
   alignItems: 'center',
-  outline: `1px solid ${theme.modalButton}`,
+  outline: `1px solid ${theme.darkBorder}`,
   outlineOffset: 0,
+  transition: 'all 0.2s ease'
 };
 
 const overlayStyle: React.CSSProperties = {
@@ -34,9 +35,10 @@ const overlayStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  background: theme.appBackground,
+  background: 'rgba(0,0,0,0.8)',
   minHeight: '100vh',
   minWidth: '100vw',
+  backdropFilter: 'blur(8px)'
 };
 
 const titleStyle: React.CSSProperties = {
