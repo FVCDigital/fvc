@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useBalance } from 'wagmi';
 import { theme } from '@/constants/theme';
 import { parseUnits, formatUnits } from 'viem';
 import { PRIVATE_SEEDING_CONFIG } from '@/contracts/bonding';
 import { BaseCardProps } from '@/types';
 import FVCAllocationChart from './FVCAllocationChart/FVCAllocationChart';
+import { CONTRACTS } from '@/utils/contracts/bondingContract';
 
 interface PrivateSaleCardProps extends BaseCardProps {
   className?: string;
@@ -20,6 +21,16 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   const [totalBonded, setTotalBonded] = useState(0);
   const [currentDiscount, setCurrentDiscount] = useState(20);
   const [currentMilestone, setCurrentMilestone] = useState(0);
+  
+  // USDC Balance
+  const usdcBalance = useBalance({ 
+    address: address as `0x${string}` | undefined,
+    token: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`,
+    query: { enabled: !!address }
+  });
+
+  // Percentage buttons
+  const percentButtons = [0, 50, 100];
   
   // Calculate progress and current milestone
   useEffect(() => {
@@ -45,6 +56,13 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
     const fvcAmount = usdcValue / discountMultiplier;
     
     return fvcAmount.toFixed(2);
+  };
+
+  // Handle percentage button clicks
+  const handlePercent = (pct: number) => {
+    if (!usdcBalance?.data) return;
+    const value = (parseFloat(usdcBalance.data.formatted) * pct) / 100;
+    setUsdcAmount(value.toString());
   };
 
   const fvcAmount = calculateFVCAmount(usdcAmount);
@@ -254,6 +272,60 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
               e.target.style.boxShadow = 'none';
             }}
           />
+          
+          {/* Balance and Percentage Buttons */}
+          <div style={{ 
+            width: '100%', 
+            margin: '8px 0 0 0', 
+            display: 'flex', 
+            flexDirection: 'row', 
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <span style={{ 
+              fontSize: 13, 
+              color: theme.secondaryText, 
+              fontFamily: 'Inter, sans-serif', 
+              flex: 1 
+            }}>
+              Balance: {usdcBalance?.isLoading ? '...' : usdcBalance?.data ? 
+                `${Number(usdcBalance.data.formatted).toFixed(4)} USDC` : '0 USDC'}
+            </span>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1, gap: 4 }}>
+              {percentButtons.map(pct => (
+                <button
+                  key={pct}
+                  type="button"
+                  onClick={() => handlePercent(pct)}
+                  style={{
+                    background: 'transparent',
+                    color: theme.secondaryText,
+                    border: '1px solid transparent',
+                    borderRadius: 5,
+                    padding: '2px 10px',
+                    fontWeight: 600,
+                    fontSize: 12,
+                    cursor: 'pointer',
+                    height: 22,
+                    minWidth: 32,
+                    fontFamily: 'Inter, sans-serif',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = theme.cardHover;
+                    e.currentTarget.style.border = `1px solid ${theme.darkBorder}`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.border = '1px solid transparent';
+                  }}
+                >
+                  {pct === 100 ? 'MAX' : `${pct}%`}
+                </button>
+              ))}
+            </div>
+          </div>
+          
           <div style={{ fontSize: 12, color: theme.secondaryText, marginTop: 4 }}>
             Max: 2M USDC per wallet
           </div>
