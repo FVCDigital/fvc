@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import { theme } from '@/constants/theme';
 import { parseUnits, formatUnits } from 'viem';
-import { PRIVATE_SEEDING_CONFIG } from '@/contracts/bonding';
+import { PRIVATE_SEEDING_CONFIG } from '../../../contracts/bonding';
 import { BaseCardProps } from '@/types';
 import FVCAllocationChart from './FVCAllocationChart/FVCAllocationChart';
 import { CONTRACTS } from '@/utils/contracts/bondingContract';
@@ -19,13 +19,12 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   
   // Mock data - replace with real contract calls
   const [totalBonded, setTotalBonded] = useState(0);
-  const [currentDiscount, setCurrentDiscount] = useState(20);
   const [currentMilestone, setCurrentMilestone] = useState(0);
   
   // USDC Balance
   const usdcBalance = useBalance({ 
     address: address as `0x${string}` | undefined,
-    token: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`,
+    token: ('USDC' in CONTRACTS ? CONTRACTS.USDC : '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e') as `0x${string}`,
     query: { enabled: !!address }
   });
 
@@ -41,19 +40,22 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
       const milestone = PRIVATE_SEEDING_CONFIG.milestones[i];
       if (totalBonded >= parseFloat(milestone.usdcSold)) {
         setCurrentMilestone(i);
-        setCurrentDiscount(milestone.discount);
         break;
       }
     }
   }, [totalBonded]);
 
-  // Calculate FVC amount based on current discount
+  // Get current milestone data
+  const currentMilestoneData = PRIVATE_SEEDING_CONFIG.milestones[currentMilestone];
+  const currentPrice = currentMilestoneData?.price || 0.025;
+
+  // Calculate FVC amount based on current milestone price
   const calculateFVCAmount = (usdcAmount: string) => {
     if (!usdcAmount || parseFloat(usdcAmount) <= 0) return '0';
     
     const usdcValue = parseFloat(usdcAmount);
-    const discountMultiplier = (100 - currentDiscount) / 100;
-    const fvcAmount = usdcValue / discountMultiplier;
+    // FVC = USDC / price per FVC
+    const fvcAmount = usdcValue / currentPrice;
     
     return fvcAmount.toFixed(2);
   };
@@ -199,22 +201,22 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <div>
               <div style={{ fontSize: 18, fontWeight: 600, color: theme.primaryText }}>
-                Current Discount: {currentDiscount}%
+                Current Price: {currentPrice.toFixed(4)} USDC/FVC
               </div>
               <div style={{ fontSize: 14, color: theme.secondaryText }}>
-                {PRIVATE_SEEDING_CONFIG.milestones[currentMilestone]?.name}
+                {currentMilestoneData?.name}
               </div>
             </div>
-            <div style={{
-              background: theme.modalButton,
-              color: theme.primaryText,
-              padding: '8px 16px',
-              borderRadius: 8,
-              fontSize: 14,
-              fontWeight: 600,
-            }}>
-              {currentDiscount}% OFF
-            </div>
+                          <div style={{
+                background: theme.modalButton,
+                color: theme.primaryText,
+                padding: '8px 16px',
+                borderRadius: 8,
+                fontSize: 14,
+                fontWeight: 600,
+              }}>
+                ${currentPrice.toFixed(4)}
+              </div>
           </div>
           
           {nextMilestone && (
@@ -346,9 +348,9 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14 }}>
-              <span style={{ color: theme.secondaryText }}>Discount applied:</span>
+              <span style={{ color: theme.secondaryText }}>Price per FVC:</span>
               <span style={{ color: theme.modalButton, fontWeight: 600 }}>
-                {currentDiscount}%
+                ${currentPrice.toFixed(4)}
               </span>
             </div>
           </div>
