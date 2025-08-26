@@ -108,14 +108,7 @@ contract Bonding is IBonding, Ownable, ReentrancyGuard {
     /// @notice Emitted when wallet cap is updated
     event WalletCapUpdated(uint256 indexed newCap);
 
-    /// @notice Emitted when emergency unlock is performed
-    event EmergencyUnlock(address indexed user, uint256 amount);
 
-    /// @notice Emitted when a new bonding round is started
-    event RoundStarted(uint256 indexed roundId, uint256 initialDiscount, uint256 finalDiscount, uint256 epochCap);
-    
-    /// @notice Emitted when public launch occurs (disables bonding)
-    event PublicLaunchOccurred(uint256 timestamp);
 
     // ============ CONSTRUCTOR ============
 
