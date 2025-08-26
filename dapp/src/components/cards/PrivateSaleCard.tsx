@@ -35,14 +35,17 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   useEffect(() => {
     const progress = (totalBonded / parseFloat(PRIVATE_SEEDING_CONFIG.epochCap)) * 100;
     
-    // Find current milestone based on progress
-    for (let i = PRIVATE_SEEDING_CONFIG.milestones.length - 1; i >= 0; i--) {
+    // Find current milestone based on total bonded amount
+    let foundMilestone = 0; // Default to first milestone
+    for (let i = 0; i < PRIVATE_SEEDING_CONFIG.milestones.length - 1; i++) {
       const milestone = PRIVATE_SEEDING_CONFIG.milestones[i];
-      if (totalBonded >= parseFloat(milestone.usdcSold)) {
-        setCurrentMilestone(i);
+      const nextMilestone = PRIVATE_SEEDING_CONFIG.milestones[i + 1];
+      if (totalBonded >= parseFloat(milestone.usdcSold) && totalBonded < parseFloat(nextMilestone.usdcSold)) {
+        foundMilestone = i;
         break;
       }
     }
+    setCurrentMilestone(foundMilestone);
   }, [totalBonded]);
 
   // Get current milestone data
@@ -106,6 +109,19 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   const progress = (totalBonded / parseFloat(PRIVATE_SEEDING_CONFIG.epochCap)) * 100;
   const nextMilestone = PRIVATE_SEEDING_CONFIG.milestones[currentMilestone + 1];
   const usdcToNextMilestone = nextMilestone ? parseFloat(nextMilestone.usdcSold) - totalBonded : 0;
+  
+  // Ensure we don't show the "Round Complete" milestone as next
+  const displayNextMilestone = nextMilestone && nextMilestone.fvcSold !== "0" ? nextMilestone : null;
+  
+  // Debug logging
+  console.log('Current Milestone:', currentMilestone);
+  console.log('Next Milestone:', nextMilestone);
+  console.log('Display Next Milestone:', displayNextMilestone);
+  console.log('Total Bonded:', totalBonded);
+  console.log('All Milestones:', PRIVATE_SEEDING_CONFIG.milestones);
+  console.log('Current Milestone Data:', currentMilestoneData);
+  console.log('Next Milestone fvcSold:', nextMilestone?.fvcSold);
+  console.log('Display Next Milestone fvcSold:', displayNextMilestone?.fvcSold);
 
   // Render disconnected state
   if (!address) {
@@ -219,9 +235,9 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
               </div>
           </div>
           
-          {nextMilestone && (
+          {displayNextMilestone && (
             <div style={{ fontSize: 14, color: theme.secondaryText }}>
-              Next tier at {formatUnits(parseUnits(nextMilestone.usdcSold, 6), 6)} USDC 
+              Next tier at {parseFloat(displayNextMilestone.fvcSold).toLocaleString()} FVC 
               ({usdcToNextMilestone > 0 ? `${formatUnits(parseUnits(usdcToNextMilestone.toString(), 6), 6)} USDC to go` : 'Milestone reached'})
             </div>
           )}
