@@ -75,14 +75,14 @@ export const PRIVATE_SEEDING_CONFIG = {
     walletCap: "2000000",           // 2M USDC per wallet
     vestingPeriod: 1080 * 24 * 60 * 60, // 36 months (12-month cliff + 24-month vesting)
     milestones: [
-        { usdcSold: "0", price: 0.025, fvcSold: "16666667", name: "Early Bird" },      // 16.67M FVC @ $0.025 = $416,667
-        { usdcSold: "416667", price: 0.05, fvcSold: "16666667", name: "Early Adopters" }, // 16.67M FVC @ $0.05 = $833,333
-        { usdcSold: "1250000", price: 0.075, fvcSold: "16666667", name: "Strategic" },     // 16.67M FVC @ $0.075 = $1,250,000
-        { usdcSold: "2500000", price: 0.1, fvcSold: "175000000", name: "Final Tier" },   // 175M FVC @ $0.1 = $17,500,000
+        { usdcSold: "0", price: 0.025, fvcSold: "16666667", name: "Early Bird" },      // 0-416,667 USDC: 16.67M FVC @ $0.025
+        { usdcSold: "416667", price: 0.05, fvcSold: "16666667", name: "Early Adopters" }, // 416,667-833,333 USDC: 16.67M FVC @ $0.05
+        { usdcSold: "833333", price: 0.075, fvcSold: "16666667", name: "Strategic" },     // 833,333-1,250,000 USDC: 16.67M FVC @ $0.075
+        { usdcSold: "1250000", price: 0.1, fvcSold: "175000000", name: "Final Tier" },   // 1,250,000-20,000,000 USDC: 175M FVC @ $0.10
         { usdcSold: "20000000", price: 0.1, fvcSold: "0", name: "Round Complete" } // Round complete at 20M USDC
     ],
     targetPrice: "$0.025 - $0.1",
-    notes: "Four gradual milestones: $0.025 → $0.05 → $0.075 → $0.1 per FVC. Heavily weighted toward $0.10 to guarantee 20M USDC from 225M FVC."
+    notes: "Four gradual milestones: $0.025 → $0.05 → $0.075 → $0.10 per FVC. Heavily weighted toward $0.10 to guarantee 20M USDC from 225M FVC."
 };
 
 // Public launch configuration (after private round completes)
