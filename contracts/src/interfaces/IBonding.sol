@@ -1,16 +1,35 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity 0.8.24;
+
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title IBonding
- * @notice Interface for FVC Protocol bonding functionality
- * @dev Defines the core bonding contract interface with vesting and round management
+ * @notice Interface for FVC Protocol milestone-based private sale bonding contract
+ * @dev Defines the core bonding functionality and data structures
  */
 interface IBonding {
+    // ============ DATA STRUCTURES ============
+    
     /**
-     * @notice Vesting schedule structure for bonded tokens
-     * @dev Tracks token lock periods for each user
-     * @param amount Total FVC tokens in vesting schedule
+     * @notice Milestone configuration structure
+     * @param usdcThreshold USDC threshold to reach this milestone
+     * @param price Price per FVC in USDC (6 decimals)
+     * @param fvcAllocation FVC tokens allocated to this milestone
+     * @param name Milestone name
+     * @param isActive Whether milestone is active
+     */
+    struct Milestone {
+        uint256 usdcThreshold;
+        uint256 price;
+        uint256 fvcAllocation;
+        string name;
+        bool isActive;
+    }
+    
+    /**
+     * @notice Vesting schedule structure
+     * @param amount Total amount of FVC tokens in vesting
      * @param startTime Vesting start timestamp
      * @param endTime Vesting end timestamp
      */
@@ -20,68 +39,92 @@ interface IBonding {
         uint256 endTime;
     }
     
-    /**
-     * @notice Round configuration structure
-     * @dev Contains all parameters for a bonding round
-     * @param roundId Unique identifier for the round
-     * @param initialDiscount Starting discount percentage
-     * @param finalDiscount Ending discount percentage
-     * @param epochCap Total USDC that can be bonded in this round
-     * @param walletCap Maximum USDC per wallet for this round
-     * @param vestingPeriod Vesting period in seconds
-     * @param fvcAllocated Total FVC tokens allocated to this round
-     * @param fvcSold Total FVC tokens sold in this round
-     * @param isActive Whether the round is currently active
-     * @param totalBonded Total USDC bonded in this round
-     */
-    struct RoundConfig {
-        uint256 roundId;
-        uint256 initialDiscount;
-        uint256 finalDiscount;
-        uint256 epochCap;
-        uint256 walletCap;
-        uint256 vestingPeriod;
-        uint256 fvcAllocated;  // Total FVC allocated to this round
-        uint256 fvcSold;       // Total FVC sold in this round
-        bool isActive;
-        uint256 totalBonded;
-    }
+    // ============ EVENTS ============
+    
+    /// @notice Emitted when private sale starts
+    event PrivateSaleStarted(uint256 startTime, uint256 endTime);
+    
+    /// @notice Emitted when private sale ends
+    event PrivateSaleEnded(uint256 totalBonded, uint256 totalFVCSold);
+    
+    /// @notice Emitted when a milestone is reached
+    event MilestoneReached(uint256 milestoneIndex, uint256 usdcThreshold, uint256 price);
+    
+    /// @notice Emitted when a user bonds USDC
+    event Bonded(address indexed user, uint256 usdcAmount, uint256 fvcAmount, uint256 milestoneIndex);
+    
+    /// @notice Emitted when a vesting schedule is created
+    event VestingScheduleCreated(address indexed user, uint256 amount, uint256 startTime, uint256 endTime);
+    
+    /// @notice Emitted when FVC tokens are allocated to a milestone
+    event FVCAllocated(uint256 indexed milestoneIndex, uint256 amount);
+
+    // ============ CORE FUNCTIONS ============
     
     /**
      * @notice Bond USDC for FVC tokens
-     * @dev Main bonding function with dynamic discount pricing
-     * @param fvcAmount Amount of FVC tokens to purchase
+     * @dev Main bonding function with milestone-based pricing
+     * @param usdcAmount Amount of USDC to bond (in 6 decimals)
      */
-    function bond(uint256 fvcAmount) external;
-
+    function bond(uint256 usdcAmount) external;
+    
     /**
-     * @notice Allocate FVC tokens to the current bonding round
-     * @dev Only owner can allocate FVC tokens for bonding
-     * @param fvcAmount Amount of FVC tokens to allocate
+     * @notice Start the private sale
+     * @dev Only bonding manager can start the sale
+     * @param duration Duration of the sale in seconds
      */
-    function allocateFVC(uint256 fvcAmount) external;
-
+    function startPrivateSale(uint256 duration) external;
+    
     /**
-     * @notice Get remaining FVC tokens available for bonding
-     * @dev Returns the difference between allocated and sold FVC
+     * @notice End the private sale
+     * @dev Only bonding manager can end the sale
+     */
+    function endPrivateSale() external;
+
+    // ============ VIEW FUNCTIONS ============
+    
+    /**
+     * @notice Get current milestone price per FVC
+     * @dev Returns price in USDC (6 decimals) per FVC
+     * @return Current price per FVC
+     */
+    function getCurrentPrice() external view returns (uint256);
+    
+    /**
+     * @notice Get current milestone information
+     * @dev Returns complete milestone data for current milestone
+     * @return Current milestone structure
+     */
+    function getCurrentMilestone() external view returns (Milestone memory);
+    
+    /**
+     * @notice Get all milestones
+     * @dev Returns array of all milestone structures
+     * @return Array of milestone structures
+     */
+    function getAllMilestones() external view returns (Milestone[] memory);
+    
+    /**
+     * @notice Get next milestone information
+     * @dev Returns next milestone if available
+     * @return Next milestone structure or empty if at last milestone
+     */
+    function getNextMilestone() external view returns (Milestone memory);
+    
+    /**
+     * @notice Calculate FVC amount for given USDC amount at current price
+     * @dev Uses current milestone price
+     * @param usdcAmount Amount of USDC (in 6 decimals)
+     * @return fvcAmount Amount of FVC tokens (in 18 decimals)
+     */
+    function calculateFVCAmount(uint256 usdcAmount) external view returns (uint256 fvcAmount);
+    
+    /**
+     * @notice Get remaining FVC tokens available for current milestone
+     * @dev Returns remaining FVC for current milestone
      * @return Remaining FVC tokens available
      */
     function getRemainingFVC() external view returns (uint256);
-
-    /**
-     * @notice Calculate USDC amount needed for a given FVC amount
-     * @dev Uses current discount to calculate USDC required
-     * @param fvcAmount Amount of FVC tokens desired
-     * @return usdcAmount Amount of USDC needed
-     */
-    function calculateUSDCAmount(uint256 fvcAmount) external view returns (uint256 usdcAmount);
-
-    /**
-     * @notice Get current discount based on bonding progress
-     * @dev Calculates dynamic discount using total bonded amount
-     * @return Current discount percentage (0-100)
-     */
-    function getCurrentDiscount() external view returns (uint256);
 
     /**
      * @notice Get vesting schedule for a specific user
@@ -100,73 +143,46 @@ interface IBonding {
     function isLocked(address user) external view returns (bool);
 
     /**
-     * @notice Get current round configuration
-     * @dev Returns complete round data structure
-     * @return Current round configuration
+     * @notice Get vested FVC amount for a user
+     * @dev Calculates how many FVC tokens are vested and available
+     * @param user Address of the user
+     * @return vestedAmount Amount of FVC tokens vested
+     * @return totalAmount Total amount of FVC tokens in vesting
      */
-    function getCurrentRound() external view returns (RoundConfig memory);
-
-    /**
-     * @notice Complete the current bonding round
-     * @dev Only owner can call this function. Sets current round to inactive.
-     */
-    function completeCurrentRound() external;
-
-    /**
-     * @notice Start the next round with predefined parameters
-     * @dev Only owner can call this function. Uses hardcoded round parameters.
-     */
-    function startNextRound() external;
+    function getVestedAmount(address user) external view returns (uint256 vestedAmount, uint256 totalAmount);
     
     /**
-     * @notice Emitted when a user bonds USDC
-     * @param user Address of the bonding user
-     * @param usdcAmount Amount of USDC bonded
+     * @notice Get private sale progress information
+     * @dev Returns comprehensive sale progress data
+     * @return progress Progress percentage (0-10000 for 4 decimal precision)
+     * @return currentMilestoneIndex Current milestone index
+     * @return totalBondedAmount Total USDC bonded
+     * @return totalFVCSoldAmount Total FVC sold
      */
-    event Bonded(address indexed user, uint256 usdcAmount);
+    function getSaleProgress() external view returns (
+        uint256 progress,
+        uint256 currentMilestoneIndex,
+        uint256 totalBondedAmount,
+        uint256 totalFVCSoldAmount
+    );
 
-    /**
-     * @notice Emitted when a vesting schedule is created
-     * @param user Address of the user with vesting schedule
-     * @param fvcAmount Amount of FVC tokens in vesting
-     * @param startTime Vesting start timestamp
-     * @param endTime Vesting end timestamp
-     */
-    event VestingScheduleCreated(address indexed user, uint256 fvcAmount, uint256 startTime, uint256 endTime);
-
-    /**
-     * @notice Emitted when a new round starts
-     * @param roundId Unique identifier for the round
-     * @param initialDiscount Starting discount percentage
-     * @param finalDiscount Ending discount percentage
-     * @param epochCap Total tokens that can be bonded in this round
-     */
-    event RoundStarted(uint256 indexed roundId, uint256 initialDiscount, uint256 finalDiscount, uint256 epochCap);
-
-    /**
-     * @notice Emitted when a round is completed
-     * @param roundId Unique identifier for the completed round
-     * @param fvcSold Total FVC tokens sold in the completed round
-     * @param totalBonded Total USDC bonded in the completed round
-     */
-    event RoundCompleted(uint256 indexed roundId, uint256 fvcSold, uint256 totalBonded);
-
-    /**
-     * @notice Emitted when FVC tokens are allocated to the current round
-     * @param roundId The round ID
-     * @param amount The amount of FVC tokens allocated
-     */
-    event FVCAllocated(uint256 indexed roundId, uint256 amount);
-
-    /// @notice Emitted when emergency unlock is performed
-    event EmergencyUnlock(address indexed user, uint256 amount);
+    // ============ STATE VARIABLES ============
     
-    /// @notice Emitted when public launch occurs (disables bonding)
-    event PublicLaunchOccurred(uint256 timestamp);
-
-    /**
-     * @notice Mark public launch as occurred (disables future bonding)
-     * @dev Only owner can call this function. Cannot be undone.
-     */
-    function markPublicLaunch() external;
+    /// @notice Whether private sale is active
+    function privateSaleActive() external view returns (bool);
+    
+    /// @notice Current milestone index (0-3)
+    function currentMilestone() external view returns (uint256);
+    
+    /// @notice Total USDC collected in private sale
+    function totalBonded() external view returns (uint256);
+    
+    /// @notice Total FVC tokens sold in private sale
+    function totalFVCSold() external view returns (uint256);
+    
+    /// @notice Mapping of user address to total USDC bonded
+    function userBonded(address user) external view returns (uint256);
+    
+    /// @notice Mapping of user address to vesting schedule
+    function vestingSchedules(address user) external view returns (VestingSchedule memory);
 } 

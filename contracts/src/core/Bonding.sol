@@ -95,37 +95,21 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
     mapping(address => uint256) public userBonded;
     
     /// @notice Mapping of user address to vesting schedule
-    mapping(address => VestingSchedule) public vestingSchedules;
+    mapping(address => VestingSchedule) private _vestingSchedules;
+    
+    /// @notice Get vesting schedule for a user (public view function)
+    function vestingSchedules(address user) external view returns (VestingSchedule memory) {
+        return _vestingSchedules[user];
+    }
 
     // ============ MILESTONE STRUCTURE ============
-    
-    /// @notice Milestone configuration structure
-    struct Milestone {
-        uint256 usdcThreshold;    // USDC threshold to reach this milestone
-        uint256 price;            // Price per FVC in USDC (6 decimals)
-        uint256 fvcAllocation;    // FVC tokens allocated to this milestone
-        string name;              // Milestone name
-        bool isActive;            // Whether milestone is active
-    }
     
     /// @notice Array of milestones (4 total)
     Milestone[] public milestones;
     
     // ============ EVENTS ============
 
-    /// @notice Emitted when private sale starts
-    event PrivateSaleStarted(uint256 startTime, uint256 endTime);
-
-    /// @notice Emitted when private sale ends
-    event PrivateSaleEnded(uint256 totalBonded, uint256 totalFVCSold);
-
-    /// @notice Emitted when a milestone is reached
-    event MilestoneReached(uint256 milestoneIndex, uint256 usdcThreshold, uint256 price);
-
-    /// @notice Emitted when a user bonds USDC
-    event Bonded(address indexed user, uint256 usdcAmount, uint256 fvcAmount, uint256 milestoneIndex);
-    
-
+    // Events are now defined in IBonding interface
 
     // ============ INITIALIZER ============
 
@@ -251,7 +235,8 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         }
         
         // Calculate FVC amount based on current milestone price
-        uint256 fvcAmount = (usdcAmount * 1e18) / currentMilestoneData.price; // Convert to FVC (18 decimals)
+        // Price is stored as 25 (representing $0.025), so we need to multiply by 1e3 to get proper decimals
+        uint256 fvcAmount = (usdcAmount * 1e18) / (currentMilestoneData.price * 1e3); // Convert to FVC (18 decimals)
         
         // Check if enough FVC is available for this milestone
         uint256 milestoneFVCSold = _getMilestoneFVCSold(currentMilestone);
@@ -269,7 +254,7 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         uint256 cliffEndTime = startTime + 365 days; // 12-month cliff
         uint256 endTime = cliffEndTime + 730 days;   // 24-month linear after cliff
         
-        vestingSchedules[msg.sender] = VestingSchedule({
+        _vestingSchedules[msg.sender] = VestingSchedule({
             amount: fvcAmount,
             startTime: startTime,
             endTime: endTime
@@ -279,7 +264,7 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         _updateCurrentMilestone();
         
         // External calls AFTER state updates (reentrancy protection)
-        usdc.safeTransferFrom(msg.sender, treasury, usdcAmount);
+        usdc.safeTransferFrom(msg.sender, treasury, usdcAmount); // USDC goes to treasury
         fvc.mint(msg.sender, fvcAmount);
         
         emit Bonded(msg.sender, usdcAmount, fvcAmount, currentMilestone);
@@ -370,7 +355,7 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @return Vesting schedule structure
      */
     function getVestingSchedule(address user) external view returns (VestingSchedule memory) {
-        return vestingSchedules[user];
+        return _vestingSchedules[user];
     }
 
     /**
@@ -380,7 +365,7 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @return True if tokens are locked, false if unlocked
      */
     function isLocked(address user) external view returns (bool) {
-        VestingSchedule storage schedule = vestingSchedules[user];
+        VestingSchedule storage schedule = _vestingSchedules[user];
         if (schedule.amount == 0) return false;
         
         uint256 currentTime = block.timestamp;
@@ -402,7 +387,7 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @return totalAmount Total amount of FVC tokens in vesting
      */
     function getVestedAmount(address user) external view returns (uint256 vestedAmount, uint256 totalAmount) {
-        VestingSchedule storage schedule = vestingSchedules[user];
+        VestingSchedule storage schedule = _vestingSchedules[user];
         if (schedule.amount == 0) return (0, 0);
         
         totalAmount = schedule.amount;
@@ -544,7 +529,7 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         revert("Use getCurrentPrice instead");
     }
     
-    function getCurrentRound() external pure returns (RoundConfig memory) {
+    function getCurrentRound() external pure returns (uint256) {
         revert("Use getCurrentMilestone instead");
     }
     
