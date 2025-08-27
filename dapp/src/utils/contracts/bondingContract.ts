@@ -2,15 +2,15 @@ import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 
 
 // Amoy Testnet contract addresses (deployed contracts)
 export const AMOY_CONTRACTS = {
-  BONDING: '0xEE4aAF73394bDfb5434Faa055CB56Aa761fDE2F8',
-  MOCK_USDC: '0xFaa4Eb32240f7735a4F912495E89a9A4e3511e03',
-  FVC: '0xAFe27839294fb50Ca1DA999A852323a2DaC8834e', // Actual FVC address used by bonding contract
-};
+  FVC: "0xA23e293B02EDc0a847b5215aE814CBc710f8c1B2",
+  BONDING: "0xF4b7B5D028C09E773b2df6087968872BB36856eA", // CORRECT TREASURY BONDING - USDC goes to 0x7f1EE89fDB16b57930b7F53Bb998f25d917F35D9
+  USDC: "0x79a3c7c1459B4d68C39A6db2716C0f4BaE190dfc",
+} as const;
 
 // Mainnet contract addresses (from environment variables)
 export const MAINNET_CONTRACTS = {
   BONDING: process.env.NEXT_PUBLIC_MAINNET_BONDING_ADDRESS || '',
-  MOCK_USDC: process.env.NEXT_PUBLIC_MAINNET_USDC_ADDRESS || '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
+  MOCK_USDC: process.env.NEXT_PUBLIC_MAINNET_USDC_ADDRESS || '0x79a3c7c1459B4d68C39A6db2716C0f4BaE190dfc', // Use same USDC for consistency
   FVC: process.env.NEXT_PUBLIC_MAINNET_FVC_ADDRESS || '',
   VESTING: process.env.NEXT_PUBLIC_MAINNET_VESTING_ADDRESS || '',
 };
@@ -176,6 +176,11 @@ export const BONDING_ABI = [
           },
           {
             "internalType": "uint256",
+            "name": "fvcAllocation",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
             "name": "name",
             "type": "string"
           },
@@ -233,7 +238,12 @@ export const BONDING_ABI = [
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "vestedAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "totalAmount",
         "type": "uint256"
       }
     ],
@@ -604,7 +614,7 @@ export const useBondingContractFVCBalance = () => {
 
 // Hook to get user's bonded FVC amount from bonding contract (for DashboardCard)
 export const useUserFVCBalance = (userAddress?: string) => {
-  // Try to get vesting data from bonding contract
+  // Get vesting data from bonding contract ONLY
   const { data: vestingData, isLoading: vestingLoading, error: vestingError } = useReadContract({
     address: CONTRACTS.BONDING as `0x${string}`,
     abi: BONDING_ABI,
@@ -619,35 +629,20 @@ export const useUserFVCBalance = (userAddress?: string) => {
     },
   });
   
-  // Fallback: Get FVC balance directly if vesting fails
-  const { data: fvcBalance, isLoading: fvcLoading, error: fvcError } = useReadContract({
-    address: CONTRACTS.FVC as `0x${string}`,
-    abi: FVC_ABI,
-    functionName: 'balanceOf',
-    args: userAddress ? [userAddress as `0x${string}`] : undefined,
-    query: {
-      enabled: !!userAddress && (!vestingData || vestingData === 0n),
-      staleTime: 10000,
-      gcTime: 30000,
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-    },
-  });
-  
-  // Determine the final balance
+  // Determine the final balance - ONLY from bonding contract
   let finalBalance = 0n;
   if (vestingData && Array.isArray(vestingData) && vestingData.length > 1) {
     // Use vesting data if it's a proper tuple
-    finalBalance = vestingData[1] as bigint;
-    console.log('🔍 useUserFVCBalance: Using vesting data:', finalBalance);
-  } else if (fvcBalance && typeof fvcBalance === 'bigint' && fvcBalance > 0n) {
-    // Fallback to direct FVC balance
-    finalBalance = fvcBalance;
-    console.log('🔍 useUserFVCBalance: Using fallback FVC balance:', finalBalance);
+    finalBalance = vestingData[1] as bigint; // totalAmount from getVestedAmount
+    console.log('🔍 useUserFVCBalance: Using bonding contract data:', finalBalance);
+  } else {
+    // No vesting data = no bonded FVC
+    finalBalance = 0n;
+    console.log('🔍 useUserFVCBalance: No vesting data, showing 0 FVC');
   }
   
-  const isLoading = vestingLoading || fvcLoading;
-  const error = vestingError || fvcError;
+  const isLoading = vestingLoading;
+  const error = vestingError;
     
   return { userFVCBalance: finalBalance, isLoading, error };
 };
