@@ -289,7 +289,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
         </div>
         
         {/* Current Price and Milestone */}
-        <div style={{ 
+        <div style={{
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
@@ -298,7 +298,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
           background: theme.darkBorder,
           borderRadius: 8,
         }}>
-          <div>
+            <div>
             <div style={{ fontSize: 14, color: theme.secondaryText, marginBottom: 4 }}>
               Current Price
             </div>
