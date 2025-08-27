@@ -80,7 +80,7 @@ npx hardhat node
 
 ## 📚 Documentation
 
-- [Protocol Rules](./FVC_PROTOCOL_RULES.md)
+- [Protocol Rules](./FVC_PROTOCOL_RULES.txt)
 - [File Layout](./FVC_FILE_LAYOUT.txt)
 - [Development Timeline](./FVC_PROTOCOL_DEVELOPMENT_TIMELINE.md)
 - [Contract Organisation](./contracts/src/CONTRACT_ORGANISATION.md)
