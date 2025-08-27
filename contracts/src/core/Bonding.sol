@@ -110,18 +110,18 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
     
     /// @notice Array of milestones (4 total)
     Milestone[] public milestones;
-
+    
     // ============ EVENTS ============
 
     /// @notice Emitted when private sale starts
     event PrivateSaleStarted(uint256 startTime, uint256 endTime);
-    
+
     /// @notice Emitted when private sale ends
     event PrivateSaleEnded(uint256 totalBonded, uint256 totalFVCSold);
-    
+
     /// @notice Emitted when a milestone is reached
     event MilestoneReached(uint256 milestoneIndex, uint256 usdcThreshold, uint256 price);
-    
+
     /// @notice Emitted when a user bonds USDC
     event Bonded(address indexed user, uint256 usdcAmount, uint256 fvcAmount, uint256 milestoneIndex);
     
@@ -152,7 +152,7 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         fvc = IFVC(_fvc);
         usdc = IERC20(_usdc);
         treasury = _treasury;
-
+        
         // Grant roles
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(BONDING_MANAGER_ROLE, msg.sender);
