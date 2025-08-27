@@ -39,7 +39,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   // USDC Balance
   const { data: usdcBalance, isLoading: usdcBalanceLoading, refetch: refetchUSDCBalance } = useBalance({ 
     address: address as `0x${string}` | undefined,
-    token: CONTRACTS.MOCK_USDC as `0x${string}`,
+    token: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`,
     query: { enabled: !!address }
   });
 
@@ -116,7 +116,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
       // First, approve USDC spending
       console.log('Approving USDC spending...');
       writeUSDC({
-        address: CONTRACTS.MOCK_USDC as `0x${string}`,
+        address: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`,
         abi: USDC_ABI,
         functionName: 'approve',
         args: [CONTRACTS.BONDING as `0x${string}`, usdcAmountBigInt],
