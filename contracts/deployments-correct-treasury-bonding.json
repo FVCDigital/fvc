@@ -1,0 +1,14 @@
+{
+  "NEW_FVC": "0xA23e293B02EDc0a847b5215aE814CBc710f8c1B2",
+  "CORRECT_TREASURY_BONDING": "0xF4b7B5D028C09E773b2df6087968872BB36856eA",
+  "MOCK_USDC": "0x79a3c7c1459B4d68C39A6db2716C0f4BaE190dfc",
+  "TREASURY": "0x7f1EE89fDB16b57930b7F53Bb998f25d917F35D9",
+  "timestamp": "2025-08-27T21:13:51.424Z",
+  "deployer": "0xcABa97a2bb6ca2797e302C864C37632b4185d595",
+  "FLOW": [
+    "User sends USDC → Treasury receives USDC immediately",
+    "User gets FVC tokens (vested for 12 months cliff + 24 months linear)",
+    "Treasury can use USDC immediately",
+    "FVC tokens are locked with vesting schedule"
+  ]
+}
