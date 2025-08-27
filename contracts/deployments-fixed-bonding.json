@@ -1,0 +1,13 @@
+{
+  "NEW_FVC": "0xA23e293B02EDc0a847b5215aE814CBc710f8c1B2",
+  "FIXED_BONDING": "0x5B123E68d4bd263f7012b3a2051fe764983F94Df",
+  "MOCK_USDC": "0x79a3c7c1459B4d68C39A6db2716C0f4BaE190dfc",
+  "timestamp": "2025-08-27T21:07:04.942Z",
+  "deployer": "0xcABa97a2bb6ca2797e302C864C37632b4185d595",
+  "FIXES": [
+    "USDC stays with users (no treasury transfers)",
+    "No USDC approval needed",
+    "Users control their own USDC",
+    "FVC tokens still locked with vesting"
+  ]
+}
