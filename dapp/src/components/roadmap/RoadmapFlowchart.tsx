@@ -257,19 +257,13 @@ const RoadmapFlowchart: React.FC = () => {
               width: '12px',
               height: '12px',
               borderRadius: '50%',
-              background: '#F3F4F6',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '8px',
-              color: '#22C55E',
-              fontWeight: 'bold',
-            }}>✓</div>
+              background: '#10B981',
+            }} />
             <span style={{
               fontSize: 'clamp(12px, 2.5vw, 14px)',
               color: theme.primaryText,
               fontWeight: 500,
-            }}>Completed</span>
+            }}>DONE</span>
           </div>
           <div style={{
             display: 'flex',
@@ -280,14 +274,13 @@ const RoadmapFlowchart: React.FC = () => {
               width: '12px',
               height: '12px',
               borderRadius: '50%',
-              background: '#FFFFFF',
-              animation: 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+              background: '#38BDF8',
             }} />
             <span style={{
               fontSize: 'clamp(12px, 2.5vw, 14px)',
               color: theme.primaryText,
               fontWeight: 500,
-            }}>Current Stage</span>
+            }}>CURRENT</span>
           </div>
           <div style={{
             display: 'flex',
@@ -302,9 +295,9 @@ const RoadmapFlowchart: React.FC = () => {
             }} />
             <span style={{
               fontSize: 'clamp(12px, 2.5vw, 14px)',
-              color: theme.secondaryText,
+              color: theme.primaryText,
               fontWeight: 500,
-            }}>Future Stages</span>
+            }}>FUTURE</span>
           </div>
         </div>
       </div>
