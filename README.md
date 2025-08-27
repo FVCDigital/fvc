@@ -82,7 +82,7 @@ npx hardhat node
 
 - [Protocol Rules](./FVC_PROTOCOL_RULES.txt)
 - [File Layout](./FVC_FILE_LAYOUT.txt)
-- [GitBook Documentation](./fvc-gitbook/docs/)
+- [GitBook Documentation](./fvc-gitbook/README.md)
 
 ## 🤝 Contributing
 
@@ -94,4 +94,4 @@ MIT License - see [LICENSE](./LICENSE) file.
 
 ---
 
-**Note:** This is the development repository. For user documentation, see the [GitBook](./fvc-gitbook/docs/).
+**Note:** This is the development repository. For user documentation, see the [GitBook](./fvc-gitbook/README.md).
