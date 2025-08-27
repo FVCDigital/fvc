@@ -80,10 +80,10 @@ npx hardhat node
 
 ## 📚 Documentation
 
-- [Protocol Rules](./FVC_PROTOCOL_RULES.txt)
+- [Protocol Rules](./FVC_PROTOCOL_RULES.md)
 - [File Layout](./FVC_FILE_LAYOUT.txt)
 - [Development Timeline](./FVC_PROTOCOL_DEVELOPMENT_TIMELINE.md)
-- [GitBook Documentation](./fvc-gitbook/docs/)
+- [Contract Organisation](./contracts/src/CONTRACT_ORGANISATION.md)
 
 ## 🤝 Contributing
 
@@ -95,4 +95,4 @@ MIT License - see [LICENSE](./LICENSE) file.
 
 ---
 
-**Note:** This is the development repository. For user documentation, see the [GitBook](./fvc-gitbook/docs/).
+**Note:** This is the development repository. For comprehensive documentation, see the links above.
