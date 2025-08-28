@@ -29,7 +29,7 @@ describe("Bonding Contract", function () {
 
     // Deploy FVC token
     const FVC = await ethers.getContractFactory("FVC");
-    fvc = await FVC.deploy(ownerAddress as any);
+    fvc = await FVC.deploy("First Venture Capital", "FVC", ownerAddress);
 
     // Deploy Mock USDC
     const MockUSDC = await ethers.getContractFactory("MockUSDC");
@@ -291,3 +291,4 @@ describe("Bonding Contract", function () {
       ).to.be.revertedWithCustomError(bonding, "Bonding__PrivateSaleEnded");
     });
   });
+});
