@@ -26,11 +26,19 @@ import type {
 export interface FVCVestingInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "CLIFF_DURATION"
+      | "CLIFF_DURATION_DAYS"
+      | "CLIFF_DURATION_SECONDS"
       | "DEFAULT_ADMIN_ROLE"
+      | "MAX_PRECISION_LOSS"
+      | "MAX_VESTING_AMOUNT"
+      | "PRECISION"
       | "SALE_ROLE"
+      | "SECONDS_PER_DAY"
+      | "TOTAL_VESTING_DURATION_DAYS"
+      | "TOTAL_VESTING_DURATION_SECONDS"
       | "VESTING_ADMIN_ROLE"
-      | "VESTING_DURATION"
+      | "VESTING_DURATION_DAYS"
+      | "VESTING_DURATION_SECONDS"
       | "beneficiaries"
       | "calculateVestedAmount"
       | "createVestingSchedule"
@@ -65,20 +73,49 @@ export interface FVCVestingInterface extends Interface {
   ): EventFragment;
 
   encodeFunctionData(
-    functionFragment: "CLIFF_DURATION",
+    functionFragment: "CLIFF_DURATION_DAYS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "CLIFF_DURATION_SECONDS",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "DEFAULT_ADMIN_ROLE",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "MAX_PRECISION_LOSS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MAX_VESTING_AMOUNT",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "PRECISION", values?: undefined): string;
   encodeFunctionData(functionFragment: "SALE_ROLE", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "SECONDS_PER_DAY",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "TOTAL_VESTING_DURATION_DAYS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "TOTAL_VESTING_DURATION_SECONDS",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "VESTING_ADMIN_ROLE",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "VESTING_DURATION",
+    functionFragment: "VESTING_DURATION_DAYS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "VESTING_DURATION_SECONDS",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -165,20 +202,49 @@ export interface FVCVestingInterface extends Interface {
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "CLIFF_DURATION",
+    functionFragment: "CLIFF_DURATION_DAYS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "CLIFF_DURATION_SECONDS",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "DEFAULT_ADMIN_ROLE",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "MAX_PRECISION_LOSS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MAX_VESTING_AMOUNT",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "PRECISION", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "SALE_ROLE", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "SECONDS_PER_DAY",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "TOTAL_VESTING_DURATION_DAYS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "TOTAL_VESTING_DURATION_SECONDS",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "VESTING_ADMIN_ROLE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "VESTING_DURATION",
+    functionFragment: "VESTING_DURATION_DAYS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "VESTING_DURATION_SECONDS",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -395,15 +461,31 @@ export interface FVCVesting extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  CLIFF_DURATION: TypedContractMethod<[], [bigint], "view">;
+  CLIFF_DURATION_DAYS: TypedContractMethod<[], [bigint], "view">;
+
+  CLIFF_DURATION_SECONDS: TypedContractMethod<[], [bigint], "view">;
 
   DEFAULT_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
 
+  MAX_PRECISION_LOSS: TypedContractMethod<[], [bigint], "view">;
+
+  MAX_VESTING_AMOUNT: TypedContractMethod<[], [bigint], "view">;
+
+  PRECISION: TypedContractMethod<[], [bigint], "view">;
+
   SALE_ROLE: TypedContractMethod<[], [string], "view">;
+
+  SECONDS_PER_DAY: TypedContractMethod<[], [bigint], "view">;
+
+  TOTAL_VESTING_DURATION_DAYS: TypedContractMethod<[], [bigint], "view">;
+
+  TOTAL_VESTING_DURATION_SECONDS: TypedContractMethod<[], [bigint], "view">;
 
   VESTING_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
 
-  VESTING_DURATION: TypedContractMethod<[], [bigint], "view">;
+  VESTING_DURATION_DAYS: TypedContractMethod<[], [bigint], "view">;
+
+  VESTING_DURATION_SECONDS: TypedContractMethod<[], [bigint], "view">;
 
   beneficiaries: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
 
@@ -414,7 +496,7 @@ export interface FVCVesting extends BaseContract {
   >;
 
   createVestingSchedule: TypedContractMethod<
-    [beneficiary: AddressLike, amount: BigNumberish],
+    [beneficiary: AddressLike, totalAmount: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -526,19 +608,43 @@ export interface FVCVesting extends BaseContract {
   ): T;
 
   getFunction(
-    nameOrSignature: "CLIFF_DURATION"
+    nameOrSignature: "CLIFF_DURATION_DAYS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "CLIFF_DURATION_SECONDS"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "DEFAULT_ADMIN_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "MAX_PRECISION_LOSS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "MAX_VESTING_AMOUNT"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "PRECISION"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "SALE_ROLE"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "SECONDS_PER_DAY"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "TOTAL_VESTING_DURATION_DAYS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "TOTAL_VESTING_DURATION_SECONDS"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "VESTING_ADMIN_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "VESTING_DURATION"
+    nameOrSignature: "VESTING_DURATION_DAYS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "VESTING_DURATION_SECONDS"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "beneficiaries"
@@ -549,7 +655,7 @@ export interface FVCVesting extends BaseContract {
   getFunction(
     nameOrSignature: "createVestingSchedule"
   ): TypedContractMethod<
-    [beneficiary: AddressLike, amount: BigNumberish],
+    [beneficiary: AddressLike, totalAmount: BigNumberish],
     [void],
     "nonpayable"
   >;

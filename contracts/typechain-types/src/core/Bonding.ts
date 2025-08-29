@@ -63,18 +63,39 @@ export interface BondingInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "BONDING_MANAGER_ROLE"
+      | "CLIFF_DURATION_DAYS"
+      | "CLIFF_DURATION_SECONDS"
+      | "DAYS_PER_YEAR"
       | "DEFAULT_ADMIN_ROLE"
+      | "EMERGENCY_COOLDOWN"
+      | "EMERGENCY_ROLE"
+      | "MAX_BONDING_PER_BLOCK"
+      | "MAX_PRECISION_LOSS"
       | "MAX_WALLET_CAP"
+      | "PRECISION"
+      | "PRICE_PRECISION"
+      | "SECONDS_PER_DAY"
       | "TOTAL_FVC_ALLOCATION"
       | "TOTAL_SALE_TARGET"
+      | "TOTAL_VESTING_DURATION_DAYS"
+      | "TOTAL_VESTING_DURATION_SECONDS"
       | "UPGRADER_ROLE"
+      | "USDC_PRECISION"
+      | "VESTING_DURATION_DAYS"
+      | "VESTING_DURATION_SECONDS"
+      | "activateCircuitBreaker"
       | "allocateFVC"
       | "allocateFVCToMilestone"
       | "bond"
+      | "bondingThisBlock"
       | "calculateFVCAmount"
       | "calculateUSDCAmount"
+      | "circuitBreakerActive"
       | "completeCurrentRound"
       | "currentMilestone"
+      | "deactivateCircuitBreaker"
+      | "emergencyShutdownActive"
+      | "emergencyWithdraw"
       | "endPrivateSale"
       | "fvc"
       | "getAllMilestones"
@@ -82,6 +103,7 @@ export interface BondingInterface extends Interface {
       | "getCurrentMilestone"
       | "getCurrentPrice"
       | "getCurrentRound"
+      | "getEmergencyStatus"
       | "getNextMilestone"
       | "getRemainingFVC"
       | "getRoleAdmin"
@@ -92,6 +114,8 @@ export interface BondingInterface extends Interface {
       | "hasRole"
       | "initialize"
       | "isLocked"
+      | "lastBondingBlock"
+      | "lastEmergencyOperation"
       | "markPublicLaunch"
       | "milestones"
       | "privateSaleActive"
@@ -106,6 +130,7 @@ export interface BondingInterface extends Interface {
       | "totalBonded"
       | "totalFVCSold"
       | "treasury"
+      | "triggerEmergencyShutdown"
       | "upgradeTo"
       | "upgradeToAndCall"
       | "usdc"
@@ -118,6 +143,10 @@ export interface BondingInterface extends Interface {
       | "AdminChanged"
       | "BeaconUpgraded"
       | "Bonded"
+      | "CircuitBreakerActivated"
+      | "CircuitBreakerDeactivated"
+      | "EmergencyShutdown"
+      | "EmergencyWithdrawal"
       | "FVCAllocated"
       | "Initialized"
       | "MilestoneReached"
@@ -135,11 +164,48 @@ export interface BondingInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "CLIFF_DURATION_DAYS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "CLIFF_DURATION_SECONDS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "DAYS_PER_YEAR",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "DEFAULT_ADMIN_ROLE",
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "EMERGENCY_COOLDOWN",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "EMERGENCY_ROLE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MAX_BONDING_PER_BLOCK",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MAX_PRECISION_LOSS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "MAX_WALLET_CAP",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "PRECISION", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "PRICE_PRECISION",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "SECONDS_PER_DAY",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -151,7 +217,31 @@ export interface BondingInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "TOTAL_VESTING_DURATION_DAYS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "TOTAL_VESTING_DURATION_SECONDS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "UPGRADER_ROLE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "USDC_PRECISION",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "VESTING_DURATION_DAYS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "VESTING_DURATION_SECONDS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "activateCircuitBreaker",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -164,6 +254,10 @@ export interface BondingInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "bond", values: [BigNumberish]): string;
   encodeFunctionData(
+    functionFragment: "bondingThisBlock",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "calculateFVCAmount",
     values: [BigNumberish]
   ): string;
@@ -172,11 +266,27 @@ export interface BondingInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "circuitBreakerActive",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "completeCurrentRound",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "currentMilestone",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "deactivateCircuitBreaker",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "emergencyShutdownActive",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "emergencyWithdraw",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -202,6 +312,10 @@ export interface BondingInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getCurrentRound",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getEmergencyStatus",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -243,6 +357,14 @@ export interface BondingInterface extends Interface {
   encodeFunctionData(
     functionFragment: "isLocked",
     values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "lastBondingBlock",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "lastEmergencyOperation",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "markPublicLaunch",
@@ -298,6 +420,10 @@ export interface BondingInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "treasury", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "triggerEmergencyShutdown",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "upgradeTo",
     values: [AddressLike]
   ): string;
@@ -320,11 +446,48 @@ export interface BondingInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "CLIFF_DURATION_DAYS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "CLIFF_DURATION_SECONDS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "DAYS_PER_YEAR",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "DEFAULT_ADMIN_ROLE",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "EMERGENCY_COOLDOWN",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "EMERGENCY_ROLE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MAX_BONDING_PER_BLOCK",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MAX_PRECISION_LOSS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "MAX_WALLET_CAP",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "PRECISION", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "PRICE_PRECISION",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "SECONDS_PER_DAY",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -336,7 +499,31 @@ export interface BondingInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "TOTAL_VESTING_DURATION_DAYS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "TOTAL_VESTING_DURATION_SECONDS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "UPGRADER_ROLE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "USDC_PRECISION",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "VESTING_DURATION_DAYS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "VESTING_DURATION_SECONDS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "activateCircuitBreaker",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -349,6 +536,10 @@ export interface BondingInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "bond", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "bondingThisBlock",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "calculateFVCAmount",
     data: BytesLike
   ): Result;
@@ -357,11 +548,27 @@ export interface BondingInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "circuitBreakerActive",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "completeCurrentRound",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "currentMilestone",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "deactivateCircuitBreaker",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "emergencyShutdownActive",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "emergencyWithdraw",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -387,6 +594,10 @@ export interface BondingInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getCurrentRound",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getEmergencyStatus",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -417,6 +628,14 @@ export interface BondingInterface extends Interface {
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "isLocked", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "lastBondingBlock",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "lastEmergencyOperation",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "markPublicLaunch",
     data: BytesLike
@@ -464,6 +683,10 @@ export interface BondingInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "treasury", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "triggerEmergencyShutdown",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "upgradeToAndCall",
@@ -520,6 +743,63 @@ export namespace BondedEvent {
     usdcAmount: bigint;
     fvcAmount: bigint;
     milestoneIndex: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace CircuitBreakerActivatedEvent {
+  export type InputTuple = [guardian: AddressLike, timestamp: BigNumberish];
+  export type OutputTuple = [guardian: string, timestamp: bigint];
+  export interface OutputObject {
+    guardian: string;
+    timestamp: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace CircuitBreakerDeactivatedEvent {
+  export type InputTuple = [guardian: AddressLike, timestamp: BigNumberish];
+  export type OutputTuple = [guardian: string, timestamp: bigint];
+  export interface OutputObject {
+    guardian: string;
+    timestamp: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace EmergencyShutdownEvent {
+  export type InputTuple = [guardian: AddressLike, timestamp: BigNumberish];
+  export type OutputTuple = [guardian: string, timestamp: bigint];
+  export interface OutputObject {
+    guardian: string;
+    timestamp: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace EmergencyWithdrawalEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    amount: BigNumberish,
+    timestamp: BigNumberish
+  ];
+  export type OutputTuple = [user: string, amount: bigint, timestamp: bigint];
+  export interface OutputObject {
+    user: string;
+    amount: bigint;
+    timestamp: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -743,15 +1023,47 @@ export interface Bonding extends BaseContract {
 
   BONDING_MANAGER_ROLE: TypedContractMethod<[], [string], "view">;
 
+  CLIFF_DURATION_DAYS: TypedContractMethod<[], [bigint], "view">;
+
+  CLIFF_DURATION_SECONDS: TypedContractMethod<[], [bigint], "view">;
+
+  DAYS_PER_YEAR: TypedContractMethod<[], [bigint], "view">;
+
   DEFAULT_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
 
+  EMERGENCY_COOLDOWN: TypedContractMethod<[], [bigint], "view">;
+
+  EMERGENCY_ROLE: TypedContractMethod<[], [string], "view">;
+
+  MAX_BONDING_PER_BLOCK: TypedContractMethod<[], [bigint], "view">;
+
+  MAX_PRECISION_LOSS: TypedContractMethod<[], [bigint], "view">;
+
   MAX_WALLET_CAP: TypedContractMethod<[], [bigint], "view">;
+
+  PRECISION: TypedContractMethod<[], [bigint], "view">;
+
+  PRICE_PRECISION: TypedContractMethod<[], [bigint], "view">;
+
+  SECONDS_PER_DAY: TypedContractMethod<[], [bigint], "view">;
 
   TOTAL_FVC_ALLOCATION: TypedContractMethod<[], [bigint], "view">;
 
   TOTAL_SALE_TARGET: TypedContractMethod<[], [bigint], "view">;
 
+  TOTAL_VESTING_DURATION_DAYS: TypedContractMethod<[], [bigint], "view">;
+
+  TOTAL_VESTING_DURATION_SECONDS: TypedContractMethod<[], [bigint], "view">;
+
   UPGRADER_ROLE: TypedContractMethod<[], [string], "view">;
+
+  USDC_PRECISION: TypedContractMethod<[], [bigint], "view">;
+
+  VESTING_DURATION_DAYS: TypedContractMethod<[], [bigint], "view">;
+
+  VESTING_DURATION_SECONDS: TypedContractMethod<[], [bigint], "view">;
+
+  activateCircuitBreaker: TypedContractMethod<[], [void], "nonpayable">;
 
   allocateFVC: TypedContractMethod<[arg0: BigNumberish], [void], "view">;
 
@@ -762,6 +1074,8 @@ export interface Bonding extends BaseContract {
   >;
 
   bond: TypedContractMethod<[usdcAmount: BigNumberish], [void], "nonpayable">;
+
+  bondingThisBlock: TypedContractMethod<[], [bigint], "view">;
 
   calculateFVCAmount: TypedContractMethod<
     [usdcAmount: BigNumberish],
@@ -775,9 +1089,17 @@ export interface Bonding extends BaseContract {
     "view"
   >;
 
+  circuitBreakerActive: TypedContractMethod<[], [boolean], "view">;
+
   completeCurrentRound: TypedContractMethod<[], [void], "view">;
 
   currentMilestone: TypedContractMethod<[], [bigint], "view">;
+
+  deactivateCircuitBreaker: TypedContractMethod<[], [void], "nonpayable">;
+
+  emergencyShutdownActive: TypedContractMethod<[], [boolean], "view">;
+
+  emergencyWithdraw: TypedContractMethod<[], [void], "nonpayable">;
 
   endPrivateSale: TypedContractMethod<[], [void], "nonpayable">;
 
@@ -800,6 +1122,18 @@ export interface Bonding extends BaseContract {
   getCurrentPrice: TypedContractMethod<[], [bigint], "view">;
 
   getCurrentRound: TypedContractMethod<[], [bigint], "view">;
+
+  getEmergencyStatus: TypedContractMethod<
+    [],
+    [
+      [boolean, boolean, bigint] & {
+        circuitBreaker: boolean;
+        emergencyShutdown: boolean;
+        lastEmergencyOperation: bigint;
+      }
+    ],
+    "view"
+  >;
 
   getNextMilestone: TypedContractMethod<
     [],
@@ -855,6 +1189,10 @@ export interface Bonding extends BaseContract {
   >;
 
   isLocked: TypedContractMethod<[user: AddressLike], [boolean], "view">;
+
+  lastBondingBlock: TypedContractMethod<[], [bigint], "view">;
+
+  lastEmergencyOperation: TypedContractMethod<[], [bigint], "view">;
 
   markPublicLaunch: TypedContractMethod<[], [void], "view">;
 
@@ -912,6 +1250,8 @@ export interface Bonding extends BaseContract {
 
   treasury: TypedContractMethod<[], [string], "view">;
 
+  triggerEmergencyShutdown: TypedContractMethod<[], [void], "nonpayable">;
+
   upgradeTo: TypedContractMethod<
     [newImplementation: AddressLike],
     [void],
@@ -942,10 +1282,40 @@ export interface Bonding extends BaseContract {
     nameOrSignature: "BONDING_MANAGER_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "CLIFF_DURATION_DAYS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "CLIFF_DURATION_SECONDS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "DAYS_PER_YEAR"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "DEFAULT_ADMIN_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "EMERGENCY_COOLDOWN"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "EMERGENCY_ROLE"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "MAX_BONDING_PER_BLOCK"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "MAX_PRECISION_LOSS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "MAX_WALLET_CAP"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "PRECISION"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "PRICE_PRECISION"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "SECONDS_PER_DAY"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "TOTAL_FVC_ALLOCATION"
@@ -954,8 +1324,26 @@ export interface Bonding extends BaseContract {
     nameOrSignature: "TOTAL_SALE_TARGET"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+    nameOrSignature: "TOTAL_VESTING_DURATION_DAYS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "TOTAL_VESTING_DURATION_SECONDS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "UPGRADER_ROLE"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "USDC_PRECISION"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "VESTING_DURATION_DAYS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "VESTING_DURATION_SECONDS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "activateCircuitBreaker"
+  ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "allocateFVC"
   ): TypedContractMethod<[arg0: BigNumberish], [void], "view">;
@@ -970,17 +1358,32 @@ export interface Bonding extends BaseContract {
     nameOrSignature: "bond"
   ): TypedContractMethod<[usdcAmount: BigNumberish], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "bondingThisBlock"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "calculateFVCAmount"
   ): TypedContractMethod<[usdcAmount: BigNumberish], [bigint], "view">;
   getFunction(
     nameOrSignature: "calculateUSDCAmount"
   ): TypedContractMethod<[arg0: BigNumberish], [bigint], "view">;
   getFunction(
+    nameOrSignature: "circuitBreakerActive"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
     nameOrSignature: "completeCurrentRound"
   ): TypedContractMethod<[], [void], "view">;
   getFunction(
     nameOrSignature: "currentMilestone"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "deactivateCircuitBreaker"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "emergencyShutdownActive"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "emergencyWithdraw"
+  ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "endPrivateSale"
   ): TypedContractMethod<[], [void], "nonpayable">;
@@ -1002,6 +1405,19 @@ export interface Bonding extends BaseContract {
   getFunction(
     nameOrSignature: "getCurrentRound"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getEmergencyStatus"
+  ): TypedContractMethod<
+    [],
+    [
+      [boolean, boolean, bigint] & {
+        circuitBreaker: boolean;
+        emergencyShutdown: boolean;
+        lastEmergencyOperation: bigint;
+      }
+    ],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "getNextMilestone"
   ): TypedContractMethod<[], [IBonding.MilestoneStructOutput], "view">;
@@ -1063,6 +1479,12 @@ export interface Bonding extends BaseContract {
   getFunction(
     nameOrSignature: "isLocked"
   ): TypedContractMethod<[user: AddressLike], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "lastBondingBlock"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "lastEmergencyOperation"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "markPublicLaunch"
   ): TypedContractMethod<[], [void], "view">;
@@ -1126,6 +1548,9 @@ export interface Bonding extends BaseContract {
     nameOrSignature: "treasury"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "triggerEmergencyShutdown"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "upgradeTo"
   ): TypedContractMethod<
     [newImplementation: AddressLike],
@@ -1173,6 +1598,34 @@ export interface Bonding extends BaseContract {
     BondedEvent.InputTuple,
     BondedEvent.OutputTuple,
     BondedEvent.OutputObject
+  >;
+  getEvent(
+    key: "CircuitBreakerActivated"
+  ): TypedContractEvent<
+    CircuitBreakerActivatedEvent.InputTuple,
+    CircuitBreakerActivatedEvent.OutputTuple,
+    CircuitBreakerActivatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "CircuitBreakerDeactivated"
+  ): TypedContractEvent<
+    CircuitBreakerDeactivatedEvent.InputTuple,
+    CircuitBreakerDeactivatedEvent.OutputTuple,
+    CircuitBreakerDeactivatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "EmergencyShutdown"
+  ): TypedContractEvent<
+    EmergencyShutdownEvent.InputTuple,
+    EmergencyShutdownEvent.OutputTuple,
+    EmergencyShutdownEvent.OutputObject
+  >;
+  getEvent(
+    key: "EmergencyWithdrawal"
+  ): TypedContractEvent<
+    EmergencyWithdrawalEvent.InputTuple,
+    EmergencyWithdrawalEvent.OutputTuple,
+    EmergencyWithdrawalEvent.OutputObject
   >;
   getEvent(
     key: "FVCAllocated"
@@ -1277,6 +1730,50 @@ export interface Bonding extends BaseContract {
       BondedEvent.InputTuple,
       BondedEvent.OutputTuple,
       BondedEvent.OutputObject
+    >;
+
+    "CircuitBreakerActivated(address,uint256)": TypedContractEvent<
+      CircuitBreakerActivatedEvent.InputTuple,
+      CircuitBreakerActivatedEvent.OutputTuple,
+      CircuitBreakerActivatedEvent.OutputObject
+    >;
+    CircuitBreakerActivated: TypedContractEvent<
+      CircuitBreakerActivatedEvent.InputTuple,
+      CircuitBreakerActivatedEvent.OutputTuple,
+      CircuitBreakerActivatedEvent.OutputObject
+    >;
+
+    "CircuitBreakerDeactivated(address,uint256)": TypedContractEvent<
+      CircuitBreakerDeactivatedEvent.InputTuple,
+      CircuitBreakerDeactivatedEvent.OutputTuple,
+      CircuitBreakerDeactivatedEvent.OutputObject
+    >;
+    CircuitBreakerDeactivated: TypedContractEvent<
+      CircuitBreakerDeactivatedEvent.InputTuple,
+      CircuitBreakerDeactivatedEvent.OutputTuple,
+      CircuitBreakerDeactivatedEvent.OutputObject
+    >;
+
+    "EmergencyShutdown(address,uint256)": TypedContractEvent<
+      EmergencyShutdownEvent.InputTuple,
+      EmergencyShutdownEvent.OutputTuple,
+      EmergencyShutdownEvent.OutputObject
+    >;
+    EmergencyShutdown: TypedContractEvent<
+      EmergencyShutdownEvent.InputTuple,
+      EmergencyShutdownEvent.OutputTuple,
+      EmergencyShutdownEvent.OutputObject
+    >;
+
+    "EmergencyWithdrawal(address,uint256,uint256)": TypedContractEvent<
+      EmergencyWithdrawalEvent.InputTuple,
+      EmergencyWithdrawalEvent.OutputTuple,
+      EmergencyWithdrawalEvent.OutputObject
+    >;
+    EmergencyWithdrawal: TypedContractEvent<
+      EmergencyWithdrawalEvent.InputTuple,
+      EmergencyWithdrawalEvent.OutputTuple,
+      EmergencyWithdrawalEvent.OutputObject
     >;
 
     "FVCAllocated(uint256,uint256)": TypedContractEvent<

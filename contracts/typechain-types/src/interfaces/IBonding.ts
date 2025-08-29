@@ -62,23 +62,33 @@ export declare namespace IBonding {
 export interface IBondingInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "activateCircuitBreaker"
       | "bond"
+      | "bondingThisBlock"
       | "calculateFVCAmount"
+      | "circuitBreakerActive"
       | "currentMilestone"
+      | "deactivateCircuitBreaker"
+      | "emergencyShutdownActive"
+      | "emergencyWithdraw"
       | "endPrivateSale"
       | "getAllMilestones"
       | "getCurrentMilestone"
       | "getCurrentPrice"
+      | "getEmergencyStatus"
       | "getNextMilestone"
       | "getRemainingFVC"
       | "getSaleProgress"
       | "getVestedAmount"
       | "getVestingSchedule"
       | "isLocked"
+      | "lastBondingBlock"
+      | "lastEmergencyOperation"
       | "privateSaleActive"
       | "startPrivateSale"
       | "totalBonded"
       | "totalFVCSold"
+      | "triggerEmergencyShutdown"
       | "userBonded"
       | "vestingSchedules"
   ): FunctionFragment;
@@ -93,13 +103,37 @@ export interface IBondingInterface extends Interface {
       | "VestingScheduleCreated"
   ): EventFragment;
 
+  encodeFunctionData(
+    functionFragment: "activateCircuitBreaker",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "bond", values: [BigNumberish]): string;
+  encodeFunctionData(
+    functionFragment: "bondingThisBlock",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "calculateFVCAmount",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "circuitBreakerActive",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "currentMilestone",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "deactivateCircuitBreaker",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "emergencyShutdownActive",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "emergencyWithdraw",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -116,6 +150,10 @@ export interface IBondingInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getCurrentPrice",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getEmergencyStatus",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -143,6 +181,14 @@ export interface IBondingInterface extends Interface {
     values: [AddressLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "lastBondingBlock",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "lastEmergencyOperation",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "privateSaleActive",
     values?: undefined
   ): string;
@@ -159,6 +205,10 @@ export interface IBondingInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "triggerEmergencyShutdown",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "userBonded",
     values: [AddressLike]
   ): string;
@@ -167,13 +217,37 @@ export interface IBondingInterface extends Interface {
     values: [AddressLike]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "activateCircuitBreaker",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "bond", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "bondingThisBlock",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "calculateFVCAmount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "circuitBreakerActive",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "currentMilestone",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "deactivateCircuitBreaker",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "emergencyShutdownActive",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "emergencyWithdraw",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -190,6 +264,10 @@ export interface IBondingInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getCurrentPrice",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getEmergencyStatus",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -214,6 +292,14 @@ export interface IBondingInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "isLocked", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "lastBondingBlock",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "lastEmergencyOperation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "privateSaleActive",
     data: BytesLike
   ): Result;
@@ -227,6 +313,10 @@ export interface IBondingInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "totalFVCSold",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "triggerEmergencyShutdown",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "userBonded", data: BytesLike): Result;
@@ -393,7 +483,11 @@ export interface IBonding extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  activateCircuitBreaker: TypedContractMethod<[], [void], "nonpayable">;
+
   bond: TypedContractMethod<[usdcAmount: BigNumberish], [void], "nonpayable">;
+
+  bondingThisBlock: TypedContractMethod<[], [bigint], "view">;
 
   calculateFVCAmount: TypedContractMethod<
     [usdcAmount: BigNumberish],
@@ -401,7 +495,15 @@ export interface IBonding extends BaseContract {
     "view"
   >;
 
+  circuitBreakerActive: TypedContractMethod<[], [boolean], "view">;
+
   currentMilestone: TypedContractMethod<[], [bigint], "view">;
+
+  deactivateCircuitBreaker: TypedContractMethod<[], [void], "nonpayable">;
+
+  emergencyShutdownActive: TypedContractMethod<[], [boolean], "view">;
+
+  emergencyWithdraw: TypedContractMethod<[], [void], "nonpayable">;
 
   endPrivateSale: TypedContractMethod<[], [void], "nonpayable">;
 
@@ -418,6 +520,18 @@ export interface IBonding extends BaseContract {
   >;
 
   getCurrentPrice: TypedContractMethod<[], [bigint], "view">;
+
+  getEmergencyStatus: TypedContractMethod<
+    [],
+    [
+      [boolean, boolean, bigint] & {
+        circuitBreaker: boolean;
+        emergencyShutdown: boolean;
+        lastEmergencyOperation: bigint;
+      }
+    ],
+    "view"
+  >;
 
   getNextMilestone: TypedContractMethod<
     [],
@@ -454,6 +568,10 @@ export interface IBonding extends BaseContract {
 
   isLocked: TypedContractMethod<[user: AddressLike], [boolean], "view">;
 
+  lastBondingBlock: TypedContractMethod<[], [bigint], "view">;
+
+  lastEmergencyOperation: TypedContractMethod<[], [bigint], "view">;
+
   privateSaleActive: TypedContractMethod<[], [boolean], "view">;
 
   startPrivateSale: TypedContractMethod<
@@ -465,6 +583,8 @@ export interface IBonding extends BaseContract {
   totalBonded: TypedContractMethod<[], [bigint], "view">;
 
   totalFVCSold: TypedContractMethod<[], [bigint], "view">;
+
+  triggerEmergencyShutdown: TypedContractMethod<[], [void], "nonpayable">;
 
   userBonded: TypedContractMethod<[user: AddressLike], [bigint], "view">;
 
@@ -479,14 +599,32 @@ export interface IBonding extends BaseContract {
   ): T;
 
   getFunction(
+    nameOrSignature: "activateCircuitBreaker"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "bond"
   ): TypedContractMethod<[usdcAmount: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "bondingThisBlock"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "calculateFVCAmount"
   ): TypedContractMethod<[usdcAmount: BigNumberish], [bigint], "view">;
   getFunction(
+    nameOrSignature: "circuitBreakerActive"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
     nameOrSignature: "currentMilestone"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "deactivateCircuitBreaker"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "emergencyShutdownActive"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "emergencyWithdraw"
+  ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "endPrivateSale"
   ): TypedContractMethod<[], [void], "nonpayable">;
@@ -499,6 +637,19 @@ export interface IBonding extends BaseContract {
   getFunction(
     nameOrSignature: "getCurrentPrice"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "getEmergencyStatus"
+  ): TypedContractMethod<
+    [],
+    [
+      [boolean, boolean, bigint] & {
+        circuitBreaker: boolean;
+        emergencyShutdown: boolean;
+        lastEmergencyOperation: bigint;
+      }
+    ],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "getNextMilestone"
   ): TypedContractMethod<[], [IBonding.MilestoneStructOutput], "view">;
@@ -537,6 +688,12 @@ export interface IBonding extends BaseContract {
     nameOrSignature: "isLocked"
   ): TypedContractMethod<[user: AddressLike], [boolean], "view">;
   getFunction(
+    nameOrSignature: "lastBondingBlock"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "lastEmergencyOperation"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "privateSaleActive"
   ): TypedContractMethod<[], [boolean], "view">;
   getFunction(
@@ -548,6 +705,9 @@ export interface IBonding extends BaseContract {
   getFunction(
     nameOrSignature: "totalFVCSold"
   ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "triggerEmergencyShutdown"
+  ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "userBonded"
   ): TypedContractMethod<[user: AddressLike], [bigint], "view">;

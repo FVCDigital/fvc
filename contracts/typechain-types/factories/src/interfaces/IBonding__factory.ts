@@ -154,6 +154,13 @@ const _abi = [
     type: "event",
   },
   {
+    inputs: [],
+    name: "activateCircuitBreaker",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "uint256",
@@ -164,6 +171,19 @@ const _abi = [
     name: "bond",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "bondingThisBlock",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -187,6 +207,19 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "circuitBreakerActive",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "currentMilestone",
     outputs: [
       {
@@ -196,6 +229,33 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "deactivateCircuitBreaker",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "emergencyShutdownActive",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "emergencyWithdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -292,6 +352,29 @@ const _abi = [
       {
         internalType: "uint256",
         name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getEmergencyStatus",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "circuitBreaker",
+        type: "bool",
+      },
+      {
+        internalType: "bool",
+        name: "emergencyShutdown",
+        type: "bool",
+      },
+      {
+        internalType: "uint256",
+        name: "lastEmergencyOperation",
         type: "uint256",
       },
     ],
@@ -460,6 +543,32 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "lastBondingBlock",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "lastEmergencyOperation",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "privateSaleActive",
     outputs: [
       {
@@ -508,6 +617,13 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "triggerEmergencyShutdown",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
