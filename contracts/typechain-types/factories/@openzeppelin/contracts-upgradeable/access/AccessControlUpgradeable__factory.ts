@@ -10,44 +10,13 @@ import type {
 
 const _abi = [
   {
-    inputs: [],
-    name: "AccessControlBadConfirmation",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "account",
-        type: "address",
-      },
-      {
-        internalType: "bytes32",
-        name: "neededRole",
-        type: "bytes32",
-      },
-    ],
-    name: "AccessControlUnauthorizedAccount",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "InvalidInitialization",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "NotInitializing",
-    type: "error",
-  },
-  {
     anonymous: false,
     inputs: [
       {
         indexed: false,
-        internalType: "uint64",
+        internalType: "uint8",
         name: "version",
-        type: "uint64",
+        type: "uint8",
       },
     ],
     name: "Initialized",
@@ -211,7 +180,7 @@ const _abi = [
       },
       {
         internalType: "address",
-        name: "callerConfirmation",
+        name: "account",
         type: "address",
       },
     ],
