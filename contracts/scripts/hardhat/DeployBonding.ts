@@ -14,7 +14,7 @@ async function main() {
     console.log("-".repeat(40));
 
     const FVC = await ethers.getContractFactory("FVC");
-    const fvc = await FVC.deploy(deployer.address);
+    const fvc = await FVC.deploy("First Venture Capital", "FVC", deployer.address);
     await fvc.waitForDeployment();
     
     const fvcAddress = await fvc.getAddress();
