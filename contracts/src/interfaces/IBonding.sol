@@ -185,4 +185,42 @@ interface IBonding {
     
     /// @notice Mapping of user address to vesting schedule
     function vestingSchedules(address user) external view returns (VestingSchedule memory);
+    
+    // ============ EMERGENCY FUNCTIONS ============
+    
+    /// @notice Activate circuit breaker
+    function activateCircuitBreaker() external;
+    
+    /// @notice Deactivate circuit breaker
+    function deactivateCircuitBreaker() external;
+    
+    /// @notice Trigger emergency shutdown
+    function triggerEmergencyShutdown() external;
+    
+    /// @notice Emergency withdrawal for users
+    function emergencyWithdraw() external;
+    
+    /// @notice Get emergency status
+    function getEmergencyStatus() external view returns (
+        bool circuitBreaker,
+        bool emergencyShutdown,
+        uint256 lastEmergencyOperation
+    );
+    
+    // ============ CIRCUIT BREAKER STATE ============
+    
+    /// @notice Circuit breaker active flag
+    function circuitBreakerActive() external view returns (bool);
+    
+    /// @notice Emergency shutdown active flag
+    function emergencyShutdownActive() external view returns (bool);
+    
+    /// @notice Current block bonding amount
+    function bondingThisBlock() external view returns (uint256);
+    
+    /// @notice Last block number for bonding tracking
+    function lastBondingBlock() external view returns (uint256);
+    
+    /// @notice Last emergency operation timestamp
+    function lastEmergencyOperation() external view returns (uint256);
 } 
