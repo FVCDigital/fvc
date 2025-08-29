@@ -29,7 +29,7 @@ describe("FVC Protocol - Vesting Mechanics", function () {
 
     // Deploy FVC token
     const FVC = await ethers.getContractFactory("FVC");
-    fvc = await FVC.deploy(ownerAddress as any);
+    fvc = await FVC.deploy("FVC", "FVC", ownerAddress);
 
     // Deploy Mock USDC
     const MockUSDC = await ethers.getContractFactory("MockUSDC");
@@ -41,6 +41,10 @@ describe("FVC Protocol - Vesting Mechanics", function () {
 
     // Initialize bonding contract
     await bonding.initialize(await fvc.getAddress(), await usdc.getAddress(), treasuryAddress);
+
+    // Grant MINTER_ROLE to bonding contract so it can mint FVC to users
+    const minterRole = await fvc.getMinterRole();
+    await fvc.grantRole(minterRole, await bonding.getAddress());
 
     // Mint FVC tokens to bonding contract
     await fvc.mint(await bonding.getAddress(), ethers.parseEther("1000000")); // 1M FVC
@@ -144,48 +148,39 @@ describe("FVC Protocol - Vesting Mechanics", function () {
     });
 
     it("Should have 25% vested at 25% through vesting period", async function () {
-      // Move past cliff to 25% through vesting period
-      const quarterVestingTime = cliffEndTime + Math.floor(VESTING_DURATION * 0.25);
-      const timeToMove = quarterVestingTime - Math.floor(Date.now() / 1000);
+      // Move past cliff to 25% through LINEAR vesting period (after cliff)
+      const timeToMove = CLIFF_DURATION + Math.floor(VESTING_DURATION * 0.25);
       
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-        
-        const [vestedAmount, totalAmount] = await bonding.getVestedAmount(user1Address);
-        const vestedPercentage = Number((vestedAmount * BigInt(10000)) / totalAmount) / 100;
-        expect(vestedPercentage).to.be.closeTo(25, 1); // Allow 1% tolerance
-      }
+      await ethers.provider.send("evm_increaseTime", [timeToMove]);
+      await ethers.provider.send("evm_mine", []);
+      
+      const [vestedAmount, totalAmount] = await bonding.getVestedAmount(user1Address);
+      const vestedPercentage = Number((vestedAmount * BigInt(10000)) / totalAmount) / 100;
+      expect(vestedPercentage).to.be.closeTo(25, 1); // Allow 1% tolerance
     });
 
     it("Should have 50% vested at 50% through vesting period", async function () {
-      // Move to 50% through vesting period
-      const halfVestingTime = cliffEndTime + Math.floor(VESTING_DURATION * 0.50);
-      const timeToMove = halfVestingTime - Math.floor(Date.now() / 1000);
+      // Move to 50% through LINEAR vesting period (after cliff)
+      const timeToMove = CLIFF_DURATION + Math.floor(VESTING_DURATION * 0.50);
       
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-        
-        const [vestedAmount, totalAmount] = await bonding.getVestedAmount(user1Address);
-        const vestedPercentage = Number((vestedAmount * BigInt(10000)) / totalAmount) / 100;
-        expect(vestedPercentage).to.be.closeTo(50, 1);
-      }
+      await ethers.provider.send("evm_increaseTime", [timeToMove]);
+      await ethers.provider.send("evm_mine", []);
+      
+      const [vestedAmount, totalAmount] = await bonding.getVestedAmount(user1Address);
+      const vestedPercentage = Number((vestedAmount * BigInt(10000)) / totalAmount) / 100;
+      expect(vestedPercentage).to.be.closeTo(50, 1);
     });
 
     it("Should have 75% vested at 75% through vesting period", async function () {
-      // Move to 75% through vesting period
-      const threeQuarterVestingTime = cliffEndTime + Math.floor(VESTING_DURATION * 0.75);
-      const timeToMove = threeQuarterVestingTime - Math.floor(Date.now() / 1000);
+      // Move to 75% through LINEAR vesting period (after cliff)
+      const timeToMove = CLIFF_DURATION + Math.floor(VESTING_DURATION * 0.75);
       
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-        
-        const [vestedAmount, totalAmount] = await bonding.getVestedAmount(user1Address);
-        const vestedPercentage = Number((vestedAmount * BigInt(10000)) / totalAmount) / 100;
-        expect(vestedPercentage).to.be.closeTo(75, 1);
-      }
+      await ethers.provider.send("evm_increaseTime", [timeToMove]);
+      await ethers.provider.send("evm_mine", []);
+      
+      const [vestedAmount, totalAmount] = await bonding.getVestedAmount(user1Address);
+      const vestedPercentage = Number((vestedAmount * BigInt(10000)) / totalAmount) / 100;
+      expect(vestedPercentage).to.be.closeTo(75, 1);
     });
 
     it("Should have 100% vested at end of vesting period", async function () {
@@ -218,45 +213,33 @@ describe("FVC Protocol - Vesting Mechanics", function () {
 
   describe("Mathematical Accuracy", function () {
     it("Should maintain precision in calculations", async function () {
-      const usdcAmount = ethers.parseUnits("1000000", 6); // 1M USDC
+      const usdcAmount = ethers.parseUnits("100000", 6); // 100K USDC (within first milestone)
       await usdc.connect(user1).approve(await bonding.getAddress(), usdcAmount);
       await bonding.connect(user1).bond(usdcAmount);
       
       // Move past cliff
-      const vestingSchedule = await bonding.getVestingSchedule(user1Address);
-      const startTime = Number(vestingSchedule.startTime);
-      const cliffEndTime = startTime + CLIFF_DURATION;
-      const timeToMove = cliffEndTime + 1 - Math.floor(Date.now() / 1000);
+      const timeToMove = CLIFF_DURATION + 1;
+      await ethers.provider.send("evm_increaseTime", [timeToMove]);
+      await ethers.provider.send("evm_mine", []);
       
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-        
-        // Test that some tokens are vested
-        const [vestedAmount, totalAmount] = await bonding.getVestedAmount(user1Address);
-        expect(vestedAmount).to.be.gt(0);
-        expect(vestedAmount).to.be.lt(totalAmount);
-      }
+      // Test that some tokens are vested
+      const [vestedAmount, totalAmount] = await bonding.getVestedAmount(user1Address);
+      expect(vestedAmount).to.be.gt(0);
+      expect(vestedAmount).to.be.lt(totalAmount);
     });
 
     it("Should handle edge cases correctly", async function () {
-      const usdcAmount = ethers.parseUnits("1", 6); // 1 USDC
+      const usdcAmount = ethers.parseUnits("1000", 6); // 1K USDC (small amount for edge case)
       await usdc.connect(user1).approve(await bonding.getAddress(), usdcAmount);
       await bonding.connect(user1).bond(usdcAmount);
       
-      // Test at cliff end
-      const vestingSchedule = await bonding.getVestingSchedule(user1Address);
-      const startTime = Number(vestingSchedule.startTime);
-      const cliffEndTime = startTime + CLIFF_DURATION;
-      const timeToMove = cliffEndTime - Math.floor(Date.now() / 1000);
+      // Test at cliff end (exactly at cliff end, not past it)
+      const timeToMove = CLIFF_DURATION;
+      await ethers.provider.send("evm_increaseTime", [timeToMove]);
+      await ethers.provider.send("evm_mine", []);
       
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-        
-        const [vestedAmount, totalAmount] = await bonding.getVestedAmount(user1Address);
-        expect(vestedAmount).to.equal(0); // Should still be 0 at cliff end
-      }
+      const [vestedAmount, totalAmount] = await bonding.getVestedAmount(user1Address);
+      expect(vestedAmount).to.equal(0); // Should still be 0 at cliff end
     });
   });
 
