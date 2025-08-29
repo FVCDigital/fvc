@@ -54,16 +54,17 @@ describe("FVCVesting Contract", function () {
   describe("Vesting Schedule Creation", function () {
     it("should create vesting schedule correctly", async () => {
       const amount = ethers.parseEther("10000"); // 10k FVC
-      const startTime = Math.floor(Date.now() / 1000);
       
       await vesting.connect(saleContract).createVestingSchedule(beneficiary.address, amount);
       
       const schedule = await vesting.vestingSchedules(beneficiary.address);
       expect(schedule.totalAmount).to.equal(amount);
       expect(schedule.releasedAmount).to.equal(0);
-      expect(schedule.startTime).to.be.closeTo(startTime, 5); // Allow 5 second variance
-      expect(schedule.cliffTime).to.be.closeTo(startTime + CLIFF_DURATION, 5);
-      expect(schedule.endTime).to.be.closeTo(startTime + TOTAL_DURATION, 5);
+      expect(schedule.startTime).to.be.gt(0);
+      
+      // Check relative timing instead of absolute
+      expect(schedule.cliffTime).to.equal(schedule.startTime + BigInt(CLIFF_DURATION));
+      expect(schedule.endTime).to.equal(schedule.startTime + BigInt(TOTAL_DURATION));
     });
 
     it("should fail if beneficiary is zero address", async () => {
@@ -141,11 +142,9 @@ describe("FVCVesting Contract", function () {
 
     it("should have 25% vested at 25% through vesting period", async () => {
       // Move to 25% through vesting period (6 months after cliff)
-      const timeToMove = cliffTime + (VESTING_DURATION * 25 / 100) - Math.floor(Date.now() / 1000);
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-      }
+      const targetTime = cliffTime + Math.floor(VESTING_DURATION * 25 / 100);
+      await ethers.provider.send("evm_setNextBlockTimestamp", [targetTime]);
+      await ethers.provider.send("evm_mine", []);
       
       const vestedAmount = await vesting.calculateVestedAmount(beneficiary.address);
       const expectedVested = ethers.parseEther("2500"); // 25% of 10k
@@ -154,11 +153,9 @@ describe("FVCVesting Contract", function () {
 
     it("should have 50% vested at 50% through vesting period", async () => {
       // Move to 50% through vesting period (12 months after cliff)
-      const timeToMove = cliffTime + (VESTING_DURATION * 50 / 100) - Math.floor(Date.now() / 1000);
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-      }
+      const targetTime = cliffTime + Math.floor(VESTING_DURATION * 50 / 100);
+      await ethers.provider.send("evm_setNextBlockTimestamp", [targetTime]);
+      await ethers.provider.send("evm_mine", []);
       
       const vestedAmount = await vesting.calculateVestedAmount(beneficiary.address);
       const expectedVested = ethers.parseEther("5000"); // 50% of 10k
@@ -167,11 +164,9 @@ describe("FVCVesting Contract", function () {
 
     it("should have 75% vested at 75% through vesting period", async () => {
       // Move to 75% through vesting period (18 months after cliff)
-      const timeToMove = cliffTime + (VESTING_DURATION * 75 / 100) - Math.floor(Date.now() / 1000);
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-      }
+      const targetTime = cliffTime + Math.floor(VESTING_DURATION * 75 / 100);
+      await ethers.provider.send("evm_setNextBlockTimestamp", [targetTime]);
+      await ethers.provider.send("evm_mine", []);
       
       const vestedAmount = await vesting.calculateVestedAmount(beneficiary.address);
       const expectedVested = ethers.parseEther("7500"); // 75% of 10k
@@ -180,11 +175,9 @@ describe("FVCVesting Contract", function () {
 
     it("should have 100% vested at end of vesting period", async () => {
       // Move to end of vesting period
-      const timeToMove = endTime - Math.floor(Date.now() / 1000);
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-      }
+      const targetTime = cliffTime + VESTING_DURATION;
+      await ethers.provider.send("evm_setNextBlockTimestamp", [targetTime]);
+      await ethers.provider.send("evm_mine", []);
       
       const vestedAmount = await vesting.calculateVestedAmount(beneficiary.address);
       const expectedVested = ethers.parseEther("10000"); // 100% of 10k
@@ -193,11 +186,9 @@ describe("FVCVesting Contract", function () {
 
     it("should calculate progress correctly during vesting", async () => {
       // Move to 30% through vesting period
-      const timeToMove = cliffTime + (VESTING_DURATION * 30 / 100) - Math.floor(Date.now() / 1000);
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-      }
+      const targetTime = cliffTime + Math.floor(VESTING_DURATION * 30 / 100);
+      await ethers.provider.send("evm_setNextBlockTimestamp", [targetTime]);
+      await ethers.provider.send("evm_mine", []);
       
       const progress = await vesting.getVestingProgress(beneficiary.address);
       expect(progress).to.equal(30);
@@ -205,11 +196,9 @@ describe("FVCVesting Contract", function () {
 
     it("should identify cliff has passed", async () => {
       // Move past cliff
-      const timeToMove = cliffTime + 1 - Math.floor(Date.now() / 1000);
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-      }
+      const targetTime = cliffTime + 1;
+      await ethers.provider.send("evm_setNextBlockTimestamp", [targetTime]);
+      await ethers.provider.send("evm_mine", []);
       
       const cliffPassed = await vesting.isCliffPassed(beneficiary.address);
       expect(cliffPassed).to.be.true;
@@ -226,11 +215,9 @@ describe("FVCVesting Contract", function () {
       // Move to 25% through vesting period
       const schedule = await vesting.vestingSchedules(beneficiary.address);
       const cliffTime = Number(schedule.cliffTime);
-      const timeToMove = cliffTime + (VESTING_DURATION * 25 / 100) - Math.floor(Date.now() / 1000);
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-      }
+      const targetTime = cliffTime + Math.floor(VESTING_DURATION * 25 / 100);
+      await ethers.provider.send("evm_setNextBlockTimestamp", [targetTime]);
+      await ethers.provider.send("evm_mine", []);
       
       // Release tokens
       await vesting.connect(beneficiary).release();
@@ -245,11 +232,9 @@ describe("FVCVesting Contract", function () {
       // Move to 50% through vesting period
       const schedule = await vesting.vestingSchedules(beneficiary.address);
       const cliffTime = Number(schedule.cliffTime);
-      const timeToMove = cliffTime + (VESTING_DURATION * 50 / 100) - Math.floor(Date.now() / 1000);
-      if (timeToMove > 1000) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-      }
+      const targetTime = cliffTime + Math.floor(VESTING_DURATION * 50 / 100);
+      await ethers.provider.send("evm_setNextBlockTimestamp", [targetTime]);
+      await ethers.provider.send("evm_mine", []);
       
       // Release tokens
       await vesting.connect(beneficiary).release();
@@ -268,11 +253,9 @@ describe("FVCVesting Contract", function () {
       // Move past cliff
       const schedule = await vesting.vestingSchedules(beneficiary.address);
       const cliffTime = Number(schedule.cliffTime);
-      const timeToMove = cliffTime + 1 - Math.floor(Date.now() / 1000);
-      if (timeToMove > 0) {
-        await ethers.provider.send("evm_increaseTime", [timeToMove]);
-        await ethers.provider.send("evm_mine", []);
-      }
+      const targetTime = cliffTime + 1;
+      await ethers.provider.send("evm_setNextBlockTimestamp", [targetTime]);
+      await ethers.provider.send("evm_mine", []);
       
       // Test that some tokens are vested
       const vestedAmount = await vesting.calculateVestedAmount(beneficiary.address);

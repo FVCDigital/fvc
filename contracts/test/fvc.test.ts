@@ -9,9 +9,7 @@ describe("FVC Token", function () {
   beforeEach(async () => {
     [admin, user] = await ethers.getSigners();
     const FVC = await ethers.getContractFactory("FVC");
-    fvc = await upgrades.deployProxy(FVC, ["First Venture Capital", "FVC", admin.address], {
-      initializer: "initialize"
-    });
+    fvc = await FVC.deploy("First Venture Capital", "FVC", admin.address);
     await fvc.waitForDeployment();
   });
 
@@ -21,7 +19,7 @@ describe("FVC Token", function () {
   });
 
   it("admin should have MINTER_ROLE", async () => {
-    const role = await fvc.MINTER_ROLE();
+    const role = await fvc.getMinterRole();
     expect(await fvc.hasRole(role, admin.address)).to.be.true;
   });
 
