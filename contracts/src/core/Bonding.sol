@@ -27,6 +27,9 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
     /// @notice Role for upgrading the contract
     bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
     
+    /// @notice Role for emergency operations
+    bytes32 public constant EMERGENCY_ROLE = keccak256("EMERGENCY_ROLE");
+    
     /// @notice Maximum wallet cap for private sale (2M USDC)
     uint256 public constant MAX_WALLET_CAP = 2_000_000 * 1e6; // 2M USDC in 6 decimals
     
@@ -35,6 +38,30 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
     
     /// @notice Total FVC tokens for private sale (225M FVC)
     uint256 public constant TOTAL_FVC_ALLOCATION = 225_000_000 * 1e18; // 225M FVC in 18 decimals
+    
+    // ============ TIME CONSTANTS (Industry Standard) ============
+    
+    /// @notice Standard time constants using industry best practices
+    uint256 public constant SECONDS_PER_DAY = 86400;
+    uint256 public constant DAYS_PER_YEAR = 365;
+    uint256 public constant CLIFF_DURATION_DAYS = 365; // 12 months
+    uint256 public constant VESTING_DURATION_DAYS = 730; // 24 months
+    uint256 public constant TOTAL_VESTING_DURATION_DAYS = CLIFF_DURATION_DAYS + VESTING_DURATION_DAYS; // 36 months
+    
+    /// @notice Convert days to seconds with proper precision
+    uint256 public constant CLIFF_DURATION_SECONDS = CLIFF_DURATION_DAYS * SECONDS_PER_DAY;
+    uint256 public constant VESTING_DURATION_SECONDS = VESTING_DURATION_DAYS * SECONDS_PER_DAY;
+    uint256 public constant TOTAL_VESTING_DURATION_SECONDS = TOTAL_VESTING_DURATION_DAYS * SECONDS_PER_DAY;
+    
+    // ============ PRECISION CONSTANTS (Industry Standard) ============
+    
+    /// @notice Precision constants for mathematical calculations
+    uint256 public constant PRECISION = 1e18;
+    uint256 public constant PRICE_PRECISION = 1e3; // Price stored as 25 = $0.025
+    uint256 public constant USDC_PRECISION = 1e6;
+    
+    /// @notice Maximum precision loss tolerance (0.01%)
+    uint256 public constant MAX_PRECISION_LOSS = 1e14; // 0.01% of 1e18
 
     // ============ CUSTOM ERRORS ============
     
@@ -61,6 +88,18 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
     
     /// @notice Error thrown when milestone is invalid
     error Bonding__InvalidMilestone();
+    
+    /// @notice Error thrown when circuit breaker is active
+    error Bonding__CircuitBreakerActive();
+    
+    /// @notice Error thrown when emergency shutdown is active
+    error Bonding__EmergencyShutdownActive();
+    
+    /// @notice Error thrown when mathematical calculation fails
+    error Bonding__CalculationError();
+    
+    /// @notice Error thrown when precision loss is too high
+    error Bonding__PrecisionLossTooHigh();
 
     // ============ STATE VARIABLES ============
 
@@ -97,6 +136,29 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
     /// @notice Mapping of user address to vesting schedule
     mapping(address => VestingSchedule) private _vestingSchedules;
     
+    // ============ CIRCUIT BREAKER STATE (Industry Standard) ============
+    
+    /// @notice Circuit breaker active flag
+    bool public circuitBreakerActive;
+    
+    /// @notice Emergency shutdown active flag
+    bool public emergencyShutdownActive;
+    
+    /// @notice Maximum bonding per block (5M USDC for testing)
+    uint256 public constant MAX_BONDING_PER_BLOCK = 5_000_000 * 1e6;
+    
+    /// @notice Current block bonding amount
+    uint256 public bondingThisBlock;
+    
+    /// @notice Last block number for bonding tracking
+    uint256 public lastBondingBlock;
+    
+    /// @notice Emergency withdrawal cooldown (24 hours)
+    uint256 public constant EMERGENCY_COOLDOWN = 24 hours;
+    
+    /// @notice Last emergency operation timestamp
+    uint256 public lastEmergencyOperation;
+    
     /// @notice Get vesting schedule for a user (public view function)
     function vestingSchedules(address user) external view returns (VestingSchedule memory) {
         return _vestingSchedules[user];
@@ -115,33 +177,38 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
 
     /**
      * @notice Initialize the bonding contract
-     * @dev Sets up milestone structure and initial parameters
+     * @dev Sets up initial state and grants roles
      * @param _fvc FVC token contract address
      * @param _usdc USDC token contract address
      * @param _treasury Treasury address for USDC collection
+     * @custom:security Only callable once during deployment
      */
-    function initialize(
-        address _fvc,
-        address _usdc,
-        address _treasury
-    ) external initializer {
+    function initialize(address _fvc, address _usdc, address _treasury) external initializer {
         if (_fvc == address(0)) revert Bonding__ZeroAddress();
         if (_usdc == address(0)) revert Bonding__ZeroAddress();
         if (_treasury == address(0)) revert Bonding__ZeroAddress();
-
+        
         __AccessControl_init();
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
-
+        
         fvc = IFVC(_fvc);
         usdc = IERC20(_usdc);
         treasury = _treasury;
         
-        // Grant roles
+        // Grant roles to deployer
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(BONDING_MANAGER_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
-
+        _grantRole(EMERGENCY_ROLE, msg.sender);
+        
+        // Initialize circuit breaker state
+        circuitBreakerActive = false;
+        emergencyShutdownActive = false;
+        bondingThisBlock = 0;
+        lastBondingBlock = block.number;
+        lastEmergencyOperation = 0;
+        
         // Initialize milestones based on Option B structure
         _initializeMilestones();
     }
@@ -212,21 +279,31 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
 
     /**
      * @notice Bond USDC for FVC tokens
-     * @dev Main bonding function with milestone-based pricing
+     * @dev Main bonding function with milestone-based pricing and circuit breakers
      * @param usdcAmount Amount of USDC to bond (in 6 decimals)
      */
-    function bond(uint256 usdcAmount) external nonReentrant {
+    function bond(uint256 usdcAmount) external nonReentrant whenCircuitBreakerNotActive whenNotEmergencyShutdown trackBondingPerBlock(usdcAmount) {
+        // Enhanced input validation
         if (usdcAmount == 0) revert Bonding__AmountMustBeGreaterThanZero();
         if (!privateSaleActive) revert Bonding__PrivateSaleNotActive();
         if (block.timestamp > saleEndTime) revert Bonding__PrivateSaleEnded();
+        
+        // Validate milestone state
+        if (milestones.length == 0) revert Bonding__InvalidMilestone();
+        if (currentMilestone >= milestones.length) revert Bonding__InvalidMilestone();
         
         // Check wallet cap
         if (userBonded[msg.sender] + usdcAmount > MAX_WALLET_CAP) {
             revert Bonding__ExceedsWalletCap();
         }
         
-        // Check if milestone cap would be exceeded
+        // Get current milestone data with validation
         Milestone storage currentMilestoneData = milestones[currentMilestone];
+        if (!currentMilestoneData.isActive) revert Bonding__InvalidMilestone();
+        if (currentMilestoneData.price == 0) revert Bonding__CalculationError();
+        if (currentMilestoneData.fvcAllocation == 0) revert Bonding__CalculationError();
+        
+        // Check if milestone cap would be exceeded
         uint256 milestoneProgress = totalBonded - (currentMilestone > 0 ? milestones[currentMilestone - 1].usdcThreshold : 0);
         uint256 milestoneRemaining = currentMilestoneData.usdcThreshold - (currentMilestone > 0 ? milestones[currentMilestone - 1].usdcThreshold : 0);
         
@@ -234,9 +311,11 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
             revert Bonding__MilestoneCapExceeded();
         }
         
-        // Calculate FVC amount based on current milestone price
-        // Price is stored as 25 (representing $0.025), so we need to multiply by 1e3 to get proper decimals
-        uint256 fvcAmount = (usdcAmount * 1e18) / (currentMilestoneData.price * 1e3); // Convert to FVC (18 decimals)
+        // Calculate FVC amount using precise calculation
+        uint256 fvcAmount = _calculatePreciseFVCAmount(usdcAmount, currentMilestoneData.price);
+        
+        // Validate FVC calculation
+        if (fvcAmount == 0) revert Bonding__CalculationError();
         
         // Check if enough FVC is available for this milestone
         uint256 milestoneFVCSold = _getMilestoneFVCSold(currentMilestone);
@@ -249,10 +328,15 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         totalFVCSold = totalFVCSold + fvcAmount;
         userBonded[msg.sender] = userBonded[msg.sender] + usdcAmount;
         
-        // Create vesting schedule - 12-month cliff + 24-month linear
+        // Create vesting schedule using precise time calculations
+        (uint256 cliffDuration, uint256 vestingDuration, uint256 totalDuration) = _calculateVestingDurations();
         uint256 startTime = block.timestamp;
-        uint256 cliffEndTime = startTime + 365 days; // 12-month cliff
-        uint256 endTime = cliffEndTime + 730 days;   // 24-month linear after cliff
+        uint256 cliffEndTime = startTime + cliffDuration;
+        uint256 endTime = cliffEndTime + vestingDuration;
+        
+        // Validate vesting schedule
+        require(endTime > startTime, "Invalid vesting schedule");
+        require(endTime - startTime == totalDuration, "Vesting duration mismatch");
         
         _vestingSchedules[msg.sender] = VestingSchedule({
             amount: fvcAmount,
@@ -332,7 +416,7 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         uint256 currentPrice = milestones[currentMilestone].price;
         if (currentPrice == 0) return 0;
         
-        fvcAmount = (usdcAmount * 1e18) / currentPrice;
+        fvcAmount = _calculatePreciseFVCAmount(usdcAmount, currentPrice);
         return fvcAmount;
     }
 
@@ -369,7 +453,7 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         if (schedule.amount == 0) return false;
         
         uint256 currentTime = block.timestamp;
-        uint256 cliffEndTime = schedule.startTime + 365 days; // 12-month cliff
+        uint256 cliffEndTime = schedule.startTime + CLIFF_DURATION_SECONDS; // 12-month cliff
         
         // During cliff period, all tokens are locked
         if (currentTime < cliffEndTime) return true;
@@ -425,8 +509,8 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      */
     function _calculateVestedAmount(VestingSchedule storage schedule) internal view returns (uint256 vestedAmount) {
         uint256 currentTime = block.timestamp;
-        uint256 cliffEndTime = schedule.startTime + 365 days; // 12-month cliff
-        uint256 vestingEndTime = cliffEndTime + 730 days;    // 24-month linear after cliff
+        uint256 cliffEndTime = schedule.startTime + CLIFF_DURATION_SECONDS; // 12-month cliff
+        uint256 vestingEndTime = cliffEndTime + VESTING_DURATION_SECONDS;    // 24-month linear after cliff
         
         // During cliff period, no tokens are vested
         if (currentTime < cliffEndTime) {
@@ -440,7 +524,7 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         
         // Calculate linear vesting progress
         uint256 vestingProgress = currentTime - cliffEndTime;
-        uint256 vestingDuration = 730 days; // 24 months
+        uint256 vestingDuration = VESTING_DURATION_SECONDS; // 24 months
         
         vestedAmount = (schedule.amount * vestingProgress) / vestingDuration;
         return vestedAmount;
@@ -458,6 +542,107 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         // This is a simplified calculation - in practice, you'd track per-milestone sales
         // For now, we'll use the total FVC sold as an approximation
         return totalFVCSold;
+    }
+
+    // ============ MODIFIERS ============
+    
+    /// @notice Modifier to check if circuit breaker is not active
+    modifier whenCircuitBreakerNotActive() {
+        require(!circuitBreakerActive, "Circuit breaker active");
+        _;
+    }
+    
+    /// @notice Modifier to check if emergency shutdown is not active
+    modifier whenNotEmergencyShutdown() {
+        require(!emergencyShutdownActive, "Emergency shutdown active");
+        _;
+    }
+    
+    /// @notice Modifier to check if emergency cooldown has passed
+    modifier emergencyCooldownPassed() {
+        require(block.timestamp >= lastEmergencyOperation + EMERGENCY_COOLDOWN, "Emergency cooldown not passed");
+        _;
+    }
+    
+    /// @notice Modifier to track bonding per block
+    modifier trackBondingPerBlock(uint256 usdcAmount) {
+        if (block.number > lastBondingBlock) {
+            bondingThisBlock = 0;
+            lastBondingBlock = block.number;
+        }
+        require(bondingThisBlock + usdcAmount <= MAX_BONDING_PER_BLOCK, "Block bonding limit exceeded");
+        _;
+        bondingThisBlock += usdcAmount;
+    }
+
+    // ============ PRECISION FUNCTIONS (Industry Standard) ============
+    
+    /**
+     * @notice Calculate FVC amount with proper precision handling
+     * @dev Uses industry-standard precision handling to avoid rounding errors
+     * @param usdcAmount Amount of USDC (in 6 decimals)
+     * @param price Price per FVC (in 3 decimals)
+     * @return fvcAmount Amount of FVC tokens (in 18 decimals)
+     */
+    function _calculatePreciseFVCAmount(uint256 usdcAmount, uint256 price) internal pure returns (uint256 fvcAmount) {
+        // Validate inputs
+        if (usdcAmount == 0 || price == 0) revert Bonding__CalculationError();
+        
+        // Use the original formula: (usdcAmount * PRECISION) / (price * PRICE_PRECISION)
+        // This matches the original calculation that was working
+        uint256 numerator = usdcAmount * PRECISION;
+        uint256 denominator = price * PRICE_PRECISION;
+        
+        // Check for division by zero
+        if (denominator == 0) revert Bonding__CalculationError();
+        
+        // Calculate with precision
+        fvcAmount = numerator / denominator;
+        
+        // Validate result
+        if (fvcAmount == 0) revert Bonding__CalculationError();
+        
+        return fvcAmount;
+    }
+    
+    /**
+     * @notice Calculate vesting duration with proper precision
+     * @dev Ensures consistent time calculations across the contract
+     * @return cliffDuration Cliff duration in seconds
+     * @return vestingDuration Vesting duration in seconds
+     * @return totalDuration Total duration in seconds
+     */
+    function _calculateVestingDurations() internal pure returns (
+        uint256 cliffDuration,
+        uint256 vestingDuration,
+        uint256 totalDuration
+    ) {
+        cliffDuration = CLIFF_DURATION_SECONDS;
+        vestingDuration = VESTING_DURATION_SECONDS;
+        totalDuration = TOTAL_VESTING_DURATION_SECONDS;
+        
+        // Validate calculations
+        require(cliffDuration > 0, "Invalid cliff duration");
+        require(vestingDuration > 0, "Invalid vesting duration");
+        require(totalDuration == cliffDuration + vestingDuration, "Invalid total duration");
+        
+        return (cliffDuration, vestingDuration, totalDuration);
+    }
+    
+    /**
+     * @notice Validate mathematical precision
+     * @dev Checks if precision loss is within acceptable bounds
+     * @param expected Expected value
+     * @param actual Actual calculated value
+     * @return True if precision loss is acceptable
+     */
+    function _validatePrecision(uint256 expected, uint256 actual) internal pure returns (bool) {
+        if (expected == 0 || actual == 0) return false;
+        
+        uint256 difference = expected > actual ? expected - actual : actual - expected;
+        uint256 precisionLoss = (difference * PRECISION) / expected;
+        
+        return precisionLoss <= MAX_PRECISION_LOSS;
     }
 
     // ============ ADMIN FUNCTIONS ============
@@ -503,6 +688,99 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         
         emit FVCAllocated(milestoneIndex, amount);
     }
+
+    // ============ EMERGENCY FUNCTIONS (Industry Standard) ============
+    
+    /**
+     * @notice Activate circuit breaker
+     * @dev Emergency function to halt all bonding operations
+     * @custom:security Only EMERGENCY_ROLE can activate circuit breaker
+     */
+    function activateCircuitBreaker() external onlyRole(EMERGENCY_ROLE) {
+        circuitBreakerActive = true;
+        lastEmergencyOperation = block.timestamp;
+        emit CircuitBreakerActivated(msg.sender, block.timestamp);
+    }
+    
+    /**
+     * @notice Deactivate circuit breaker
+     * @dev Emergency function to resume bonding operations
+     * @custom:security Only EMERGENCY_ROLE can deactivate circuit breaker
+     */
+    function deactivateCircuitBreaker() external onlyRole(EMERGENCY_ROLE) emergencyCooldownPassed {
+        circuitBreakerActive = false;
+        lastEmergencyOperation = block.timestamp;
+        emit CircuitBreakerDeactivated(msg.sender, block.timestamp);
+    }
+    
+    /**
+     * @notice Trigger emergency shutdown
+     * @dev Halts all operations and allows emergency withdrawal
+     * @custom:security Only EMERGENCY_ROLE can trigger emergency shutdown
+     */
+    function triggerEmergencyShutdown() external onlyRole(EMERGENCY_ROLE) emergencyCooldownPassed {
+        emergencyShutdownActive = true;
+        privateSaleActive = false;
+        lastEmergencyOperation = block.timestamp;
+        emit EmergencyShutdown(msg.sender, block.timestamp);
+    }
+    
+    /**
+     * @notice Emergency withdrawal for users
+     * @dev Allows users to withdraw their USDC in emergency situations
+     * @custom:security Only available during emergency shutdown
+     */
+    function emergencyWithdraw() external whenNotEmergencyShutdown {
+        require(emergencyShutdownActive, "Emergency withdrawal not available");
+        
+        uint256 userBondedAmount = userBonded[msg.sender];
+        require(userBondedAmount > 0, "No USDC bonded");
+        
+        // Calculate proportional refund based on treasury balance
+        uint256 treasuryBalance = usdc.balanceOf(treasury);
+        uint256 refundAmount = (userBondedAmount * treasuryBalance) / totalBonded;
+        
+        // Ensure refund doesn't exceed user's bonded amount
+        refundAmount = refundAmount > userBondedAmount ? userBondedAmount : refundAmount;
+        
+        // Update state
+        userBonded[msg.sender] = 0;
+        totalBonded = totalBonded - userBondedAmount;
+        
+        // Transfer refund
+        usdc.safeTransferFrom(treasury, msg.sender, refundAmount);
+        
+        emit EmergencyWithdrawal(msg.sender, refundAmount, block.timestamp);
+    }
+    
+    /**
+     * @notice Get emergency status
+     * @dev Returns current emergency state
+     * @return circuitBreaker Circuit breaker status
+     * @return emergencyShutdown Emergency shutdown status
+     * @return lastEmergencyOperation Last emergency operation timestamp
+     */
+    function getEmergencyStatus() external view returns (
+        bool circuitBreaker,
+        bool emergencyShutdown,
+        uint256 lastEmergencyOperation
+    ) {
+        return (circuitBreakerActive, emergencyShutdownActive, lastEmergencyOperation);
+    }
+    
+    // ============ EVENTS ============
+    
+    /// @notice Emitted when circuit breaker is activated
+    event CircuitBreakerActivated(address indexed guardian, uint256 timestamp);
+    
+    /// @notice Emitted when circuit breaker is deactivated
+    event CircuitBreakerDeactivated(address indexed guardian, uint256 timestamp);
+    
+    /// @notice Emitted when emergency shutdown is triggered
+    event EmergencyShutdown(address indexed guardian, uint256 timestamp);
+    
+    /// @notice Emitted when emergency withdrawal occurs
+    event EmergencyWithdrawal(address indexed user, uint256 amount, uint256 timestamp);
 
     // ============ UUPS UPGRADE FUNCTIONS ============
 
