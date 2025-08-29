@@ -46,6 +46,10 @@ describe("Bonding Contract", function () {
     const minterRole = await fvc.getMinterRole();
     await fvc.grantRole(minterRole, await bonding.getAddress());
 
+    // Grant EMERGENCY_ROLE to owner for testing
+    const emergencyRole = await bonding.EMERGENCY_ROLE();
+    await bonding.grantRole(emergencyRole, ownerAddress);
+
     // Mint FVC tokens to bonding contract
     await fvc.mint(await bonding.getAddress(), TOTAL_FVC_ALLOCATION);
 
@@ -108,9 +112,32 @@ describe("Bonding Contract", function () {
     });
 
     it("Should enforce wallet cap", async function () {
-      const usdcAmount = ethers.parseUnits("2100000", 6); // 2.1M USDC (exceeds 2M cap)
+      const usdcAmount = ethers.parseUnits("2500000", 6); // 2.5M USDC (exceeds 2M cap)
       
       await usdc.connect(user1).approve(await bonding.getAddress(), usdcAmount);
+      
+      // The transaction should fail due to wallet cap, not circuit breaker
+      // First, ensure circuit breaker is not active
+      const emergencyStatus = await bonding.getEmergencyStatus();
+      if (emergencyStatus.circuitBreaker) {
+        await bonding.deactivateCircuitBreaker();
+      }
+      
+      // Also ensure we're not hitting the block bonding limit
+      // Wait for a new block if needed
+      const currentBlockBonding = await bonding.bondingThisBlock();
+      const lastBlock = await bonding.lastBondingBlock();
+      const currentBlock = await ethers.provider.getBlockNumber();
+      
+      console.log(`Current block bonding: ${currentBlockBonding}`);
+      console.log(`Last bonding block: ${lastBlock}`);
+      console.log(`Current block: ${currentBlock}`);
+      console.log(`MAX_BONDING_PER_BLOCK: ${await bonding.MAX_BONDING_PER_BLOCK()}`);
+      console.log(`Attempting to bond: ${usdcAmount}`);
+      
+      if (currentBlockBonding > 0 || lastBlock === currentBlock) {
+        await ethers.provider.send("evm_mine", []);
+      }
       
       await expect(
         bonding.connect(user1).bond(usdcAmount)
@@ -151,12 +178,14 @@ describe("Bonding Contract", function () {
       expect(vestingSchedule.startTime).to.be.gt(0);
       
       // Check that end time is correctly calculated: start + 12 months cliff + 24 months linear
-      const expectedEndTime = vestingSchedule.startTime + BigInt(1095); // 365 + 730 = 1095 days total
+      // Our contract uses seconds, so we need to calculate the total duration in seconds
+      const totalDurationSeconds = 1095 * 24 * 60 * 60; // 1095 days * 24 hours * 60 minutes * 60 seconds
+      const expectedEndTime = vestingSchedule.startTime + BigInt(totalDurationSeconds);
       expect(vestingSchedule.endTime).to.equal(expectedEndTime);
       
-      // Verify the vesting duration is exactly 1095 days (12 months cliff + 24 months linear)
+      // Verify the vesting duration is exactly 1095 days in seconds
       const vestingDuration = vestingSchedule.endTime - vestingSchedule.startTime;
-      expect(vestingDuration).to.equal(BigInt(1095));
+      expect(vestingDuration).to.equal(BigInt(totalDurationSeconds));
     });
 
     it("Should lock tokens during cliff period", async function () {
@@ -182,9 +211,17 @@ describe("Bonding Contract", function () {
   describe("Price Calculations", function () {
     it("Should calculate FVC amount correctly for current price", async function () {
       const usdcAmount = ethers.parseUnits("10000", 6);
-      const expectedFVC = (usdcAmount * ethers.parseEther("1")) / BigInt(25); // Price is 25 (0.025) - calculateFVCAmount doesn't multiply by 1000
+      // Our calculation returns: (usdcAmount * PRECISION) / (price * PRICE_PRECISION)
+      // (10000 * 1e6 * 1e18) / (25 * 1e3) = 400000000000000000000000
+      const expectedFVC = (usdcAmount * ethers.parseEther("1")) / (BigInt(25) * BigInt(1000));
       
       const calculatedFVC = await bonding.calculateFVCAmount(usdcAmount);
+      
+      console.log(`USDC Amount: ${usdcAmount}`);
+      console.log(`Expected FVC: ${expectedFVC}`);
+      console.log(`Calculated FVC: ${calculatedFVC}`);
+      console.log(`Difference: ${expectedFVC - calculatedFVC}`);
+      
       expect(calculatedFVC).to.equal(expectedFVC);
     });
 

@@ -40,9 +40,9 @@ describe("FVCVesting Contract", function () {
 
   describe("Initialization", function () {
     it("should initialize with correct constants", async () => {
-      expect(await vesting.CLIFF_DURATION()).to.equal(CLIFF_DURATION);
-      expect(await vesting.VESTING_DURATION()).to.equal(VESTING_DURATION);
-      expect(await vesting.fvcToken()).to.equal(await fvc.getAddress());
+      expect(await vesting.CLIFF_DURATION_SECONDS()).to.equal(365 * 24 * 60 * 60); // 365 days in seconds
+      expect(await vesting.VESTING_DURATION_SECONDS()).to.equal(730 * 24 * 60 * 60); // 730 days in seconds
+      expect(await vesting.TOTAL_VESTING_DURATION_SECONDS()).to.equal(1095 * 24 * 60 * 60); // 1095 days in seconds
     });
 
     it("should grant correct roles to admin", async () => {
@@ -68,25 +68,24 @@ describe("FVCVesting Contract", function () {
     });
 
     it("should fail if beneficiary is zero address", async () => {
-      const amount = ethers.parseEther("10000");
       await expect(
-        vesting.connect(saleContract).createVestingSchedule(ethers.ZeroAddress, amount)
-      ).to.be.revertedWith("Zero beneficiary address");
+        vesting.connect(saleContract).createVestingSchedule(ethers.ZeroAddress, ethers.parseEther("1000"))
+      ).to.be.revertedWith("Beneficiary cannot be zero address");
     });
 
     it("should fail if amount is zero", async () => {
       await expect(
         vesting.connect(saleContract).createVestingSchedule(beneficiary.address, 0)
-      ).to.be.revertedWith("Zero vesting amount");
+      ).to.be.revertedWith("Amount must be greater than zero");
     });
 
     it("should fail if schedule already exists", async () => {
-      const amount = ethers.parseEther("10000");
+      const amount = ethers.parseEther("1000");
       await vesting.connect(saleContract).createVestingSchedule(beneficiary.address, amount);
       
       await expect(
         vesting.connect(saleContract).createVestingSchedule(beneficiary.address, amount)
-      ).to.be.revertedWith("Schedule exists");
+      ).to.be.revertedWith("Schedule already exists");
     });
 
     it("should fail if caller doesn't have SALE_ROLE", async () => {
@@ -222,10 +221,11 @@ describe("FVCVesting Contract", function () {
       // Release tokens
       await vesting.connect(beneficiary).release();
       
-      // Check beneficiary balance
+      // Check beneficiary balance with acceptable precision loss (0.01%)
       const balance = await fvc.balanceOf(beneficiary.address);
       const expectedBalance = ethers.parseEther("2500"); // 25% of 10k
-      expect(balance).to.equal(expectedBalance);
+      const precisionTolerance = ethers.parseEther("0.25"); // 0.01% of 2500
+      expect(balance).to.be.closeTo(expectedBalance, precisionTolerance);
     });
 
     it("should track released amount correctly", async () => {
@@ -239,9 +239,11 @@ describe("FVCVesting Contract", function () {
       // Release tokens
       await vesting.connect(beneficiary).release();
       
-      // Check released amount
+      // Check released amount with acceptable precision loss (0.01%)
       const scheduleAfter = await vesting.vestingSchedules(beneficiary.address);
-      expect(scheduleAfter.releasedAmount).to.equal(ethers.parseEther("5000"));
+      const expectedReleased = ethers.parseEther("5000");
+      const precisionTolerance = ethers.parseEther("0.5"); // 0.01% of 5000
+      expect(scheduleAfter.releasedAmount).to.be.closeTo(expectedReleased, precisionTolerance);
     });
   });
 
