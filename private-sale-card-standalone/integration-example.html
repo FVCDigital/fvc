@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FVC Private Sale Card - Integration Example</title>
+    
+    <!-- Import Inter font for best typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Basic page styles */
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0A0A0A;
+            color: #FFFFFF;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+        
+        .page-header h1 {
+            margin: 0 0 16px 0;
+            font-size: 32px;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+        
+        .page-header p {
+            margin: 0;
+            font-size: 16px;
+            color: #9CA3AF;
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .integration-note {
+            background: rgba(56,189,248,0.1);
+            border: 1px solid rgba(56,189,248,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .integration-note h3 {
+            margin: 0 0 16px 0;
+            color: #38BDF8;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .integration-note p {
+            margin: 0;
+            color: #9CA3AF;
+            font-size: 14px;
+        }
+        
+        .code-snippet {
+            background: #2A2A2A;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            color: #E5E7EB;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-left: 4px solid #38BDF8;
+        }
+        
+        .step {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: #1A1A1A;
+            border-radius: 12px;
+            border: 1px solid #2A2A2A;
+        }
+        
+        .step h3 {
+            margin: 0 0 16px 0;
+            color: #FFFFFF;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .step p {
+            margin: 0 0 16px 0;
+            color: #9CA3AF;
+            line-height: 1.6;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #38BDF8;
+            color: #FFFFFF;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>FVC Private Sale Card</h1>
+            <p>Minimal Integration Example</p>
+        </div>
+
+        <!-- Integration Note -->
+        <div class="integration-note">
+            <h3>What You Need</h3>
+            <p>Just 3 files: <code>PrivateSaleCard.js</code>, a container div, and 2 lines of JavaScript!</p>
+        </div>
+
+        <!-- Step 1: Add Container -->
+        <div class="step">
+            <h3><span class="step-number">1</span>Add Container to Your HTML</h3>
+            <p>Create a div element where you want the Private Sale Card to appear:</p>
+            <div class="code-snippet">
+&lt;!-- Add this anywhere in your HTML body --&gt;
+&lt;div id="fvc-private-sale"&gt;&lt;/div&gt;
+            </div>
+        </div>
+
+        <!-- Step 2: Include Script -->
+        <div class="step">
+            <h3><span class="step-number">2</span>Include the JavaScript File</h3>
+            <p>Add the script tag before the closing body tag:</p>
+            <div class="code-snippet">
+&lt;!-- Add this before &lt;/body&gt; --&gt;
+&lt;script src="PrivateSaleCard.js"&gt;&lt;/script&gt;
+            </div>
+        </div>
+
+        <!-- Step 3: Initialise Component -->
+        <div class="step">
+            <h3><span class="step-number">3</span>Initialise the Component</h3>
+            <p>Add this JavaScript code to create the card:</p>
+            <div class="code-snippet">
+&lt;script&gt;
+    // Create the Private Sale Card
+    const privateSaleCard = new FVCPrivateSaleCard('fvc-private-sale');
+&lt;/script&gt;
+            </div>
+        </div>
+
+        <!-- Complete Example -->
+        <div class="step">
+            <h3><span class="step-number">4</span>Complete Example</h3>
+            <p>Here's the complete minimal HTML file:</p>
+            <div class="code-snippet">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;My Website&lt;/title&gt;
+    &lt;link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!-- Your existing content --&gt;
+    &lt;h1&gt;Welcome to My Website&lt;/h1&gt;
+    
+    &lt;!-- FVC Private Sale Card will appear here --&gt;
+    &lt;div id="fvc-private-sale"&gt;&lt;/div&gt;
+    
+    &lt;!-- Include the component --&gt;
+    &lt;script src="PrivateSaleCard.js"&gt;&lt;/script&gt;
+    
+    &lt;!-- Initialise the component --&gt;
+    &lt;script&gt;
+        const privateSaleCard = new FVCPrivateSaleCard('fvc-private-sale');
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+            </div>
+        </div>
+
+        <!-- Live Demo -->
+        <div class="step">
+            <h3><span class="step-number">5</span>Live Demo</h3>
+            <p>Below is the actual Private Sale Card component running on this page:</p>
+            <div id="fvc-private-sale-demo"></div>
+        </div>
+
+        <!-- Customisation -->
+        <div class="step">
+            <h3><span class="step-number">6</span>Customise Theme (Optional)</h3>
+            <p>Match the card colours to your website:</p>
+            <div class="code-snippet">
+const privateSaleCard = new FVCPrivateSaleCard('fvc-private-sale', {
+    theme: {
+        modalBackground: '#1E1E1E',    // Card background
+        generalButton: '#FF6B6B',      // Accent colour
+        primaryText: '#FFFFFF',        // Text colour
+        // ... customise other colours
+    }
+});
+            </div>
+        </div>
+
+        <!-- That's It! -->
+        <div class="step">
+            <h3><span class="step-number">7</span>That's It!</h3>
+            <p>You now have a fully functional Private Sale Card on your website! The component:</p>
+            <ul style="color: #9CA3AF; line-height: 1.6;">
+                <li>Automatically adapts to different screen sizes</li>
+                <li>Shows all FVC Protocol information</li>
+                <li>Displays "Coming Soon" state (no functional buttons)</li>
+                <li>Can be easily updated when the sale goes live</li>
+                <li>Requires no external dependencies</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Include the Private Sale Card script -->
+    <script src="PrivateSaleCard.js"></script>
+    
+    <!-- Initialise the demo -->
+    <script>
+        // Create the Private Sale Card in the demo container
+        const demoCard = new FVCPrivateSaleCard('fvc-private-sale-demo');
+        
+        console.log('FVC Private Sale Card Integration Example loaded!');
+    </script>
+</body>
+</html>

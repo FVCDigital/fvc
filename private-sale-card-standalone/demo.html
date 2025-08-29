@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FVC Protocol - Private Sale Card Demo</title>
+    <style>
+        /* Import Inter font for better typography */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0A0A0A;
+            color: #FFFFFF;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .demo-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #1A1A1A;
+            border-radius: 16px;
+            border: 1px solid #2A2A2A;
+        }
+        
+        .demo-header h1 {
+            margin: 0 0 16px 0;
+            font-size: 32px;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+        
+        .demo-header p {
+            margin: 0;
+            font-size: 16px;
+            color: #9CA3AF;
+            line-height: 1.5;
+        }
+        
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .demo-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #1A1A1A;
+            border-radius: 16px;
+            border: 1px solid #2A2A2A;
+        }
+        
+        .demo-section h2 {
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            font-weight: 600;
+            color: #FFFFFF;
+        }
+        
+        .demo-section p {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            color: #9CA3AF;
+            line-height: 1.6;
+        }
+        
+        .code-block {
+            background: #2A2A2A;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            color: #E5E7EB;
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 16px 0;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            color: #9CA3AF;
+            position: relative;
+            padding-left: 24px;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10B981;
+            font-weight: bold;
+        }
+        
+        .integration-steps {
+            background: rgba(56,189,248,0.1);
+            border: 1px solid rgba(56,189,248,0.3);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        
+        .integration-steps h3 {
+            margin: 0 0 16px 0;
+            color: #38BDF8;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .step {
+            margin-bottom: 16px;
+            padding-left: 24px;
+            position: relative;
+        }
+        
+        .step:before {
+            content: counter(step-counter);
+            counter-increment: step-counter;
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #38BDF8;
+            color: #FFFFFF;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .integration-steps {
+            counter-reset: step-counter;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <!-- Demo Header -->
+        <div class="demo-header">
+            <h1>FVC Protocol - Private Sale Card</h1>
+            <p>Standalone JavaScript component for easy website integration</p>
+        </div>
+
+        <!-- Live Demo -->
+        <div class="demo-section">
+            <h2>Live Demo</h2>
+            <p>Below is the actual Private Sale Card component in action:</p>
+            <div id="fvc-private-sale-demo"></div>
+        </div>
+
+        <!-- Features -->
+        <div class="demo-section">
+            <h2>Features</h2>
+            <ul class="feature-list">
+                <li><strong>Coming Soon State:</strong> All buttons are disabled and show "Coming Soon"</li>
+                <li><strong>Progressive Pricing:</strong> Shows the 4-tier pricing structure ($0.025 → $0.10)</li>
+                <li><strong>Vesting Schedule:</strong> Displays 12-month cliff and 24-month linear vesting</li>
+                <li><strong>Responsive Design:</strong> Works on all device sizes</li>
+                <li><strong>Customisable Theme:</strong> Easy to match your website's design</li>
+                <li><strong>No Dependencies:</strong> Pure JavaScript, no external libraries required</li>
+            </ul>
+        </div>
+
+        <!-- Integration Guide -->
+        <div class="demo-section">
+            <h2>Integration Guide</h2>
+            <p>Follow these simple steps to integrate the Private Sale Card into your website:</p>
+            
+            <div class="integration-steps">
+                <h3>Quick Integration Steps</h3>
+                
+                <div class="step">
+                    <strong>Download the files:</strong> Get the <code>PrivateSaleCard.js</code> file from this package
+                </div>
+                
+                <div class="step">
+                    <strong>Add the script to your HTML:</strong> Include the JavaScript file in your page
+                </div>
+                
+                <div class="step">
+                    <strong>Create a container:</strong> Add a div element where you want the card to appear
+                </div>
+                
+                <div class="step">
+                    <strong>Initialise the component:</strong> Create an instance of the card
+                </div>
+            </div>
+
+            <h3>HTML Setup</h3>
+            <div class="code-block">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Your Website&lt;/title&gt;
+    &lt;!-- Import Inter font for best typography --&gt;
+    &lt;link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!-- Container for the Private Sale Card --&gt;
+    &lt;div id="fvc-private-sale"&gt;&lt;/div&gt;
+    
+    &lt;!-- Include the Private Sale Card script --&gt;
+    &lt;script src="PrivateSaleCard.js"&gt;&lt;/script&gt;
+    
+    &lt;!-- Initialise the component --&gt;
+    &lt;script&gt;
+        // Create the Private Sale Card
+        const privateSaleCard = new FVCPrivateSaleCard('fvc-private-sale');
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+            </div>
+
+            <h3>Advanced Usage</h3>
+            <div class="code-block">
+// Customise the theme colours
+const privateSaleCard = new FVCPrivateSaleCard('fvc-private-sale', {
+    theme: {
+        modalBackground: '#1E1E1E',    // Custom background
+        primaryText: '#FFFFFF',        // Custom text colour
+        generalButton: '#FF6B6B',      // Custom accent colour
+        // ... other theme options
+    }
+});
+
+// Update the card later when functionality is ready
+privateSaleCard.update({
+    progress: 25,           // 25% progress
+    currentPrice: 0.05,     // $0.05 per FVC
+    milestone: 'Early Adopters'
+});
+
+// Remove the card if needed
+privateSaleCard.destroy();
+            </div>
+        </div>
+
+        <!-- Customisation -->
+        <div class="demo-section">
+            <h2>Customisation Options</h2>
+            <p>The component is highly customisable through the options parameter:</p>
+            
+            <h3>Theme Customisation</h3>
+            <div class="code-block">
+const customTheme = {
+    appBackground: '#0A0A0A',        // Main background
+    modalBackground: '#1A1A1A',      // Card background
+    modalButton: '#2A2A2A',          // Button background
+    primaryText: '#FFFFFF',          // Main text colour
+    secondaryText: '#9CA3AF',        // Secondary text
+    generalButton: '#38BDF8',        // Accent colour
+    buttonText: '#FFFFFF',           // Button text
+    cardHover: '#222222',            // Hover states
+    accentGlow: 'rgba(56,189,248,0.1)', // Glow effects
+    darkBorder: '#2A2A2A',           // Borders
+    darkShadow: 'rgba(0,0,0,0.3)'   // Shadows
+};
+            </div>
+        </div>
+    </div>
+
+    <!-- Include the Private Sale Card script -->
+    <script src="PrivateSaleCard.js"></script>
+    
+    <!-- Initialise the demo -->
+    <script>
+        // Create the Private Sale Card in the demo container
+        const demoCard = new FVCPrivateSaleCard('fvc-private-sale-demo');
+        
+        // Log that the component is ready
+        console.log('FVC Private Sale Card Demo loaded successfully!');
+        console.log('Component instance:', demoCard);
+    </script>
+</body>
+</html>
