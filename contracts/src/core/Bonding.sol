@@ -136,6 +136,12 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
     /// @notice Mapping of user address to vesting schedule
     mapping(address => VestingSchedule) private _vestingSchedules;
     
+    /// @notice Mapping of user address to array of bond transactions
+    mapping(address => BondTransaction[]) private _userBonds;
+    
+    /// @notice Mapping of user address to total bond count
+    mapping(address => uint256) private _userBondCount;
+    
     // ============ CIRCUIT BREAKER STATE (Industry Standard) ============
     
     /// @notice Circuit breaker active flag
@@ -338,6 +344,23 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         require(endTime > startTime, "Invalid vesting schedule");
         require(endTime - startTime == totalDuration, "Vesting duration mismatch");
         
+        // Create new bond transaction (don't overwrite previous ones)
+        uint256 bondId = _userBondCount[msg.sender];
+        _userBonds[msg.sender].push(BondTransaction({
+            bondId: bondId,
+            usdcAmount: usdcAmount,
+            fvcAmount: fvcAmount,
+            timestamp: startTime,
+            milestone: currentMilestone,
+            claimedAmount: 0,
+            isActive: true
+        }));
+        
+        // Update bond count
+        _userBondCount[msg.sender] = bondId + 1;
+        
+        // Keep legacy vesting schedule for backward compatibility
+        // This will be the most recent bond's schedule
         _vestingSchedules[msg.sender] = VestingSchedule({
             amount: fvcAmount,
             startTime: startTime,
@@ -353,6 +376,7 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         
         emit Bonded(msg.sender, usdcAmount, fvcAmount, currentMilestone);
         emit VestingScheduleCreated(msg.sender, fvcAmount, startTime, endTime);
+        emit BondTransactionCreated(msg.sender, bondId, usdcAmount, fvcAmount, currentMilestone, startTime);
     }
 
     // ============ VIEW FUNCTIONS ============
@@ -449,18 +473,21 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @return True if tokens are locked, false if unlocked
      */
     function isLocked(address user) external view returns (bool) {
-        VestingSchedule storage schedule = _vestingSchedules[user];
-        if (schedule.amount == 0) return false;
+        // Check if user has any active bonds
+        BondTransaction[] storage bonds = _userBonds[user];
+        if (bonds.length == 0) return false;
         
-        uint256 currentTime = block.timestamp;
-        uint256 cliffEndTime = schedule.startTime + CLIFF_DURATION_SECONDS; // 12-month cliff
+        // Check if any bonds are still locked
+        for (uint256 i = 0; i < bonds.length; i++) {
+            if (bonds[i].isActive) {
+                uint256 vested = _calculateVestedAmountForBond(bonds[i]);
+                if (bonds[i].fvcAmount > vested) {
+                    return true; // At least one bond is still locked
+                }
+            }
+        }
         
-        // During cliff period, all tokens are locked
-        if (currentTime < cliffEndTime) return true;
-        
-        // After cliff, calculate vested amount
-        uint256 vestedAmount = _calculateVestedAmount(schedule);
-        return schedule.amount > vestedAmount;
+        return false; // All bonds are fully vested
     }
 
     /**
@@ -471,12 +498,8 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @return totalAmount Total amount of FVC tokens in vesting
      */
     function getVestedAmount(address user) external view returns (uint256 vestedAmount, uint256 totalAmount) {
-        VestingSchedule storage schedule = _vestingSchedules[user];
-        if (schedule.amount == 0) return (0, 0);
-        
-        totalAmount = schedule.amount;
-        vestedAmount = _calculateVestedAmount(schedule);
-        return (vestedAmount, totalAmount);
+        // Use new multiple bond approach for more accurate calculation
+        return getTotalVestedAmount(user);
     }
 
     /**
@@ -497,6 +520,90 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         currentMilestoneIndex = currentMilestone;
         totalBondedAmount = totalBonded;
         totalFVCSoldAmount = totalFVCSold;
+    }
+
+    // ============ MULTIPLE VESTING SCHEDULES ============
+    
+    /**
+     * @notice Get all bond transactions for a user
+     * @dev Returns array of all bond transactions for the specified user
+     * @param user Address of the user
+     * @return Array of bond transaction structures
+     */
+    function getUserBonds(address user) external view returns (BondTransaction[] memory) {
+        return _userBonds[user];
+    }
+    
+    /**
+     * @notice Get total vested amount across all bonds for a user
+     * @dev Calculates total vested and total amount across all active bonds
+     * @param user Address of the user
+     * @return totalVested Total amount of FVC tokens vested across all bonds
+     * @return totalAmount Total amount of FVC tokens across all bonds
+     */
+    function getTotalVestedAmount(address user) public view returns (uint256 totalVested, uint256 totalAmount) {
+        BondTransaction[] storage bonds = _userBonds[user];
+        
+        for (uint256 i = 0; i < bonds.length; i++) {
+            if (bonds[i].isActive) {
+                uint256 vested = _calculateVestedAmountForBond(bonds[i]);
+                totalVested += vested;
+                totalAmount += bonds[i].fvcAmount;
+            }
+        }
+        
+        return (totalVested, totalAmount);
+    }
+    
+    /**
+     * @notice Get bond count for a user
+     * @dev Returns the number of bond transactions for the specified user
+     * @param user Address of the user
+     * @return Number of bond transactions
+     */
+    function getBondCount(address user) external view returns (uint256) {
+        return _userBondCount[user];
+    }
+    
+    /**
+     * @notice Get specific bond transaction by index
+     * @dev Returns bond transaction at the specified index for the user
+     * @param user Address of the user
+     * @param index Index of the bond transaction
+     * @return Bond transaction structure
+     */
+    function getBondAtIndex(address user, uint256 index) external view returns (BondTransaction memory) {
+        require(index < _userBonds[user].length, "Bond index out of bounds");
+        return _userBonds[user][index];
+    }
+    
+    /**
+     * @notice Calculate vested amount for a specific bond transaction
+     * @dev Implements 12-month cliff + 24-month linear vesting for individual bonds
+     * @param bond Bond transaction structure
+     * @return vestedAmount Amount of FVC tokens vested for this bond
+     */
+    function _calculateVestedAmountForBond(BondTransaction storage bond) internal view returns (uint256 vestedAmount) {
+        uint256 currentTime = block.timestamp;
+        uint256 cliffEndTime = bond.timestamp + CLIFF_DURATION_SECONDS; // 12-month cliff
+        uint256 vestingEndTime = cliffEndTime + VESTING_DURATION_SECONDS; // 24-month linear after cliff
+        
+        // During cliff period, no tokens are vested
+        if (currentTime < cliffEndTime) {
+            return 0;
+        }
+        
+        // After cliff, linear vesting over 24 months
+        if (currentTime >= vestingEndTime) {
+            return bond.fvcAmount; // Fully vested
+        }
+        
+        // Calculate linear vesting progress
+        uint256 vestingProgress = currentTime - cliffEndTime;
+        uint256 vestingDuration = VESTING_DURATION_SECONDS; // 24 months
+        
+        vestedAmount = (bond.fvcAmount * vestingProgress) / vestingDuration;
+        return vestedAmount;
     }
 
     // ============ INTERNAL FUNCTIONS ============
