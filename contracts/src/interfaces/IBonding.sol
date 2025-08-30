@@ -39,6 +39,26 @@ interface IBonding {
         uint256 endTime;
     }
     
+    /**
+     * @notice Individual bond transaction structure
+     * @param bondId Unique identifier for this bond
+     * @param usdcAmount Amount of USDC invested in this bond
+     * @param fvcAmount Amount of FVC tokens received from this bond
+     * @param timestamp When this bond was created
+     * @param milestone Which price tier this bond used
+     * @param claimedAmount How much FVC has been claimed from this bond
+     * @param isActive Whether this bond is still active
+     */
+    struct BondTransaction {
+        uint256 bondId;
+        uint256 usdcAmount;
+        uint256 fvcAmount;
+        uint256 timestamp;
+        uint256 milestone;
+        uint256 claimedAmount;
+        bool isActive;
+    }
+    
     // ============ EVENTS ============
     
     /// @notice Emitted when private sale starts
@@ -55,6 +75,16 @@ interface IBonding {
     
     /// @notice Emitted when a vesting schedule is created
     event VestingScheduleCreated(address indexed user, uint256 amount, uint256 startTime, uint256 endTime);
+    
+    /// @notice Emitted when a new bond transaction is created
+    event BondTransactionCreated(
+        address indexed user, 
+        uint256 indexed bondId, 
+        uint256 usdcAmount, 
+        uint256 fvcAmount, 
+        uint256 milestoneIndex, 
+        uint256 timestamp
+    );
     
     /// @notice Emitted when FVC tokens are allocated to a milestone
     event FVCAllocated(uint256 indexed milestoneIndex, uint256 amount);
@@ -165,6 +195,42 @@ interface IBonding {
         uint256 totalBondedAmount,
         uint256 totalFVCSoldAmount
     );
+
+    // ============ MULTIPLE VESTING SCHEDULES ============
+    
+    /**
+     * @notice Get all bond transactions for a user
+     * @dev Returns array of all bond transactions for the specified user
+     * @param user Address of the user
+     * @return Array of bond transaction structures
+     */
+    function getUserBonds(address user) external view returns (BondTransaction[] memory);
+    
+    /**
+     * @notice Get total vested amount across all bonds for a user
+     * @dev Calculates total vested and total amount across all active bonds
+     * @param user Address of the user
+     * @return totalVested Total amount of FVC tokens vested across all bonds
+     * @return totalAmount Total amount of FVC tokens across all bonds
+     */
+    function getTotalVestedAmount(address user) external view returns (uint256 totalVested, uint256 totalAmount);
+    
+    /**
+     * @notice Get bond count for a user
+     * @dev Returns the number of bond transactions for the specified user
+     * @param user Address of the user
+     * @return Number of bond transactions
+     */
+    function getBondCount(address user) external view returns (uint256);
+    
+    /**
+     * @notice Get specific bond transaction by index
+     * @dev Returns bond transaction at the specified index for the user
+     * @param user Address of the user
+     * @param index Index of the bond transaction
+     * @return Bond transaction structure
+     */
+    function getBondAtIndex(address user, uint256 index) external view returns (BondTransaction memory);
 
     // ============ STATE VARIABLES ============
     

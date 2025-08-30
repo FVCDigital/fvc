@@ -46,6 +46,34 @@ export declare namespace IBonding {
     isActive: boolean;
   };
 
+  export type BondTransactionStruct = {
+    bondId: BigNumberish;
+    usdcAmount: BigNumberish;
+    fvcAmount: BigNumberish;
+    timestamp: BigNumberish;
+    milestone: BigNumberish;
+    claimedAmount: BigNumberish;
+    isActive: boolean;
+  };
+
+  export type BondTransactionStructOutput = [
+    bondId: bigint,
+    usdcAmount: bigint,
+    fvcAmount: bigint,
+    timestamp: bigint,
+    milestone: bigint,
+    claimedAmount: bigint,
+    isActive: boolean
+  ] & {
+    bondId: bigint;
+    usdcAmount: bigint;
+    fvcAmount: bigint;
+    timestamp: bigint;
+    milestone: bigint;
+    claimedAmount: bigint;
+    isActive: boolean;
+  };
+
   export type VestingScheduleStruct = {
     amount: BigNumberish;
     startTime: BigNumberish;
@@ -99,6 +127,8 @@ export interface BondingInterface extends Interface {
       | "endPrivateSale"
       | "fvc"
       | "getAllMilestones"
+      | "getBondAtIndex"
+      | "getBondCount"
       | "getCurrentDiscount"
       | "getCurrentMilestone"
       | "getCurrentPrice"
@@ -108,6 +138,8 @@ export interface BondingInterface extends Interface {
       | "getRemainingFVC"
       | "getRoleAdmin"
       | "getSaleProgress"
+      | "getTotalVestedAmount"
+      | "getUserBonds"
       | "getVestedAmount"
       | "getVestingSchedule"
       | "grantRole"
@@ -142,6 +174,7 @@ export interface BondingInterface extends Interface {
     nameOrSignatureOrTopic:
       | "AdminChanged"
       | "BeaconUpgraded"
+      | "BondTransactionCreated"
       | "Bonded"
       | "CircuitBreakerActivated"
       | "CircuitBreakerDeactivated"
@@ -299,6 +332,14 @@ export interface BondingInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "getBondAtIndex",
+    values: [AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getBondCount",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getCurrentDiscount",
     values?: undefined
   ): string;
@@ -333,6 +374,14 @@ export interface BondingInterface extends Interface {
   encodeFunctionData(
     functionFragment: "getSaleProgress",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTotalVestedAmount",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getUserBonds",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "getVestedAmount",
@@ -581,6 +630,14 @@ export interface BondingInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getBondAtIndex",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getBondCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getCurrentDiscount",
     data: BytesLike
   ): Result;
@@ -614,6 +671,14 @@ export interface BondingInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getSaleProgress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTotalVestedAmount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getUserBonds",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -718,6 +783,37 @@ export namespace BeaconUpgradedEvent {
   export type OutputTuple = [beacon: string];
   export interface OutputObject {
     beacon: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace BondTransactionCreatedEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    bondId: BigNumberish,
+    usdcAmount: BigNumberish,
+    fvcAmount: BigNumberish,
+    milestoneIndex: BigNumberish,
+    timestamp: BigNumberish
+  ];
+  export type OutputTuple = [
+    user: string,
+    bondId: bigint,
+    usdcAmount: bigint,
+    fvcAmount: bigint,
+    milestoneIndex: bigint,
+    timestamp: bigint
+  ];
+  export interface OutputObject {
+    user: string;
+    bondId: bigint;
+    usdcAmount: bigint;
+    fvcAmount: bigint;
+    milestoneIndex: bigint;
+    timestamp: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -1111,6 +1207,14 @@ export interface Bonding extends BaseContract {
     "view"
   >;
 
+  getBondAtIndex: TypedContractMethod<
+    [user: AddressLike, index: BigNumberish],
+    [IBonding.BondTransactionStructOutput],
+    "view"
+  >;
+
+  getBondCount: TypedContractMethod<[user: AddressLike], [bigint], "view">;
+
   getCurrentDiscount: TypedContractMethod<[], [bigint], "view">;
 
   getCurrentMilestone: TypedContractMethod<
@@ -1155,6 +1259,18 @@ export interface Bonding extends BaseContract {
         totalFVCSoldAmount: bigint;
       }
     ],
+    "view"
+  >;
+
+  getTotalVestedAmount: TypedContractMethod<
+    [user: AddressLike],
+    [[bigint, bigint] & { totalVested: bigint; totalAmount: bigint }],
+    "view"
+  >;
+
+  getUserBonds: TypedContractMethod<
+    [user: AddressLike],
+    [IBonding.BondTransactionStructOutput[]],
     "view"
   >;
 
@@ -1394,6 +1510,16 @@ export interface Bonding extends BaseContract {
     nameOrSignature: "getAllMilestones"
   ): TypedContractMethod<[], [IBonding.MilestoneStructOutput[]], "view">;
   getFunction(
+    nameOrSignature: "getBondAtIndex"
+  ): TypedContractMethod<
+    [user: AddressLike, index: BigNumberish],
+    [IBonding.BondTransactionStructOutput],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getBondCount"
+  ): TypedContractMethod<[user: AddressLike], [bigint], "view">;
+  getFunction(
     nameOrSignature: "getCurrentDiscount"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
@@ -1439,6 +1565,20 @@ export interface Bonding extends BaseContract {
         totalFVCSoldAmount: bigint;
       }
     ],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getTotalVestedAmount"
+  ): TypedContractMethod<
+    [user: AddressLike],
+    [[bigint, bigint] & { totalVested: bigint; totalAmount: bigint }],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "getUserBonds"
+  ): TypedContractMethod<
+    [user: AddressLike],
+    [IBonding.BondTransactionStructOutput[]],
     "view"
   >;
   getFunction(
@@ -1593,6 +1733,13 @@ export interface Bonding extends BaseContract {
     BeaconUpgradedEvent.OutputObject
   >;
   getEvent(
+    key: "BondTransactionCreated"
+  ): TypedContractEvent<
+    BondTransactionCreatedEvent.InputTuple,
+    BondTransactionCreatedEvent.OutputTuple,
+    BondTransactionCreatedEvent.OutputObject
+  >;
+  getEvent(
     key: "Bonded"
   ): TypedContractEvent<
     BondedEvent.InputTuple,
@@ -1719,6 +1866,17 @@ export interface Bonding extends BaseContract {
       BeaconUpgradedEvent.InputTuple,
       BeaconUpgradedEvent.OutputTuple,
       BeaconUpgradedEvent.OutputObject
+    >;
+
+    "BondTransactionCreated(address,uint256,uint256,uint256,uint256,uint256)": TypedContractEvent<
+      BondTransactionCreatedEvent.InputTuple,
+      BondTransactionCreatedEvent.OutputTuple,
+      BondTransactionCreatedEvent.OutputObject
+    >;
+    BondTransactionCreated: TypedContractEvent<
+      BondTransactionCreatedEvent.InputTuple,
+      BondTransactionCreatedEvent.OutputTuple,
+      BondTransactionCreatedEvent.OutputObject
     >;
 
     "Bonded(address,uint256,uint256,uint256)": TypedContractEvent<

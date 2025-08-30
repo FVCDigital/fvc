@@ -19,6 +19,49 @@ const _abi = [
         type: "address",
       },
       {
+        indexed: true,
+        internalType: "uint256",
+        name: "bondId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "usdcAmount",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "fvcAmount",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "milestoneIndex",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "timestamp",
+        type: "uint256",
+      },
+    ],
+    name: "BondTransactionCreated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
         indexed: false,
         internalType: "uint256",
         name: "usdcAmount",
@@ -306,6 +349,86 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "index",
+        type: "uint256",
+      },
+    ],
+    name: "getBondAtIndex",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "bondId",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "usdcAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "fvcAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "milestone",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "claimedAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "isActive",
+            type: "bool",
+          },
+        ],
+        internalType: "struct IBonding.BondTransaction",
+        name: "",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
+    name: "getBondCount",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "getCurrentMilestone",
     outputs: [
@@ -457,6 +580,86 @@ const _abi = [
         internalType: "uint256",
         name: "totalFVCSoldAmount",
         type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
+    name: "getTotalVestedAmount",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "totalVested",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "totalAmount",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
+    name: "getUserBonds",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "bondId",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "usdcAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "fvcAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "milestone",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "claimedAmount",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "isActive",
+            type: "bool",
+          },
+        ],
+        internalType: "struct IBonding.BondTransaction[]",
+        name: "",
+        type: "tuple[]",
       },
     ],
     stateMutability: "view",
