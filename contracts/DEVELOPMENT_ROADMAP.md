@@ -1,17 +1,17 @@
 # FVC Protocol - Development Roadmap
 
-## Current Status: Phase 1 Complete ✅
+## Current Status: Initial Foundation Complete ✅
 
 ### **What We've Accomplished**
 
-#### **Smart Contract Development**
+#### **Initial Token Distribution**
 - ✅ **FVC.sol**: Non-upgradeable ERC20 governance token
-- ✅ **Bonding.sol**: UUPS upgradeable bonding contract with milestone pricing
+- ✅ **Bonding.sol**: UUPS upgradeable initial token distribution contract
 - ✅ **Interfaces**: IBonding.sol and IFVC.sol for contract interactions
 - ✅ **Security**: Access control, reentrancy protection, circuit breaker pattern
 
 #### **Testing Infrastructure**
-- ✅ **61 passing tests** covering core functionality
+- ✅ **61 passing tests** covering initial token distribution
 - ✅ **Comprehensive test structure** following industry standards
 - ✅ **Test utilities** and helper functions
 - ✅ **Documentation** for future contributors
@@ -30,122 +30,230 @@
 
 ---
 
-## **Phase 2: Testing Enhancement (Weeks 1-4)**
+## **Phase 1: Core Venture Funding System (Weeks 1-8)**
 
-### **Priority 1: Emergency Scenario Testing**
-**Why**: Currently only 60% coverage - below industry standards
-**Goal**: Achieve 90%+ coverage in emergency functions
+### **Priority 1: Venture Funding Contracts (Weeks 1-4)**
+**Why**: This is the core purpose of the protocol - currently 0% implemented and tested
+**Goal**: Complete venture funding system with proposal creation, community voting, and fund distribution
 
 ```typescript
-// Example test to implement
-describe("Emergency Scenarios", function () {
-  it("Should activate circuit breaker and halt all operations", async function () {
-    await bonding.activateCircuitBreaker();
-    expect(await bonding.circuitBreakerActive()).to.be.true;
+// Example contracts to implement
+contract FundingProposals {
+    function createProposal(
+        address target,
+        uint256 amount,
+        string memory description,
+        uint256 duration
+    ) external returns (uint256 proposalId);
     
-    // Verify all bonding operations are halted
-    await expect(
-      bonding.connect(user1).bond(ethers.parseUnits("1000", 6))
-    ).to.be.revertedWith("Circuit breaker active");
-  });
-});
+    function voteOnProposal(uint256 proposalId, bool support) external;
+    
+    function executeProposal(uint256 proposalId) external;
+}
+
+contract RevenueSharing {
+    function processRevenue(uint256 projectId, uint256 amount) external;
+    
+    function distributeToStakers() external;
+    
+    function buyAndBurnFVC() external;
+}
 ```
 
 **Files to create**:
-- `test/emergency.test.ts` - Circuit breaker and shutdown testing
-- `test/security.test.ts` - Attack vector prevention
-- `test/stress.test.ts` - Maximum amounts and concurrent operations
+- `contracts/src/grants/FundingProposals.sol` - Funding proposal management
+- `contracts/src/grants/RevenueSharing.sol` - Revenue collection and distribution
+- `contracts/src/grants/GrantManager.sol` - Grant lifecycle management
+- `test/grants/` - Comprehensive testing for venture funding system
 
-### **Priority 2: Integration Testing**
-**Why**: Currently only 40% coverage - critical for mainnet
-**Goal**: Test cross-contract interactions and state consistency
+### **Priority 2: Governance System (Weeks 5-8)**
+**Why**: Governance controls all venture funding decisions - currently 0% implemented
+**Goal**: Complete governance system with quadratic voting, proposal lifecycle, and timelock
 
 ```typescript
-// Example test to implement
-describe("Integration Scenarios", function () {
-  it("Should maintain consistency across contract interactions", async function () {
-    // Test FVC token and bonding contract state sync
-    // Verify vesting schedule consistency
-    // Test event emission accuracy
-  });
-});
+// Example contracts to implement
+contract FVCGovernor {
+    function createProposal(
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        string memory description
+    ) external returns (uint256 proposalId);
+    
+    function castVote(uint256 proposalId, uint8 support) external;
+    
+    function executeProposal(uint256 proposalId) external;
+}
+
+contract FVCTimelock {
+    function schedule(
+        address target,
+        uint256 value,
+        bytes calldata data,
+        bytes32 predecessor,
+        bytes32 salt,
+        uint256 delay
+    ) external;
+}
 ```
 
 **Files to create**:
-- `test/integration.test.ts` - Cross-contract testing
-- `test/frontend.test.ts` - View function responses
-- `test/gas.test.ts` - Gas optimization testing
+- `contracts/src/governance/FVCGovernor.sol` - Main governance contract
+- `contracts/src/governance/FVCTimelock.sol` - Timelock controller
+- `contracts/src/governance/PauseGuardian.sol` - Emergency pause system
+- `test/governance/` - Comprehensive governance testing
 
 ---
 
-## **Phase 3: Advanced Features (Weeks 5-8)**
+## **Phase 2: Staking and Rewards (Weeks 9-16)**
 
-### **Priority 3: Attack Vector Prevention**
-**Why**: Security is non-negotiable for DeFi protocols
-**Goal**: Comprehensive protection against common attacks
+### **Priority 3: Staking System (Weeks 9-12)**
+**Why**: Staking is how users earn from venture fund success - currently 0% implemented
+**Goal**: Complete staking system with tier-based rewards and revenue-based funding
 
 ```typescript
-// Example test to implement
-describe("Attack Vector Protection", function () {
-  it("Should prevent flash loan attacks", async function () {
-    // Test bonding and immediate selling
-    // Verify vesting schedule integrity
-    // Test economic attack scenarios
+// Example contracts to implement
+contract StakingVault {
+    function stake(uint256 amount, uint256 lockPeriod) external;
+    
+    function calculateRewards(address user) external view returns (uint256);
+    
+    function claimRewards() external;
+    
+    function earlyExit() external;
+}
+
+contract RewardsDistributor {
+    function distributeRewards() external;
+    
+    function calculateAPY(uint256 lockPeriod) external view returns (uint256);
+    
+    function processRevenueShare(uint256 amount) external;
+}
+```
+
+**Files to create**:
+- `contracts/src/staking/StakingVault.sol` - Main staking contract
+- `contracts/src/staking/RewardsDistributor.sol` - Reward calculation and distribution
+- `contracts/src/staking/StakingMath.sol` - Mathematical utilities
+- `test/staking/` - Comprehensive staking testing
+
+### **Priority 4: Revenue Management (Weeks 13-16)**
+**Why**: Revenue sharing funds all staking rewards - currently 0% implemented
+**Goal**: Complete revenue management with profit calculation, distribution, and treasury operations
+
+```typescript
+// Example contracts to implement
+contract TreasuryVault {
+    function allocateFunds(uint256 projectId, uint256 amount) external;
+    
+    function collectRevenue(uint256 projectId, uint256 amount) external;
+    
+    function distributeToStakers(uint256 amount) external;
+    
+    function buyAndBurnFVC(uint256 amount) external;
+}
+
+contract RevenueRouter {
+    function routeRevenue(uint256 amount) external;
+    
+    function calculateDistribution() external view returns (uint256, uint256, uint256);
+}
+```
+
+**Files to create**:
+- `contracts/src/treasury/TreasuryVault.sol` - Main treasury contract
+- `contracts/src/treasury/RevenueRouter.sol` - Revenue routing and distribution
+- `contracts/src/treasury/GrantsManager.sol` - Grant funding management
+- `test/treasury/` - Comprehensive treasury testing
+
+---
+
+## **Phase 3: Compliance and Integration (Weeks 17-24)**
+
+### **Priority 5: Compliance System (Weeks 17-20)**
+**Why**: Compliance is essential for institutional adoption and regulatory approval
+**Goal**: Complete KYC/AML integration with whitelist management and regulatory compliance
+
+```typescript
+// Example contracts to implement
+contract KYCRegistry {
+    function verifyIdentity(address user, bytes memory proof) external;
+    
+    function checkWhitelist(address user) external view returns (bool);
+    
+    function updateCompliance(address user) external;
+    
+    function revokeAccess(address user) external;
+}
+
+contract ComplianceOracle {
+    function validateKYC(bytes memory data) external view returns (bool);
+    
+    function checkSectorEligibility(string memory sector) external view returns (bool);
+}
+```
+
+**Files to create**:
+- `contracts/src/compliance/KYCRegistry.sol` - KYC verification and management
+- `contracts/src/compliance/ComplianceOracle.sol` - External compliance integration
+- `contracts/src/compliance/WhitelistManager.sol` - Access control management
+- `test/compliance/` - Comprehensive compliance testing
+
+### **Priority 6: Integration and Optimization (Weeks 21-24)**
+**Why**: Integration ensures system coherence and user experience
+**Goal**: Complete cross-contract integration with gas optimization and performance tuning
+
+```typescript
+// Example integration testing
+describe("Complete Venture Funding Flow", function () {
+  it("Should execute complete funding cycle", async function () {
+    // 1. Create funding proposal
+    // 2. Community votes
+    // 3. Execute funding
+    // 4. Collect revenue
+    // 5. Distribute to stakers
+    // 6. Buy & burn FVC
   });
 });
 ```
 
 **Areas to cover**:
-- Flash loan attack prevention
-- Reentrancy protection validation
-- Price manipulation resistance
-- Economic attack scenarios
-
-### **Priority 4: Performance Optimization**
-**Why**: Gas efficiency affects user experience and costs
-**Goal**: Optimize gas usage for common operations
-
-```typescript
-// Example test to implement
-describe("Gas Optimization", function () {
-  it("Should optimize gas usage for bonding operations", async function () {
-    const gasUsed = await bonding.connect(user1).bond(usdcAmount);
-    expect(gasUsed).to.be.lt(MAX_ACCEPTABLE_GAS);
-  });
-});
-```
-
-**Optimizations to implement**:
-- Batch operations for multiple users
-- Efficient storage patterns
-- Optimized mathematical calculations
-- Reduced external calls
+- Cross-contract state consistency
+- Gas optimization strategies
+- Performance benchmarking
+- Real-world scenario simulation
 
 ---
 
-## **Phase 4: Production Readiness (Weeks 9-12)**
+## **Phase 4: Production Readiness (Weeks 25-32)**
 
-### **Priority 5: Audit Preparation**
+### **Priority 7: Audit Preparation (Weeks 25-28)**
 **Why**: Professional audits are essential for mainnet deployment
 **Goal**: Achieve 95%+ test coverage and comprehensive documentation
 
 **Audit requirements**:
-- [ ] 95%+ line coverage
+- [ ] 95%+ line coverage across all contracts
 - [ ] All critical paths tested
-- [ ] Emergency scenarios covered
-- [ ] Attack vectors protected
-- [ ] Gas optimization complete
+- [ ] Venture funding mechanics fully validated
+- [ ] Governance system thoroughly tested
+- [ ] Staking and rewards verified
+- [ ] Compliance system validated
+- [ ] Integration scenarios tested
 
-### **Priority 6: Mainnet Deployment**
-**Why**: Protocol is ready for real users and capital
+### **Priority 8: Mainnet Deployment (Weeks 29-32)**
+**Why**: Protocol is ready for real users and venture funding operations
 **Goal**: Secure, audited, and tested mainnet deployment
 
 **Deployment checklist**:
-- [ ] All tests passing
+- [ ] All tests passing (300+ tests)
 - [ ] Security audit completed
-- [ ] Emergency procedures tested
+- [ ] Venture funding system validated
+- [ ] Governance system operational
+- [ ] Staking and rewards functional
+- [ ] Compliance system active
 - [ ] Frontend integration ready
-- [ ] Treasury management in place
+- [ ] Treasury management operational
 
 ---
 
@@ -155,52 +263,58 @@ describe("Gas Optimization", function () {
 ```
 FVC Token (Non-upgradeable)
     ↓
-Bonding Contract (UUPS upgradeable)
+Bonding Contract (Initial Distribution)
     ↓
-Treasury & Milestone Management
+Treasury Vault (Capital Management)
     ↓
-User Vesting Schedules
+Funding Proposals (Venture Funding)
+    ↓
+Revenue Sharing (Profit Distribution)
+    ↓
+Staking Vault (User Rewards)
 ```
 
 ### **Key Design Decisions**
 1. **FVC Non-upgradeable**: Maintains user trust in governance token
-2. **Bonding Upgradeable**: Allows protocol evolution and improvements
-3. **Milestone-based Pricing**: Rewards early supporters and maximizes capital
-4. **12-month Cliff + 24-month Linear**: Industry standard vesting schedule
-5. **Circuit Breaker Pattern**: Emergency halt mechanism for crises
+2. **Bonding Upgradeable**: Allows initial distribution parameter updates
+3. **Governance Upgradeable**: Enables protocol evolution and improvements
+4. **Revenue Sharing**: Interest-free model based on actual business success
+5. **Professional Vetting + Community Voting**: Quality control + decentralization
 
 ### **Security Features**
 - **Access Control**: Role-based permissions for all admin functions
 - **Reentrancy Protection**: OpenZeppelin's ReentrancyGuard
-- **Circuit Breaker**: Emergency halt mechanism
+- **Circuit Breaker**: Emergency halt mechanism for venture funding operations
 - **Emergency Shutdown**: Complete protocol shutdown capability
-- **Input Validation**: Comprehensive parameter checking
+- **Multi-signature Treasury**: 3-of-5 signer requirement for fund operations
 
 ---
 
 ## **Testing Strategy**
 
 ### **Current Coverage**
-- **Total Tests**: 61 passing
-- **Estimated Line Coverage**: 85%
-- **Test Categories**: 6/8 covered
-- **Critical Paths**: 90% covered
+- **Total Tests**: 61 tests (initial distribution only)
+- **Estimated Line Coverage**: 15%
+- **Test Categories**: 1/8 covered
+- **Critical Paths**: 5% covered
+- **Core Functionality**: 0% covered
 
 ### **Target Coverage**
-- **Total Tests**: 150+ tests
+- **Total Tests**: 300+ tests
 - **Line Coverage**: 95%+
 - **Test Categories**: 8/8 covered
 - **Critical Paths**: 98% covered
+- **Core Functionality**: 100% covered
 
 ### **Test Categories**
-1. ✅ **Initialization**: Contract setup and parameters
-2. ✅ **Core Functionality**: Bonding and milestone logic
-3. ✅ **Access Control**: Role-based permissions
-4. ✅ **Edge Cases**: Boundary conditions and errors
-5. ✅ **Mathematical Precision**: Calculations and rounding
-6. ⚠️ **Security**: Reentrancy and attack prevention
-7. ❌ **Emergency**: Circuit breaker and shutdown
-8. ❌ **Integration**: Cross-contract interactions
+1. ✅ **Initial Distribution**: Token sale and vesting (95% covered)
+2. ❌ **Venture Funding**: Core business logic (0% covered)
+3. ❌ **Governance**: Community decision making (0% covered)
+4. ❌ **Staking**: User reward mechanisms (0% covered)
+5. ❌ **Revenue Sharing**: Economic model (0% covered)
+6. ❌ **Compliance**: Regulatory requirements (0% covered)
+7. ❌ **Treasury**: Fund management (0% covered)
+8. ❌ **Integration**: System coherence (0% covered)
 
 ---
 
@@ -211,79 +325,84 @@ User Vesting Schedules
 |----------|-------|----------|------------|
 | **Aerodrome** | 200+ | 98% | Core mechanics, security, gas |
 | **Uniswap V3** | 300+ | 99% | Mathematical precision, security |
-| **Compound V3** | 250+ | 97% | Risk management, emergency |
-| **FVC Protocol** | 61 | 85% | Core functionality, basic security |
+| **Compound V3** | 250+ | 97% | Risk management, emergency procedures |
+| **FVC Protocol** | 61 | 15% | Initial distribution only |
 
 ### **Gap Analysis**
-- **Emergency Testing**: 40% below industry standard
-- **Integration Testing**: 45% below industry standard
-- **Stress Testing**: 50% below industry standard
-- **Attack Prevention**: 35% below industry standard
+- **Venture Funding**: 100% below industry standard (core purpose missing)
+- **Governance**: 100% below industry standard (decision making missing)
+- **Staking**: 100% below industry standard (reward mechanism missing)
+- **Revenue Sharing**: 100% below industry standard (economic model missing)
 
 ---
 
 ## **Resource Allocation**
 
-### **Week 1-2: Emergency Testing**
+### **Weeks 1-8: Core Venture Funding (40% of development time)**
 - **Effort**: 40% of development time
-- **Deliverables**: Emergency scenario test suite
-- **Success Metrics**: 90%+ emergency function coverage
+- **Deliverables**: Complete venture funding system
+- **Success Metrics**: 100% venture funding functionality implemented and tested
 
-### **Week 3-4: Integration Testing**
+### **Weeks 9-16: Staking and Revenue (30% of development time)**
 - **Effort**: 30% of development time
-- **Deliverables**: Cross-contract integration tests
-- **Success Metrics**: 80%+ integration coverage
+- **Deliverables**: Complete staking and revenue management
+- **Success Metrics**: 100% staking and revenue functionality implemented and tested
 
-### **Week 5-6: Attack Prevention**
+### **Weeks 17-24: Compliance and Integration (20% of development time)**
 - **Effort**: 20% of development time
-- **Deliverables**: Security and attack vector tests
-- **Success Metrics**: 90%+ security coverage
+- **Deliverables**: Complete compliance and integration systems
+- **Success Metrics**: 100% compliance and integration functionality implemented and tested
 
-### **Week 7-8: Performance & Optimization**
+### **Weeks 25-32: Production Readiness (10% of development time)**
 - **Effort**: 10% of development time
-- **Deliverables**: Gas optimization and stress tests
-- **Success Metrics**: 95%+ overall coverage
+- **Deliverables**: Audit preparation and mainnet deployment
+- **Success Metrics**: 95%+ overall coverage and successful mainnet deployment
 
 ---
 
 ## **Success Metrics**
 
 ### **Technical Metrics**
-- [ ] 95%+ line coverage
+- [ ] 95%+ line coverage across all contracts
 - [ ] All critical paths tested
-- [ ] Emergency scenarios covered
-- [ ] Attack vectors protected
-- [ ] Gas optimization complete
+- [ ] Venture funding system fully functional
+- [ ] Governance system operational
+- [ ] Staking and rewards functional
+- [ ] Revenue sharing validated
+- [ ] Compliance system active
+- [ ] Integration complete
 
 ### **Quality Metrics**
 - [ ] All tests passing consistently
-- [ ] No critical security gaps
+- [ ] No critical functionality gaps
 - [ ] Industry-standard test patterns
 - [ ] Comprehensive documentation
 - [ ] Ready for professional audit
 
 ### **Business Metrics**
-- [ ] Protocol ready for mainnet
-- [ ] User trust and confidence
-- [ ] Regulatory compliance
-- [ ] Competitive positioning
-- [ ] Long-term sustainability
+- [ ] Protocol ready for venture funding operations
+- [ ] User trust and confidence established
+- [ ] Regulatory compliance achieved
+- [ ] Competitive positioning secured
+- [ ] Long-term sustainability ensured
 
 ---
 
 ## **Risk Assessment**
 
 ### **High Risk Areas**
-1. **Emergency Functions**: Currently under-tested
-2. **Integration Scenarios**: Cross-contract consistency
-3. **Attack Vectors**: Security vulnerabilities
-4. **Stress Testing**: Performance under load
+1. **Venture Funding System**: Currently 0% implemented and tested
+2. **Governance System**: Core decision making completely missing
+3. **Staking and Rewards**: User incentive mechanism not implemented
+4. **Revenue Sharing**: Economic model not validated
+5. **Compliance**: Regulatory requirements not met
 
 ### **Mitigation Strategies**
-1. **Prioritize emergency testing** in Phase 2
-2. **Implement comprehensive integration tests** for cross-contract interactions
-3. **Focus on attack prevention** before mainnet deployment
-4. **Conduct thorough stress testing** with realistic scenarios
+1. **Prioritize venture funding implementation** in Phase 1
+2. **Implement governance system** before any other features
+3. **Develop staking and revenue systems** in parallel
+4. **Focus on compliance** before mainnet deployment
+5. **Conduct thorough integration testing** across all systems
 
 ---
 
@@ -295,32 +414,34 @@ User Vesting Schedules
 3. **Follow learning guide** using LEARNING_GUIDE.md
 4. **Run existing tests** to understand current state
 
-### **Week 1-2 Goals**
-1. **Create emergency.test.ts** with circuit breaker testing
-2. **Implement stress testing** for maximum amounts
-3. **Add attack vector protection** tests
-4. **Achieve 90%+ emergency function coverage**
+### **Week 1-4 Goals**
+1. **Design venture funding contracts** architecture
+2. **Implement funding proposal system**
+3. **Create community voting mechanisms**
+4. **Develop fund distribution logic**
 
 ### **Success Criteria**
-- [ ] Emergency scenarios fully tested
-- [ ] Circuit breaker functionality validated
-- [ ] Stress testing scenarios implemented
-- [ ] Test coverage increased to 90%+
+- [ ] Venture funding contracts designed and deployed
+- [ ] Funding proposal system functional
+- [ ] Community voting operational
+- [ ] Fund distribution working correctly
 
 ---
 
 ## **Conclusion**
 
-The FVC Protocol has a **solid foundation** with well-designed smart contracts and a comprehensive testing infrastructure. We're currently at **85% test coverage** with **61 passing tests**, which represents a **good foundation** but needs enhancement to reach **industry standards**.
+The FVC Protocol has a **minimal foundation** with well-designed initial token distribution contracts and a comprehensive testing infrastructure. However, we're currently at **15% test coverage** with **61 tests covering only initial distribution**, which represents a **critical gap** in core functionality.
 
-**Phase 2 (Emergency Testing)** is the critical next step, as emergency functions currently have only **60% coverage** - significantly below industry standards. This represents the **highest risk area** and should be prioritized.
+**Phase 1 (Core Venture Funding)** is the critical next step, as venture funding functionality is currently **0% implemented and tested** - this is the core purpose of the protocol and must be prioritized above all else.
 
-By following this roadmap, we can achieve **95%+ test coverage** and **industry-standard testing levels** within 8-12 weeks, making the protocol ready for professional audit and mainnet deployment.
+By following this roadmap, we can achieve **95%+ test coverage** and **complete venture funding functionality** within 32 weeks, making the protocol ready for professional audit and mainnet deployment.
 
 **Key Success Factors**:
-1. **Focus on emergency testing first** (highest risk, lowest coverage)
-2. **Follow industry testing patterns** (Aerodrome, Uniswap, Compound)
-3. **Maintain comprehensive documentation** for future contributors
-4. **Prioritize security and user protection** above all else
+1. **Focus on venture funding first** (core purpose, currently 0% implemented)
+2. **Implement governance system** (controls all funding decisions)
+3. **Develop staking and revenue** (user incentive mechanisms)
+4. **Prioritize compliance** (regulatory approval essential)
 
-The foundation is excellent - now it's time to build the comprehensive testing suite that will make this protocol truly production-ready.
+**Critical Insight**: This is DeFi's first venture fund - the bonding system is just the initial fundraising mechanism. The real innovation is the venture funding protocol that follows, which is currently completely unimplemented and untested.
+
+The foundation is excellent for one component - now it's time to build the comprehensive venture funding ecosystem that will make this protocol truly revolutionary.
