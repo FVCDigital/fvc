@@ -47,6 +47,16 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   const { prices: currentPrices, isLoading: isLoadingPrices } = useCurrentPrices();
   const { ethUsdPrice, isLoading: isLoadingEthPrice } = useEthUsdPrice();
   
+  // Debug logging for price data
+  console.log('=== PrivateSaleCard Price Debug ===');
+  console.log('currentPrices:', currentPrices);
+  console.log('ethUsdPrice:', ethUsdPrice);
+  console.log('currentMilestoneData:', currentMilestoneData);
+  console.log('isLoadingPrices:', isLoadingPrices);
+  console.log('isLoadingEthPrice:', isLoadingEthPrice);
+  console.log('bondAmount:', bondAmount);
+  console.log('selectedAsset:', selectedAsset.symbol);
+  
   // Contract interaction hooks
   const { writeContract: writeBonding, isPending: isBondingPending, data: bondingHash } = useWriteContract();
   const { writeContract: writeUSDC, isPending: isUSDCPending, data: usdcHash } = useWriteContract();
@@ -99,12 +109,13 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
       // FVC = USDC / price per FVC
       const fvcAmount = usdcValue / currentPrice;
       return fvcAmount.toFixed(2);
-    } else if (selectedAsset.symbol === 'ETH' && ethUsdPrice && currentPrice) {
+    } else if (selectedAsset.symbol === 'ETH' && ethUsdPrice && currentMilestoneData) {
       // For ETH bonding, use the direct ETH/USD price from Chainlink and current FVC price
-      const fvcAmount = calculateFVCAmountFromETH(amount, ethUsdPrice, currentPrice);
+      // currentMilestoneData.price is in contract format (25 = $0.025), which is what calculateFVCAmountFromETH expects
+      const fvcAmount = calculateFVCAmountFromETH(amount, ethUsdPrice, currentMilestoneData.price);
       console.log('ETH Calculation Debug:', {
         amount,
-        currentPrice: currentPrice.toString(),
+        currentMilestonePrice: currentMilestoneData.price.toString(),
         ethUsdPrice: ethUsdPrice.toString(),
         fvcAmount
       });
