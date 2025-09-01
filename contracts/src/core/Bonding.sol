@@ -9,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../interfaces/IBonding.sol";
 import "../interfaces/IFVC.sol";
+import "../interfaces/AggregatorV3Interface.sol";
 
 /**
  * @title Bonding
@@ -62,6 +63,12 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
     
     /// @notice Maximum precision loss tolerance (0.01%)
     uint256 public constant MAX_PRECISION_LOSS = 1e14; // 0.01% of 1e18
+    
+    /// @notice ETH precision (18 decimals)
+    uint256 public constant ETH_PRECISION = 1e18;
+    
+    /// @notice Chainlink ETH/USD price feed decimals (usually 8)
+    uint256 public constant CHAINLINK_DECIMALS = 8;
 
     // ============ CUSTOM ERRORS ============
     
@@ -100,6 +107,12 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
     
     /// @notice Error thrown when precision loss is too high
     error Bonding__PrecisionLossTooHigh();
+    
+    /// @notice Error thrown when ETH amount is insufficient
+    error Bonding__InsufficientETH();
+    
+    /// @notice Error thrown when price feed is invalid
+    error Bonding__InvalidPriceFeed();
 
     // ============ STATE VARIABLES ============
 
@@ -111,6 +124,9 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
 
     /// @notice Treasury address for USDC collection
     address public treasury;
+    
+    /// @notice Chainlink ETH/USD price feed address
+    AggregatorV3Interface public ethUsdPriceFeed;
     
     /// @notice Whether private sale is active
     bool public privateSaleActive;
@@ -187,12 +203,14 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @param _fvc FVC token contract address
      * @param _usdc USDC token contract address
      * @param _treasury Treasury address for USDC collection
+     * @param _ethUsdPriceFeed Chainlink ETH/USD price feed address
      * @custom:security Only callable once during deployment
      */
-    function initialize(address _fvc, address _usdc, address _treasury) external initializer {
+    function initialize(address _fvc, address _usdc, address _treasury, address _ethUsdPriceFeed) external initializer {
         if (_fvc == address(0)) revert Bonding__ZeroAddress();
         if (_usdc == address(0)) revert Bonding__ZeroAddress();
         if (_treasury == address(0)) revert Bonding__ZeroAddress();
+        if (_ethUsdPriceFeed == address(0)) revert Bonding__ZeroAddress();
         
         __AccessControl_init();
         __ReentrancyGuard_init();
@@ -201,6 +219,7 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         fvc = IFVC(_fvc);
         usdc = IERC20(_usdc);
         treasury = _treasury;
+        ethUsdPriceFeed = AggregatorV3Interface(_ethUsdPriceFeed);
         
         // Grant roles to deployer
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -379,6 +398,121 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         emit BondTransactionCreated(msg.sender, bondId, usdcAmount, fvcAmount, currentMilestone, startTime);
     }
 
+    /**
+     * @notice Bond ETH for FVC tokens
+     * @dev Converts ETH to USDC equivalent using Chainlink price feed
+     * @param fvcAmount Amount of FVC tokens to purchase (in 18 decimals)
+     */
+    function bondWithETH(uint256 fvcAmount) external payable nonReentrant whenCircuitBreakerNotActive whenNotEmergencyShutdown {
+        // Enhanced input validation
+        if (fvcAmount == 0) revert Bonding__AmountMustBeGreaterThanZero();
+        if (msg.value == 0) revert Bonding__AmountMustBeGreaterThanZero();
+        if (!privateSaleActive) revert Bonding__PrivateSaleNotActive();
+        if (block.timestamp > saleEndTime) revert Bonding__PrivateSaleEnded();
+        
+        // Validate milestone state
+        if (milestones.length == 0) revert Bonding__InvalidMilestone();
+        if (currentMilestone >= milestones.length) revert Bonding__InvalidMilestone();
+        
+        // Get current milestone data with validation
+        Milestone storage currentMilestoneData = milestones[currentMilestone];
+        if (!currentMilestoneData.isActive) revert Bonding__InvalidMilestone();
+        if (currentMilestoneData.price == 0) revert Bonding__CalculationError();
+        if (currentMilestoneData.fvcAllocation == 0) revert Bonding__CalculationError();
+        
+        // Get ETH/USD price from Chainlink
+        uint256 ethUsdPrice = _getEthUsdPrice();
+        if (ethUsdPrice == 0) revert Bonding__InvalidPriceFeed();
+        
+        // Calculate required USDC amount for the FVC tokens
+        uint256 requiredUsdcAmount = _calculatePreciseUSDCAmount(fvcAmount, currentMilestoneData.price);
+        
+        // Calculate required ETH amount
+        uint256 requiredWei = _calculateRequiredWei(requiredUsdcAmount, ethUsdPrice);
+        
+        // Check if user sent enough ETH
+        if (msg.value < requiredWei) revert Bonding__InsufficientETH();
+        
+        // Check wallet cap (convert ETH to USDC equivalent for cap check)
+        uint256 ethUsdEquivalent = (msg.value * ethUsdPrice) / ETH_PRECISION;
+        if (userBonded[msg.sender] + ethUsdEquivalent > MAX_WALLET_CAP) {
+            revert Bonding__ExceedsWalletCap();
+        }
+        
+        // Check if milestone cap would be exceeded
+        uint256 milestoneProgress = totalBonded - (currentMilestone > 0 ? milestones[currentMilestone - 1].usdcThreshold : 0);
+        uint256 milestoneRemaining = currentMilestoneData.usdcThreshold - (currentMilestone > 0 ? milestones[currentMilestone - 1].usdcThreshold : 0);
+        
+        if (milestoneProgress + ethUsdEquivalent > milestoneRemaining) {
+            revert Bonding__MilestoneCapExceeded();
+        }
+        
+        // Check if enough FVC is available for this milestone
+        uint256 milestoneFVCSold = _getMilestoneFVCSold(currentMilestone);
+        if (milestoneFVCSold + fvcAmount > currentMilestoneData.fvcAllocation) {
+            revert Bonding__MilestoneCapExceeded();
+        }
+        
+        // Update state BEFORE external calls (reentrancy protection)
+        totalBonded = totalBonded + ethUsdEquivalent;
+        totalFVCSold = totalFVCSold + fvcAmount;
+        userBonded[msg.sender] = userBonded[msg.sender] + ethUsdEquivalent;
+        
+        // Create vesting schedule using precise time calculations
+        (uint256 cliffDuration, uint256 vestingDuration, uint256 totalDuration) = _calculateVestingDurations();
+        uint256 startTime = block.timestamp;
+        uint256 cliffEndTime = startTime + cliffDuration;
+        uint256 endTime = cliffEndTime + vestingDuration;
+        
+        // Validate vesting schedule
+        require(endTime > startTime, "Invalid vesting schedule");
+        require(endTime - startTime == totalDuration, "Vesting duration mismatch");
+        
+        // Create new bond transaction
+        uint256 bondId = _userBondCount[msg.sender];
+        _userBonds[msg.sender].push(BondTransaction({
+            bondId: bondId,
+            usdcAmount: ethUsdEquivalent, // Store as USDC equivalent
+            fvcAmount: fvcAmount,
+            timestamp: startTime,
+            milestone: currentMilestone,
+            claimedAmount: 0,
+            isActive: true
+        }));
+        
+        // Update bond count
+        _userBondCount[msg.sender] = bondId + 1;
+        
+        // Keep legacy vesting schedule for backward compatibility
+        _vestingSchedules[msg.sender] = VestingSchedule({
+            amount: fvcAmount,
+            startTime: startTime,
+            endTime: endTime
+        });
+        
+        // Update current milestone if needed
+        _updateCurrentMilestone();
+        
+        // External calls AFTER state updates (reentrancy protection)
+        // Forward ETH to treasury (convert to USDC equivalent for accounting)
+        (bool success, ) = payable(treasury).call{value: requiredWei}("");
+        require(success, "ETH transfer failed");
+        
+        // Refund excess ETH if any
+        uint256 excessWei = msg.value - requiredWei;
+        if (excessWei > 0) {
+            (bool refundSuccess, ) = payable(msg.sender).call{value: excessWei}("");
+            require(refundSuccess, "ETH refund failed");
+        }
+        
+        // Mint FVC tokens
+        fvc.mint(msg.sender, fvcAmount);
+        
+        emit Bonded(msg.sender, ethUsdEquivalent, fvcAmount, currentMilestone);
+        emit VestingScheduleCreated(msg.sender, fvcAmount, startTime, endTime);
+        emit BondTransactionCreated(msg.sender, bondId, ethUsdEquivalent, fvcAmount, currentMilestone, startTime);
+    }
+
     // ============ VIEW FUNCTIONS ============
 
     /**
@@ -389,6 +523,48 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
     function getCurrentPrice() external view returns (uint256) {
         if (milestones.length == 0) return 0;
         return milestones[currentMilestone].price;
+    }
+
+    /**
+     * @notice Get current ETH/USD price from Chainlink
+     * @dev Returns ETH/USD price in 18 decimals
+     * @return ethUsdPrice ETH/USD price from Chainlink
+     */
+    function getEthUsdPrice() external view returns (uint256 ethUsdPrice) {
+        return _getEthUsdPrice();
+    }
+
+    /**
+     * @notice Get current FVC prices in both USDC and ETH
+     * @dev Returns both USDC and ETH prices per FVC token
+     * @return usdcPricePerFVC Price per FVC in USDC (6 decimals)
+     * @return ethPricePerFVC Price per FVC in ETH (18 decimals)
+     */
+    function getCurrentPrices() external view returns (uint256 usdcPricePerFVC, uint256 ethPricePerFVC) {
+        if (milestones.length == 0) return (0, 0);
+        
+        uint256 currentPrice = milestones[currentMilestone].price;
+        usdcPricePerFVC = currentPrice;
+        
+        // Get ETH/USD price from Chainlink
+        uint256 ethUsdPrice = _getEthUsdPrice();
+        if (ethUsdPrice == 0) {
+            ethPricePerFVC = 0;
+            return (usdcPricePerFVC, ethPricePerFVC);
+        }
+        
+        // Convert USDC price to ETH price
+        // Formula: ethPricePerFVC = (usdcPricePerFVC * USDC_PRECISION * ETH_PRECISION) / (ethUsdPrice * PRICE_PRECISION)
+        uint256 numerator = currentPrice * USDC_PRECISION * ETH_PRECISION;
+        uint256 denominator = ethUsdPrice * PRICE_PRECISION;
+        
+        if (denominator == 0) {
+            ethPricePerFVC = 0;
+        } else {
+            ethPricePerFVC = numerator / denominator;
+        }
+        
+        return (usdcPricePerFVC, ethPricePerFVC);
     }
 
     /**
@@ -649,6 +825,95 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         // This is a simplified calculation - in practice, you'd track per-milestone sales
         // For now, we'll use the total FVC sold as an approximation
         return totalFVCSold;
+    }
+
+    /**
+     * @notice Get ETH/USD price from Chainlink price feed
+     * @dev Fetches latest price data and validates it
+     * @return ethUsdPrice ETH/USD price with proper decimals
+     */
+    function _getEthUsdPrice() internal view returns (uint256 ethUsdPrice) {
+        try ethUsdPriceFeed.latestRoundData() returns (
+            uint80,
+            int256 price,
+            uint256,
+            uint256,
+            uint80
+        ) {
+            // Validate price data
+            if (price <= 0) return 0;
+            
+            // Convert to uint256 and adjust for decimals
+            ethUsdPrice = uint256(price);
+            
+            // Chainlink ETH/USD feed typically has 8 decimals
+            // We need to convert to 18 decimals for consistency
+            if (ethUsdPriceFeed.decimals() < 18) {
+                uint256 decimalsToAdd = 18 - ethUsdPriceFeed.decimals();
+                ethUsdPrice = ethUsdPrice * (10 ** decimalsToAdd);
+            } else if (ethUsdPriceFeed.decimals() > 18) {
+                uint256 decimalsToRemove = ethUsdPriceFeed.decimals() - 18;
+                ethUsdPrice = ethUsdPrice / (10 ** decimalsToRemove);
+            }
+            
+            return ethUsdPrice;
+        } catch {
+            return 0; // Return 0 if price feed fails
+        }
+    }
+
+    /**
+     * @notice Calculate USDC amount for given FVC amount at current price
+     * @dev Reverse calculation of FVC amount
+     * @param fvcAmount Amount of FVC tokens (in 18 decimals)
+     * @param price Price per FVC (in 3 decimals)
+     * @return usdcAmount Amount of USDC required (in 6 decimals)
+     */
+    function _calculatePreciseUSDCAmount(uint256 fvcAmount, uint256 price) internal pure returns (uint256 usdcAmount) {
+        // Validate inputs
+        if (fvcAmount == 0 || price == 0) revert Bonding__CalculationError();
+        
+        // Formula: usdcAmount = (fvcAmount * price * PRICE_PRECISION) / PRECISION
+        uint256 numerator = fvcAmount * price * PRICE_PRECISION;
+        uint256 denominator = PRECISION;
+        
+        // Check for division by zero
+        if (denominator == 0) revert Bonding__CalculationError();
+        
+        // Calculate with precision
+        usdcAmount = numerator / denominator;
+        
+        // Validate result
+        if (usdcAmount == 0) revert Bonding__CalculationError();
+        
+        return usdcAmount;
+    }
+
+    /**
+     * @notice Calculate required ETH amount for given USDC amount
+     * @dev Converts USDC amount to ETH using Chainlink price
+     * @param usdcAmount Amount of USDC (in 6 decimals)
+     * @param ethUsdPrice ETH/USD price (in 18 decimals)
+     * @return requiredWei Required ETH amount in wei
+     */
+    function _calculateRequiredWei(uint256 usdcAmount, uint256 ethUsdPrice) internal pure returns (uint256 requiredWei) {
+        // Validate inputs
+        if (usdcAmount == 0 || ethUsdPrice == 0) revert Bonding__CalculationError();
+        
+        // Formula: requiredWei = (usdcAmount * ETH_PRECISION) / ethUsdPrice
+        uint256 numerator = usdcAmount * ETH_PRECISION;
+        uint256 denominator = ethUsdPrice;
+        
+        // Check for division by zero
+        if (denominator == 0) revert Bonding__CalculationError();
+        
+        // Calculate with precision
+        requiredWei = numerator / denominator;
+        
+        // Validate result
+        if (requiredWei == 0) revert Bonding__CalculationError();
+        
+        return requiredWei;
     }
 
     // ============ MODIFIERS ============

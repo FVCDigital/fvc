@@ -99,6 +99,13 @@ interface IBonding {
     function bond(uint256 usdcAmount) external;
     
     /**
+     * @notice Bond ETH for FVC tokens
+     * @dev Converts ETH to USDC equivalent using Chainlink price feed
+     * @param fvcAmount Amount of FVC tokens to purchase (in 18 decimals)
+     */
+    function bondWithETH(uint256 fvcAmount) external payable;
+    
+    /**
      * @notice Start the private sale
      * @dev Only bonding manager can start the sale
      * @param duration Duration of the sale in seconds
@@ -119,6 +126,21 @@ interface IBonding {
      * @return Current price per FVC
      */
     function getCurrentPrice() external view returns (uint256);
+    
+    /**
+     * @notice Get current ETH/USD price from Chainlink
+     * @dev Returns ETH/USD price in 18 decimals
+     * @return ethUsdPrice ETH/USD price from Chainlink
+     */
+    function getEthUsdPrice() external view returns (uint256 ethUsdPrice);
+
+    /**
+     * @notice Get current FVC prices in both USDC and ETH
+     * @dev Returns both USDC and ETH prices per FVC token
+     * @return usdcPricePerFVC Price per FVC in USDC (6 decimals)
+     * @return ethPricePerFVC Price per FVC in ETH (18 decimals)
+     */
+    function getCurrentPrices() external view returns (uint256 usdcPricePerFVC, uint256 ethPricePerFVC);
     
     /**
      * @notice Get current milestone information
