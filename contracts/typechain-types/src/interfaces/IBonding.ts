@@ -92,6 +92,7 @@ export interface IBondingInterface extends Interface {
     nameOrSignature:
       | "activateCircuitBreaker"
       | "bond"
+      | "bondWithETH"
       | "bondingThisBlock"
       | "calculateFVCAmount"
       | "circuitBreakerActive"
@@ -105,7 +106,9 @@ export interface IBondingInterface extends Interface {
       | "getBondCount"
       | "getCurrentMilestone"
       | "getCurrentPrice"
+      | "getCurrentPrices"
       | "getEmergencyStatus"
+      | "getEthUsdPrice"
       | "getNextMilestone"
       | "getRemainingFVC"
       | "getSaleProgress"
@@ -141,6 +144,10 @@ export interface IBondingInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "bond", values: [BigNumberish]): string;
+  encodeFunctionData(
+    functionFragment: "bondWithETH",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "bondingThisBlock",
     values?: undefined
@@ -194,7 +201,15 @@ export interface IBondingInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "getCurrentPrices",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getEmergencyStatus",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getEthUsdPrice",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -272,6 +287,10 @@ export interface IBondingInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "bond", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "bondWithETH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "bondingThisBlock",
     data: BytesLike
   ): Result;
@@ -324,7 +343,15 @@ export interface IBondingInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getCurrentPrices",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getEmergencyStatus",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getEthUsdPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -583,6 +610,12 @@ export interface IBonding extends BaseContract {
 
   bond: TypedContractMethod<[usdcAmount: BigNumberish], [void], "nonpayable">;
 
+  bondWithETH: TypedContractMethod<
+    [fvcAmount: BigNumberish],
+    [void],
+    "payable"
+  >;
+
   bondingThisBlock: TypedContractMethod<[], [bigint], "view">;
 
   calculateFVCAmount: TypedContractMethod<
@@ -625,6 +658,12 @@ export interface IBonding extends BaseContract {
 
   getCurrentPrice: TypedContractMethod<[], [bigint], "view">;
 
+  getCurrentPrices: TypedContractMethod<
+    [],
+    [[bigint, bigint] & { usdcPricePerFVC: bigint; ethPricePerFVC: bigint }],
+    "view"
+  >;
+
   getEmergencyStatus: TypedContractMethod<
     [],
     [
@@ -636,6 +675,8 @@ export interface IBonding extends BaseContract {
     ],
     "view"
   >;
+
+  getEthUsdPrice: TypedContractMethod<[], [bigint], "view">;
 
   getNextMilestone: TypedContractMethod<
     [],
@@ -721,6 +762,9 @@ export interface IBonding extends BaseContract {
     nameOrSignature: "bond"
   ): TypedContractMethod<[usdcAmount: BigNumberish], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "bondWithETH"
+  ): TypedContractMethod<[fvcAmount: BigNumberish], [void], "payable">;
+  getFunction(
     nameOrSignature: "bondingThisBlock"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
@@ -764,6 +808,13 @@ export interface IBonding extends BaseContract {
     nameOrSignature: "getCurrentPrice"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+    nameOrSignature: "getCurrentPrices"
+  ): TypedContractMethod<
+    [],
+    [[bigint, bigint] & { usdcPricePerFVC: bigint; ethPricePerFVC: bigint }],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "getEmergencyStatus"
   ): TypedContractMethod<
     [],
@@ -776,6 +827,9 @@ export interface IBonding extends BaseContract {
     ],
     "view"
   >;
+  getFunction(
+    nameOrSignature: "getEthUsdPrice"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "getNextMilestone"
   ): TypedContractMethod<[], [IBonding.MilestoneStructOutput], "view">;
