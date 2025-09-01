@@ -19,6 +19,9 @@ export const cn = (...inputs: ClassValue[]) => {
 // Re-export bonding service functions
 export {
   calculateFVCAmount,
+  calculateFVCAmountFromUSDC,
+  calculateFVCAmountFromETH,
+  calculateRequiredETH,
   calculateCurrentDiscount,
   calculateVestingProgress,
   calculateTimeRemaining,
@@ -34,7 +37,6 @@ export {
 
 // Re-export trading service functions
 export {
-  calculateFVCAmountFromUSDC,
   calculateUSDCAmountFromFVC,
   calculateTradingFee,
   calculateNetAmount,

@@ -55,7 +55,7 @@ export const useApproveUSDC = (amount: string) => {
 };
 
 // Hook for bonding with different assets
-export const useBond = (amount: string, asset: any) => {
+export const useBond = (amount: string, asset: any, fvcAmount?: string) => {
   const { address } = useAccount();
   
   const { data: hash, writeContract, isPending, error } = useWriteContract();
@@ -64,20 +64,25 @@ export const useBond = (amount: string, asset: any) => {
     hash,
   });
 
-  const handleBond = async () => {
+  const handleBond = async (passedFvcAmount?: string) => {
     if (!amount || !address) return;
     
+    const finalFvcAmount = passedFvcAmount || fvcAmount;
+    
     if (asset.symbol === 'ETH') {
-      // For ETH, we need to convert to USDC first
-      // This is a simplified version - in production you'd use a DEX or price oracle
-      const ETH_TO_USDC_RATE = 3000; // This should come from a price oracle
-      const usdcEquivalent = parseFloat(amount) * ETH_TO_USDC_RATE;
+      // For ETH bonding, use the new bondWithETH function
+      if (!finalFvcAmount) {
+        console.error('FVC amount is required for ETH bonding');
+        return;
+      }
       
-      // For now, we'll just show an error that ETH bonding requires USDC conversion
-      // In a real implementation, you'd integrate with a DEX like Uniswap
-      console.log('ETH bonding requires USDC conversion. USDC equivalent:', usdcEquivalent);
-      alert('ETH bonding requires USDC conversion. Please use USDC for bonding.');
-      return;
+      writeContract({
+        address: CONTRACTS.BONDING as `0x${string}`,
+        abi: BONDING_ABI,
+        functionName: 'bondWithETH',
+        args: [parseUnits(finalFvcAmount, 18)], // FVC amount in 18 decimals
+        value: parseUnits(amount, 18), // ETH amount in wei
+      });
     } else {
       // For USDC, send amount as parameter
       writeContract({
@@ -143,7 +148,7 @@ export const useBondingFlow = (selectedAsset?: any) => {
   };
 
   // Handle bonding
-  const handleBond = async () => {
+  const handleBond = async (fvcAmount?: string) => {
     if (!bondAmount || !address) {
       setErrorMessage('Please enter an amount and connect wallet');
       return;
@@ -153,7 +158,7 @@ export const useBondingFlow = (selectedAsset?: any) => {
     setErrorMessage('');
     
     try {
-      await bond();
+      await bond(fvcAmount);
     } catch (error) {
       setStep('error');
       setErrorMessage('Bonding failed');
