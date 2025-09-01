@@ -119,6 +119,19 @@ export const BONDING_ABI = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "fvcAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "bondWithETH",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getAllMilestones",
     "outputs": [
@@ -193,6 +206,50 @@ export const BONDING_ABI = [
         "internalType": "struct IBonding.Milestone",
         "name": "",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCurrentPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getEthUsdPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "ethUsdPrice",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCurrentPrices",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "usdcPricePerFVC",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "ethPricePerFVC",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -741,4 +798,70 @@ export const useDebugContractCall = (userAddress?: string) => {
   });
   
   return { result, isLoading, error };
+};
+
+// Hook to get current FVC price in USDC
+export const useCurrentPrice = () => {
+  const { data: price, isLoading, error } = useReadContract({
+    address: CONTRACTS.BONDING as `0x${string}`,
+    abi: BONDING_ABI,
+    functionName: 'getCurrentPrice',
+    query: {
+      enabled: !!CONTRACTS.BONDING,
+      staleTime: 30000, // Cache for 30 seconds
+      gcTime: 60000,    // Keep in memory for 1 minute
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+    },
+  });
+
+  return {
+    price: price as bigint | undefined,
+    isLoading,
+    error,
+  };
+};
+
+// Hook to get current FVC prices in both USDC and ETH
+export const useCurrentPrices = () => {
+  const { data: prices, isLoading, error } = useReadContract({
+    address: CONTRACTS.BONDING as `0x${string}`,
+    abi: BONDING_ABI,
+    functionName: 'getCurrentPrices',
+    query: {
+      enabled: !!CONTRACTS.BONDING,
+      staleTime: 15000, // Cache for 15 seconds (more frequent updates for price feeds)
+      gcTime: 30000,    // Keep in memory for 30 seconds
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+    },
+  });
+
+  return {
+    prices: prices as [bigint, bigint] | undefined,
+    isLoading,
+    error,
+  };
+};
+
+// Hook to get ETH/USD price from Chainlink
+export const useEthUsdPrice = () => {
+  const { data: ethUsdPrice, isLoading, error } = useReadContract({
+    address: CONTRACTS.BONDING as `0x${string}`,
+    abi: BONDING_ABI,
+    functionName: 'getEthUsdPrice',
+    query: {
+      enabled: !!CONTRACTS.BONDING,
+      staleTime: 15000, // Cache for 15 seconds (more frequent updates for price feeds)
+      gcTime: 30000,    // Keep in memory for 30 seconds
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+    },
+  });
+
+  return {
+    ethUsdPrice: ethUsdPrice as bigint | undefined,
+    isLoading,
+    error,
+  };
 };
