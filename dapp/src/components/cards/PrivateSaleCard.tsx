@@ -57,6 +57,15 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   console.log('bondAmount:', bondAmount);
   console.log('selectedAsset:', selectedAsset.symbol);
   
+  // Check if price feed is working
+  if (!isLoadingEthPrice && !ethUsdPrice) {
+    console.warn('⚠️ ETH/USD price feed is not returning data. This might indicate:');
+    console.warn('1. Price feed contract is not deployed or configured');
+    console.warn('2. Price feed is returning 0 or failing');
+    console.warn('3. Network connectivity issues');
+    console.warn('Using fallback ETH price for calculations.');
+  }
+  
   // Contract interaction hooks
   const { writeContract: writeBonding, isPending: isBondingPending, data: bondingHash } = useWriteContract();
   const { writeContract: writeUSDC, isPending: isUSDCPending, data: usdcHash } = useWriteContract();
@@ -109,15 +118,25 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
       // FVC = USDC / price per FVC
       const fvcAmount = usdcValue / currentPrice;
       return fvcAmount.toFixed(2);
-    } else if (selectedAsset.symbol === 'ETH' && ethUsdPrice && currentMilestoneData) {
-      // For ETH bonding, use the direct ETH/USD price from Chainlink and current FVC price
+    } else if (selectedAsset.symbol === 'ETH' && currentMilestoneData) {
+      // For ETH bonding, use ETH/USD price from Chainlink or fallback to reasonable estimate
+      let effectiveEthUsdPrice = ethUsdPrice;
+      
+      // Fallback to reasonable ETH price if Chainlink price is not available
+      if (!effectiveEthUsdPrice || effectiveEthUsdPrice === 0n) {
+        // Use a reasonable ETH price estimate (e.g., $3000 = 3000 * 1e18)
+        effectiveEthUsdPrice = BigInt(3000 * 1e18);
+        console.log('Using fallback ETH price:', effectiveEthUsdPrice.toString());
+      }
+      
       // currentMilestoneData.price is in contract format (25 = $0.025), which is what calculateFVCAmountFromETH expects
-      const fvcAmount = calculateFVCAmountFromETH(amount, ethUsdPrice, currentMilestoneData.price);
+      const fvcAmount = calculateFVCAmountFromETH(amount, effectiveEthUsdPrice, currentMilestoneData.price);
       console.log('ETH Calculation Debug:', {
         amount,
         currentMilestonePrice: currentMilestoneData.price.toString(),
-        ethUsdPrice: ethUsdPrice.toString(),
-        fvcAmount
+        ethUsdPrice: effectiveEthUsdPrice.toString(),
+        fvcAmount,
+        usingFallback: !ethUsdPrice || ethUsdPrice === 0n
       });
       return parseFloat(fvcAmount).toFixed(2);
     }
