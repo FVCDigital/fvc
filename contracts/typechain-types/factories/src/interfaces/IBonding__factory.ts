@@ -217,6 +217,19 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "fvcAmount",
+        type: "uint256",
+      },
+    ],
+    name: "bondWithETH",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "bondingThisBlock",
     outputs: [
@@ -483,6 +496,24 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "getCurrentPrices",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "usdcPricePerFVC",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "ethPricePerFVC",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
     name: "getEmergencyStatus",
     outputs: [
       {
@@ -498,6 +529,19 @@ const _abi = [
       {
         internalType: "uint256",
         name: "lastEmergencyOperation",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getEthUsdPrice",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "ethUsdPrice",
         type: "uint256",
       },
     ],
