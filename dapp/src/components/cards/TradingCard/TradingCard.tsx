@@ -11,10 +11,13 @@ import BondingTerms from './BondingTerms';
 import useKYC from '@/utils/hooks/useKYC';
 import KYCButton from '@/components/cards/KYCButton';
 import { useBondingFlow, useMockUSDCBalance, useBondingContractBalance } from '@/utils/handlers/bondingHandler';
-import { useCurrentDiscount, useCurrentRound, CONTRACTS } from '@/utils/contracts/bondingContract';
+import { useCurrentDiscount, useCurrentRound, useCurrentPrice, useCurrentPrices, useEthUsdPrice, CONTRACTS } from '@/utils/contracts/bondingContract';
 import { parseUnits, formatUnits } from 'viem';
 import { 
   calculateFVCAmount, 
+  calculateFVCAmountFromUSDC,
+  calculateFVCAmountFromETH,
+  calculateRequiredETH,
   getAssetDisplayName, 
   getActionButtonText, 
   shouldShowApproveButton,
@@ -87,6 +90,9 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   const { discount, isLoading: isLoadingDiscount } = useCurrentDiscount();
   const { currentRound, isLoading: isLoadingRound } = useCurrentRound();
   const { bondingContractBalance, isLoading: isLoadingBalance } = useBondingContractBalance();
+  const { price: currentPrice, isLoading: isLoadingPrice } = useCurrentPrice();
+  const { prices: currentPrices, isLoading: isLoadingPrices } = useCurrentPrices();
+  const { ethUsdPrice, isLoading: isLoadingEthPrice } = useEthUsdPrice();
 
   // Handle the new contract structure - currentRound is now an array
   const round = currentRound && Array.isArray(currentRound) ? {
@@ -136,14 +142,24 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   const { isVerified, triggerVerification, QrModal } = useKYC();
   const [showKycModal, setShowKycModal] = useState(false);
 
-  // Calculate FVC output based on current discount
-  const fvcAmount = calculateFVCAmount(bondAmount, discount as bigint | undefined, selectedAsset);
+  // Calculate FVC output based on current price
+  const fvcAmount = selectedAsset.symbol === 'USDC' 
+    ? calculateFVCAmountFromUSDC(bondAmount, currentPrice)
+    : selectedAsset.symbol === 'ETH' && ethUsdPrice && currentPrice
+      ? calculateFVCAmountFromETH(bondAmount, ethUsdPrice, currentPrice) // bondAmount (ETH), ethUsdPrice, fvcUsdPrice
+      : calculateFVCAmount(bondAmount, discount as bigint | undefined, selectedAsset); // Fallback for legacy
   
   // Debug logging
+  console.log('=== BONDING DEBUG ===');
+  console.log('Selected Asset:', selectedAsset.symbol);
   console.log('Bond Amount:', bondAmount);
-  console.log('Discount:', discount);
+  console.log('Current Price (FVC/USDC):', currentPrice);
+  console.log('ETH/USD Price:', ethUsdPrice);
+  console.log('Current Prices (FVC in USDC/ETH):', currentPrices);
   console.log('Calculated FVC Amount:', fvcAmount);
+  console.log('Discount:', discount);
   console.log('Contract Addresses:', CONTRACTS);
+  console.log('===================');
 
   const handlePercent = (pct: number) => {
     if (!balance?.data) return;
@@ -153,7 +169,12 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
 
   const handleBond = async () => {
     if (!address) return;
-    await handleBondFlow();
+    // For ETH bonding, we need to pass the FVC amount
+    if (selectedAsset.symbol === 'ETH') {
+      await handleBondFlow(fvcAmount);
+    } else {
+      await handleBondFlow();
+    }
   };
 
   const handleApproveClick = async () => {
@@ -233,6 +254,30 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
             bondingContractBalance={bondingContractBalance}
           />
 
+          {/* Price Display */}
+          {currentPrices && !isLoadingPrices && (
+            <div style={{ 
+              background: 'rgba(56,189,248,0.1)', 
+              padding: '12px 16px', 
+              borderRadius: 8, 
+              marginBottom: 16,
+              width: '100%',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: 14, color: theme.secondaryText, marginBottom: 4 }}>
+                Current FVC Price
+              </div>
+              <div style={{ fontSize: 16, fontWeight: 600, color: theme.primaryText }}>
+                ${(Number(currentPrices[0]) / 1000).toFixed(3)} USDC
+              </div>
+              {currentPrices[1] > 0n && (
+                <div style={{ fontSize: 14, color: theme.secondaryText }}>
+                  {formatUnits(currentPrices[1], 18)} ETH
+                </div>
+              )}
+            </div>
+          )}
+
 
 
           {/* Amount Input */}
@@ -270,7 +315,7 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
                 fontFamily: 'Inter, sans-serif',
               }}
             >
-              {isApproving ? 'Approving...' : 'Approve USDC'}
+              {isApproving ? 'Approving USDC...' : 'Approve USDC'}
             </button>
           ) : (
             <button

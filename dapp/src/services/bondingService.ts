@@ -42,11 +42,84 @@ export const DEFAULT_BONDING_CONFIG = {
 // =============================================================================
 
 /**
- * Calculates FVC tokens to mint based on USDC amount and discount
- * @param usdcAmount - Amount of USDC being bonded (or ETH converted to USDC)
- * @param discount - Current discount percentage (0-100)
- * @param asset - Asset being bonded (for ETH conversion)
+ * Calculates FVC tokens to mint based on USDC amount and current price
+ * @param usdcAmount - Amount of USDC being bonded
+ * @param currentPrice - Current FVC price in USDC (6 decimals)
  * @returns Amount of FVC tokens to mint
+ */
+export function calculateFVCAmountFromUSDC(usdcAmount: string, currentPrice: bigint | undefined): string {
+  console.log('calculateFVCAmountFromUSDC called with:', { usdcAmount, currentPrice });
+  
+  if (!usdcAmount || !currentPrice) return '';
+  
+  const usdcAmountBigInt = parseUnits(usdcAmount, 6);
+  const fvcAmount = (usdcAmountBigInt * BigInt(1e18)) / (currentPrice * BigInt(1000)); // currentPrice is in 3 decimals
+  
+  return formatUnits(fvcAmount, 18);
+}
+
+/**
+ * Calculates required ETH amount for FVC tokens using Chainlink price
+ * @param fvcAmount - Amount of FVC tokens to purchase
+ * @param ethUsdPrice - ETH/USD price from Chainlink (18 decimals)
+ * @param fvcUsdPrice - FVC price in USDC (6 decimals)
+ * @returns Required ETH amount in wei
+ */
+export function calculateRequiredETH(fvcAmount: string, ethUsdPrice: bigint, fvcUsdPrice: bigint): string {
+  console.log('calculateRequiredETH called with:', { fvcAmount, ethUsdPrice, fvcUsdPrice });
+  
+  if (!fvcAmount || !ethUsdPrice || !fvcUsdPrice) return '';
+  
+  const fvcAmountBigInt = parseUnits(fvcAmount, 18);
+  const requiredUsdc = (fvcAmountBigInt * fvcUsdPrice * BigInt(1000)) / BigInt(1e18);
+  const requiredETH = (requiredUsdc * BigInt(1e18)) / ethUsdPrice;
+  
+  return requiredETH.toString();
+}
+
+/**
+ * Calculates FVC tokens from ETH amount using Chainlink price
+ * @param ethAmount - Amount of ETH being bonded
+ * @param ethUsdPrice - ETH/USD price from Chainlink (18 decimals)
+ * @param fvcUsdPrice - FVC price in USDC (6 decimals)
+ * @returns Amount of FVC tokens to mint
+ */
+export function calculateFVCAmountFromETH(ethAmount: string, ethUsdPrice: bigint, fvcUsdPrice: bigint): string {
+  console.log('calculateFVCAmountFromETH called with:', { ethAmount, ethUsdPrice, fvcUsdPrice });
+  
+  if (!ethAmount || !ethUsdPrice || !fvcUsdPrice) {
+    console.log('Missing parameters, returning empty string');
+    return '';
+  }
+  
+  const ethAmountBigInt = parseUnits(ethAmount, 18);
+  console.log('ethAmountBigInt:', ethAmountBigInt.toString());
+  
+  // Convert ETH to USDC equivalent (6 decimals)
+  // ethUsdPrice is in 18 decimals from the contract, so we need to scale it to 6 decimals for USDC
+  const ethUsdPriceScaled = ethUsdPrice / BigInt(1e12); // Convert 18 decimals to 6 decimals
+  const usdcEquivalent = (ethAmountBigInt * ethUsdPriceScaled) / BigInt(1e18);
+  console.log('ethUsdPriceScaled:', ethUsdPriceScaled.toString());
+  console.log('usdcEquivalent:', usdcEquivalent.toString());
+  
+  // Convert USDC to FVC tokens
+  // fvcUsdPrice is stored as integer where 25 = $0.025 (3 decimal precision)
+  // We need to convert it to 6 decimals for USDC comparison: 25 * 1000 = 25000 (6 decimals)
+  const fvcUsdPriceScaled = fvcUsdPrice * BigInt(1000); // Convert 3 decimals to 6 decimals
+  console.log('fvcUsdPriceScaled:', fvcUsdPriceScaled.toString());
+  
+  const fvcAmount = (usdcEquivalent * BigInt(1e18)) / fvcUsdPriceScaled;
+  console.log('fvcAmount (raw):', fvcAmount.toString());
+  
+  const result = formatUnits(fvcAmount, 18);
+  console.log('fvcAmount (formatted):', result);
+  
+  return result;
+}
+
+/**
+ * Legacy function for backward compatibility
+ * @deprecated Use calculateFVCAmountFromUSDC instead
  */
 export function calculateFVCAmount(usdcAmount: string, discount: bigint | undefined, asset?: any): string {
   console.log('calculateFVCAmount called with:', { usdcAmount, discount, asset });
@@ -274,11 +347,11 @@ export function getActionButtonText(
   isApproving: boolean
 ): string {
   if (asset.symbol === 'ETH') {
-    return isBonding ? 'Bonding...' : 'Bond ETH (Convert to USDC)';
+    return isBonding ? 'Bonding with ETH...' : 'Bond with ETH';
   }
   return isApproved 
-    ? (isBonding ? 'Bonding...' : 'Bond USDC') 
-    : (isApproving ? 'Approving...' : 'Approve USDC');
+    ? (isBonding ? 'Bonding with USDC...' : 'Bond with USDC') 
+    : (isApproving ? 'Approving USDC...' : 'Approve USDC');
 }
 
 // =============================================================================
@@ -310,11 +383,13 @@ export function prepareApprovalTransaction(
  * Prepares bonding transaction parameters
  * @param amount - Amount to bond
  * @param asset - Asset to bond
+ * @param fvcAmount - Amount of FVC tokens to purchase (for ETH bonding)
  * @returns Transaction parameters
  */
 export function prepareBondingTransaction(
   amount: string,
-  asset: Asset
+  asset: Asset,
+  fvcAmount?: string
 ): { 
   address: `0x${string}`; 
   abi: any; 
@@ -323,20 +398,20 @@ export function prepareBondingTransaction(
   value?: bigint;
 } {
   if (asset.symbol === 'ETH') {
-    // For ETH, we need to convert to USDC first
-    // This would require integration with a DEX like Uniswap
-    // For now, we'll just return USDC bonding parameters
-    const ETH_TO_USDC_RATE = 3000; // This should come from a price oracle
-    const usdcEquivalent = parseFloat(amount) * ETH_TO_USDC_RATE;
+    // For ETH bonding, use the new bondWithETH function
+    if (!fvcAmount) {
+      throw new Error('FVC amount is required for ETH bonding');
+    }
     
     return {
       address: CONTRACTS.BONDING as `0x${string}`,
       abi: BONDING_ABI,
-      functionName: 'bond',
-      args: [parseUnits(usdcEquivalent.toString(), 6)], // Convert to USDC equivalent
+      functionName: 'bondWithETH',
+      args: [parseUnits(fvcAmount, 18)], // FVC amount in 18 decimals
+      value: parseUnits(amount, 18), // ETH amount in wei
     };
   } else {
-    // Only USDC bonding is supported
+    // USDC bonding
     return {
       address: CONTRACTS.BONDING as `0x${string}`,
       abi: BONDING_ABI,

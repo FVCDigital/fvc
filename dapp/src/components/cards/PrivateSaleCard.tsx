@@ -2,17 +2,39 @@ import React, { useState, useEffect } from 'react';
 import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { theme } from '@/constants/theme';
 import { parseUnits, formatUnits } from 'viem';
-import { BaseCardProps } from '@/types';
+import { BaseCardProps, Asset } from '@/types';
 import FVCAllocationChart from './FVCAllocationChart/FVCAllocationChart';
-import { CONTRACTS, useAllMilestones, useCurrentMilestone, useSaleProgress, usePrivateSaleActive, BONDING_ABI, USDC_ABI } from '@/utils/contracts/bondingContract';
+import AssetSelector from './TradingCard/AssetSelector';
+import { CONTRACTS, useAllMilestones, useCurrentMilestone, useSaleProgress, usePrivateSaleActive, useCurrentPrices, useEthUsdPrice, BONDING_ABI, USDC_ABI } from '@/utils/contracts/bondingContract';
+import { calculateFVCAmountFromUSDC, calculateFVCAmountFromETH, calculatePercentageAmount } from '@/utils';
 
 interface PrivateSaleCardProps extends BaseCardProps {
   className?: string;
 }
 
+const ASSETS: Asset[] = [
+  { 
+    symbol: 'USDC', 
+    name: 'USD Coin', 
+    address: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`, 
+    decimals: 6,
+    logo: '/assets/usdc-logo.png',
+    color: '#2775CA'
+  },
+  { 
+    symbol: 'ETH', 
+    name: 'Ethereum', 
+    address: '0x0000000000000000000000000000000000000000', 
+    decimals: 18,
+    logo: '/assets/eth-logo.png',
+    color: '#627EEA'
+  },
+];
+
 const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => {
   const { address } = useAccount();
-  const [usdcAmount, setUsdcAmount] = useState('');
+  const [selectedAsset, setSelectedAsset] = useState(ASSETS[0]);
+  const [bondAmount, setBondAmount] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,6 +44,8 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   const { currentMilestone: currentMilestoneData, isLoading: currentMilestoneLoading, refetch: refetchCurrentMilestone } = useCurrentMilestone();
   const { saleProgress, isLoading: progressLoading, refetch: refetchSaleProgress } = useSaleProgress();
   const { isActive: privateSaleActive, isLoading: saleActiveLoading } = usePrivateSaleActive();
+  const { prices: currentPrices, isLoading: isLoadingPrices } = useCurrentPrices();
+  const { ethUsdPrice, isLoading: isLoadingEthPrice } = useEthUsdPrice();
   
   // Contract interaction hooks
   const { writeContract: writeBonding, isPending: isBondingPending, data: bondingHash } = useWriteContract();
@@ -36,12 +60,21 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
     hash: bondingHash,
   });
   
-  // USDC Balance
-  const { data: usdcBalance, isLoading: usdcBalanceLoading, refetch: refetchUSDCBalance } = useBalance({ 
+  // Balance - Use real balance for both ETH and USDC
+  const ethBalance = useBalance({ 
+    address: address as `0x${string}` | undefined,
+    query: { enabled: !!address }
+  });
+  
+  const usdcBalance = useBalance({ 
     address: address as `0x${string}` | undefined,
     token: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`,
     query: { enabled: !!address }
   });
+  
+  const balance = selectedAsset.symbol === 'ETH' 
+    ? ethBalance
+    : usdcBalance;
 
   // Percentage buttons
   const percentButtons = [0, 50, 100];
@@ -57,25 +90,38 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   const currentPrice = currentMilestoneData ? Number(currentMilestoneData.price) / 1000 : 0.025;
   const currentMilestoneName = currentMilestoneData?.name || 'Early Bird';
 
-  // Calculate FVC amount based on current milestone price
-  const calculateFVCAmount = (usdcAmount: string) => {
-    if (!usdcAmount || parseFloat(usdcAmount) <= 0) return '0';
+  // Calculate FVC amount based on current milestone price and selected asset
+  const calculateFVCAmount = (amount: string) => {
+    if (!amount || parseFloat(amount) <= 0) return '0';
     
-    const usdcValue = parseFloat(usdcAmount);
-    // FVC = USDC / price per FVC
-    const fvcAmount = usdcValue / currentPrice;
+    if (selectedAsset.symbol === 'USDC') {
+      const usdcValue = parseFloat(amount);
+      // FVC = USDC / price per FVC
+      const fvcAmount = usdcValue / currentPrice;
+      return fvcAmount.toFixed(2);
+    } else if (selectedAsset.symbol === 'ETH' && ethUsdPrice && currentPrice) {
+      // For ETH bonding, use the direct ETH/USD price from Chainlink and current FVC price
+      const fvcAmount = calculateFVCAmountFromETH(amount, ethUsdPrice, currentPrice);
+      console.log('ETH Calculation Debug:', {
+        amount,
+        currentPrice: currentPrice.toString(),
+        ethUsdPrice: ethUsdPrice.toString(),
+        fvcAmount
+      });
+      return parseFloat(fvcAmount).toFixed(2);
+    }
     
-    return fvcAmount.toFixed(2);
+    return '0';
   };
 
   // Handle percentage button clicks
   const handlePercent = (pct: number) => {
-    if (!usdcBalance) return;
-    const value = (parseFloat(usdcBalance.formatted) * pct) / 100;
-    setUsdcAmount(value.toString());
+    if (!balance?.data) return;
+    const value = calculatePercentageAmount(balance.data.formatted, pct, selectedAsset.decimals);
+    setBondAmount(value);
   };
 
-  const fvcAmount = calculateFVCAmount(usdcAmount);
+  const fvcAmount = calculateFVCAmount(bondAmount);
 
   // Find next milestone
   const nextMilestone = milestones && milestones.length > currentMilestoneIndex + 1 
@@ -95,15 +141,29 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
       return;
     }
 
-    if (!usdcAmount || parseFloat(usdcAmount) <= 0) {
+    if (!bondAmount || parseFloat(bondAmount) <= 0) {
       setError('Please enter a valid amount');
       return;
     }
 
-    // Check wallet cap (2M USDC)
-    if (parseFloat(usdcAmount) > 2000000) {
+    // Check wallet cap (2M USDC equivalent)
+    const amountValue = parseFloat(bondAmount);
+    if (selectedAsset.symbol === 'USDC' && amountValue > 2000000) {
       setError('Maximum investment per wallet is 2M USDC');
       return;
+    } else if (selectedAsset.symbol === 'ETH' && currentPrices && currentPrices[1] > 0n) {
+      // Calculate ETH/USD price from existing data
+      const fvcUsdPrice = currentPrices[0];
+      const fvcEthPrice = currentPrices[1];
+      const fvcUsdPriceScaled = fvcUsdPrice * BigInt(1e15);
+      const calculatedEthUsdPrice = fvcUsdPriceScaled / fvcEthPrice;
+      
+      // Convert ETH to USDC equivalent for cap check
+      const ethUsdEquivalent = amountValue * Number(formatUnits(calculatedEthUsdPrice, 18));
+      if (ethUsdEquivalent > 2000000) {
+        setError('Maximum investment per wallet is 2M USDC equivalent');
+        return;
+      }
     }
 
     setIsProcessing(true);
@@ -111,30 +171,45 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
     setIsSuccess(false);
     
     try {
-      const usdcAmountBigInt = parseUnits(usdcAmount, 6);
-      
-      // First, approve USDC spending
-      console.log('Approving USDC spending...');
-      writeUSDC({
-        address: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`,
-        abi: USDC_ABI,
-        functionName: 'approve',
-        args: [CONTRACTS.BONDING as `0x${string}`, usdcAmountBigInt],
-      });
+      if (selectedAsset.symbol === 'USDC') {
+        const usdcAmountBigInt = parseUnits(bondAmount, 6);
+        
+        // First, approve USDC spending
+        console.log('Approving USDC spending...');
+        writeUSDC({
+          address: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`,
+          abi: USDC_ABI,
+          functionName: 'approve',
+          args: [CONTRACTS.BONDING as `0x${string}`, usdcAmountBigInt],
+        });
+      } else if (selectedAsset.symbol === 'ETH') {
+        // For ETH bonding, use bondWithETH function
+        const fvcAmountBigInt = parseUnits(fvcAmount, 18);
+        const ethAmountBigInt = parseUnits(bondAmount, 18);
+        
+        console.log('Bonding with ETH...');
+        writeBonding({
+          address: CONTRACTS.BONDING as `0x${string}`,
+          abi: BONDING_ABI,
+          functionName: 'bondWithETH',
+          args: [fvcAmountBigInt],
+          value: ethAmountBigInt,
+        });
+      }
       
     } catch (err) {
       console.error('Investment failed:', err);
-      setError('Failed to initiate USDC approval. Please try again.');
+      setError(`Failed to initiate ${selectedAsset.symbol} bonding. Please try again.`);
       setIsProcessing(false);
     }
   };
 
-  // Handle approval success and initiate bonding
+  // Handle approval success and initiate bonding (USDC only)
   useEffect(() => {
-    if (isApprovalSuccess && !isBondingPending && !bondingHash) {
+    if (isApprovalSuccess && !isBondingPending && !bondingHash && selectedAsset.symbol === 'USDC') {
       console.log('USDC approval successful, initiating bonding...');
       
-      const usdcAmountBigInt = parseUnits(usdcAmount, 6);
+      const usdcAmountBigInt = parseUnits(bondAmount, 6);
       
       // Then, bond USDC for FVC
       writeBonding({
@@ -144,7 +219,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
         args: [usdcAmountBigInt],
       });
     }
-  }, [isApprovalSuccess, isBondingPending, bondingHash, usdcAmount]);
+  }, [isApprovalSuccess, isBondingPending, bondingHash, bondAmount, selectedAsset.symbol]);
 
   // Handle approval error
   useEffect(() => {
@@ -169,7 +244,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
     if (isBondingSuccess) {
       console.log('Bonding successful!');
       setIsSuccess(true);
-      setUsdcAmount('');
+      setBondAmount('');
       setIsProcessing(false);
       
       // Refresh contract data to show updated numbers
@@ -177,7 +252,12 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
         refetchSaleProgress();
         refetchCurrentMilestone();
         refetchMilestones();
-        refetchUSDCBalance(); // Refresh USDC balance
+        // Refresh both balances
+        if (selectedAsset.symbol === 'USDC') {
+          usdcBalance.refetch();
+        } else {
+          ethBalance.refetch();
+        }
       }, 2000); // Wait 2 seconds for blockchain to settle
       
       // Reset success state after 5 seconds
@@ -185,7 +265,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
         setIsSuccess(false);
       }, 5000);
     }
-  }, [isBondingSuccess, refetchSaleProgress, refetchCurrentMilestone, refetchMilestones]);
+  }, [isBondingSuccess, refetchSaleProgress, refetchCurrentMilestone, refetchMilestones, selectedAsset.symbol, usdcBalance, ethBalance]);
 
   // Progressive loading - show interface immediately, load data progressively
   const isLoading = milestonesLoading || currentMilestoneLoading || progressLoading || saleActiveLoading;
@@ -300,11 +380,16 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
         }}>
             <div>
             <div style={{ fontSize: 14, color: theme.secondaryText, marginBottom: 4 }}>
-              Current Price
+              Current FVC Price
             </div>
             <div style={{ fontSize: 18, fontWeight: 600, color: theme.primaryText }}>
-              {currentMilestoneLoading ? 'Loading...' : `$${currentPrice.toFixed(4)} USDC/FVC`}
+              {currentMilestoneLoading ? 'Loading...' : `$${currentPrice.toFixed(4)} USDC`}
             </div>
+            {currentPrices && !isLoadingPrices && currentPrices[1] > 0n && (
+              <div style={{ fontSize: 14, fontWeight: 500, color: theme.modalButton, marginTop: 2 }}>
+                {formatUnits(currentPrices[1], 18)} ETH per FVC
+              </div>
+            )}
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 14, color: theme.secondaryText, marginBottom: 4 }}>
@@ -357,14 +442,23 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
           Invest in Private Sale
         </h3>
         
+        {/* Asset Selector */}
+        <div style={{ marginBottom: 20 }}>
+          <AssetSelector 
+            assets={ASSETS} 
+            selectedAsset={selectedAsset} 
+            setSelectedAsset={setSelectedAsset} 
+          />
+        </div>
+        
         <div style={{ marginBottom: 20, width: '100%' }}>
           <label style={{ display: 'block', fontSize: 14, color: theme.secondaryText, marginBottom: 8 }}>
-            USDC Amount
+            {selectedAsset.symbol} Amount
           </label>
           <input
             type="number"
-            value={usdcAmount}
-            onChange={(e) => setUsdcAmount(e.target.value)}
+            value={bondAmount}
+            onChange={(e) => setBondAmount(e.target.value)}
             placeholder="Amount"
             style={{
               width: '100%',
@@ -405,8 +499,8 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
               fontFamily: 'Inter, sans-serif', 
               flex: 1 
             }}>
-              Balance: {usdcBalanceLoading ? 'Loading...' : usdcBalance ? 
-                `${Number(usdcBalance.formatted).toFixed(4)} USDC` : '0 USDC'}
+              Balance: {balance?.isLoading ? 'Loading...' : balance?.data ? 
+                `${Number(balance.data.formatted).toFixed(4)} ${selectedAsset.symbol}` : `0 ${selectedAsset.symbol}`}
             </span>
             <div style={{ display: 'flex', justifyContent: 'flex-end', flex: 1, gap: 4 }}>
               {percentButtons.map(pct => (
@@ -444,11 +538,11 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
           </div>
           
           <div style={{ fontSize: 12, color: theme.secondaryText, marginTop: 4 }}>
-            Max: 2M USDC per wallet
+            Max: 2M USDC equivalent per wallet
           </div>
         </div>
 
-        {usdcAmount && parseFloat(usdcAmount) > 0 && (
+        {bondAmount && parseFloat(bondAmount) > 0 && (
           <div style={{
             background: theme.modalBackground,
             padding: 16,
@@ -473,7 +567,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
 
         <button
           onClick={handleInvestment}
-          disabled={isProcessing || isBondingPending || isUSDCPending || isApprovalPending || isBondingPendingReceipt || !usdcAmount || parseFloat(usdcAmount) <= 0}
+          disabled={isProcessing || isBondingPending || isUSDCPending || isApprovalPending || isBondingPendingReceipt || !bondAmount || parseFloat(bondAmount) <= 0}
           style={{
             width: '100%',
             padding: '14px 24px',
@@ -501,9 +595,10 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
             fontSize: 14,
             border: '1px solid #93c5fd',
           }}>
-            {isApprovalPending && '⏳ Waiting for USDC approval confirmation...'}
-            {isApprovalSuccess && isBondingPending && '⏳ USDC approved! Waiting for bonding transaction...'}
+            {isApprovalPending && selectedAsset.symbol === 'USDC' && '⏳ Waiting for USDC approval confirmation...'}
+            {isApprovalSuccess && isBondingPending && selectedAsset.symbol === 'USDC' && '⏳ USDC approved! Waiting for bonding transaction...'}
             {isBondingPendingReceipt && '⏳ Bonding transaction submitted! Waiting for confirmation...'}
+            {selectedAsset.symbol === 'ETH' && isBondingPending && '⏳ ETH bonding transaction submitted! Waiting for confirmation...'}
             {!isApprovalPending && !isBondingPending && !isBondingPendingReceipt && '⏳ Processing...'}
           </div>
         )}
@@ -541,38 +636,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
           </div>
         )}
 
-        {/* Manual Refresh Button */}
-        <button
-          onClick={() => {
-            refetchSaleProgress();
-            refetchCurrentMilestone();
-            refetchMilestones();
-            refetchUSDCBalance();
-          }}
-          style={{
-            width: '100%',
-            padding: '12px 24px',
-            background: 'transparent',
-            color: theme.secondaryText,
-            border: `1px solid ${theme.darkBorder}`,
-            borderRadius: 8,
-            fontSize: 14,
-            fontWeight: 500,
-            cursor: 'pointer',
-            marginTop: 16,
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = theme.cardHover;
-            e.currentTarget.style.borderColor = theme.modalButton;
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'transparent';
-            e.currentTarget.style.borderColor = theme.darkBorder;
-          }}
-        >
-          🔄 Refresh Data
-        </button>
+
 
         {isSuccess && (
           <div style={{
