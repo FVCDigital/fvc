@@ -91,12 +91,14 @@ export interface BondingInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "BONDING_MANAGER_ROLE"
+      | "CHAINLINK_DECIMALS"
       | "CLIFF_DURATION_DAYS"
       | "CLIFF_DURATION_SECONDS"
       | "DAYS_PER_YEAR"
       | "DEFAULT_ADMIN_ROLE"
       | "EMERGENCY_COOLDOWN"
       | "EMERGENCY_ROLE"
+      | "ETH_PRECISION"
       | "MAX_BONDING_PER_BLOCK"
       | "MAX_PRECISION_LOSS"
       | "MAX_WALLET_CAP"
@@ -115,6 +117,7 @@ export interface BondingInterface extends Interface {
       | "allocateFVC"
       | "allocateFVCToMilestone"
       | "bond"
+      | "bondWithETH"
       | "bondingThisBlock"
       | "calculateFVCAmount"
       | "calculateUSDCAmount"
@@ -125,6 +128,7 @@ export interface BondingInterface extends Interface {
       | "emergencyShutdownActive"
       | "emergencyWithdraw"
       | "endPrivateSale"
+      | "ethUsdPriceFeed"
       | "fvc"
       | "getAllMilestones"
       | "getBondAtIndex"
@@ -132,8 +136,10 @@ export interface BondingInterface extends Interface {
       | "getCurrentDiscount"
       | "getCurrentMilestone"
       | "getCurrentPrice"
+      | "getCurrentPrices"
       | "getCurrentRound"
       | "getEmergencyStatus"
+      | "getEthUsdPrice"
       | "getNextMilestone"
       | "getRemainingFVC"
       | "getRoleAdmin"
@@ -197,6 +203,10 @@ export interface BondingInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "CHAINLINK_DECIMALS",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "CLIFF_DURATION_DAYS",
     values?: undefined
   ): string;
@@ -218,6 +228,10 @@ export interface BondingInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "EMERGENCY_ROLE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ETH_PRECISION",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -287,6 +301,10 @@ export interface BondingInterface extends Interface {
   ): string;
   encodeFunctionData(functionFragment: "bond", values: [BigNumberish]): string;
   encodeFunctionData(
+    functionFragment: "bondWithETH",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "bondingThisBlock",
     values?: undefined
   ): string;
@@ -326,6 +344,10 @@ export interface BondingInterface extends Interface {
     functionFragment: "endPrivateSale",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "ethUsdPriceFeed",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "fvc", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "getAllMilestones",
@@ -352,11 +374,19 @@ export interface BondingInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "getCurrentPrices",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getCurrentRound",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getEmergencyStatus",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getEthUsdPrice",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -401,7 +431,7 @@ export interface BondingInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [AddressLike, AddressLike, AddressLike]
+    values: [AddressLike, AddressLike, AddressLike, AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "isLocked",
@@ -495,6 +525,10 @@ export interface BondingInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "CHAINLINK_DECIMALS",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "CLIFF_DURATION_DAYS",
     data: BytesLike
   ): Result;
@@ -516,6 +550,10 @@ export interface BondingInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "EMERGENCY_ROLE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ETH_PRECISION",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -585,6 +623,10 @@ export interface BondingInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "bond", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "bondWithETH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "bondingThisBlock",
     data: BytesLike
   ): Result;
@@ -624,6 +666,10 @@ export interface BondingInterface extends Interface {
     functionFragment: "endPrivateSale",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "ethUsdPriceFeed",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "fvc", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getAllMilestones",
@@ -650,11 +696,19 @@ export interface BondingInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getCurrentPrices",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getCurrentRound",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "getEmergencyStatus",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getEthUsdPrice",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -1119,6 +1173,8 @@ export interface Bonding extends BaseContract {
 
   BONDING_MANAGER_ROLE: TypedContractMethod<[], [string], "view">;
 
+  CHAINLINK_DECIMALS: TypedContractMethod<[], [bigint], "view">;
+
   CLIFF_DURATION_DAYS: TypedContractMethod<[], [bigint], "view">;
 
   CLIFF_DURATION_SECONDS: TypedContractMethod<[], [bigint], "view">;
@@ -1130,6 +1186,8 @@ export interface Bonding extends BaseContract {
   EMERGENCY_COOLDOWN: TypedContractMethod<[], [bigint], "view">;
 
   EMERGENCY_ROLE: TypedContractMethod<[], [string], "view">;
+
+  ETH_PRECISION: TypedContractMethod<[], [bigint], "view">;
 
   MAX_BONDING_PER_BLOCK: TypedContractMethod<[], [bigint], "view">;
 
@@ -1171,6 +1229,12 @@ export interface Bonding extends BaseContract {
 
   bond: TypedContractMethod<[usdcAmount: BigNumberish], [void], "nonpayable">;
 
+  bondWithETH: TypedContractMethod<
+    [fvcAmount: BigNumberish],
+    [void],
+    "payable"
+  >;
+
   bondingThisBlock: TypedContractMethod<[], [bigint], "view">;
 
   calculateFVCAmount: TypedContractMethod<
@@ -1199,6 +1263,8 @@ export interface Bonding extends BaseContract {
 
   endPrivateSale: TypedContractMethod<[], [void], "nonpayable">;
 
+  ethUsdPriceFeed: TypedContractMethod<[], [string], "view">;
+
   fvc: TypedContractMethod<[], [string], "view">;
 
   getAllMilestones: TypedContractMethod<
@@ -1225,6 +1291,12 @@ export interface Bonding extends BaseContract {
 
   getCurrentPrice: TypedContractMethod<[], [bigint], "view">;
 
+  getCurrentPrices: TypedContractMethod<
+    [],
+    [[bigint, bigint] & { usdcPricePerFVC: bigint; ethPricePerFVC: bigint }],
+    "view"
+  >;
+
   getCurrentRound: TypedContractMethod<[], [bigint], "view">;
 
   getEmergencyStatus: TypedContractMethod<
@@ -1238,6 +1310,8 @@ export interface Bonding extends BaseContract {
     ],
     "view"
   >;
+
+  getEthUsdPrice: TypedContractMethod<[], [bigint], "view">;
 
   getNextMilestone: TypedContractMethod<
     [],
@@ -1299,7 +1373,12 @@ export interface Bonding extends BaseContract {
   >;
 
   initialize: TypedContractMethod<
-    [_fvc: AddressLike, _usdc: AddressLike, _treasury: AddressLike],
+    [
+      _fvc: AddressLike,
+      _usdc: AddressLike,
+      _treasury: AddressLike,
+      _ethUsdPriceFeed: AddressLike
+    ],
     [void],
     "nonpayable"
   >;
@@ -1398,6 +1477,9 @@ export interface Bonding extends BaseContract {
     nameOrSignature: "BONDING_MANAGER_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "CHAINLINK_DECIMALS"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "CLIFF_DURATION_DAYS"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
@@ -1415,6 +1497,9 @@ export interface Bonding extends BaseContract {
   getFunction(
     nameOrSignature: "EMERGENCY_ROLE"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "ETH_PRECISION"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "MAX_BONDING_PER_BLOCK"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -1474,6 +1559,9 @@ export interface Bonding extends BaseContract {
     nameOrSignature: "bond"
   ): TypedContractMethod<[usdcAmount: BigNumberish], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "bondWithETH"
+  ): TypedContractMethod<[fvcAmount: BigNumberish], [void], "payable">;
+  getFunction(
     nameOrSignature: "bondingThisBlock"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
@@ -1504,6 +1592,9 @@ export interface Bonding extends BaseContract {
     nameOrSignature: "endPrivateSale"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "ethUsdPriceFeed"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
     nameOrSignature: "fvc"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
@@ -1529,6 +1620,13 @@ export interface Bonding extends BaseContract {
     nameOrSignature: "getCurrentPrice"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+    nameOrSignature: "getCurrentPrices"
+  ): TypedContractMethod<
+    [],
+    [[bigint, bigint] & { usdcPricePerFVC: bigint; ethPricePerFVC: bigint }],
+    "view"
+  >;
+  getFunction(
     nameOrSignature: "getCurrentRound"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
@@ -1544,6 +1642,9 @@ export interface Bonding extends BaseContract {
     ],
     "view"
   >;
+  getFunction(
+    nameOrSignature: "getEthUsdPrice"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "getNextMilestone"
   ): TypedContractMethod<[], [IBonding.MilestoneStructOutput], "view">;
@@ -1612,7 +1713,12 @@ export interface Bonding extends BaseContract {
   getFunction(
     nameOrSignature: "initialize"
   ): TypedContractMethod<
-    [_fvc: AddressLike, _usdc: AddressLike, _treasury: AddressLike],
+    [
+      _fvc: AddressLike,
+      _usdc: AddressLike,
+      _treasury: AddressLike,
+      _ethUsdPriceFeed: AddressLike
+    ],
     [void],
     "nonpayable"
   >;

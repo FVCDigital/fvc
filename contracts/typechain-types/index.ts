@@ -132,6 +132,8 @@ export type { FVCTimelock } from "./src/governance/FVCTimelock";
 export { FVCTimelock__factory } from "./factories/src/governance/FVCTimelock__factory";
 export type { PauseGuardian } from "./src/governance/PauseGuardian";
 export { PauseGuardian__factory } from "./factories/src/governance/PauseGuardian__factory";
+export type { AggregatorV3Interface } from "./src/interfaces/AggregatorV3Interface";
+export { AggregatorV3Interface__factory } from "./factories/src/interfaces/AggregatorV3Interface__factory";
 export type { IBonding } from "./src/interfaces/IBonding";
 export { IBonding__factory } from "./factories/src/interfaces/IBonding__factory";
 export type { IFVC } from "./src/interfaces/IFVC";
