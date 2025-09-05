@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -264,7 +263,6 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
         _grantRole(TREASURY_ADMIN_ROLE, _admin);
         _grantRole(GOVERNANCE_ROLE, _admin);
 
-        // Grant fund manager roles
         for (uint256 i = 0; i < _fundManagers.length; i++) {
             if (_fundManagers[i] != address(0)) {
                 _grantRole(FUND_MANAGER_ROLE, _fundManagers[i]);
@@ -315,7 +313,6 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
         if (amount == 0) revert TreasuryVault__ZeroAmount();
         if (amount > MAX_SINGLE_TRANSFER) revert TreasuryVault__ExceedsTransferLimit();
 
-        // Check if sufficient balance exists
         uint256 balance = token == address(0) ? 
             address(this).balance : 
             IERC20(token).balanceOf(address(this));
@@ -384,12 +381,10 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
         if (proposal.isExecuted) revert TreasuryVault__ProposalNotReady();
         if (proposal.approvals < requiredApprovals) revert TreasuryVault__ProposalNotReady();
         
-        // Check execution delay
         if (block.timestamp > proposal.createdAt + maxExecutionDelay) {
             revert TreasuryVault__ProposalNotReady();
         }
 
-        // Check daily transfer limits
         uint256 today = block.timestamp / 1 days;
         if (dailyTransferAmounts[today] + proposal.amount > MAX_DAILY_TRANSFER) {
             revert TreasuryVault__ExceedsTransferLimit();
@@ -399,13 +394,10 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
         proposal.executedAt = block.timestamp;
         dailyTransferAmounts[today] += proposal.amount;
 
-        // Execute transfer
         if (proposal.token == address(0)) {
-            // ETH transfer
             (bool success, ) = proposal.target.call{value: proposal.amount}("");
             require(success, "ETH transfer failed");
         } else {
-            // ERC20 transfer
             IERC20(proposal.token).safeTransfer(proposal.target, proposal.amount);
         }
 
@@ -488,23 +480,18 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
             
         if (amount > balance) revert TreasuryVault__InsufficientBalance();
 
-        // Calculate distribution amounts
         uint256 stakingAmount = (amount * distributionRules.stakingPercentage) / BASIS_POINTS;
         uint256 operationsAmount = (amount * distributionRules.operationsPercentage) / BASIS_POINTS;
         uint256 developmentAmount = (amount * distributionRules.developmentPercentage) / BASIS_POINTS;
-        // Treasury amount is what remains
 
-        // Transfer to staking contract
         if (stakingAmount > 0 && distributionRules.stakingContract != address(0)) {
             _transferFunds(token, distributionRules.stakingContract, stakingAmount);
         }
 
-        // Transfer to operations wallet
         if (operationsAmount > 0 && distributionRules.operationsWallet != address(0)) {
             _transferFunds(token, distributionRules.operationsWallet, operationsAmount);
         }
 
-        // Transfer to development wallet
         if (developmentAmount > 0 && distributionRules.developmentWallet != address(0)) {
             _transferFunds(token, distributionRules.developmentWallet, developmentAmount);
         }
@@ -664,11 +651,9 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
      */
     function _transferFunds(address token, address to, uint256 amount) internal {
         if (token == address(0)) {
-            // ETH transfer
             (bool success, ) = to.call{value: amount}("");
             require(success, "ETH transfer failed");
         } else {
-            // ERC20 transfer
             IERC20(token).safeTransfer(to, amount);
         }
     }

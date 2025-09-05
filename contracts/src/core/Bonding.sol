@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -193,7 +192,6 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
     
     // ============ EVENTS ============
 
-    // Events are now defined in IBonding interface
 
     // ============ INITIALIZER ============
 
@@ -221,20 +219,17 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         treasury = _treasury;
         ethUsdPriceFeed = AggregatorV3Interface(_ethUsdPriceFeed);
         
-        // Grant roles to deployer
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(BONDING_MANAGER_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
         _grantRole(EMERGENCY_ROLE, msg.sender);
         
-        // Initialize circuit breaker state
         circuitBreakerActive = false;
         emergencyShutdownActive = false;
         bondingThisBlock = 0;
         lastBondingBlock = block.number;
         lastEmergencyOperation = 0;
         
-        // Initialize milestones based on Option B structure
         _initializeMilestones();
     }
 
@@ -245,7 +240,6 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @dev Sets up the milestone structure with exact pricing and allocations
      */
     function _initializeMilestones() private {
-        // Early Bird: 0-416,667 USDC → 16,666,667 FVC at $0.025
         milestones.push(Milestone({
             usdcThreshold: 416_667 * 1e6,           // 416,667 USDC
             price: 25,                              // $0.025 (25 = 0.025 * 1000)
@@ -254,7 +248,6 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
             isActive: true
         }));
 
-        // Early Adopters: 416,667-833,333 USDC → 16,666,667 FVC at $0.05
         milestones.push(Milestone({
             usdcThreshold: 833_333 * 1e6,           // 833,333 USDC
             price: 50,                              // $0.05 (50 = 0.05 * 1000)
@@ -263,7 +256,6 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
             isActive: true
         }));
 
-        // Growth: 833,333-1,250,000 USDC → 16,666,667 FVC at $0.075
         milestones.push(Milestone({
             usdcThreshold: 1_250_000 * 1e6,        // 1,250,000 USDC
             price: 75,                              // $0.075 (75 = 0.075 * 1000)
@@ -272,7 +264,6 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
             isActive: true
         }));
 
-        // Final: 1,250,000-20,000,000 USDC → 175,000,000 FVC at $0.10
         milestones.push(Milestone({
             usdcThreshold: 20_000_000 * 1e6,       // 20,000,000 USDC
             price: 100,                             // $0.10 (100 = 0.10 * 1000)
@@ -308,27 +299,22 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @param usdcAmount Amount of USDC to bond (in 6 decimals)
      */
     function bond(uint256 usdcAmount) external nonReentrant whenCircuitBreakerNotActive whenNotEmergencyShutdown trackBondingPerBlock(usdcAmount) {
-        // Enhanced input validation
         if (usdcAmount == 0) revert Bonding__AmountMustBeGreaterThanZero();
         if (!privateSaleActive) revert Bonding__PrivateSaleNotActive();
         if (block.timestamp > saleEndTime) revert Bonding__PrivateSaleEnded();
         
-        // Validate milestone state
         if (milestones.length == 0) revert Bonding__InvalidMilestone();
         if (currentMilestone >= milestones.length) revert Bonding__InvalidMilestone();
         
-        // Check wallet cap
         if (userBonded[msg.sender] + usdcAmount > MAX_WALLET_CAP) {
             revert Bonding__ExceedsWalletCap();
         }
         
-        // Get current milestone data with validation
         Milestone storage currentMilestoneData = milestones[currentMilestone];
         if (!currentMilestoneData.isActive) revert Bonding__InvalidMilestone();
         if (currentMilestoneData.price == 0) revert Bonding__CalculationError();
         if (currentMilestoneData.fvcAllocation == 0) revert Bonding__CalculationError();
         
-        // Check if milestone cap would be exceeded
         uint256 milestoneProgress = totalBonded - (currentMilestone > 0 ? milestones[currentMilestone - 1].usdcThreshold : 0);
         uint256 milestoneRemaining = currentMilestoneData.usdcThreshold - (currentMilestone > 0 ? milestones[currentMilestone - 1].usdcThreshold : 0);
         
@@ -336,34 +322,27 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
             revert Bonding__MilestoneCapExceeded();
         }
         
-        // Calculate FVC amount using precise calculation
         uint256 fvcAmount = _calculatePreciseFVCAmount(usdcAmount, currentMilestoneData.price);
         
-        // Validate FVC calculation
         if (fvcAmount == 0) revert Bonding__CalculationError();
         
-        // Check if enough FVC is available for this milestone
         uint256 milestoneFVCSold = _getMilestoneFVCSold(currentMilestone);
         if (milestoneFVCSold + fvcAmount > currentMilestoneData.fvcAllocation) {
             revert Bonding__MilestoneCapExceeded();
         }
         
-        // Update state BEFORE external calls (reentrancy protection)
         totalBonded = totalBonded + usdcAmount;
         totalFVCSold = totalFVCSold + fvcAmount;
         userBonded[msg.sender] = userBonded[msg.sender] + usdcAmount;
         
-        // Create vesting schedule using precise time calculations
         (uint256 cliffDuration, uint256 vestingDuration, uint256 totalDuration) = _calculateVestingDurations();
         uint256 startTime = block.timestamp;
         uint256 cliffEndTime = startTime + cliffDuration;
         uint256 endTime = cliffEndTime + vestingDuration;
         
-        // Validate vesting schedule
         require(endTime > startTime, "Invalid vesting schedule");
         require(endTime - startTime == totalDuration, "Vesting duration mismatch");
         
-        // Create new bond transaction (don't overwrite previous ones)
         uint256 bondId = _userBondCount[msg.sender];
         _userBonds[msg.sender].push(BondTransaction({
             bondId: bondId,
@@ -375,21 +354,16 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
             isActive: true
         }));
         
-        // Update bond count
         _userBondCount[msg.sender] = bondId + 1;
         
-        // Keep legacy vesting schedule for backward compatibility
-        // This will be the most recent bond's schedule
         _vestingSchedules[msg.sender] = VestingSchedule({
             amount: fvcAmount,
             startTime: startTime,
             endTime: endTime
         });
         
-        // Update current milestone if needed
         _updateCurrentMilestone();
         
-        // External calls AFTER state updates (reentrancy protection)
         usdc.safeTransferFrom(msg.sender, treasury, usdcAmount); // USDC goes to treasury
         fvc.mint(msg.sender, fvcAmount);
         
@@ -404,42 +378,33 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @param fvcAmount Amount of FVC tokens to purchase (in 18 decimals)
      */
     function bondWithETH(uint256 fvcAmount) external payable nonReentrant whenCircuitBreakerNotActive whenNotEmergencyShutdown {
-        // Enhanced input validation
         if (fvcAmount == 0) revert Bonding__AmountMustBeGreaterThanZero();
         if (msg.value == 0) revert Bonding__AmountMustBeGreaterThanZero();
         if (!privateSaleActive) revert Bonding__PrivateSaleNotActive();
         if (block.timestamp > saleEndTime) revert Bonding__PrivateSaleEnded();
         
-        // Validate milestone state
         if (milestones.length == 0) revert Bonding__InvalidMilestone();
         if (currentMilestone >= milestones.length) revert Bonding__InvalidMilestone();
         
-        // Get current milestone data with validation
         Milestone storage currentMilestoneData = milestones[currentMilestone];
         if (!currentMilestoneData.isActive) revert Bonding__InvalidMilestone();
         if (currentMilestoneData.price == 0) revert Bonding__CalculationError();
         if (currentMilestoneData.fvcAllocation == 0) revert Bonding__CalculationError();
         
-        // Get ETH/USD price from Chainlink
         uint256 ethUsdPrice = _getEthUsdPrice();
         if (ethUsdPrice == 0) revert Bonding__InvalidPriceFeed();
         
-        // Calculate required USDC amount for the FVC tokens
         uint256 requiredUsdcAmount = _calculatePreciseUSDCAmount(fvcAmount, currentMilestoneData.price);
         
-        // Calculate required ETH amount
         uint256 requiredWei = _calculateRequiredWei(requiredUsdcAmount, ethUsdPrice);
         
-        // Check if user sent enough ETH
         if (msg.value < requiredWei) revert Bonding__InsufficientETH();
         
-        // Check wallet cap (convert ETH to USDC equivalent for cap check)
         uint256 ethUsdEquivalent = (msg.value * ethUsdPrice) / ETH_PRECISION;
         if (userBonded[msg.sender] + ethUsdEquivalent > MAX_WALLET_CAP) {
             revert Bonding__ExceedsWalletCap();
         }
         
-        // Check if milestone cap would be exceeded
         uint256 milestoneProgress = totalBonded - (currentMilestone > 0 ? milestones[currentMilestone - 1].usdcThreshold : 0);
         uint256 milestoneRemaining = currentMilestoneData.usdcThreshold - (currentMilestone > 0 ? milestones[currentMilestone - 1].usdcThreshold : 0);
         
@@ -447,28 +412,23 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
             revert Bonding__MilestoneCapExceeded();
         }
         
-        // Check if enough FVC is available for this milestone
         uint256 milestoneFVCSold = _getMilestoneFVCSold(currentMilestone);
         if (milestoneFVCSold + fvcAmount > currentMilestoneData.fvcAllocation) {
             revert Bonding__MilestoneCapExceeded();
         }
         
-        // Update state BEFORE external calls (reentrancy protection)
         totalBonded = totalBonded + ethUsdEquivalent;
         totalFVCSold = totalFVCSold + fvcAmount;
         userBonded[msg.sender] = userBonded[msg.sender] + ethUsdEquivalent;
         
-        // Create vesting schedule using precise time calculations
         (uint256 cliffDuration, uint256 vestingDuration, uint256 totalDuration) = _calculateVestingDurations();
         uint256 startTime = block.timestamp;
         uint256 cliffEndTime = startTime + cliffDuration;
         uint256 endTime = cliffEndTime + vestingDuration;
         
-        // Validate vesting schedule
         require(endTime > startTime, "Invalid vesting schedule");
         require(endTime - startTime == totalDuration, "Vesting duration mismatch");
         
-        // Create new bond transaction
         uint256 bondId = _userBondCount[msg.sender];
         _userBonds[msg.sender].push(BondTransaction({
             bondId: bondId,
@@ -480,32 +440,25 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
             isActive: true
         }));
         
-        // Update bond count
         _userBondCount[msg.sender] = bondId + 1;
         
-        // Keep legacy vesting schedule for backward compatibility
         _vestingSchedules[msg.sender] = VestingSchedule({
             amount: fvcAmount,
             startTime: startTime,
             endTime: endTime
         });
         
-        // Update current milestone if needed
         _updateCurrentMilestone();
         
-        // External calls AFTER state updates (reentrancy protection)
-        // Forward ETH to treasury (convert to USDC equivalent for accounting)
         (bool success, ) = payable(treasury).call{value: requiredWei}("");
         require(success, "ETH transfer failed");
         
-        // Refund excess ETH if any
         uint256 excessWei = msg.value - requiredWei;
         if (excessWei > 0) {
             (bool refundSuccess, ) = payable(msg.sender).call{value: excessWei}("");
             require(refundSuccess, "ETH refund failed");
         }
         
-        // Mint FVC tokens
         fvc.mint(msg.sender, fvcAmount);
         
         emit Bonded(msg.sender, ethUsdEquivalent, fvcAmount, currentMilestone);
@@ -546,15 +499,12 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         uint256 currentPrice = milestones[currentMilestone].price;
         usdcPricePerFVC = currentPrice;
         
-        // Get ETH/USD price from Chainlink
         uint256 ethUsdPrice = _getEthUsdPrice();
         if (ethUsdPrice == 0) {
             ethPricePerFVC = 0;
             return (usdcPricePerFVC, ethPricePerFVC);
         }
         
-        // Convert USDC price to ETH price
-        // Formula: ethPricePerFVC = (usdcPricePerFVC * USDC_PRECISION * ETH_PRECISION) / (ethUsdPrice * PRICE_PRECISION)
         uint256 numerator = currentPrice * USDC_PRECISION * ETH_PRECISION;
         uint256 denominator = ethUsdPrice * PRICE_PRECISION;
         
@@ -593,7 +543,6 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      */
     function getNextMilestone() external view returns (Milestone memory) {
         if (currentMilestone >= milestones.length - 1) {
-            // Return empty milestone if at last milestone
             return Milestone({
                 usdcThreshold: 0,
                 price: 0,
@@ -649,11 +598,9 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @return True if tokens are locked, false if unlocked
      */
     function isLocked(address user) external view returns (bool) {
-        // Check if user has any active bonds
         BondTransaction[] storage bonds = _userBonds[user];
         if (bonds.length == 0) return false;
         
-        // Check if any bonds are still locked
         for (uint256 i = 0; i < bonds.length; i++) {
             if (bonds[i].isActive) {
                 uint256 vested = _calculateVestedAmountForBond(bonds[i]);
@@ -674,7 +621,6 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @return totalAmount Total amount of FVC tokens in vesting
      */
     function getVestedAmount(address user) external view returns (uint256 vestedAmount, uint256 totalAmount) {
-        // Use new multiple bond approach for more accurate calculation
         return getTotalVestedAmount(user);
     }
 
@@ -764,17 +710,14 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         uint256 cliffEndTime = bond.timestamp + CLIFF_DURATION_SECONDS; // 12-month cliff
         uint256 vestingEndTime = cliffEndTime + VESTING_DURATION_SECONDS; // 24-month linear after cliff
         
-        // During cliff period, no tokens are vested
         if (currentTime < cliffEndTime) {
             return 0;
         }
         
-        // After cliff, linear vesting over 24 months
         if (currentTime >= vestingEndTime) {
             return bond.fvcAmount; // Fully vested
         }
         
-        // Calculate linear vesting progress
         uint256 vestingProgress = currentTime - cliffEndTime;
         uint256 vestingDuration = VESTING_DURATION_SECONDS; // 24 months
         
@@ -795,17 +738,14 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         uint256 cliffEndTime = schedule.startTime + CLIFF_DURATION_SECONDS; // 12-month cliff
         uint256 vestingEndTime = cliffEndTime + VESTING_DURATION_SECONDS;    // 24-month linear after cliff
         
-        // During cliff period, no tokens are vested
         if (currentTime < cliffEndTime) {
             return 0;
         }
         
-        // After cliff, linear vesting over 24 months
         if (currentTime >= vestingEndTime) {
             return schedule.amount; // Fully vested
         }
         
-        // Calculate linear vesting progress
         uint256 vestingProgress = currentTime - cliffEndTime;
         uint256 vestingDuration = VESTING_DURATION_SECONDS; // 24 months
         
@@ -822,8 +762,6 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
     function _getMilestoneFVCSold(uint256 milestoneIndex) internal view returns (uint256 fvcSold) {
         if (milestoneIndex >= milestones.length) return 0;
         
-        // This is a simplified calculation - in practice, you'd track per-milestone sales
-        // For now, we'll use the total FVC sold as an approximation
         return totalFVCSold;
     }
 
@@ -840,14 +778,10 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
             uint256,
             uint80
         ) {
-            // Validate price data
             if (price <= 0) return 0;
             
-            // Convert to uint256 and adjust for decimals
             ethUsdPrice = uint256(price);
             
-            // Chainlink ETH/USD feed typically has 8 decimals
-            // We need to convert to 18 decimals for consistency
             if (ethUsdPriceFeed.decimals() < 18) {
                 uint256 decimalsToAdd = 18 - ethUsdPriceFeed.decimals();
                 ethUsdPrice = ethUsdPrice * (10 ** decimalsToAdd);
@@ -870,20 +804,15 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @return usdcAmount Amount of USDC required (in 6 decimals)
      */
     function _calculatePreciseUSDCAmount(uint256 fvcAmount, uint256 price) internal pure returns (uint256 usdcAmount) {
-        // Validate inputs
         if (fvcAmount == 0 || price == 0) revert Bonding__CalculationError();
         
-        // Formula: usdcAmount = (fvcAmount * price * PRICE_PRECISION) / PRECISION
         uint256 numerator = fvcAmount * price * PRICE_PRECISION;
         uint256 denominator = PRECISION;
         
-        // Check for division by zero
         if (denominator == 0) revert Bonding__CalculationError();
         
-        // Calculate with precision
         usdcAmount = numerator / denominator;
         
-        // Validate result
         if (usdcAmount == 0) revert Bonding__CalculationError();
         
         return usdcAmount;
@@ -897,20 +826,15 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @return requiredWei Required ETH amount in wei
      */
     function _calculateRequiredWei(uint256 usdcAmount, uint256 ethUsdPrice) internal pure returns (uint256 requiredWei) {
-        // Validate inputs
         if (usdcAmount == 0 || ethUsdPrice == 0) revert Bonding__CalculationError();
         
-        // Formula: requiredWei = (usdcAmount * ETH_PRECISION) / ethUsdPrice
         uint256 numerator = usdcAmount * ETH_PRECISION;
         uint256 denominator = ethUsdPrice;
         
-        // Check for division by zero
         if (denominator == 0) revert Bonding__CalculationError();
         
-        // Calculate with precision
         requiredWei = numerator / denominator;
         
-        // Validate result
         if (requiredWei == 0) revert Bonding__CalculationError();
         
         return requiredWei;
@@ -957,21 +881,15 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
      * @return fvcAmount Amount of FVC tokens (in 18 decimals)
      */
     function _calculatePreciseFVCAmount(uint256 usdcAmount, uint256 price) internal pure returns (uint256 fvcAmount) {
-        // Validate inputs
         if (usdcAmount == 0 || price == 0) revert Bonding__CalculationError();
         
-        // Use the original formula: (usdcAmount * PRECISION) / (price * PRICE_PRECISION)
-        // This matches the original calculation that was working
         uint256 numerator = usdcAmount * PRECISION;
         uint256 denominator = price * PRICE_PRECISION;
         
-        // Check for division by zero
         if (denominator == 0) revert Bonding__CalculationError();
         
-        // Calculate with precision
         fvcAmount = numerator / denominator;
         
-        // Validate result
         if (fvcAmount == 0) revert Bonding__CalculationError();
         
         return fvcAmount;
@@ -993,7 +911,6 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         vestingDuration = VESTING_DURATION_SECONDS;
         totalDuration = TOTAL_VESTING_DURATION_SECONDS;
         
-        // Validate calculations
         require(cliffDuration > 0, "Invalid cliff duration");
         require(vestingDuration > 0, "Invalid vesting duration");
         require(totalDuration == cliffDuration + vestingDuration, "Invalid total duration");
@@ -1108,18 +1025,14 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
         uint256 userBondedAmount = userBonded[msg.sender];
         require(userBondedAmount > 0, "No USDC bonded");
         
-        // Calculate proportional refund based on treasury balance
         uint256 treasuryBalance = usdc.balanceOf(treasury);
         uint256 refundAmount = (userBondedAmount * treasuryBalance) / totalBonded;
         
-        // Ensure refund doesn't exceed user's bonded amount
         refundAmount = refundAmount > userBondedAmount ? userBondedAmount : refundAmount;
         
-        // Update state
         userBonded[msg.sender] = 0;
         totalBonded = totalBonded - userBondedAmount;
         
-        // Transfer refund
         usdc.safeTransferFrom(treasury, msg.sender, refundAmount);
         
         emit EmergencyWithdrawal(msg.sender, refundAmount, block.timestamp);
@@ -1165,7 +1078,6 @@ contract Bonding is IBonding, Initializable, AccessControlUpgradeable, Reentranc
 
     // ============ LEGACY INTERFACE COMPLIANCE ============
     
-    // These functions are kept for interface compliance but may not be used in the new system
     
     function allocateFVC(uint256) external pure {
         revert("Use allocateFVCToMilestone instead");

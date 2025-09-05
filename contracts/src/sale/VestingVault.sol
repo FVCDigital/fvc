@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -237,10 +236,8 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
         beneficiarySchedules[beneficiary].push(scheduleId);
         totalVestingTokens += totalAmount;
 
-        // Transfer tokens to this contract for custody
         fvcToken.safeTransferFrom(msg.sender, address(this), totalAmount);
 
-        // Mint ERC-1155 receipt to beneficiary
         _mint(beneficiary, scheduleId, 1, "");
 
         emit VestingScheduleCreated(
@@ -299,7 +296,6 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
             totalAmount += totalAmounts[i];
         }
 
-        // Single token transfer for all schedules
         fvcToken.safeTransferFrom(msg.sender, address(this), totalAmount);
     }
 
@@ -327,7 +323,6 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
         schedule.claimedAmount += claimableAmount;
         totalVestingTokens -= claimableAmount;
 
-        // Transfer vested tokens to beneficiary
         fvcToken.safeTransfer(msg.sender, claimableAmount);
 
         uint256 remainingAmount = schedule.totalAmount - schedule.claimedAmount;
@@ -393,12 +388,10 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
         schedule.isRevoked = true;
         totalVestingTokens -= returnAmount;
 
-        // Transfer unvested tokens back to revoker
         if (returnAmount > 0) {
             fvcToken.safeTransfer(schedule.revoker, returnAmount);
         }
 
-        // Burn the ERC-1155 receipt
         _burn(schedule.beneficiary, scheduleId, 1);
 
         emit VestingRevoked(scheduleId, msg.sender, returnAmount);
@@ -423,13 +416,10 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
         address oldBeneficiary = schedule.beneficiary;
         schedule.beneficiary = newBeneficiary;
 
-        // Remove from old beneficiary's list
         _removeFromBeneficiarySchedules(oldBeneficiary, scheduleId);
         
-        // Add to new beneficiary's list
         beneficiarySchedules[newBeneficiary].push(scheduleId);
 
-        // Transfer ERC-1155 receipt
         _safeTransferFrom(oldBeneficiary, newBeneficiary, scheduleId, 1, "");
 
         emit BeneficiaryChanged(scheduleId, oldBeneficiary, newBeneficiary);
@@ -557,7 +547,6 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
         beneficiarySchedules[beneficiary].push(scheduleId);
         totalVestingTokens += totalAmount;
 
-        // Mint ERC-1155 receipt to beneficiary
         _mint(beneficiary, scheduleId, 1, "");
 
         emit VestingScheduleCreated(
@@ -588,7 +577,6 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
             return schedule.totalAmount;
         }
         
-        // Linear vesting calculation
         uint256 vestingDuration = schedule.endTime - schedule.cliffTime;
         uint256 timeVested = block.timestamp - schedule.cliffTime;
         
@@ -627,13 +615,10 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
         uint256[] memory amounts,
         bytes memory data
     ) internal virtual override {
-        // Allow minting and burning
         if (from == address(0) || to == address(0)) {
             return;
         }
         
-        // Allow transfers only through changeBeneficiary function
-        // This check could be enhanced to verify the caller
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
 
