@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -120,14 +119,12 @@ contract FVCVesting is AccessControl, ReentrancyGuard {
         require(totalAmount > 0, "Amount must be greater than zero");
         require(vestingSchedules[beneficiary].totalAmount == 0, "Schedule already exists");
         
-        // Validate amount limits
         require(totalAmount <= MAX_VESTING_AMOUNT, "Amount exceeds maximum");
         
         uint256 startTime = block.timestamp;
         uint256 cliffTime = startTime + CLIFF_DURATION_SECONDS;
         uint256 endTime = cliffTime + VESTING_DURATION_SECONDS;
         
-        // Validate vesting schedule parameters
         _validateVestingSchedule(startTime, cliffTime, endTime, totalAmount);
         
         vestingSchedules[beneficiary] = VestingSchedule({
@@ -141,7 +138,6 @@ contract FVCVesting is AccessControl, ReentrancyGuard {
         beneficiaries.push(beneficiary);
         totalVestingTokens += totalAmount;
         
-        // Transfer tokens to this contract for custody
         IERC20(address(fvcToken)).safeTransferFrom(msg.sender, address(this), totalAmount);
         
         emit VestingCreated(beneficiary, totalAmount, startTime, cliffTime, endTime);
@@ -191,7 +187,6 @@ contract FVCVesting is AccessControl, ReentrancyGuard {
         
         totalVestingTokens += totalAmount;
         
-        // Transfer total tokens to this contract
         IERC20(address(fvcToken)).safeTransferFrom(msg.sender, address(this), totalAmount);
     }
 
@@ -206,20 +201,16 @@ contract FVCVesting is AccessControl, ReentrancyGuard {
         VestingSchedule storage schedule = vestingSchedules[msg.sender];
         require(schedule.totalAmount > 0, "No vesting schedule");
         
-        // Calculate vested amount using precise calculation
         uint256 vestedAmount = _calculatePreciseVestedAmount(schedule);
         uint256 releasableAmount = vestedAmount - schedule.releasedAmount;
         
         require(releasableAmount > 0, "No tokens to release");
         
-        // Update state
         schedule.releasedAmount += releasableAmount;
         totalVestingTokens -= releasableAmount;
         
-        // Validate precision of the calculation
         require(_validatePrecision(vestedAmount, _calculatePreciseVestedAmount(schedule)), "Precision loss too high");
         
-        // Transfer tokens
         IERC20(address(fvcToken)).safeTransfer(msg.sender, releasableAmount);
         
         emit TokensReleased(msg.sender, releasableAmount);
@@ -294,7 +285,6 @@ contract FVCVesting is AccessControl, ReentrancyGuard {
         uint256 vestingElapsed = block.timestamp - schedule.cliffTime;
         uint256 vestingDuration = schedule.endTime - schedule.cliffTime;
         
-        // Use higher precision calculation
         return (vestingElapsed * 100 * PRECISION) / (vestingDuration * PRECISION);
     }
 
@@ -337,36 +327,27 @@ contract FVCVesting is AccessControl, ReentrancyGuard {
     function _calculatePreciseVestedAmount(VestingSchedule storage schedule) internal view returns (uint256 vestedAmount) {
         uint256 currentTime = block.timestamp;
         
-        // During cliff period, no tokens are vested
         if (currentTime < schedule.cliffTime) {
             return 0;
         }
         
-        // After vesting period, all tokens are vested
         if (currentTime >= schedule.endTime) {
             return schedule.totalAmount;
         }
         
-        // Linear vesting after cliff with precision handling
         uint256 vestingElapsed = currentTime - schedule.cliffTime;
         uint256 vestingDuration = schedule.endTime - schedule.cliffTime;
         
-        // Validate time calculations
         require(vestingElapsed <= vestingDuration, "Invalid vesting elapsed time");
         require(vestingDuration > 0, "Invalid vesting duration");
         
-        // Use higher precision calculation to minimize rounding errors
-        // Formula: (totalAmount * vestingElapsed * PRECISION) / (vestingDuration * PRECISION)
         uint256 numerator = schedule.totalAmount * vestingElapsed * PRECISION;
         uint256 denominator = vestingDuration * PRECISION;
         
-        // Check for division by zero
         require(denominator > 0, "Division by zero");
         
-        // Calculate with precision
         vestedAmount = numerator / denominator;
         
-        // Ensure we don't exceed total amount
         if (vestedAmount > schedule.totalAmount) {
             vestedAmount = schedule.totalAmount;
         }
@@ -410,7 +391,6 @@ contract FVCVesting is AccessControl, ReentrancyGuard {
         require(totalAmount > 0, "Invalid total amount");
         require(totalAmount <= MAX_VESTING_AMOUNT, "Amount exceeds maximum");
         
-        // Validate time durations
         uint256 cliffDuration = cliffTime - startTime;
         uint256 vestingDuration = endTime - cliffTime;
         uint256 totalDuration = endTime - startTime;

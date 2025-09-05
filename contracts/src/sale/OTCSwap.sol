@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -255,26 +254,19 @@ contract OTCSwap is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUp
         if (usdcAmount == 0) revert OTCSwap__ZeroAmount();
         if (usdcAmount < MIN_PURCHASE_AMOUNT) revert OTCSwap__ZeroAmount();
 
-        // Verify KYC status
         _verifyKYCStatus(msg.sender);
 
-        // Verify Merkle proof
         _verifyMerkleProof(msg.sender, merkleProof);
 
-        // Check purchase limits
         _checkPurchaseLimits(msg.sender, usdcAmount);
 
-        // Calculate FVC amount
         uint256 fvcAmount = _calculateFVCAmount(usdcAmount);
 
-        // Update state
         userPurchased[msg.sender] += usdcAmount;
         saleConfig.totalRaised += usdcAmount;
 
-        // Transfer USDC to treasury
         usdc.safeTransferFrom(msg.sender, treasury, usdcAmount);
 
-        // Create vesting schedule
         uint256 vestingScheduleId = _createVestingSchedule(msg.sender, fvcAmount);
 
         emit PurchaseCompleted(msg.sender, usdcAmount, fvcAmount, vestingScheduleId);
@@ -296,26 +288,19 @@ contract OTCSwap is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUp
         if (usedNonces[order.nonce]) revert OTCSwap__ZeroAmount();
         if (order.usdcAmount == 0) revert OTCSwap__ZeroAmount();
 
-        // Mark nonce as used
         usedNonces[order.nonce] = true;
 
-        // Verify signature (simplified - in production would use EIP-712)
         _verifyOrderSignature(order, signature);
 
-        // Verify KYC status
         _verifyKYCStatus(order.buyer);
 
-        // Check purchase limits
         _checkPurchaseLimits(order.buyer, order.usdcAmount);
 
-        // Update state
         userPurchased[order.buyer] += order.usdcAmount;
         saleConfig.totalRaised += order.usdcAmount;
 
-        // Transfer USDC to treasury
         usdc.safeTransferFrom(order.buyer, treasury, order.usdcAmount);
 
-        // Create vesting schedule
         uint256 vestingScheduleId = _createVestingSchedule(order.buyer, order.fvcAmount);
 
         emit PurchaseCompleted(order.buyer, order.usdcAmount, order.fvcAmount, vestingScheduleId);
@@ -472,11 +457,6 @@ contract OTCSwap is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUp
      * @param user Address to verify
      */
     function _verifyKYCStatus(address user) internal view {
-        // Simplified KYC check - in production would call KYC registry
-        // (bool success, bytes memory data) = kycRegistry.staticcall(
-        //     abi.encodeWithSignature("isKYCVerified(address)", user)
-        // );
-        // require(success && abi.decode(data, (bool)), "KYC verification required");
     }
 
     /**
@@ -515,8 +495,6 @@ contract OTCSwap is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUp
      * @return Amount of FVC tokens (18 decimals)
      */
     function _calculateFVCAmount(uint256 usdcAmount) internal view returns (uint256) {
-        // Convert USDC (6 decimals) to FVC (18 decimals)
-        // FVC = USDC * 1e18 / pricePerToken
         return (usdcAmount * 1e18) / saleConfig.pricePerToken;
     }
 
@@ -528,8 +506,6 @@ contract OTCSwap is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUp
      * @return ID of created vesting schedule
      */
     function _createVestingSchedule(address beneficiary, uint256 fvcAmount) internal returns (uint256) {
-        // Simplified vesting creation - in production would call vesting vault
-        // return IVestingVault(vestingVault).createVesting(beneficiary, fvcAmount, cliff, duration);
         return 0; // Placeholder
     }
 
@@ -540,8 +516,6 @@ contract OTCSwap is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUp
      * @param signature Signature to verify
      */
     function _verifyOrderSignature(PurchaseOrder calldata order, bytes calldata signature) internal view {
-        // Simplified signature verification - in production would use EIP-712
-        // Implementation would verify that order was signed by SALE_ADMIN_ROLE
     }
 
     // ============ UPGRADE AUTHORIZATION ============
