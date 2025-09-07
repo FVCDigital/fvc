@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -108,17 +107,14 @@ contract PauseGuardian is AccessControl, Pausable {
     ) {
         if (admin == address(0)) revert PauseGuardian__ZeroAddress();
         
-        // Set up roles
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(GOVERNANCE_ADMIN_ROLE, admin);
         
-        // Grant guardian roles
         for (uint256 i = 0; i < guardians.length; i++) {
             if (guardians[i] == address(0)) revert PauseGuardian__ZeroAddress();
             _grantRole(GUARDIAN_ROLE, guardians[i]);
         }
         
-        // Grant emergency roles
         for (uint256 i = 0; i < emergencyAddresses.length; i++) {
             if (emergencyAddresses[i] == address(0)) revert PauseGuardian__ZeroAddress();
             _grantRole(EMERGENCY_ROLE, emergencyAddresses[i]);
@@ -147,7 +143,6 @@ contract PauseGuardian is AccessControl, Pausable {
         pauseStartTime[contractAddr] = block.timestamp;
         pauseDuration[contractAddr] = duration;
         
-        // Call pause function on target contract if it implements Pausable
         _callPauseFunction(contractAddr, true);
         
         emit ContractPaused(contractAddr, msg.sender, duration);
@@ -248,7 +243,6 @@ contract PauseGuardian is AccessControl, Pausable {
         
         isRegisteredContract[contractAddr] = false;
         
-        // Remove from array
         for (uint256 i = 0; i < pausableContracts.length; i++) {
             if (pausableContracts[i] == contractAddr) {
                 pausableContracts[i] = pausableContracts[pausableContracts.length - 1];
@@ -257,7 +251,6 @@ contract PauseGuardian is AccessControl, Pausable {
             }
         }
         
-        // Unpause if currently paused
         if (contractPaused[contractAddr]) {
             _unpauseContract(contractAddr);
         }
@@ -278,7 +271,6 @@ contract PauseGuardian is AccessControl, Pausable {
             return false;
         }
         
-        // Check if pause has expired
         if (block.timestamp >= pauseStartTime[contractAddr] + pauseDuration[contractAddr]) {
             return false;
         }
@@ -355,7 +347,6 @@ contract PauseGuardian is AccessControl, Pausable {
         pauseStartTime[contractAddr] = 0;
         pauseDuration[contractAddr] = 0;
         
-        // Call unpause function on target contract if it implements Pausable
         _callPauseFunction(contractAddr, false);
         
         emit ContractUnpaused(contractAddr, msg.sender);
@@ -368,14 +359,10 @@ contract PauseGuardian is AccessControl, Pausable {
      * @param shouldPause True to pause, false to unpause
      */
     function _callPauseFunction(address contractAddr, bool shouldPause) internal {
-        // Attempt to call pause/unpause function on target contract
-        // This will fail silently if the contract doesn't implement Pausable
         bytes memory data = shouldPause ? 
             abi.encodeWithSignature("pause()") : 
             abi.encodeWithSignature("unpause()");
             
-        // Use low-level call to avoid reverting if function doesn't exist
         (bool success, ) = contractAddr.call(data);
-        // Intentionally ignore success status - not all contracts may implement Pausable
     }
 }

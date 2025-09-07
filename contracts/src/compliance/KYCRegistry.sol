@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -159,12 +158,10 @@ contract KYCRegistry is AccessControl {
         _grantRole(KYC_ADMIN_ROLE, _admin);
         _grantRole(COMPLIANCE_OFFICER_ROLE, _admin);
 
-        // Grant KYC oracle role to compliance oracle
         if (_complianceOracle != address(0)) {
             _grantRole(KYC_ORACLE_ROLE, _complianceOracle);
         }
 
-        // Grant compliance officer roles
         for (uint256 i = 0; i < _kycOfficers.length; i++) {
             if (_kycOfficers[i] != address(0)) {
                 _grantRole(COMPLIANCE_OFFICER_ROLE, _kycOfficers[i]);
@@ -211,7 +208,6 @@ contract KYCRegistry is AccessControl {
         if (riskScore > 100) revert KYCRegistry__UnauthorizedVerification();
         if (restrictedCountries[countryCode]) revert KYCRegistry__UnauthorizedVerification();
 
-        // Check if this is a new verification
         bool isNewVerification = !kycRecords[user].isVerified;
 
         uint256 expiresAt = block.timestamp + duration;
@@ -326,7 +322,6 @@ contract KYCRegistry is AccessControl {
 
         kycRecords[user].isBlacklisted = true;
         
-        // Revoke verification if verified
         if (kycRecords[user].isVerified) {
             kycRecords[user].isVerified = false;
             kycRecords[user].expiresAt = block.timestamp;
@@ -392,14 +387,12 @@ contract KYCRegistry is AccessControl {
      * @custom:security Only DEFAULT_ADMIN_ROLE can update oracle
      */
     function updateComplianceOracle(address newOracle) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        // Revoke role from old oracle
         if (complianceOracle != address(0)) {
             _revokeRole(KYC_ORACLE_ROLE, complianceOracle);
         }
 
         complianceOracle = newOracle;
 
-        // Grant role to new oracle
         if (newOracle != address(0)) {
             _grantRole(KYC_ORACLE_ROLE, newOracle);
         }
