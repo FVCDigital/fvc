@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/governance/TimelockController.sol";
@@ -70,12 +69,10 @@ contract FVCTimelock is TimelockController {
         address[] memory executors,
         address admin
     ) TimelockController(MIN_DELAY, proposers, executors, admin) {
-        // Set default delays for critical operations
         _setOperationDelay(this.updateDelay.selector, CRITICAL_DELAY);
         _setOperationDelay(this.grantRole.selector, CRITICAL_DELAY);
         _setOperationDelay(this.revokeRole.selector, CRITICAL_DELAY);
         
-        // Grant timelock admin role
         _grantRole(TIMELOCK_ADMIN_ROLE, admin);
     }
 
@@ -196,7 +193,6 @@ contract FVCTimelock is TimelockController {
     ) external onlyRole(PROPOSER_ROLE) returns (uint256) {
         uint256 maxDelay = getMinDelay();
         
-        // Find the maximum delay required among all operations
         for (uint256 i = 0; i < targets.length; i++) {
             uint256 operationDelay = this.getOperationDelay(targets[i], values[i], payloads[i]);
             if (operationDelay > maxDelay) {
@@ -300,8 +296,6 @@ contract FVCTimelock is TimelockController {
      * @return delays Array of corresponding delays
      */
     function getConfiguredDelays() external view returns (bytes4[] memory selectors, uint256[] memory delays) {
-        // This would return configured delays - implementation depends on storage pattern
-        // For now, return empty arrays as this is a view function for debugging
         selectors = new bytes4[](0);
         delays = new uint256[](0);
     }
