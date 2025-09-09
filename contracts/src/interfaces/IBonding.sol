@@ -88,6 +88,12 @@ interface IBonding {
     
     /// @notice Emitted when FVC tokens are allocated to a milestone
     event FVCAllocated(uint256 indexed milestoneIndex, uint256 amount);
+    
+    /// @notice Emitted when total allocation is adjusted
+    event AllocationAdjusted(uint256 newTotalAllocation, uint256 otcSoldAmount, uint256 remainingAllocation);
+    
+    /// @notice Emitted when milestone allocations are updated
+    event MilestoneAllocationsUpdated(uint256 remainingAllocation);
 
     // ============ CORE FUNCTIONS ============
     

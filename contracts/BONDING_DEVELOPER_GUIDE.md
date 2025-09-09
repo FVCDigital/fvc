@@ -1,10 +1,113 @@
-# FVC Protocol - Bonding Developer Guide
+# FVC Protocol - Complete Developer Guide
 
 ## Overview
 
-This guide is designed to make you **self-sufficient** as the FVC Protocol developer. You'll learn the complete end-to-end bonding process, understand how the smart contracts work, and be able to debug, modify, and extend the system without external assistance.
+This guide covers the **complete FVC Protocol architecture** including the dual fundraising system, governance, and long-term vision. You'll understand how the sophisticated smart contract architecture enables flexible fundraising while maintaining security and compliance.
 
-**Goal**: Become the expert on your own codebase
+**Goal**: Master the entire FVC Protocol ecosystem
+
+---
+
+## 🏗️ **FVC Protocol Architecture Overview**
+
+FVC Protocol is a **decentralized venture capital platform** that provides interest-free funding to businesses through community governance. The protocol features a sophisticated dual-token fundraising system designed to serve different investor classes while maintaining regulatory compliance.
+
+### **Core Value Proposition:**
+- **Interest-free business funding** through DAO governance
+- **Dual fundraising architecture** (OTC + Public Bonding)
+- **Regulatory compliance** with KYC/AML integration
+- **Long-term value creation** through revenue sharing and buybacks
+
+### **Target Investors:**
+1. **Earliest Investors**: Pre-seed, seed, strategic (via OTC sales)
+2. **Community Investors**: Retail, smaller institutional (via public bonding)
+3. **SME Borrowers**: Businesses seeking interest-free funding
+
+---
+
+## 💰 **Dual Fundraising Architecture**
+
+The protocol implements **two complementary fundraising mechanisms** from a shared 225M FVC allocation:
+
+### **1. OTC Sales (Priority) - Earliest Investors**
+- **Purpose**: Custom sale rounds for sophisticated investors
+- **Pricing**: Discounted rates with custom terms
+- **Access**: Merkle allowlist + KYC verification
+- **Caps**: Up to 10M USDC per investor
+- **Vesting**: **Mandatory 12-month cliff + 24-month linear**
+
+### **2. Public Bonding - Community Participation**
+- **Purpose**: Open community fundraising
+- **Pricing**: 4-milestone structure ($0.025 → $0.10)
+- **Access**: Open to anyone (no KYC required)
+- **Caps**: 2M USDC per wallet, 20M USDC total
+- **Vesting**: **Same 12-month cliff + 24-month linear**
+
+### **Why This Architecture?**
+- **Flexibility**: Different terms for different investor classes
+- **Capital Efficiency**: Maximize fundraising while maintaining fairness
+- **Regulatory Compliance**: KYC for large investors, open for community
+- **Market Dynamics**: Institutional first, then community participation
+
+---
+
+## ⏰ **Vesting Mechanics - Universal 36-Month Schedule**
+
+**All FVC token sales use the same vesting structure** to ensure fairness across investor classes:
+
+### **Vesting Timeline:**
+```
+Month 0-12:  🔒 CLIFF PERIOD - 0% tokens accessible
+Month 12-36: 📈 LINEAR VESTING - Gradual release to 100%
+```
+
+### **How It Works:**
+
+**Cliff Period (Months 0-12):**
+- **0% of tokens** are accessible during the first 12 months
+- Tokens are **fully locked** - no claiming possible
+- Prevents immediate dumping and ensures long-term alignment
+
+**Vesting Period (Months 12-36):**
+- **Linear progression** from 0% to 100% over 24 months
+- **Daily unlock rate**: ~0.139% per month (100% ÷ 24 months)
+- Users can claim unlocked tokens at any time
+
+### **Calculation Example:**
+```
+If investor purchases 100,000 FVC tokens:
+
+Month 0-12:   0 tokens claimable (cliff)
+Month 18:     25,000 tokens claimable (25% vested)
+Month 24:     50,000 tokens claimable (50% vested)
+Month 30:     75,000 tokens claimable (75% vested)
+Month 36:     100,000 tokens claimable (100% vested)
+```
+
+### **Smart Contract Implementation:**
+```solidity
+function _calculateVestedAmount(VestingSchedule storage schedule) internal view returns (uint256) {
+    if (block.timestamp < schedule.cliffEndTime) {
+        return 0; // Still in cliff period
+    }
+    
+    if (block.timestamp >= schedule.endTime) {
+        return schedule.totalAmount; // Fully vested
+    }
+    
+    // Linear vesting calculation
+    uint256 timeSinceCliff = block.timestamp - schedule.cliffEndTime;
+    uint256 vestingDuration = schedule.endTime - schedule.cliffEndTime;
+    
+    return (schedule.totalAmount * timeSinceCliff) / vestingDuration;
+}
+```
+
+### **Why This Vesting Structure?**
+- **Market Stability**: Prevents immediate token dumps
+- **Long-term Alignment**: Ensures investors are committed to protocol success
+- **Regulatory Standard**: Industry-standard vesting for private sales
+- **Fair Distribution**: Same rules for all investor classes
 
 ---
 
