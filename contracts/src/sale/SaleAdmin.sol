@@ -139,12 +139,6 @@ contract SaleAdmin is AccessControlUpgradeable, UUPSUpgradeable {
     // ============ EVENTS ============
 
     /// @notice Emitted when a new sale round is created
-    /// @param roundId Unique identifier for the round
-    /// @param name Human-readable name
-    /// @param pricePerToken Price per FVC token
-    /// @param totalCap Total USDC cap
-    /// @param startTime Round start timestamp
-    /// @param endTime Round end timestamp
     event SaleRoundCreated(
         uint256 indexed roundId,
         string name,
@@ -155,10 +149,6 @@ contract SaleAdmin is AccessControlUpgradeable, UUPSUpgradeable {
     );
 
     /// @notice Emitted when sale round configuration is updated
-    /// @param roundId Sale round identifier
-    /// @param pricePerToken New price per token
-    /// @param totalCap New total cap
-    /// @param individualCap New individual cap
     event SaleRoundUpdated(
         uint256 indexed roundId,
         uint256 pricePerToken,
@@ -167,9 +157,6 @@ contract SaleAdmin is AccessControlUpgradeable, UUPSUpgradeable {
     );
 
     /// @notice Emitted when sale round status changes
-    /// @param roundId Sale round identifier
-    /// @param isActive New active status
-    /// @param activatedBy Address that changed the status
     event SaleRoundStatusChanged(
         uint256 indexed roundId,
         bool isActive,
@@ -177,9 +164,6 @@ contract SaleAdmin is AccessControlUpgradeable, UUPSUpgradeable {
     );
 
     /// @notice Emitted when allowlist is updated
-    /// @param roundId Sale round identifier
-    /// @param merkleRoot New Merkle root
-    /// @param updatedBy Address that updated the allowlist
     event AllowlistUpdated(
         uint256 indexed roundId,
         bytes32 merkleRoot,
@@ -187,11 +171,6 @@ contract SaleAdmin is AccessControlUpgradeable, UUPSUpgradeable {
     );
 
     /// @notice Emitted when individual allowlist entry is modified
-    /// @param roundId Sale round identifier
-    /// @param user Address modified
-    /// @param isAllowed New allowlist status
-    /// @param individualCap Custom individual cap
-    /// @param modifiedBy Address that made the modification
     event IndividualAllowlistModified(
         uint256 indexed roundId,
         address indexed user,
@@ -201,18 +180,13 @@ contract SaleAdmin is AccessControlUpgradeable, UUPSUpgradeable {
     );
 
     /// @notice Emitted when contract addresses are updated
-    /// @param otcSwap New OTC swap contract address
-    /// @param vestingVault New vesting vault contract address
     event ContractAddressesUpdated(address otcSwap, address vestingVault);
 
     /// @notice Emitted when global sale pause status changes
-    /// @param isPaused New pause status
-    /// @param pausedBy Address that changed the status
     event GlobalSalePauseChanged(bool isPaused, address indexed pausedBy);
 
     // ============ STORAGE GAP ============
     
-    /// @dev Storage gap for future upgrades
     uint256[40] private __gap;
 
     // ============ INITIALIZER ============
@@ -367,7 +341,6 @@ contract SaleAdmin is AccessControlUpgradeable, UUPSUpgradeable {
     {
         if (saleRounds[roundId].roundId == 0) revert SaleAdmin__RoundNotFound();
 
-        // Deactivate current active round if activating a new one
         if (isActive && currentActiveRound != 0 && currentActiveRound != roundId) {
             saleRounds[currentActiveRound].isActive = false;
             emit SaleRoundStatusChanged(currentActiveRound, false, msg.sender);
@@ -489,14 +462,12 @@ contract SaleAdmin is AccessControlUpgradeable, UUPSUpgradeable {
     ) external view returns (bool) {
         SaleRound storage round = saleRounds[roundId];
         
-        // Check individual allowlist first
         if (allowlists[roundId][user].isAllowed) {
             return true;
         }
 
-        // Check Merkle proof if root exists
         if (round.merkleRoot != bytes32(0)) {
-            bytes32 leaf = keccak256(abi.encodePacked(user));
+            bytes32 leaf = keccak256(abi.encode(user));
             return MerkleProof.verify(merkleProof, round.merkleRoot, leaf);
         }
 
