@@ -2,6 +2,7 @@ pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "../interfaces/IPausable.sol";
 
 /**
  * @title PauseGuardian
@@ -67,27 +68,18 @@ contract PauseGuardian is AccessControl, Pausable {
     // ============ EVENTS ============
 
     /// @notice Emitted when a contract is paused
-    /// @param contractAddr Address of paused contract
-    /// @param guardian Address of guardian who initiated pause
-    /// @param duration Duration of pause in seconds
     event ContractPaused(address indexed contractAddr, address indexed guardian, uint256 duration);
     
     /// @notice Emitted when a contract is unpaused
-    /// @param contractAddr Address of unpaused contract
-    /// @param guardian Address of guardian who lifted pause
     event ContractUnpaused(address indexed contractAddr, address indexed guardian);
     
     /// @notice Emitted when emergency pause is activated
-    /// @param guardian Address of guardian who triggered emergency pause
-    /// @param affectedContracts Array of contracts paused
     event EmergencyPauseActivated(address indexed guardian, address[] affectedContracts);
     
     /// @notice Emitted when a contract is registered for guardian oversight
-    /// @param contractAddr Address of registered contract
     event ContractRegistered(address indexed contractAddr);
     
     /// @notice Emitted when a contract is unregistered
-    /// @param contractAddr Address of unregistered contract
     event ContractUnregistered(address indexed contractAddr);
 
     // ============ CONSTRUCTOR ============
@@ -107,15 +99,18 @@ contract PauseGuardian is AccessControl, Pausable {
     ) {
         if (admin == address(0)) revert PauseGuardian__ZeroAddress();
         
+        _pause();
+        _unpause();
+        
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
         _grantRole(GOVERNANCE_ADMIN_ROLE, admin);
         
-        for (uint256 i = 0; i < guardians.length; i++) {
+        for (uint256 i = 0; i < guardians.length; ++i) {
             if (guardians[i] == address(0)) revert PauseGuardian__ZeroAddress();
             _grantRole(GUARDIAN_ROLE, guardians[i]);
         }
         
-        for (uint256 i = 0; i < emergencyAddresses.length; i++) {
+        for (uint256 i = 0; i < emergencyAddresses.length; ++i) {
             if (emergencyAddresses[i] == address(0)) revert PauseGuardian__ZeroAddress();
             _grantRole(EMERGENCY_ROLE, emergencyAddresses[i]);
         }
@@ -180,7 +175,7 @@ contract PauseGuardian is AccessControl, Pausable {
         
         lastEmergencyPause = block.timestamp;
         
-        for (uint256 i = 0; i < contracts.length; i++) {
+        for (uint256 i = 0; i < contracts.length; ++i) {
             address contractAddr = contracts[i];
             if (contractAddr != address(0) && isRegisteredContract[contractAddr] && !contractPaused[contractAddr]) {
                 contractPaused[contractAddr] = true;
@@ -200,7 +195,7 @@ contract PauseGuardian is AccessControl, Pausable {
      * @custom:security Only EMERGENCY_ROLE can lift emergency pauses
      */
     function emergencyUnpauseAll() external onlyRole(EMERGENCY_ROLE) {
-        for (uint256 i = 0; i < pausableContracts.length; i++) {
+        for (uint256 i = 0; i < pausableContracts.length; ++i) {
             address contractAddr = pausableContracts[i];
             if (contractPaused[contractAddr]) {
                 _unpauseContract(contractAddr);
@@ -243,7 +238,7 @@ contract PauseGuardian is AccessControl, Pausable {
         
         isRegisteredContract[contractAddr] = false;
         
-        for (uint256 i = 0; i < pausableContracts.length; i++) {
+        for (uint256 i = 0; i < pausableContracts.length; ++i) {
             if (pausableContracts[i] == contractAddr) {
                 pausableContracts[i] = pausableContracts[pausableContracts.length - 1];
                 pausableContracts.pop();
@@ -359,10 +354,14 @@ contract PauseGuardian is AccessControl, Pausable {
      * @param shouldPause True to pause, false to unpause
      */
     function _callPauseFunction(address contractAddr, bool shouldPause) internal {
-        bytes memory data = shouldPause ? 
-            abi.encodeWithSignature("pause()") : 
-            abi.encodeWithSignature("unpause()");
-            
-        (bool success, ) = contractAddr.call(data);
+        if (shouldPause) {
+            try IPausable(contractAddr).pause() {
+            } catch {
+            }
+        } else {
+            try IPausable(contractAddr).unpause() {
+            } catch {
+            }
+        }
     }
 }
