@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -12,8 +12,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  */
 contract FVCUnlocked is ERC20, Ownable {
     /// @notice Emitted when tokens are minted
-    /// @param to Address receiving the tokens
-    /// @param amount Amount minted
     event TokensMinted(address indexed to, uint256 amount);
 
     /**
@@ -67,12 +65,18 @@ contract FVCUnlocked is ERC20, Ownable {
 
     /**
      * @notice Burn tokens from specified address
-     * @dev Only owner can call this function
+     * @dev Only owner can call this function with additional validation
      * @param from Address to burn tokens from
      * @param amount Amount of tokens to burn
-     * @custom:security Only owner can burn tokens
+     * @custom:security Only owner can burn tokens, with zero checks
      */
     function burn(address from, uint256 amount) external onlyOwner {
+        require(from != address(0), "Cannot burn from zero address");
+        require(amount > 0, "Cannot burn zero amount");
+        require(balanceOf(from) >= amount, "Insufficient balance to burn");
+        
         _burn(from, amount);
+        
+        emit Transfer(from, address(0), amount); // Explicit burn event
     }
 }
