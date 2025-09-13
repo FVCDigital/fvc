@@ -11,17 +11,9 @@ contract RewardsDistributor {
     // ============ PLACEHOLDER NOTICE ============
     
     /// @notice This contract is a placeholder for Phase 2 implementation
-    /// @dev Will implement: reward calculation, distribution logic, APY management
     
     // ============ FUTURE FEATURES ============
     
-    // Phase 2 will include:
-    // - Automated reward calculation based on staking duration
-    // - Distribution of protocol revenue to stakers
-    // - APY rate management based on protocol performance
-    // - Reward vesting mechanisms
-    // - Integration with treasury revenue streams
-    // - Compound reward options
     
     // ============ PLACEHOLDER FUNCTIONS ============
     
@@ -30,7 +22,6 @@ contract RewardsDistributor {
      * @dev Will distribute rewards to all stakers based on their stakes
      */
     function distributeRewards(uint256 totalRewardAmount) external pure {
-        // Placeholder - will be implemented in Phase 2
         revert("Phase 2 - Not yet implemented");
     }
     
@@ -39,7 +30,6 @@ contract RewardsDistributor {
      * @dev Will calculate rewards for a specific staker
      */
     function calculateRewards(address staker) external pure returns (uint256) {
-        // Placeholder - will be implemented in Phase 2
         revert("Phase 2 - Not yet implemented");
     }
     
@@ -48,7 +38,6 @@ contract RewardsDistributor {
      * @dev Will update APY rates based on protocol performance
      */
     function updateAPYRates(uint256 newBaseAPY) external pure {
-        // Placeholder - will be implemented in Phase 2
         revert("Phase 2 - Not yet implemented");
     }
 }
