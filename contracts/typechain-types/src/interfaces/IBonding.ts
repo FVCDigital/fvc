@@ -130,9 +130,11 @@ export interface IBondingInterface extends Interface {
 
   getEvent(
     nameOrSignatureOrTopic:
+      | "AllocationAdjusted"
       | "BondTransactionCreated"
       | "Bonded"
       | "FVCAllocated"
+      | "MilestoneAllocationsUpdated"
       | "MilestoneReached"
       | "PrivateSaleEnded"
       | "PrivateSaleStarted"
@@ -418,6 +420,28 @@ export interface IBondingInterface extends Interface {
   ): Result;
 }
 
+export namespace AllocationAdjustedEvent {
+  export type InputTuple = [
+    newTotalAllocation: BigNumberish,
+    otcSoldAmount: BigNumberish,
+    remainingAllocation: BigNumberish
+  ];
+  export type OutputTuple = [
+    newTotalAllocation: bigint,
+    otcSoldAmount: bigint,
+    remainingAllocation: bigint
+  ];
+  export interface OutputObject {
+    newTotalAllocation: bigint;
+    otcSoldAmount: bigint;
+    remainingAllocation: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace BondTransactionCreatedEvent {
   export type InputTuple = [
     user: AddressLike,
@@ -480,6 +504,18 @@ export namespace FVCAllocatedEvent {
   export interface OutputObject {
     milestoneIndex: bigint;
     amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace MilestoneAllocationsUpdatedEvent {
+  export type InputTuple = [remainingAllocation: BigNumberish];
+  export type OutputTuple = [remainingAllocation: bigint];
+  export interface OutputObject {
+    remainingAllocation: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -914,6 +950,13 @@ export interface IBonding extends BaseContract {
   >;
 
   getEvent(
+    key: "AllocationAdjusted"
+  ): TypedContractEvent<
+    AllocationAdjustedEvent.InputTuple,
+    AllocationAdjustedEvent.OutputTuple,
+    AllocationAdjustedEvent.OutputObject
+  >;
+  getEvent(
     key: "BondTransactionCreated"
   ): TypedContractEvent<
     BondTransactionCreatedEvent.InputTuple,
@@ -933,6 +976,13 @@ export interface IBonding extends BaseContract {
     FVCAllocatedEvent.InputTuple,
     FVCAllocatedEvent.OutputTuple,
     FVCAllocatedEvent.OutputObject
+  >;
+  getEvent(
+    key: "MilestoneAllocationsUpdated"
+  ): TypedContractEvent<
+    MilestoneAllocationsUpdatedEvent.InputTuple,
+    MilestoneAllocationsUpdatedEvent.OutputTuple,
+    MilestoneAllocationsUpdatedEvent.OutputObject
   >;
   getEvent(
     key: "MilestoneReached"
@@ -964,6 +1014,17 @@ export interface IBonding extends BaseContract {
   >;
 
   filters: {
+    "AllocationAdjusted(uint256,uint256,uint256)": TypedContractEvent<
+      AllocationAdjustedEvent.InputTuple,
+      AllocationAdjustedEvent.OutputTuple,
+      AllocationAdjustedEvent.OutputObject
+    >;
+    AllocationAdjusted: TypedContractEvent<
+      AllocationAdjustedEvent.InputTuple,
+      AllocationAdjustedEvent.OutputTuple,
+      AllocationAdjustedEvent.OutputObject
+    >;
+
     "BondTransactionCreated(address,uint256,uint256,uint256,uint256,uint256)": TypedContractEvent<
       BondTransactionCreatedEvent.InputTuple,
       BondTransactionCreatedEvent.OutputTuple,
@@ -995,6 +1056,17 @@ export interface IBonding extends BaseContract {
       FVCAllocatedEvent.InputTuple,
       FVCAllocatedEvent.OutputTuple,
       FVCAllocatedEvent.OutputObject
+    >;
+
+    "MilestoneAllocationsUpdated(uint256)": TypedContractEvent<
+      MilestoneAllocationsUpdatedEvent.InputTuple,
+      MilestoneAllocationsUpdatedEvent.OutputTuple,
+      MilestoneAllocationsUpdatedEvent.OutputObject
+    >;
+    MilestoneAllocationsUpdated: TypedContractEvent<
+      MilestoneAllocationsUpdatedEvent.InputTuple,
+      MilestoneAllocationsUpdatedEvent.OutputTuple,
+      MilestoneAllocationsUpdatedEvent.OutputObject
     >;
 
     "MilestoneReached(uint256,uint256,uint256)": TypedContractEvent<

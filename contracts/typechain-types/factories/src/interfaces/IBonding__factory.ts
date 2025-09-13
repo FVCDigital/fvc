@@ -13,6 +13,31 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
+        indexed: false,
+        internalType: "uint256",
+        name: "newTotalAllocation",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "otcSoldAmount",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "remainingAllocation",
+        type: "uint256",
+      },
+    ],
+    name: "AllocationAdjusted",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: true,
         internalType: "address",
         name: "user",
@@ -100,6 +125,19 @@ const _abi = [
       },
     ],
     name: "FVCAllocated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "remainingAllocation",
+        type: "uint256",
+      },
+    ],
+    name: "MilestoneAllocationsUpdated",
     type: "event",
   },
   {
