@@ -105,7 +105,6 @@ export interface BondingInterface extends Interface {
       | "PRECISION"
       | "PRICE_PRECISION"
       | "SECONDS_PER_DAY"
-      | "TOTAL_FVC_ALLOCATION"
       | "TOTAL_SALE_TARGET"
       | "TOTAL_VESTING_DURATION_DAYS"
       | "TOTAL_VESTING_DURATION_SECONDS"
@@ -114,6 +113,7 @@ export interface BondingInterface extends Interface {
       | "VESTING_DURATION_DAYS"
       | "VESTING_DURATION_SECONDS"
       | "activateCircuitBreaker"
+      | "adjustAllocation"
       | "allocateFVC"
       | "allocateFVCToMilestone"
       | "bond"
@@ -158,6 +158,7 @@ export interface BondingInterface extends Interface {
       | "milestones"
       | "privateSaleActive"
       | "proxiableUUID"
+      | "remainingFVCAllocation"
       | "renounceRole"
       | "revokeRole"
       | "saleEndTime"
@@ -166,9 +167,11 @@ export interface BondingInterface extends Interface {
       | "startPrivateSale"
       | "supportsInterface"
       | "totalBonded"
+      | "totalFVCAllocation"
       | "totalFVCSold"
       | "treasury"
       | "triggerEmergencyShutdown"
+      | "updateMilestoneAllocations"
       | "upgradeTo"
       | "upgradeToAndCall"
       | "usdc"
@@ -179,6 +182,7 @@ export interface BondingInterface extends Interface {
   getEvent(
     nameOrSignatureOrTopic:
       | "AdminChanged"
+      | "AllocationAdjusted"
       | "BeaconUpgraded"
       | "BondTransactionCreated"
       | "Bonded"
@@ -188,6 +192,7 @@ export interface BondingInterface extends Interface {
       | "EmergencyWithdrawal"
       | "FVCAllocated"
       | "Initialized"
+      | "MilestoneAllocationsUpdated"
       | "MilestoneReached"
       | "PrivateSaleEnded"
       | "PrivateSaleStarted"
@@ -256,10 +261,6 @@ export interface BondingInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "TOTAL_FVC_ALLOCATION",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "TOTAL_SALE_TARGET",
     values?: undefined
   ): string;
@@ -290,6 +291,10 @@ export interface BondingInterface extends Interface {
   encodeFunctionData(
     functionFragment: "activateCircuitBreaker",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "adjustAllocation",
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "allocateFVC",
@@ -462,6 +467,10 @@ export interface BondingInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "remainingFVCAllocation",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "renounceRole",
     values: [BytesLike, AddressLike]
   ): string;
@@ -494,12 +503,20 @@ export interface BondingInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "totalFVCAllocation",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "totalFVCSold",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "treasury", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "triggerEmergencyShutdown",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updateMilestoneAllocations",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -578,10 +595,6 @@ export interface BondingInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "TOTAL_FVC_ALLOCATION",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "TOTAL_SALE_TARGET",
     data: BytesLike
   ): Result;
@@ -611,6 +624,10 @@ export interface BondingInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "activateCircuitBreaker",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "adjustAllocation",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -769,6 +786,10 @@ export interface BondingInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "remainingFVCAllocation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "renounceRole",
     data: BytesLike
   ): Result;
@@ -798,12 +819,20 @@ export interface BondingInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "totalFVCAllocation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "totalFVCSold",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "treasury", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "triggerEmergencyShutdown",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "updateMilestoneAllocations",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
@@ -825,6 +854,28 @@ export namespace AdminChangedEvent {
   export interface OutputObject {
     previousAdmin: string;
     newAdmin: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace AllocationAdjustedEvent {
+  export type InputTuple = [
+    newTotalAllocation: BigNumberish,
+    otcSoldAmount: BigNumberish,
+    remainingAllocation: BigNumberish
+  ];
+  export type OutputTuple = [
+    newTotalAllocation: bigint,
+    otcSoldAmount: bigint,
+    remainingAllocation: bigint
+  ];
+  export interface OutputObject {
+    newTotalAllocation: bigint;
+    otcSoldAmount: bigint;
+    remainingAllocation: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -975,6 +1026,18 @@ export namespace InitializedEvent {
   export type OutputTuple = [version: bigint];
   export interface OutputObject {
     version: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace MilestoneAllocationsUpdatedEvent {
+  export type InputTuple = [remainingAllocation: BigNumberish];
+  export type OutputTuple = [remainingAllocation: bigint];
+  export interface OutputObject {
+    remainingAllocation: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -1201,8 +1264,6 @@ export interface Bonding extends BaseContract {
 
   SECONDS_PER_DAY: TypedContractMethod<[], [bigint], "view">;
 
-  TOTAL_FVC_ALLOCATION: TypedContractMethod<[], [bigint], "view">;
-
   TOTAL_SALE_TARGET: TypedContractMethod<[], [bigint], "view">;
 
   TOTAL_VESTING_DURATION_DAYS: TypedContractMethod<[], [bigint], "view">;
@@ -1218,6 +1279,12 @@ export interface Bonding extends BaseContract {
   VESTING_DURATION_SECONDS: TypedContractMethod<[], [bigint], "view">;
 
   activateCircuitBreaker: TypedContractMethod<[], [void], "nonpayable">;
+
+  adjustAllocation: TypedContractMethod<
+    [newTotalAllocation: BigNumberish, otcSoldAmount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
   allocateFVC: TypedContractMethod<[arg0: BigNumberish], [void], "view">;
 
@@ -1409,6 +1476,8 @@ export interface Bonding extends BaseContract {
 
   proxiableUUID: TypedContractMethod<[], [string], "view">;
 
+  remainingFVCAllocation: TypedContractMethod<[], [bigint], "view">;
+
   renounceRole: TypedContractMethod<
     [role: BytesLike, account: AddressLike],
     [void],
@@ -1441,11 +1510,15 @@ export interface Bonding extends BaseContract {
 
   totalBonded: TypedContractMethod<[], [bigint], "view">;
 
+  totalFVCAllocation: TypedContractMethod<[], [bigint], "view">;
+
   totalFVCSold: TypedContractMethod<[], [bigint], "view">;
 
   treasury: TypedContractMethod<[], [string], "view">;
 
   triggerEmergencyShutdown: TypedContractMethod<[], [void], "nonpayable">;
+
+  updateMilestoneAllocations: TypedContractMethod<[], [void], "nonpayable">;
 
   upgradeTo: TypedContractMethod<
     [newImplementation: AddressLike],
@@ -1519,9 +1592,6 @@ export interface Bonding extends BaseContract {
     nameOrSignature: "SECONDS_PER_DAY"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "TOTAL_FVC_ALLOCATION"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
     nameOrSignature: "TOTAL_SALE_TARGET"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
@@ -1545,6 +1615,13 @@ export interface Bonding extends BaseContract {
   getFunction(
     nameOrSignature: "activateCircuitBreaker"
   ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "adjustAllocation"
+  ): TypedContractMethod<
+    [newTotalAllocation: BigNumberish, otcSoldAmount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
   getFunction(
     nameOrSignature: "allocateFVC"
   ): TypedContractMethod<[arg0: BigNumberish], [void], "view">;
@@ -1756,6 +1833,9 @@ export interface Bonding extends BaseContract {
     nameOrSignature: "proxiableUUID"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "remainingFVCAllocation"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "renounceRole"
   ): TypedContractMethod<
     [role: BytesLike, account: AddressLike],
@@ -1788,6 +1868,9 @@ export interface Bonding extends BaseContract {
     nameOrSignature: "totalBonded"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
+    nameOrSignature: "totalFVCAllocation"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "totalFVCSold"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
@@ -1795,6 +1878,9 @@ export interface Bonding extends BaseContract {
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "triggerEmergencyShutdown"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "updateMilestoneAllocations"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "upgradeTo"
@@ -1830,6 +1916,13 @@ export interface Bonding extends BaseContract {
     AdminChangedEvent.InputTuple,
     AdminChangedEvent.OutputTuple,
     AdminChangedEvent.OutputObject
+  >;
+  getEvent(
+    key: "AllocationAdjusted"
+  ): TypedContractEvent<
+    AllocationAdjustedEvent.InputTuple,
+    AllocationAdjustedEvent.OutputTuple,
+    AllocationAdjustedEvent.OutputObject
   >;
   getEvent(
     key: "BeaconUpgraded"
@@ -1893,6 +1986,13 @@ export interface Bonding extends BaseContract {
     InitializedEvent.InputTuple,
     InitializedEvent.OutputTuple,
     InitializedEvent.OutputObject
+  >;
+  getEvent(
+    key: "MilestoneAllocationsUpdated"
+  ): TypedContractEvent<
+    MilestoneAllocationsUpdatedEvent.InputTuple,
+    MilestoneAllocationsUpdatedEvent.OutputTuple,
+    MilestoneAllocationsUpdatedEvent.OutputObject
   >;
   getEvent(
     key: "MilestoneReached"
@@ -1961,6 +2061,17 @@ export interface Bonding extends BaseContract {
       AdminChangedEvent.InputTuple,
       AdminChangedEvent.OutputTuple,
       AdminChangedEvent.OutputObject
+    >;
+
+    "AllocationAdjusted(uint256,uint256,uint256)": TypedContractEvent<
+      AllocationAdjustedEvent.InputTuple,
+      AllocationAdjustedEvent.OutputTuple,
+      AllocationAdjustedEvent.OutputObject
+    >;
+    AllocationAdjusted: TypedContractEvent<
+      AllocationAdjustedEvent.InputTuple,
+      AllocationAdjustedEvent.OutputTuple,
+      AllocationAdjustedEvent.OutputObject
     >;
 
     "BeaconUpgraded(address)": TypedContractEvent<
@@ -2060,6 +2171,17 @@ export interface Bonding extends BaseContract {
       InitializedEvent.InputTuple,
       InitializedEvent.OutputTuple,
       InitializedEvent.OutputObject
+    >;
+
+    "MilestoneAllocationsUpdated(uint256)": TypedContractEvent<
+      MilestoneAllocationsUpdatedEvent.InputTuple,
+      MilestoneAllocationsUpdatedEvent.OutputTuple,
+      MilestoneAllocationsUpdatedEvent.OutputObject
+    >;
+    MilestoneAllocationsUpdated: TypedContractEvent<
+      MilestoneAllocationsUpdatedEvent.InputTuple,
+      MilestoneAllocationsUpdatedEvent.OutputTuple,
+      MilestoneAllocationsUpdatedEvent.OutputObject
     >;
 
     "MilestoneReached(uint256,uint256,uint256)": TypedContractEvent<
