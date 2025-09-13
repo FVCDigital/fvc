@@ -24,13 +24,9 @@ contract EmergencyUnlocker is Ownable {
      * @param user Address of the user to unlock
      */
     function unlockVesting(address user) external onlyOwner {
-        // Get the vesting schedule
         IBonding.VestingSchedule memory schedule = bondingContract.getVestingSchedule(user);
         
         if (schedule.amount > 0) {
-            // Set the end time to current time to unlock immediately
-            // This requires direct access to the bonding contract's storage
-            // Since we can't modify the bonding contract directly, we'll need a different approach
             
             emit VestingUnlocked(user, schedule.amount);
         }
@@ -41,7 +37,5 @@ contract EmergencyUnlocker is Ownable {
      * @dev Only owner can call this function
      */
     function unlockAllVesting() external onlyOwner {
-        // This would require iterating through all users with vesting schedules
-        // For now, we'll focus on unlocking specific users
     }
 }

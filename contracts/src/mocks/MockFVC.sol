@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 contract MockFVC is ERC20, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     
-    // Bonding contract address for vesting checks
     address public bondingContract;
 
     constructor() ERC20("First Venture Capital", "FVC") {
@@ -32,6 +31,5 @@ contract MockFVC is ERC20, AccessControl {
         return super.transferFrom(from, to, amount);
     }
 
-    // FVC-specific events
     event BondingContractSet(address indexed bondingContract);
 } 
