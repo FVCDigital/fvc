@@ -133,10 +133,6 @@ contract OTCSwap is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUp
     // ============ EVENTS ============
 
     /// @notice Emitted when a purchase is completed
-    /// @param buyer Address of the buyer
-    /// @param usdcAmount Amount of USDC spent
-    /// @param fvcAmount Amount of FVC tokens purchased
-    /// @param vestingScheduleId ID of created vesting schedule
     event PurchaseCompleted(
         address indexed buyer, 
         uint256 usdcAmount, 
@@ -145,10 +141,6 @@ contract OTCSwap is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUp
     );
     
     /// @notice Emitted when sale configuration is updated
-    /// @param merkleRoot New Merkle root for allowlist
-    /// @param pricePerToken New price per token
-    /// @param totalCap New total cap
-    /// @param individualCap New individual cap
     event SaleConfigUpdated(
         bytes32 merkleRoot, 
         uint256 pricePerToken, 
@@ -157,20 +149,13 @@ contract OTCSwap is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUp
     );
     
     /// @notice Emitted when sale is started or stopped
-    /// @param isActive New sale status
-    /// @param startTime Sale start time
-    /// @param endTime Sale end time
     event SaleStatusChanged(bool isActive, uint256 startTime, uint256 endTime);
     
     /// @notice Emitted when contract addresses are updated
-    /// @param vestingVault New vesting vault address
-    /// @param kycRegistry New KYC registry address
-    /// @param treasury New treasury address
     event ContractAddressesUpdated(address vestingVault, address kycRegistry, address treasury);
 
     // ============ STORAGE GAP ============
     
-    /// @dev Storage gap for future upgrades
     uint256[35] private __gap;
 
     // ============ INITIALIZER ============
@@ -466,7 +451,7 @@ contract OTCSwap is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUp
      * @param merkleProof Merkle proof array
      */
     function _verifyMerkleProof(address user, bytes32[] calldata merkleProof) internal view {
-        bytes32 leaf = keccak256(abi.encodePacked(user));
+        bytes32 leaf = keccak256(abi.encode(user));
         if (!MerkleProof.verify(merkleProof, saleConfig.merkleRoot, leaf)) {
             revert OTCSwap__NotOnAllowlist();
         }
@@ -495,6 +480,7 @@ contract OTCSwap is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSUp
      * @return Amount of FVC tokens (18 decimals)
      */
     function _calculateFVCAmount(uint256 usdcAmount) internal view returns (uint256) {
+        if (saleConfig.pricePerToken == 0) revert OTCSwap__InvalidPrice();
         return (usdcAmount * 1e18) / saleConfig.pricePerToken;
     }
 
