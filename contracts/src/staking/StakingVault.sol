@@ -11,17 +11,9 @@ contract StakingVault {
     // ============ PLACEHOLDER NOTICE ============
     
     /// @notice This contract is a placeholder for Phase 2 implementation
-    /// @dev Will implement: lockup-based staking, tiered APY rewards, reward distribution
     
     // ============ FUTURE FEATURES ============
     
-    // Phase 2 will include:
-    // - Lockup-based staking (3, 6, 12 months)
-    // - Tiered APY rewards (5-12% based on lockup)
-    // - Reward distribution mechanism
-    // - Early unstaking penalties
-    // - Governance voting power based on staked amount
-    // - Integration with revenue distribution
     
     // ============ PLACEHOLDER FUNCTIONS ============
     
@@ -30,7 +22,6 @@ contract StakingVault {
      * @dev Will allow users to stake FVC tokens with lockup periods
      */
     function stake(uint256 amount, uint256 lockupPeriod) external pure {
-        // Placeholder - will be implemented in Phase 2
         revert("Phase 2 - Not yet implemented");
     }
     
@@ -39,7 +30,6 @@ contract StakingVault {
      * @dev Will allow users to unstake after lockup period
      */
     function unstake(uint256 stakeId) external pure {
-        // Placeholder - will be implemented in Phase 2
         revert("Phase 2 - Not yet implemented");
     }
     
@@ -48,7 +38,6 @@ contract StakingVault {
      * @dev Will allow users to claim accumulated rewards
      */
     function claimRewards() external pure {
-        // Placeholder - will be implemented in Phase 2
         revert("Phase 2 - Not yet implemented");
     }
 }
