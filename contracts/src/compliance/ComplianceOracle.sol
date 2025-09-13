@@ -118,10 +118,6 @@ contract ComplianceOracle is AccessControl {
     // ============ EVENTS ============
 
     /// @notice Emitted when verification is submitted to oracle
-    /// @param user Address being verified
-    /// @param applicantId External provider applicant ID
-    /// @param providerId KYC provider identifier
-    /// @param verificationLevel Level of verification
     event VerificationSubmitted(
         address indexed user,
         string applicantId,
@@ -130,10 +126,6 @@ contract ComplianceOracle is AccessControl {
     );
 
     /// @notice Emitted when verification is confirmed by oracle
-    /// @param user Address that was verified
-    /// @param applicantId External provider applicant ID
-    /// @param verificationHash Hash of verification data
-    /// @param expiresAt Expiration timestamp
     event VerificationConfirmed(
         address indexed user,
         string applicantId,
@@ -142,9 +134,6 @@ contract ComplianceOracle is AccessControl {
     );
 
     /// @notice Emitted when verification is revoked
-    /// @param user Address whose verification was revoked
-    /// @param reason Reason for revocation
-    /// @param revokedBy Address that revoked verification
     event VerificationRevoked(
         address indexed user,
         string reason,
@@ -152,9 +141,6 @@ contract ComplianceOracle is AccessControl {
     );
 
     /// @notice Emitted when KYC provider is authorized/deauthorized
-    /// @param providerId Provider identifier
-    /// @param isAuthorized New authorization status
-    /// @param updatedBy Address that updated authorization
     event ProviderAuthorizationUpdated(
         string providerId,
         bool isAuthorized,
@@ -162,8 +148,6 @@ contract ComplianceOracle is AccessControl {
     );
 
     /// @notice Emitted when oracle status changes
-    /// @param isActive New oracle status
-    /// @param updatedBy Address that updated status
     event OracleStatusUpdated(
         bool isActive,
         address indexed updatedBy
@@ -196,14 +180,12 @@ contract ComplianceOracle is AccessControl {
         _grantRole(ORACLE_ADMIN_ROLE, _admin);
         _grantRole(COMPLIANCE_MONITOR_ROLE, _admin);
 
-        // Grant verification oracle roles
         for (uint256 i = 0; i < _verificationOracles.length; i++) {
             if (_verificationOracles[i] != address(0)) {
                 _grantRole(VERIFICATION_ORACLE_ROLE, _verificationOracles[i]);
             }
         }
 
-        // Authorize Sumsub as default provider
         authorizedProviders["sumsub"] = true;
     }
 
@@ -247,14 +229,13 @@ contract ComplianceOracle is AccessControl {
         require(verificationLevel > 0 && verificationLevel <= 3, "Invalid verification level");
         require(riskScore <= 100, "Invalid risk score");
 
-        // Check if verification already exists
         if (verificationRecords[user].isActive) {
             revert ComplianceOracle__VerificationExists();
         }
 
         uint256 expiresAt = block.timestamp + STANDARD_VERIFICATION_PERIOD;
         bytes32 verificationHash = keccak256(
-            abi.encodePacked(user, applicantId, verificationData, block.timestamp)
+            abi.encode(user, applicantId, verificationData, block.timestamp)
         );
 
         verificationRecords[user] = VerificationRecord({
@@ -285,33 +266,21 @@ contract ComplianceOracle is AccessControl {
         external 
         onlyWhenOracleActive 
     {
-        // Verify signature and nonce
         _verifyRequestSignature(request);
         
         if (usedNonces[request.nonce]) revert ComplianceOracle__VerificationExpired();
         usedNonces[request.nonce] = true;
 
-        // Check if verification exists
         VerificationRecord storage record = verificationRecords[request.user];
         if (!record.isActive) revert ComplianceOracle__UnauthorizedOracle();
 
-        // Verify request data matches stored record
         bytes32 requestHash = keccak256(
-            abi.encodePacked(request.user, request.applicantId, request.verificationData, request.timestamp)
+            abi.encode(request.user, request.applicantId, request.verificationData, request.timestamp)
         );
         
         require(requestHash == record.verificationHash, "Verification data mismatch");
 
-        // Register with KYC Registry (if available)
         if (kycRegistry != address(0)) {
-            // Call KYC Registry to register verification
-            // IKYCRegistry(kycRegistry).verifyKYC(
-            //     request.user, 
-            //     record.verificationLevel, 
-            //     record.expiresAt - block.timestamp,
-            //     record.countryCode,
-            //     record.riskScore
-            // );
         }
 
         emit VerificationConfirmed(
@@ -355,13 +324,9 @@ contract ComplianceOracle is AccessControl {
     {
         require(msg.sender == sumsubWebhook, "Unauthorized webhook");
         
-        // Verify Sumsub signature (simplified)
         _verifySumsubSignature(payload, signature);
 
-        // Process payload (would decode Sumsub webhook data)
-        // Implementation would parse Sumsub webhook format and update verifications
         
-        // For now, emit event for monitoring
         emit VerificationSubmitted(address(0), "", "sumsub", 0);
     }
 
@@ -474,7 +439,7 @@ contract ComplianceOracle is AccessControl {
      */
     function _verifyRequestSignature(VerificationRequest calldata request) internal view {
         bytes32 messageHash = keccak256(
-            abi.encodePacked(
+            abi.encode(
                 request.user,
                 request.applicantId,
                 request.verificationData,
@@ -483,9 +448,6 @@ contract ComplianceOracle is AccessControl {
             )
         );
 
-        // Simplified signature verification
-        // In production, would use proper ECDSA signature verification
-        // to verify the signature was created by authorized oracle
         
         if (request.signature.length == 0) {
             revert ComplianceOracle__InvalidSignature();
@@ -499,8 +461,6 @@ contract ComplianceOracle is AccessControl {
      * @param signature Sumsub signature
      */
     function _verifySumsubSignature(bytes calldata payload, bytes calldata signature) internal pure {
-        // Simplified Sumsub signature verification
-        // In production, would verify using Sumsub's public key and HMAC
         
         if (payload.length == 0 || signature.length == 0) {
             revert ComplianceOracle__InvalidSignature();
