@@ -41,21 +41,17 @@ library VestingMath {
         if (endTime <= cliffTime) revert VestingMath__ZeroVestingDuration();
         if (cliffTime < startTime) revert VestingMath__CliffExceedsDuration();
         
-        // Before cliff: nothing vested
         if (currentTime < cliffTime) {
             return 0;
         }
         
-        // After vesting period: fully vested
         if (currentTime >= endTime) {
             return totalAmount;
         }
         
-        // During vesting period: linear interpolation
         uint256 vestingDuration = endTime - cliffTime;
         uint256 timeVested = currentTime - cliffTime;
         
-        // Use precise calculation to avoid rounding errors
         return (totalAmount * timeVested) / vestingDuration;
     }
 
@@ -282,22 +278,18 @@ library VestingMath {
         if (totalAmount == 0) revert VestingMath__ZeroAmount();
         if (endTime <= startTime) revert VestingMath__ZeroVestingDuration();
         
-        // Before vesting starts
         if (currentTime <= startTime) {
             return 0;
         }
         
-        // After vesting ends
         if (currentTime >= endTime) {
             return totalAmount;
         }
         
-        // Calculate base vesting
         uint256 vestingDuration = endTime - startTime;
         uint256 timeVested = currentTime - startTime;
         uint256 baseVested = (totalAmount * timeVested) / vestingDuration;
         
-        // Apply acceleration multiplier (capped at total amount)
         uint256 accelerated = (baseVested * accelerationMultiplier) / 10000;
         
         return accelerated > totalAmount ? totalAmount : accelerated;
