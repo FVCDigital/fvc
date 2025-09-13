@@ -3,8 +3,8 @@ pragma solidity ^0.8.24;
 
 /**
  * @title IOTCSwap
- * @notice Interface for FVC Protocol OTC swap functionality
- * @dev Defines the OTC swap interface for private token sales
+ * @notice Interface for FVC OTC swap functionality
+ * @dev OTC swap interface for private token sales
  */
 interface IOTCSwap {
     /**
@@ -60,7 +60,7 @@ interface IOTCSwap {
 
     /**
      * @notice Purchase FVC tokens with signed order
-     * @dev Alternative purchase method using cryptographic signatures
+     * @dev Purchase using cryptographic signatures
      * @param order Purchase order details
      * @param signature Admin signature approving the order
      */
