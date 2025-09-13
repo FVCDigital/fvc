@@ -45,13 +45,9 @@ contract FVCTimelock is TimelockController {
     // ============ EVENTS ============
 
     /// @notice Emitted when operation delay is set for a function selector
-    /// @param selector Function selector
-    /// @param delay Required delay in seconds
     event OperationDelaySet(bytes4 indexed selector, uint256 delay);
     
     /// @notice Emitted when custom delay is set for specific operation
-    /// @param operationId Operation identifier
-    /// @param delay Custom delay in seconds
     event CustomDelaySet(bytes32 indexed operationId, uint256 delay);
 
     // ============ CONSTRUCTOR ============

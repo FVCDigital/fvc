@@ -85,10 +85,6 @@ contract KYCRegistry is AccessControl {
     // ============ EVENTS ============
 
     /// @notice Emitted when address is KYC verified
-    /// @param user Address that was verified
-    /// @param verificationLevel Level of verification
-    /// @param expiresAt Expiration timestamp
-    /// @param verifiedBy Address that performed verification
     event KYCVerified(
         address indexed user,
         uint8 verificationLevel,
@@ -97,9 +93,6 @@ contract KYCRegistry is AccessControl {
     );
 
     /// @notice Emitted when KYC verification is revoked
-    /// @param user Address whose verification was revoked
-    /// @param revokedBy Address that revoked verification
-    /// @param reason Human-readable reason for revocation
     event KYCRevoked(
         address indexed user,
         address indexed revokedBy,
@@ -107,9 +100,6 @@ contract KYCRegistry is AccessControl {
     );
 
     /// @notice Emitted when address is blacklisted
-    /// @param user Address that was blacklisted
-    /// @param blacklistedBy Address that performed blacklisting
-    /// @param reason Reason for blacklisting
     event AddressBlacklisted(
         address indexed user,
         address indexed blacklistedBy,
@@ -117,9 +107,6 @@ contract KYCRegistry is AccessControl {
     );
 
     /// @notice Emitted when country restriction is updated
-    /// @param countryCode ISO country code
-    /// @param isRestricted New restriction status
-    /// @param updatedBy Address that updated restriction
     event CountryRestrictionUpdated(
         bytes2 indexed countryCode,
         bool isRestricted,
@@ -127,8 +114,6 @@ contract KYCRegistry is AccessControl {
     );
 
     /// @notice Emitted when KYC enforcement status changes
-    /// @param isActive New enforcement status
-    /// @param updatedBy Address that changed status
     event KYCEnforcementUpdated(
         bool isActive,
         address indexed updatedBy

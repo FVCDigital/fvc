@@ -56,14 +56,10 @@ contract FVCGovernor is
     // ============ EVENTS ============
 
     /// @notice Emitted when governance parameters are updated
-    /// @param votingDelay New voting delay in blocks
-    /// @param votingPeriod New voting period in blocks
-    /// @param proposalThreshold New proposal threshold
     event GovernanceParametersUpdated(uint256 votingDelay, uint256 votingPeriod, uint256 proposalThreshold);
 
     // ============ STORAGE GAP ============
     
-    /// @dev Storage gap for future upgrades
     uint256[45] private __gap;
 
     // ============ INITIALISER ============
