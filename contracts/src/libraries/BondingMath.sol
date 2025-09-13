@@ -26,8 +26,6 @@ library BondingMath {
      */
     function calculateFVCAmount(uint256 usdcAmount, uint256 discount) internal pure returns (uint256 fvcAmount) {
         if (discount > 100) revert BondingMath__DiscountExceeds100();
-        // Use discount-based pricing: FVC = USDC * (1 + discount/100)
-        // Convert from USDC (6 decimals) to FVC (18 decimals) by multiplying by 10^12
         fvcAmount = usdcAmount * (100 + discount) / 100 * 1e12;
         return fvcAmount;
     }
@@ -42,8 +40,6 @@ library BondingMath {
      */
     function calculateFVCAmountWithPremium(uint256 usdcAmount, uint256 premium) internal pure returns (uint256 fvcAmount) {
         if (premium > 100) revert BondingMath__PremiumExceeds100();
-        // Formula: FVC = USDC / (1 + premium/100)
-        // This ensures 1 USDC = 1 FVC when premium = 0
         fvcAmount = usdcAmount * 100 / (100 + premium);
         return fvcAmount;
     }
@@ -72,7 +68,6 @@ library BondingMath {
             return finalPremium;
         }
         
-        // Use higher precision to avoid integer division loss
         uint256 progress = (totalBonded * 10000) / epochCap; // 10000 = 100%
         uint256 premiumRange = finalPremium - initialPremium;
         currentPremium = initialPremium + (progress * premiumRange / 10000);
@@ -104,7 +99,6 @@ library BondingMath {
             return finalDiscount;
         }
         
-        // Use higher precision to avoid integer division loss
         uint256 progress = (totalBonded * 10000) / epochCap; // 10000 = 100%
         uint256 discountRange = initialDiscount - finalDiscount;
         currentDiscount = initialDiscount - (progress * discountRange / 10000);
@@ -158,8 +152,6 @@ library BondingMath {
      */
     function calculateUSDCAmount(uint256 fvcAmount, uint256 discount) internal pure returns (uint256 usdcAmount) {
         if (discount > 100) revert BondingMath__DiscountExceeds100();
-        // Reverse calculation: USDC = FVC / (1 + discount/100)
-        // Convert from FVC (18 decimals) to USDC (6 decimals) by dividing by 10^12
         usdcAmount = fvcAmount / (100 + discount) * 100 / 1e12;
         return usdcAmount;
     }
