@@ -108,13 +108,6 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
     // ============ EVENTS ============
 
     /// @notice Emitted when a new vesting schedule is created
-    /// @param scheduleId Unique identifier for the vesting schedule
-    /// @param beneficiary Address that will receive the tokens
-    /// @param totalAmount Total amount of tokens in the schedule
-    /// @param startTime Vesting start timestamp
-    /// @param cliffTime Cliff end timestamp
-    /// @param endTime Vesting end timestamp
-    /// @param isRevocable Whether the schedule can be revoked
     event VestingScheduleCreated(
         uint256 indexed scheduleId,
         address indexed beneficiary,
@@ -126,10 +119,6 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
     );
 
     /// @notice Emitted when tokens are claimed from vesting
-    /// @param scheduleId Vesting schedule identifier
-    /// @param beneficiary Address claiming the tokens
-    /// @param amount Amount of tokens claimed
-    /// @param remainingAmount Amount still vesting
     event TokensClaimed(
         uint256 indexed scheduleId,
         address indexed beneficiary,
@@ -138,9 +127,6 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
     );
 
     /// @notice Emitted when a vesting schedule is revoked
-    /// @param scheduleId Vesting schedule identifier
-    /// @param revoker Address that revoked the schedule
-    /// @param returnedAmount Amount returned to revoker
     event VestingRevoked(
         uint256 indexed scheduleId,
         address indexed revoker,
@@ -148,9 +134,6 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
     );
 
     /// @notice Emitted when beneficiary is changed
-    /// @param scheduleId Vesting schedule identifier
-    /// @param oldBeneficiary Previous beneficiary
-    /// @param newBeneficiary New beneficiary
     event BeneficiaryChanged(
         uint256 indexed scheduleId,
         address indexed oldBeneficiary,
@@ -338,7 +321,7 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
     function claimMultipleSchedules(uint256[] calldata scheduleIds) external nonReentrant {
         uint256 totalClaimable = 0;
         
-        for (uint256 i = 0; i < scheduleIds.length; i++) {
+        for (uint256 i = 0; i < scheduleIds.length; ++i) {
             uint256 scheduleId = scheduleIds[i];
             VestingSchedule storage schedule = vestingSchedules[scheduleId];
             
@@ -483,7 +466,7 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
         uint256[] memory scheduleIds = beneficiarySchedules[beneficiary];
         uint256 totalClaimable = 0;
 
-        for (uint256 i = 0; i < scheduleIds.length; i++) {
+        for (uint256 i = 0; i < scheduleIds.length; ++i) {
             uint256 scheduleId = scheduleIds[i];
             VestingSchedule storage schedule = vestingSchedules[scheduleId];
             
@@ -578,6 +561,8 @@ contract VestingVault is ERC1155, AccessControl, ReentrancyGuard {
         }
         
         uint256 vestingDuration = schedule.endTime - schedule.cliffTime;
+        if (vestingDuration == 0) return schedule.totalAmount; // Instant vesting if no duration
+        
         uint256 timeVested = block.timestamp - schedule.cliffTime;
         
         return (schedule.totalAmount * timeVested) / vestingDuration;
