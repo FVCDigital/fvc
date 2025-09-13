@@ -3,8 +3,8 @@ pragma solidity ^0.8.24;
 
 /**
  * @title IVestingVault
- * @notice Interface for FVC Protocol vesting vault functionality
- * @dev Defines the vesting vault interface for token custody and vesting schedules
+ * @notice Interface for FVC vesting vault functionality
+ * @dev Vesting vault interface for token custody and vesting schedules
  */
 interface IVestingVault {
     /**

@@ -5,8 +5,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title IBonding
- * @notice Interface for FVC Protocol milestone-based private sale bonding contract
- * @dev Defines the core bonding functionality and data structures
+ * @notice Interface for FVC milestone-based bonding contract
+ * @dev Bonding functionality and data structures
  */
 interface IBonding {
     // ============ DATA STRUCTURES ============
@@ -123,6 +123,14 @@ interface IBonding {
      * @dev Only bonding manager can end the sale
      */
     function endPrivateSale() external;
+
+    /**
+     * @notice Allocate FVC tokens to a specific milestone
+     * @dev Only bonding manager can allocate tokens
+     * @param milestoneIndex Index of the milestone
+     * @param amount Amount of FVC tokens to allocate
+     */
+    function allocateFVCToMilestone(uint256 milestoneIndex, uint256 amount) external;
 
     // ============ VIEW FUNCTIONS ============
     
