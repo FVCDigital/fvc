@@ -2,6 +2,7 @@ pragma solidity 0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "../interfaces/IBonding.sol";
 
 /**
  * @title FVC
@@ -24,27 +25,20 @@ contract FVC is ERC20, AccessControl {
     // ============ STATE VARIABLES ============
     
     /// @notice Role identifier for minting FVC tokens
-    /// @dev Only addresses with this role can mint new tokens
     bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");
     
     /// @notice Bonding contract address for vesting checks
-    /// @dev Used to verify token transfers against vesting schedules
     address public bondingContract;
 
     // ============ EVENTS ============
 
     /// @notice Emitted when bonding contract is set
-    /// @param bondingContract Address of the bonding contract
     event BondingContractSet(address indexed bondingContract);
     
     /// @notice Emitted when tokens are minted
-    /// @param to Address receiving the tokens
-    /// @param amount Amount minted
     event TokensMinted(address indexed to, uint256 amount);
     
     /// @notice Emitted when tokens are burned
-    /// @param from Address tokens are burned from
-    /// @param amount Amount burned
     event TokensBurned(address indexed from, uint256 amount);
 
     // ============ CONSTRUCTOR ============
@@ -150,11 +144,11 @@ contract FVC is ERC20, AccessControl {
     function _checkVesting(address from) internal view {
         address _bondingContract = bondingContract; // Cache storage variable
         if (_bondingContract != address(0)) {
-            (bool success, bytes memory data) = _bondingContract.staticcall(
-                abi.encodeWithSignature("isLocked(address)", from)
-            );
-            if (success && abi.decode(data, (bool))) {
-                revert TokensLockedInVesting();
+            try IBonding(_bondingContract).isLocked(from) returns (bool isLocked) {
+                if (isLocked) {
+                    revert TokensLockedInVesting();
+                }
+            } catch {
             }
         }
     }
