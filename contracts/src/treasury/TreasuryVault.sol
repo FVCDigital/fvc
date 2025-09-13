@@ -5,6 +5,7 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 
 /**
  * @title TreasuryVault
@@ -156,12 +157,6 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
     // ============ EVENTS ============
 
     /// @notice Emitted when a new proposal is created
-    /// @param proposalId Unique proposal identifier
-    /// @param proposer Address that created the proposal
-    /// @param target Target address for transfer
-    /// @param token Token address
-    /// @param amount Transfer amount
-    /// @param description Proposal description
     event ProposalCreated(
         uint256 indexed proposalId,
         address indexed proposer,
@@ -172,9 +167,6 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
     );
 
     /// @notice Emitted when a proposal receives a vote
-    /// @param proposalId Proposal identifier
-    /// @param voter Address that voted
-    /// @param approved Whether vote was approval or rejection
     event ProposalVoted(
         uint256 indexed proposalId,
         address indexed voter,
@@ -182,10 +174,6 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
     );
 
     /// @notice Emitted when a proposal is executed
-    /// @param proposalId Proposal identifier
-    /// @param executor Address that executed the proposal
-    /// @param target Target address
-    /// @param amount Transfer amount
     event ProposalExecuted(
         uint256 indexed proposalId,
         address indexed executor,
@@ -194,9 +182,6 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
     );
 
     /// @notice Emitted when funds are received
-    /// @param from Source address
-    /// @param token Token address
-    /// @param amount Amount received
     event FundsReceived(
         address indexed from,
         address indexed token,
@@ -204,10 +189,6 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
     );
 
     /// @notice Emitted when distribution rules are updated
-    /// @param stakingPercentage New staking percentage
-    /// @param treasuryPercentage New treasury percentage
-    /// @param operationsPercentage New operations percentage
-    /// @param developmentPercentage New development percentage
     event DistributionRulesUpdated(
         uint256 stakingPercentage,
         uint256 treasuryPercentage,
@@ -216,10 +197,6 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
     );
 
     /// @notice Emitted when emergency withdrawal occurs
-    /// @param token Token address
-    /// @param amount Amount withdrawn
-    /// @param destination Destination address
-    /// @param executor Address that executed withdrawal
     event EmergencyWithdrawal(
         address indexed token,
         uint256 amount,
@@ -229,7 +206,6 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
 
     // ============ STORAGE GAP ============
     
-    /// @dev Storage gap for future upgrades
     uint256[35] private __gap;
 
     // ============ INITIALIZER ============
@@ -390,16 +366,15 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
             revert TreasuryVault__ExceedsTransferLimit();
         }
 
-        proposal.isExecuted = true;
-        proposal.executedAt = block.timestamp;
-        dailyTransferAmounts[today] += proposal.amount;
-
         if (proposal.token == address(0)) {
-            (bool success, ) = proposal.target.call{value: proposal.amount}("");
-            require(success, "ETH transfer failed");
+            _transferETH(proposal.target, proposal.amount);
         } else {
             IERC20(proposal.token).safeTransfer(proposal.target, proposal.amount);
         }
+
+        proposal.isExecuted = true;
+        proposal.executedAt = block.timestamp;
+        dailyTransferAmounts[today] += proposal.amount;
 
         emit ProposalExecuted(proposalId, msg.sender, proposal.target, proposal.amount);
     }
@@ -671,4 +646,18 @@ contract TreasuryVault is AccessControlUpgradeable, ReentrancyGuardUpgradeable, 
         override
         onlyRole(TREASURY_ADMIN_ROLE)
     {}
+
+    /**
+     * @notice Internal function to safely transfer ETH
+     * @dev Uses Address.sendValue to prevent reentrancy and handle failure properly
+     * @param recipient Address to receive ETH
+     * @param amount Amount of ETH to transfer
+     */
+    function _transferETH(address recipient, uint256 amount) internal {
+        if (recipient == address(0)) revert TreasuryVault__ZeroAddress();
+        if (amount == 0) revert TreasuryVault__ZeroAmount();
+        if (address(this).balance < amount) revert TreasuryVault__InsufficientBalance();
+        
+        Address.sendValue(payable(recipient), amount);
+    }
 }
