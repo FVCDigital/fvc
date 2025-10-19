@@ -40,3 +40,4 @@ contracts/scripts/*.json
 contracts/src/sale/Test*.sol
 contracts/src/sale/Custom*.sol
 contracts/scripts_backup_*/
+.env.deploy
