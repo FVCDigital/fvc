@@ -230,13 +230,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IBonding__factory>;
     getContractFactory(
+      name: "IComplianceOracle",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IComplianceOracle__factory>;
+    getContractFactory(
       name: "IFVC",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IFVC__factory>;
     getContractFactory(
+      name: "IKYCRegistry",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IKYCRegistry__factory>;
+    getContractFactory(
       name: "IOTCSwap",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IOTCSwap__factory>;
+    getContractFactory(
+      name: "IPausable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IPausable__factory>;
     getContractFactory(
       name: "IVestingVault",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -274,9 +286,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SaleAdmin__factory>;
     getContractFactory(
+      name: "SimpleSwap",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SimpleSwap__factory>;
+    getContractFactory(
       name: "TestFVCVesting",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TestFVCVesting__factory>;
+    getContractFactory(
+      name: "TokenSaleAudited",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TokenSaleAudited__factory>;
+    getContractFactory(
+      name: "TokenSaleMinimal",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TokenSaleMinimal__factory>;
     getContractFactory(
       name: "VestingVault",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -286,6 +310,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.RewardsDistributor__factory>;
     getContractFactory(
+      name: "StakingRewards",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.StakingRewards__factory>;
+    getContractFactory(
       name: "StakingVault",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.StakingVault__factory>;
@@ -294,9 +322,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.EmergencyUnlocker__factory>;
     getContractFactory(
+      name: "FVCFaucet",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.FVCFaucet__factory>;
+    getContractFactory(
       name: "FVCUnlocked",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FVCUnlocked__factory>;
+    getContractFactory(
+      name: "IStakingRewards",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IStakingRewards__factory>;
+    getContractFactory(
+      name: "MockYieldDistributor",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MockYieldDistributor__factory>;
     getContractFactory(
       name: "TreasuryVault",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -573,15 +613,30 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IBonding>;
     getContractAt(
+      name: "IComplianceOracle",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IComplianceOracle>;
+    getContractAt(
       name: "IFVC",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IFVC>;
     getContractAt(
+      name: "IKYCRegistry",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IKYCRegistry>;
+    getContractAt(
       name: "IOTCSwap",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.IOTCSwap>;
+    getContractAt(
+      name: "IPausable",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IPausable>;
     getContractAt(
       name: "IVestingVault",
       address: string | ethers.Addressable,
@@ -628,10 +683,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.SaleAdmin>;
     getContractAt(
+      name: "SimpleSwap",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SimpleSwap>;
+    getContractAt(
       name: "TestFVCVesting",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.TestFVCVesting>;
+    getContractAt(
+      name: "TokenSaleAudited",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TokenSaleAudited>;
+    getContractAt(
+      name: "TokenSaleMinimal",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TokenSaleMinimal>;
     getContractAt(
       name: "VestingVault",
       address: string | ethers.Addressable,
@@ -643,6 +713,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.RewardsDistributor>;
     getContractAt(
+      name: "StakingRewards",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.StakingRewards>;
+    getContractAt(
       name: "StakingVault",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -653,10 +728,25 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.EmergencyUnlocker>;
     getContractAt(
+      name: "FVCFaucet",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.FVCFaucet>;
+    getContractAt(
       name: "FVCUnlocked",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.FVCUnlocked>;
+    getContractAt(
+      name: "IStakingRewards",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IStakingRewards>;
+    getContractAt(
+      name: "MockYieldDistributor",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MockYieldDistributor>;
     getContractAt(
       name: "TreasuryVault",
       address: string | ethers.Addressable,
@@ -880,13 +970,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IBonding>;
     deployContract(
+      name: "IComplianceOracle",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IComplianceOracle>;
+    deployContract(
       name: "IFVC",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IFVC>;
     deployContract(
+      name: "IKYCRegistry",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IKYCRegistry>;
+    deployContract(
       name: "IOTCSwap",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IOTCSwap>;
+    deployContract(
+      name: "IPausable",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPausable>;
     deployContract(
       name: "IVestingVault",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -924,9 +1026,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SaleAdmin>;
     deployContract(
+      name: "SimpleSwap",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SimpleSwap>;
+    deployContract(
       name: "TestFVCVesting",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TestFVCVesting>;
+    deployContract(
+      name: "TokenSaleAudited",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TokenSaleAudited>;
+    deployContract(
+      name: "TokenSaleMinimal",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TokenSaleMinimal>;
     deployContract(
       name: "VestingVault",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -936,6 +1050,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.RewardsDistributor>;
     deployContract(
+      name: "StakingRewards",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.StakingRewards>;
+    deployContract(
       name: "StakingVault",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.StakingVault>;
@@ -944,9 +1062,21 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.EmergencyUnlocker>;
     deployContract(
+      name: "FVCFaucet",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.FVCFaucet>;
+    deployContract(
       name: "FVCUnlocked",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.FVCUnlocked>;
+    deployContract(
+      name: "IStakingRewards",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IStakingRewards>;
+    deployContract(
+      name: "MockYieldDistributor",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockYieldDistributor>;
     deployContract(
       name: "TreasuryVault",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -1223,15 +1353,30 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IBonding>;
     deployContract(
+      name: "IComplianceOracle",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IComplianceOracle>;
+    deployContract(
       name: "IFVC",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IFVC>;
     deployContract(
+      name: "IKYCRegistry",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IKYCRegistry>;
+    deployContract(
       name: "IOTCSwap",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.IOTCSwap>;
+    deployContract(
+      name: "IPausable",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IPausable>;
     deployContract(
       name: "IVestingVault",
       args: any[],
@@ -1278,10 +1423,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SaleAdmin>;
     deployContract(
+      name: "SimpleSwap",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SimpleSwap>;
+    deployContract(
       name: "TestFVCVesting",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TestFVCVesting>;
+    deployContract(
+      name: "TokenSaleAudited",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TokenSaleAudited>;
+    deployContract(
+      name: "TokenSaleMinimal",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.TokenSaleMinimal>;
     deployContract(
       name: "VestingVault",
       args: any[],
@@ -1293,6 +1453,11 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.RewardsDistributor>;
     deployContract(
+      name: "StakingRewards",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.StakingRewards>;
+    deployContract(
       name: "StakingVault",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -1303,10 +1468,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.EmergencyUnlocker>;
     deployContract(
+      name: "FVCFaucet",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.FVCFaucet>;
+    deployContract(
       name: "FVCUnlocked",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.FVCUnlocked>;
+    deployContract(
+      name: "IStakingRewards",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IStakingRewards>;
+    deployContract(
+      name: "MockYieldDistributor",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockYieldDistributor>;
     deployContract(
       name: "TreasuryVault",
       args: any[],

@@ -27,10 +27,10 @@ export interface FVCInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "DEFAULT_ADMIN_ROLE"
+      | "MAX_SUPPLY"
       | "allowance"
       | "approve"
       | "balanceOf"
-      | "bondingContract"
       | "decimals"
       | "decreaseAllowance"
       | "getMinterRole"
@@ -42,7 +42,6 @@ export interface FVCInterface extends Interface {
       | "name"
       | "renounceRole"
       | "revokeRole"
-      | "setBondingContract"
       | "supportsInterface"
       | "symbol"
       | "totalSupply"
@@ -53,17 +52,18 @@ export interface FVCInterface extends Interface {
   getEvent(
     nameOrSignatureOrTopic:
       | "Approval"
-      | "BondingContractSet"
       | "RoleAdminChanged"
       | "RoleGranted"
       | "RoleRevoked"
-      | "TokensBurned"
-      | "TokensMinted"
       | "Transfer"
   ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "DEFAULT_ADMIN_ROLE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MAX_SUPPLY",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -77,10 +77,6 @@ export interface FVCInterface extends Interface {
   encodeFunctionData(
     functionFragment: "balanceOf",
     values: [AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "bondingContract",
-    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "decimals", values?: undefined): string;
   encodeFunctionData(
@@ -121,10 +117,6 @@ export interface FVCInterface extends Interface {
     values: [BytesLike, AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "setBondingContract",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [BytesLike]
   ): string;
@@ -146,13 +138,10 @@ export interface FVCInterface extends Interface {
     functionFragment: "DEFAULT_ADMIN_ROLE",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "MAX_SUPPLY", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "allowance", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "balanceOf", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "bondingContract",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "decimals", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "decreaseAllowance",
@@ -180,10 +169,6 @@ export interface FVCInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "setBondingContract",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
   ): Result;
@@ -210,18 +195,6 @@ export namespace ApprovalEvent {
     owner: string;
     spender: string;
     value: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace BondingContractSetEvent {
-  export type InputTuple = [bondingContract: AddressLike];
-  export type OutputTuple = [bondingContract: string];
-  export interface OutputObject {
-    bondingContract: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -280,32 +253,6 @@ export namespace RoleRevokedEvent {
     role: string;
     account: string;
     sender: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace TokensBurnedEvent {
-  export type InputTuple = [from: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [from: string, amount: bigint];
-  export interface OutputObject {
-    from: string;
-    amount: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace TokensMintedEvent {
-  export type InputTuple = [to: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [to: string, amount: bigint];
-  export interface OutputObject {
-    to: string;
-    amount: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -376,6 +323,8 @@ export interface FVC extends BaseContract {
 
   DEFAULT_ADMIN_ROLE: TypedContractMethod<[], [string], "view">;
 
+  MAX_SUPPLY: TypedContractMethod<[], [bigint], "view">;
+
   allowance: TypedContractMethod<
     [owner: AddressLike, spender: AddressLike],
     [bigint],
@@ -389,8 +338,6 @@ export interface FVC extends BaseContract {
   >;
 
   balanceOf: TypedContractMethod<[account: AddressLike], [bigint], "view">;
-
-  bondingContract: TypedContractMethod<[], [string], "view">;
 
   decimals: TypedContractMethod<[], [bigint], "view">;
 
@@ -442,12 +389,6 @@ export interface FVC extends BaseContract {
     "nonpayable"
   >;
 
-  setBondingContract: TypedContractMethod<
-    [_bondingContract: AddressLike],
-    [void],
-    "nonpayable"
-  >;
-
   supportsInterface: TypedContractMethod<
     [interfaceId: BytesLike],
     [boolean],
@@ -478,6 +419,9 @@ export interface FVC extends BaseContract {
     nameOrSignature: "DEFAULT_ADMIN_ROLE"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "MAX_SUPPLY"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "allowance"
   ): TypedContractMethod<
     [owner: AddressLike, spender: AddressLike],
@@ -494,9 +438,6 @@ export interface FVC extends BaseContract {
   getFunction(
     nameOrSignature: "balanceOf"
   ): TypedContractMethod<[account: AddressLike], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "bondingContract"
-  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "decimals"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -559,9 +500,6 @@ export interface FVC extends BaseContract {
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "setBondingContract"
-  ): TypedContractMethod<[_bondingContract: AddressLike], [void], "nonpayable">;
-  getFunction(
     nameOrSignature: "supportsInterface"
   ): TypedContractMethod<[interfaceId: BytesLike], [boolean], "view">;
   getFunction(
@@ -593,13 +531,6 @@ export interface FVC extends BaseContract {
     ApprovalEvent.OutputObject
   >;
   getEvent(
-    key: "BondingContractSet"
-  ): TypedContractEvent<
-    BondingContractSetEvent.InputTuple,
-    BondingContractSetEvent.OutputTuple,
-    BondingContractSetEvent.OutputObject
-  >;
-  getEvent(
     key: "RoleAdminChanged"
   ): TypedContractEvent<
     RoleAdminChangedEvent.InputTuple,
@@ -621,20 +552,6 @@ export interface FVC extends BaseContract {
     RoleRevokedEvent.OutputObject
   >;
   getEvent(
-    key: "TokensBurned"
-  ): TypedContractEvent<
-    TokensBurnedEvent.InputTuple,
-    TokensBurnedEvent.OutputTuple,
-    TokensBurnedEvent.OutputObject
-  >;
-  getEvent(
-    key: "TokensMinted"
-  ): TypedContractEvent<
-    TokensMintedEvent.InputTuple,
-    TokensMintedEvent.OutputTuple,
-    TokensMintedEvent.OutputObject
-  >;
-  getEvent(
     key: "Transfer"
   ): TypedContractEvent<
     TransferEvent.InputTuple,
@@ -652,17 +569,6 @@ export interface FVC extends BaseContract {
       ApprovalEvent.InputTuple,
       ApprovalEvent.OutputTuple,
       ApprovalEvent.OutputObject
-    >;
-
-    "BondingContractSet(address)": TypedContractEvent<
-      BondingContractSetEvent.InputTuple,
-      BondingContractSetEvent.OutputTuple,
-      BondingContractSetEvent.OutputObject
-    >;
-    BondingContractSet: TypedContractEvent<
-      BondingContractSetEvent.InputTuple,
-      BondingContractSetEvent.OutputTuple,
-      BondingContractSetEvent.OutputObject
     >;
 
     "RoleAdminChanged(bytes32,bytes32,bytes32)": TypedContractEvent<
@@ -696,28 +602,6 @@ export interface FVC extends BaseContract {
       RoleRevokedEvent.InputTuple,
       RoleRevokedEvent.OutputTuple,
       RoleRevokedEvent.OutputObject
-    >;
-
-    "TokensBurned(address,uint256)": TypedContractEvent<
-      TokensBurnedEvent.InputTuple,
-      TokensBurnedEvent.OutputTuple,
-      TokensBurnedEvent.OutputObject
-    >;
-    TokensBurned: TypedContractEvent<
-      TokensBurnedEvent.InputTuple,
-      TokensBurnedEvent.OutputTuple,
-      TokensBurnedEvent.OutputObject
-    >;
-
-    "TokensMinted(address,uint256)": TypedContractEvent<
-      TokensMintedEvent.InputTuple,
-      TokensMintedEvent.OutputTuple,
-      TokensMintedEvent.OutputObject
-    >;
-    TokensMinted: TypedContractEvent<
-      TokensMintedEvent.InputTuple,
-      TokensMintedEvent.OutputTuple,
-      TokensMintedEvent.OutputObject
     >;
 
     "Transfer(address,address,uint256)": TypedContractEvent<

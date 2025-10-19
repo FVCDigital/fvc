@@ -3,6 +3,9 @@
 /* eslint-disable */
 export { AggregatorV3Interface__factory } from "./AggregatorV3Interface__factory";
 export { IBonding__factory } from "./IBonding__factory";
+export { IComplianceOracle__factory } from "./IComplianceOracle__factory";
 export { IFVC__factory } from "./IFVC__factory";
+export { IKYCRegistry__factory } from "./IKYCRegistry__factory";
 export { IOTCSwap__factory } from "./IOTCSwap__factory";
+export { IPausable__factory } from "./IPausable__factory";
 export { IVestingVault__factory } from "./IVestingVault__factory";

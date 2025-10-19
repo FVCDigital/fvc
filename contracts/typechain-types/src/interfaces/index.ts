@@ -3,6 +3,9 @@
 /* eslint-disable */
 export type { AggregatorV3Interface } from "./AggregatorV3Interface";
 export type { IBonding } from "./IBonding";
+export type { IComplianceOracle } from "./IComplianceOracle";
 export type { IFVC } from "./IFVC";
+export type { IKYCRegistry } from "./IKYCRegistry";
 export type { IOTCSwap } from "./IOTCSwap";
+export type { IPausable } from "./IPausable";
 export type { IVestingVault } from "./IVestingVault";
