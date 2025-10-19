@@ -18,6 +18,9 @@ contracts/GOV_GTM_TOKEN_OPTIONS_LAYMAN.md
 contracts/PRIVATE_SALE_DESIGN.md
 contracts/QUESTIONS_GOV_GTM_TOKEN.md
 
+# Local documentation
+docs/
+
 
 # Hardhat compilation artifacts
 contracts/artifacts/
