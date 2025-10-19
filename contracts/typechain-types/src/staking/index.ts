@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { RewardsDistributor } from "./RewardsDistributor";
+export type { StakingRewards } from "./StakingRewards";
 export type { StakingVault } from "./StakingVault";

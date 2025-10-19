@@ -91,6 +91,7 @@ export interface IBondingInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "activateCircuitBreaker"
+      | "allocateFVCToMilestone"
       | "bond"
       | "bondWithETH"
       | "bondingThisBlock"
@@ -144,6 +145,10 @@ export interface IBondingInterface extends Interface {
   encodeFunctionData(
     functionFragment: "activateCircuitBreaker",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "allocateFVCToMilestone",
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "bond", values: [BigNumberish]): string;
   encodeFunctionData(
@@ -285,6 +290,10 @@ export interface IBondingInterface extends Interface {
 
   decodeFunctionResult(
     functionFragment: "activateCircuitBreaker",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "allocateFVCToMilestone",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "bond", data: BytesLike): Result;
@@ -644,6 +653,12 @@ export interface IBonding extends BaseContract {
 
   activateCircuitBreaker: TypedContractMethod<[], [void], "nonpayable">;
 
+  allocateFVCToMilestone: TypedContractMethod<
+    [milestoneIndex: BigNumberish, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
   bond: TypedContractMethod<[usdcAmount: BigNumberish], [void], "nonpayable">;
 
   bondWithETH: TypedContractMethod<
@@ -794,6 +809,13 @@ export interface IBonding extends BaseContract {
   getFunction(
     nameOrSignature: "activateCircuitBreaker"
   ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "allocateFVCToMilestone"
+  ): TypedContractMethod<
+    [milestoneIndex: BigNumberish, amount: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
   getFunction(
     nameOrSignature: "bond"
   ): TypedContractMethod<[usdcAmount: BigNumberish], [void], "nonpayable">;

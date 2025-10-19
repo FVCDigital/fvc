@@ -40,7 +40,7 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
     statusStyles = {
       background: 'linear-gradient(135deg, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0.08) 100%)',
       borderColor: '#38BDF8',
-      color: '#FFFFFF',
+      color: '#9CA3AF',
       boxShadow: '0 8px 25px -5px rgba(56,189,248,0.3), 0 10px 15px -3px rgba(0, 0, 0, 0.4)',
       animation: 'subtle-pulse 3s ease-in-out infinite',
     };

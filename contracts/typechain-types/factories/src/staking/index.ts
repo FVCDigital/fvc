@@ -2,4 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 export { RewardsDistributor__factory } from "./RewardsDistributor__factory";
+export { StakingRewards__factory } from "./StakingRewards__factory";
 export { StakingVault__factory } from "./StakingVault__factory";

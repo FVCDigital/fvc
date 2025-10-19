@@ -5,5 +5,8 @@ export { CustomFVCVesting__factory } from "./CustomFVCVesting__factory";
 export { FVCVesting__factory } from "./FVCVesting__factory";
 export { OTCSwap__factory } from "./OTCSwap__factory";
 export { SaleAdmin__factory } from "./SaleAdmin__factory";
+export { SimpleSwap__factory } from "./SimpleSwap__factory";
 export { TestFVCVesting__factory } from "./TestFVCVesting__factory";
+export { TokenSaleAudited__factory } from "./TokenSaleAudited__factory";
+export { TokenSaleMinimal__factory } from "./TokenSaleMinimal__factory";
 export { VestingVault__factory } from "./VestingVault__factory";

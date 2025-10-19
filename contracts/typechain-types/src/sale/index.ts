@@ -5,5 +5,8 @@ export type { CustomFVCVesting } from "./CustomFVCVesting";
 export type { FVCVesting } from "./FVCVesting";
 export type { OTCSwap } from "./OTCSwap";
 export type { SaleAdmin } from "./SaleAdmin";
+export type { SimpleSwap } from "./SimpleSwap";
 export type { TestFVCVesting } from "./TestFVCVesting";
+export type { TokenSaleAudited } from "./TokenSaleAudited";
+export type { TokenSaleMinimal } from "./TokenSaleMinimal";
 export type { VestingVault } from "./VestingVault";

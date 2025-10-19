@@ -8,6 +8,7 @@ import type {
   FunctionFragment,
   Result,
   Interface,
+  EventFragment,
   AddressLike,
   ContractRunner,
   ContractMethod,
@@ -17,13 +18,32 @@ import type {
   TypedContractEvent,
   TypedDeferredTopicFilter,
   TypedEventLog,
+  TypedLogDescription,
   TypedListener,
   TypedContractMethod,
 } from "../../common";
 
 export interface IFVCInterface extends Interface {
-  getFunction(nameOrSignature: "mint" | "setBondingContract"): FunctionFragment;
+  getFunction(
+    nameOrSignature:
+      | "getMinterRole"
+      | "mint"
+      | "setBondingContract"
+      | "transfer"
+      | "transferFrom"
+  ): FunctionFragment;
 
+  getEvent(
+    nameOrSignatureOrTopic:
+      | "BondingContractSet"
+      | "TokensBurned"
+      | "TokensMinted"
+  ): EventFragment;
+
+  encodeFunctionData(
+    functionFragment: "getMinterRole",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "mint",
     values: [AddressLike, BigNumberish]
@@ -32,12 +52,67 @@ export interface IFVCInterface extends Interface {
     functionFragment: "setBondingContract",
     values: [AddressLike]
   ): string;
+  encodeFunctionData(
+    functionFragment: "transfer",
+    values: [AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferFrom",
+    values: [AddressLike, AddressLike, BigNumberish]
+  ): string;
 
+  decodeFunctionResult(
+    functionFragment: "getMinterRole",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setBondingContract",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "transfer", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "transferFrom",
+    data: BytesLike
+  ): Result;
+}
+
+export namespace BondingContractSetEvent {
+  export type InputTuple = [bondingContract: AddressLike];
+  export type OutputTuple = [bondingContract: string];
+  export interface OutputObject {
+    bondingContract: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace TokensBurnedEvent {
+  export type InputTuple = [from: AddressLike, amount: BigNumberish];
+  export type OutputTuple = [from: string, amount: bigint];
+  export interface OutputObject {
+    from: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace TokensMintedEvent {
+  export type InputTuple = [to: AddressLike, amount: BigNumberish];
+  export type OutputTuple = [to: string, amount: bigint];
+  export interface OutputObject {
+    to: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export interface IFVC extends BaseContract {
@@ -83,6 +158,8 @@ export interface IFVC extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  getMinterRole: TypedContractMethod<[], [string], "view">;
+
   mint: TypedContractMethod<
     [to: AddressLike, amount: BigNumberish],
     [void],
@@ -95,10 +172,25 @@ export interface IFVC extends BaseContract {
     "nonpayable"
   >;
 
+  transfer: TypedContractMethod<
+    [to: AddressLike, amount: BigNumberish],
+    [boolean],
+    "nonpayable"
+  >;
+
+  transferFrom: TypedContractMethod<
+    [from: AddressLike, to: AddressLike, amount: BigNumberish],
+    [boolean],
+    "nonpayable"
+  >;
+
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
 
+  getFunction(
+    nameOrSignature: "getMinterRole"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "mint"
   ): TypedContractMethod<
@@ -109,6 +201,75 @@ export interface IFVC extends BaseContract {
   getFunction(
     nameOrSignature: "setBondingContract"
   ): TypedContractMethod<[_bondingContract: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "transfer"
+  ): TypedContractMethod<
+    [to: AddressLike, amount: BigNumberish],
+    [boolean],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "transferFrom"
+  ): TypedContractMethod<
+    [from: AddressLike, to: AddressLike, amount: BigNumberish],
+    [boolean],
+    "nonpayable"
+  >;
 
-  filters: {};
+  getEvent(
+    key: "BondingContractSet"
+  ): TypedContractEvent<
+    BondingContractSetEvent.InputTuple,
+    BondingContractSetEvent.OutputTuple,
+    BondingContractSetEvent.OutputObject
+  >;
+  getEvent(
+    key: "TokensBurned"
+  ): TypedContractEvent<
+    TokensBurnedEvent.InputTuple,
+    TokensBurnedEvent.OutputTuple,
+    TokensBurnedEvent.OutputObject
+  >;
+  getEvent(
+    key: "TokensMinted"
+  ): TypedContractEvent<
+    TokensMintedEvent.InputTuple,
+    TokensMintedEvent.OutputTuple,
+    TokensMintedEvent.OutputObject
+  >;
+
+  filters: {
+    "BondingContractSet(address)": TypedContractEvent<
+      BondingContractSetEvent.InputTuple,
+      BondingContractSetEvent.OutputTuple,
+      BondingContractSetEvent.OutputObject
+    >;
+    BondingContractSet: TypedContractEvent<
+      BondingContractSetEvent.InputTuple,
+      BondingContractSetEvent.OutputTuple,
+      BondingContractSetEvent.OutputObject
+    >;
+
+    "TokensBurned(address,uint256)": TypedContractEvent<
+      TokensBurnedEvent.InputTuple,
+      TokensBurnedEvent.OutputTuple,
+      TokensBurnedEvent.OutputObject
+    >;
+    TokensBurned: TypedContractEvent<
+      TokensBurnedEvent.InputTuple,
+      TokensBurnedEvent.OutputTuple,
+      TokensBurnedEvent.OutputObject
+    >;
+
+    "TokensMinted(address,uint256)": TypedContractEvent<
+      TokensMintedEvent.InputTuple,
+      TokensMintedEvent.OutputTuple,
+      TokensMintedEvent.OutputObject
+    >;
+    TokensMinted: TypedContractEvent<
+      TokensMintedEvent.InputTuple,
+      TokensMintedEvent.OutputTuple,
+      TokensMintedEvent.OutputObject
+    >;
+  };
 }
