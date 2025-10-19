@@ -21,6 +21,15 @@ contracts/QUESTIONS_GOV_GTM_TOKEN.md
 # Local documentation
 docs/
 
+# Email drafts and partnership materials
+*_emails.txt
+*_email.txt
+
+# Build artifacts
+dapp/out/
+dapp/*.tar.gz
+dapp/.env.example
+
 
 # Hardhat compilation artifacts
 contracts/artifacts/
