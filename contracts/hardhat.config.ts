@@ -26,15 +26,20 @@ const config: HardhatUserConfig = {
       url: "http://127.0.0.1:8545",
     },
     amoy: {
-      url: process.env.AMOY_RPC_URL || "https://polygon-amoy.drpc.org",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      url: process.env.POLYGON_AMOY_RPC || "https://rpc-amoy.polygon.technology",
+      accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
       chainId: 80002,
-      gasPrice: 50000000000, // 50 gwei (much lower than current 352 gwei)
-      gas: 5000000, // 5M gas limit
-      timeout: 600000, // 10 minutes
-      httpHeaders: {
-        "User-Agent": "Hardhat/2.26.1"
-      }
+      gasPrice: 50000000000,
+      gas: 5000000,
+      timeout: 600000,
+    },
+    "polygon-amoy": {
+      url: process.env.POLYGON_AMOY_RPC || "https://rpc-amoy.polygon.technology",
+      accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
+      chainId: 80002,
+      gasPrice: 50000000000,
+      gas: 5000000,
+      timeout: 600000,
     },
   },
   paths: {
