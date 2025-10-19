@@ -4,6 +4,7 @@
  */
 import React from 'react';
 import { theme } from '@/constants/theme';
+import TestnetBanner from './TestnetBanner';
 
 /**
  * Props for MainLayout component
@@ -44,6 +45,7 @@ export default function MainLayout({ children, isMobile, isClient, fullWidth = f
 
   return (
     <div style={mainStyle}>
+      <TestnetBanner />
       <main className="flex-1 flex flex-col items-center justify-center" style={contentStyle}>
         <br/>
         <div style={{ 

@@ -11,7 +11,7 @@ import { theme } from '@/constants/theme';
 const projectId = '54d704a3ccdf59ce20365f11281123bd'; // original WalletConnect projectId
 
 const config = getDefaultConfig({
-  appName: 'FVC Protocol',
+  appName: 'FVC',
   projectId,
   chains: [mainnet, polygon, polygonAmoy],
   ssr: true,

@@ -1,4 +1,4 @@
-// Centralised theme colours for FVC Protocol
+// Centralised theme colours for FVC
 export const theme = {
   appBackground: '#0A0A0A',
   modalBackground: '#1A1A1A',

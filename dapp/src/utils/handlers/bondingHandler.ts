@@ -218,9 +218,9 @@ export const useBondingContractBalance = () => {
   // Determine correct FVC address for all environments
   let fvcAddress: string = '';
   if ('FVC' in CONTRACTS) {
-    fvcAddress = CONTRACTS.FVC;
+    fvcAddress = (CONTRACTS as any).FVC;
   } else if ('MOCK_FVC' in CONTRACTS) {
-    fvcAddress = CONTRACTS.MOCK_FVC;
+    fvcAddress = (CONTRACTS as any).MOCK_FVC;
   }
 
   const { data: balance, isLoading, error } = useBalance({

@@ -71,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             display: 'flex',
             alignItems: 'center',
           }}>
-            FVC Protocol
+            FVC
           </div>
         )}
         {isMobile && onClose && (
