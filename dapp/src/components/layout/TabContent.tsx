@@ -9,6 +9,7 @@ import ComingSoonCard from '@/components/cards/ComingSoonCard';
 import FVCAllocationChart from '@/components/cards/FVCAllocationChart/FVCAllocationChart';
 import { RoadmapFlowchart } from '@/components/roadmap';
 import { TabId } from '@/constants/tabs';
+import StakingView from '@/screen-view/StakingView';
 
 /**
  * Props for TabContent component
@@ -39,22 +40,7 @@ export default function TabContent({ activeTab, isConnected, address }: TabConte
     case 'private-sale':
       return <PrivateSaleCard />;
     case 'staking':
-      return (
-        <FVCFeatureCard
-          title="FVC Staking"
-          subtitle="Staking features coming soon"
-          description="FVC Protocol staking features and details will be displayed here. Please provide the actual staking mechanics, rewards, and features."
-          features={[
-            "Staking details to be confirmed",
-            "Reward structure to be defined",
-            "Lock periods to be determined",
-            "Governance integration to be specified"
-          ]}
-          launchDate="TBD"
-          icon="🔒"
-          accentColor="#38BDF8"
-        />
-      );
+      return <StakingView />;
     case 'governance':
       return (
         <FVCFeatureCard

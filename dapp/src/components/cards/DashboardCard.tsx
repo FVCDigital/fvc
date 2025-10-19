@@ -96,8 +96,35 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
         <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Dashboard</div>
         <div style={{ fontSize: 16, color: theme.secondaryText, marginBottom: 16, textAlign: 'center' }}>
-          Your FVC Protocol overview
+          Your FVC overview
         </div>
+        <a 
+          href="#/staking"
+          style={{
+            background: theme.modalBackground,
+            border: `1px solid ${theme.generalButton}`,
+            borderRadius: 12,
+            padding: '12px 16px',
+            marginBottom: 16,
+            textAlign: 'center',
+            cursor: 'pointer',
+            textDecoration: 'none',
+            display: 'block',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = theme.cardHover;
+            e.currentTarget.style.borderColor = theme.generalButton;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = theme.modalBackground;
+            e.currentTarget.style.borderColor = theme.generalButton;
+          }}
+        >
+          <div style={{ fontSize: 14, color: theme.generalButton, fontWeight: 600 }}>
+            Staking is now live on testnet →
+          </div>
+        </a>
 
         {/* FVC Balance */}
         <div style={{

@@ -11,9 +11,9 @@ import { Asset } from '@/types';
 export const USDC_ASSET: Asset = {
   symbol: 'USDC',
   name: 'USD Coin',
-  address: process.env.NEXT_PUBLIC_NETWORK === 'testnet' 
+  address: (process.env.NEXT_PUBLIC_NETWORK === 'testnet' 
     ? (process.env.NEXT_PUBLIC_MOCK_USDC_ADDRESS || '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174')
-    : (process.env.NEXT_PUBLIC_MAINNET_USDC_ADDRESS || '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'), // Dynamic USDC address
+    : (process.env.NEXT_PUBLIC_MAINNET_USDC_ADDRESS || '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174')) as `0x${string}`, // Dynamic USDC address
   decimals: 6,
   logo: '/assets/usdc.svg',
   color: '#2775CA',
@@ -37,7 +37,7 @@ export const ETH_ASSET: Asset = {
 export const FVC_ASSET: Asset = {
   symbol: 'FVC',
   name: 'First Venture Capital',
-  address: process.env.NEXT_PUBLIC_FVC_ADDRESS || '0x0165878A594ca255338adfa4d48449f69242Eb8F', // FVC token address from env
+  address: (process.env.NEXT_PUBLIC_FVC_ADDRESS || '0x0165878A594ca255338adfa4d48449f69242Eb8F') as `0x${string}`, // FVC token address from env
   decimals: 18,
   logo: '/assets/fvc.svg',
   color: '#38BDF8',
