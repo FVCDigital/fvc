@@ -37,7 +37,7 @@
     "viem": "^2.33.0",
     "wagmi": "^2.16.0"
   },
-  "packageManager": "yarn@4.9.2",
+  "packageManager": "yarn@4.10.3",
   "resolutions": {
     "@vanilla-extract/sprinkles": "1.6.4"
   }
