@@ -32,7 +32,7 @@ const RoadmapFlowchart: React.FC = () => {
       ],
       timeline: 'Q3 2025',
       status: 'completed',
-      icon: '🏗️'
+      icon: '🏗️',
     },
     {
       id: 1,
@@ -47,7 +47,7 @@ const RoadmapFlowchart: React.FC = () => {
       ],
       timeline: 'Q4 2025',
       status: 'current',
-      icon: '💰'
+      icon: '💰',
     },
     {
       id: 2,
@@ -62,7 +62,7 @@ const RoadmapFlowchart: React.FC = () => {
       ],
       timeline: 'Q1 2026',
       status: 'future',
-      icon: '🔓'
+      icon: '🔓',
     },
     {
       id: 3,
@@ -77,7 +77,7 @@ const RoadmapFlowchart: React.FC = () => {
       ],
       timeline: 'Q2 2026',
       status: 'future',
-      icon: '🗳️'
+      icon: '🗳️',
     },
     {
       id: 4,
@@ -92,7 +92,7 @@ const RoadmapFlowchart: React.FC = () => {
       ],
       timeline: 'Q3 2026',
       status: 'future',
-      icon: '🏢'
+      icon: '🏢',
     },
     {
       id: 5,
@@ -107,7 +107,7 @@ const RoadmapFlowchart: React.FC = () => {
       ],
       timeline: 'Q4 2026',
       status: 'future',
-      icon: '🎯'
+      icon: '💎',
     },
     {
       id: 6,
@@ -122,7 +122,7 @@ const RoadmapFlowchart: React.FC = () => {
       ],
       timeline: 'Q1 2027',
       status: 'future',
-      icon: '🚀'
+      icon: '🚀',
     }
   ];
 

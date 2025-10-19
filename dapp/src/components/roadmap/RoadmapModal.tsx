@@ -44,8 +44,8 @@ const RoadmapModal: React.FC<RoadmapModalProps> = ({ stage, isOpen, onClose }) =
   if (isCurrent) {
     modalBackground = 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)';
     modalBorderColor = 'rgba(255, 255, 255, 0.8)';
-    textColor = theme.appBackground;
-    secondaryTextColor = theme.appBackground;
+    textColor = theme.primaryText;
+    secondaryTextColor = theme.secondaryText;
   } else if (isCompleted) {
     modalBackground = 'linear-gradient(135deg, rgba(243, 244, 246, 0.98) 0%, rgba(229, 231, 235, 0.95) 100%)';
     modalBorderColor = 'rgba(243, 244, 246, 0.8)';
@@ -150,7 +150,7 @@ const RoadmapModal: React.FC<RoadmapModalProps> = ({ stage, isOpen, onClose }) =
 
   const detailItemStyle: React.CSSProperties = {
     fontSize: '14px',
-    color: secondaryTextColor,
+    color: textColor,
     margin: 0,
     marginBottom: '12px',
     lineHeight: 1.4,
@@ -174,7 +174,7 @@ const RoadmapModal: React.FC<RoadmapModalProps> = ({ stage, isOpen, onClose }) =
   if (isCurrent) {
     timelineStatusStyles = {
       background: `rgba(59, 130, 246, 0.1)`,
-      color: theme.modalButton,
+      color: theme.primaryText,
       borderColor: `rgba(59, 130, 246, 0.3)`,
     };
   } else if (isCompleted) {
