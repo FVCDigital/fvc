@@ -15,7 +15,7 @@ contract FVCFaucet {
     IFVC public immutable fvc;
     
     /// @notice Amount distributed per claim
-    uint256 public constant CLAIM_AMOUNT = 10_000 * 1e18; // 10,000 FVC
+    uint256 public constant CLAIM_AMOUNT = 10 * 1e18; // 10 FVC
     
     /// @notice Cooldown period between claims (24 hours)
     uint256 public constant COOLDOWN_PERIOD = 1 days;
