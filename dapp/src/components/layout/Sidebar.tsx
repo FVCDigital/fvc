@@ -20,9 +20,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
-    { id: 'private-sale', label: 'Private Sale' },
     { id: 'staking', label: 'Staking' },
-    { id: 'governance', label: 'Governance' },
     { id: 'roadmap', label: 'Roadmap' },
   ];
 
@@ -70,8 +68,20 @@ const Sidebar: React.FC<SidebarProps> = ({
             color: theme.primaryText,
             display: 'flex',
             alignItems: 'center',
+            gap: 8,
           }}>
             FVC
+            <div style={{
+              background: 'linear-gradient(90deg, #FCD34D 0%, #FBBF24 100%)',
+              color: '#000000',
+              padding: '4px 8px',
+              borderRadius: 6,
+              fontSize: 10,
+              fontWeight: 700,
+              fontFamily: 'Inter, sans-serif',
+            }}>
+              TESTNET
+            </div>
           </div>
         )}
         {isMobile && onClose && (

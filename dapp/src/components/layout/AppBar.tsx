@@ -19,31 +19,20 @@ const AppBar: React.FC<AppBarProps> = ({
   onMenuToggle
 }) => (
   <header
-    className="w-full flex items-center justify-between py-4"
+    className="flex items-center justify-end py-4"
     style={{
       background: theme.modalBackground,
       borderBottom: `1px solid ${theme.modalButton}`,
       minHeight: 64,
       zIndex: 1001,
-      position: 'relative',
-      marginLeft: isMobile ? 0 : 280,
-      width: isMobile ? '100%' : 'calc(100% - 280px)',
+      position: 'fixed',
+      top: 0,
+      left: isMobile ? 0 : 280,
+      right: 0,
+      paddingRight: isMobile ? 16 : 48,
+      boxSizing: 'border-box',
     }}
   >
-    {/* Left side - Logo */}
-    <div className="flex items-center">
-      <div
-        className="text-xl font-bold tracking-tight"
-        style={{
-          color: theme.primaryText,
-          fontFamily: 'Inter',
-          marginLeft: isMobile ? 16 : 48,
-        }}
-      >
-        FVC
-      </div>
-    </div>
-    
     {/* Right side - Wallet Only (Desktop) or Wallet + Burger Menu (Mobile) */}
     <div className="flex items-center gap-4">
       <ConnectWalletButton />
