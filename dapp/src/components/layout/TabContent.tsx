@@ -10,6 +10,7 @@ import FVCAllocationChart from '@/components/cards/FVCAllocationChart/FVCAllocat
 import { RoadmapFlowchart } from '@/components/roadmap';
 import { TabId } from '@/constants/tabs';
 import StakingView from '@/screen-view/StakingView';
+import DashboardView from '@/screen-view/DashboardView';
 
 /**
  * Props for TabContent component
@@ -32,32 +33,28 @@ interface TabContentProps {
 export default function TabContent({ activeTab, isConnected, address }: TabContentProps): React.JSX.Element {
   switch (activeTab) {
     case 'dashboard':
-      return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-          <DashboardCard />
-        </div>
-      );
-    case 'private-sale':
-      return <PrivateSaleCard />;
+      return <DashboardView />;
+    // case 'private-sale':
+    //   return <PrivateSaleCard />;
     case 'staking':
       return <StakingView />;
-    case 'governance':
-      return (
-        <FVCFeatureCard
-          title="FVC Governance"
-          subtitle="Governance features coming soon"
-          description="FVC Protocol governance features and details will be displayed here. Please provide the actual governance mechanics, voting power, and features."
-          features={[
-            "Governance details to be confirmed",
-            "Voting mechanisms to be defined",
-            "Proposal requirements to be determined",
-            "Staking integration to be specified"
-          ]}
-          launchDate="TBD"
-          icon="🗳️"
-          accentColor="#10B981"
-        />
-      );
+    // case 'governance':
+    //   return (
+    //     <FVCFeatureCard
+    //       title="FVC Governance"
+    //       subtitle="Governance features coming soon"
+    //       description="FVC Protocol governance features and details will be displayed here. Please provide the actual governance mechanics, voting power, and features."
+    //       features={[
+    //         "Governance details to be confirmed",
+    //         "Voting mechanisms to be defined",
+    //         "Proposal requirements to be determined",
+    //         "Staking integration to be specified"
+    //       ]}
+    //       launchDate="TBD"
+    //       icon="🗳️"
+    //       accentColor="#10B981"
+    //     />
+    //   );
     case 'roadmap':
       return <RoadmapFlowchart />;
     default:
