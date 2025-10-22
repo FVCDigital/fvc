@@ -11,9 +11,12 @@ const TestnetBanner: React.FC = () => {
       fontWeight: 600,
       fontFamily: 'Inter, sans-serif',
       borderBottom: '1px solid #F59E0B',
-      position: 'sticky',
-      top: 0,
+      position: 'fixed',
+      top: 64,
+      left: 280,
+      right: 0,
       zIndex: 1000,
+      boxSizing: 'border-box',
     }}>
       TESTNET: FVC Token is currently on testnet (Polygon Amoy). Do not use real funds.
     </div>
