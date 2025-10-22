@@ -11,6 +11,7 @@ import AppBar from '@/components/layout/AppBar';
 import Sidebar from '@/components/layout/Sidebar';
 import MainLayout from '@/components/layout/MainLayout';
 import TabContent from '@/components/layout/TabContent';
+import TestnetBanner from '@/components/layout/TestnetBanner';
 import { theme } from '@/constants/theme';
 import { useHashRouting } from '@/hooks/useHashRouting';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
