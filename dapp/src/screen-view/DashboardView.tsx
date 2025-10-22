@@ -1,18 +1,22 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 import { CenteredFlexCol } from '@/components/atomic/CenteredFlexCol';
-import UnifiedStakingCard from '@/components/cards/UnifiedStakingCard';
+import { HomeTitle } from '@/components/atomic/HomeTitle';
+import FaucetCard from '@/components/cards/FaucetCard';
 import { theme } from '@/constants/theme';
 
-const StakingView: React.FC = () => {
-  const handleViewPartners = () => {
-    window.location.hash = '#/partners';
+const DashboardView: React.FC = () => {
+  const router = useRouter();
+
+  const handleNextPage = () => {
+    window.location.hash = '#/staking';
   };
 
   return (
     <CenteredFlexCol>
-      <UnifiedStakingCard />
+      <FaucetCard />
       <button
-        onClick={handleViewPartners}
+        onClick={handleNextPage}
         style={{
           marginTop: 24,
           padding: '14px 28px',
@@ -37,10 +41,10 @@ const StakingView: React.FC = () => {
           e.currentTarget.style.boxShadow = 'none';
         }}
       >
-        View Our Partners →
+        Stake →
       </button>
     </CenteredFlexCol>
   );
 };
 
-export default StakingView; 
+export default DashboardView;
