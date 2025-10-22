@@ -15,7 +15,6 @@ function formatTime(seconds: number): string {
 const FaucetCard: React.FC = () => {
   const { address } = useAccount();
 
-  // Read user's claim status
   const { data: claimStatus } = useReadContract({
     address: FAUCET_ADDRESS,
     abi: faucetABI,
@@ -23,7 +22,6 @@ const FaucetCard: React.FC = () => {
     args: address ? [address] : undefined,
   });
 
-  // Read user's claim info
   const { data: userInfo } = useReadContract({
     address: FAUCET_ADDRESS,
     abi: faucetABI,
@@ -31,7 +29,6 @@ const FaucetCard: React.FC = () => {
     args: address ? [address] : undefined,
   });
 
-  // Write: claim FVC
   const { data: claimHash, writeContract: claim } = useWriteContract();
   const { isLoading: isClaiming } = useWaitForTransactionReceipt({ hash: claimHash });
 
@@ -50,19 +47,18 @@ const FaucetCard: React.FC = () => {
         background: theme.modalBackground,
         color: theme.primaryText,
         borderRadius: 16,
-        padding: 28,
-        boxShadow: `0 4px 24px ${theme.accentGlow}`,
-        margin: '16px auto',
-        maxWidth: 800,
-        width: '100%',
+        padding: 32,
         border: `1px solid ${theme.darkBorder}`,
         fontFamily: 'Inter, sans-serif',
+        maxWidth: 600,
+        width: '100%',
+        margin: '0 auto',
       }}>
-        <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, textAlign: 'center' }}>
-          Testnet Faucet
+        <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, textAlign: 'center' }}>
+          Get Testnet FVC
         </div>
-        <div style={{ fontSize: 16, color: theme.secondaryText, textAlign: 'center' }}>
-          Connect your wallet to claim free testnet FVC
+        <div style={{ fontSize: 14, color: theme.secondaryText, textAlign: 'center' }}>
+          Connect your wallet to claim free testnet FVC tokens
         </div>
       </div>
     );
@@ -78,27 +74,24 @@ const FaucetCard: React.FC = () => {
       background: theme.modalBackground,
       color: theme.primaryText,
       borderRadius: 16,
-      padding: 28,
-      boxShadow: `0 4px 24px ${theme.accentGlow}`,
-      margin: '16px auto',
-      maxWidth: 800,
-      width: '100%',
+      padding: 32,
       border: `1px solid ${theme.darkBorder}`,
       fontFamily: 'Inter, sans-serif',
+      maxWidth: 600,
+      width: '100%',
+      margin: '0 auto',
     }}>
-      {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>
-          Testnet Faucet
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
+          Get Testnet FVC
         </div>
         <div style={{ fontSize: 14, color: theme.secondaryText }}>
-          Get free testnet FVC to try staking. Each claim gives you 10,000 FVC.
+          Claim free testnet tokens to try staking. Each claim gives you 10 FVC.
         </div>
       </div>
 
-      {/* Stats */}
       <div style={{
-        background: theme.modalBackground,
+        background: '#1A1A1A',
         borderRadius: 12,
         padding: 20,
         marginBottom: 20,
@@ -138,7 +131,6 @@ const FaucetCard: React.FC = () => {
         </div>
       </div>
 
-      {/* Claim Button */}
       <button
         onClick={handleClaim}
         disabled={!canClaim || isClaiming || remainingClaims === 0}
@@ -150,7 +142,7 @@ const FaucetCard: React.FC = () => {
           background: !canClaim || isClaiming || remainingClaims === 0 
             ? theme.darkBorder 
             : theme.generalButton,
-          color: theme.buttonText,
+          color: !canClaim || isClaiming || remainingClaims === 0 ? theme.secondaryText : '#000000',
           fontSize: 16,
           fontWeight: 700,
           cursor: !canClaim || isClaiming || remainingClaims === 0 ? 'not-allowed' : 'pointer',
@@ -164,21 +156,21 @@ const FaucetCard: React.FC = () => {
           ? 'Max Claims Reached'
           : !canClaim
           ? `Cooldown Active (${formatTime(remainingCooldown)})`
-          : 'Claim 10,000 FVC'}
+          : 'Claim 10 FVC'}
       </button>
 
       {remainingClaims === 0 && (
         <div style={{
           marginTop: 16,
           padding: 16,
-          background: theme.modalBackground,
+          background: '#1A1A1A',
           borderRadius: 12,
           border: `1px solid ${theme.darkBorder}`,
           fontSize: 14,
           color: theme.secondaryText,
           textAlign: 'center',
         }}>
-          You've reached the maximum claims. Use your FVC to test staking below!
+          You've reached the maximum claims. Use your FVC to test staking!
         </div>
       )}
     </div>

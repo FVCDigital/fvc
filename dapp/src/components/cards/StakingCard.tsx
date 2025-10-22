@@ -152,10 +152,11 @@ const StakingCard: React.FC = () => {
       padding: 28,
       boxShadow: `0 4px 24px ${theme.accentGlow}`,
       margin: '16px auto',
-      maxWidth: 800,
+      maxWidth: '100%',
       width: '100%',
       border: `1px solid ${theme.darkBorder}`,
       fontFamily: 'Inter, sans-serif',
+      boxSizing: 'border-box',
     }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
