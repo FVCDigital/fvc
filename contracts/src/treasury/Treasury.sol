@@ -7,6 +7,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
+/// @notice Minimal interface for the staking contract (owner-only notify)
+interface IStaking {
+    function notifyRewardAmount(uint256 reward) external;
+}
+
 /// @notice Minimal adapter interface for deposits/harvests
 interface IYieldAdapter {
     function depositAll() external;
@@ -585,6 +590,7 @@ contract Treasury is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSU
 
             if (stakingAmount > 0 && distributionRules.stakingContract != address(0)) {
                 _transferFunds(usdc, distributionRules.stakingContract, stakingAmount);
+                IStaking(distributionRules.stakingContract).notifyRewardAmount(stakingAmount);
             }
             if (operationsAmount > 0 && distributionRules.operationsWallet != address(0)) {
                 _transferFunds(usdc, distributionRules.operationsWallet, operationsAmount);
