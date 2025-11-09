@@ -7,6 +7,13 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
+/// @notice Minimal adapter interface for deposits/harvests
+interface IYieldAdapter {
+    function depositAll() external;
+    function withdrawPrincipal(uint256 amount) external;
+    function harvest() external returns (uint256);
+}
+
 /**
  * @title TreasuryVault
  * @notice Multi-sig controlled treasury with automated distribution rules for FVC Protocol
@@ -153,6 +160,9 @@ contract Treasury is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSU
     
     /// @notice Revenue router contract address
     address public revenueRouter;
+
+    /// @notice Address of the yield adapter (e.g. AaveYieldAdapter)
+    address public yieldAdapter;
 
     // ============ EVENTS ============
 
@@ -539,6 +549,50 @@ contract Treasury is AccessControlUpgradeable, ReentrancyGuardUpgradeable, UUPSU
         requiredApprovals = _requiredApprovals;
         maxExecutionDelay = _maxExecutionDelay;
         revenueRouter = _revenueRouter;
+    }
+
+    /**
+     * @notice Set the yield adapter address
+     * @param _adapter Address of the deployed adapter (e.g. AaveYieldAdapter)
+     */
+    function setYieldAdapter(address _adapter) external onlyRole(TREASURY_ADMIN_ROLE) {
+        yieldAdapter = _adapter;
+    }
+
+    /**
+     * @notice Transfer USDC held by Treasury to adapter, then instruct adapter to deposit
+     * @param usdc Token address to deposit (USDC)
+     * @param amount Amount to transfer to adapter before deposit
+     */
+    function depositToAdapter(address usdc, uint256 amount) external onlyRole(FUND_MANAGER_ROLE) nonReentrant {
+        require(yieldAdapter != address(0), "No adapter");
+        if (amount == 0) revert TreasuryVault__ZeroAmount();
+        IERC20(usdc).safeTransfer(yieldAdapter, amount);
+        IYieldAdapter(yieldAdapter).depositAll();
+    }
+
+    /**
+     * @notice Harvest yield from adapter and forward 100% according to current distribution rules
+     * @param usdc Token address to distribute (USDC)
+     */
+    function harvestFromAdapter(address usdc) external onlyRole(FUND_MANAGER_ROLE) nonReentrant {
+        require(yieldAdapter != address(0), "No adapter");
+        uint256 harvested = IYieldAdapter(yieldAdapter).harvest();
+        if (harvested > 0 && distributionRules.isActive) {
+            uint256 stakingAmount = (harvested * distributionRules.stakingPercentage) / BASIS_POINTS;
+            uint256 operationsAmount = (harvested * distributionRules.operationsPercentage) / BASIS_POINTS;
+            uint256 developmentAmount = (harvested * distributionRules.developmentPercentage) / BASIS_POINTS;
+
+            if (stakingAmount > 0 && distributionRules.stakingContract != address(0)) {
+                _transferFunds(usdc, distributionRules.stakingContract, stakingAmount);
+            }
+            if (operationsAmount > 0 && distributionRules.operationsWallet != address(0)) {
+                _transferFunds(usdc, distributionRules.operationsWallet, operationsAmount);
+            }
+            if (developmentAmount > 0 && distributionRules.developmentWallet != address(0)) {
+                _transferFunds(usdc, distributionRules.developmentWallet, developmentAmount);
+            }
+        }
     }
 
     // ============ VIEW FUNCTIONS ============
