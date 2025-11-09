@@ -38,7 +38,7 @@ contracts/cache/
 # Dependencies and build files
 package-lock.json
 yarn.lock
-dapp/package.json
+# keep dapp/package.json tracked
 dapp/package-lock.json
 dapp/yarn.lock
 
