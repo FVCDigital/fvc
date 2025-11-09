@@ -41,7 +41,7 @@ const RoadmapFlowchart: React.FC = () => {
       description: 'Initial fundraising round to secure professional audit and establish protocol foundation. This stage focuses on building trust and ensuring security through comprehensive auditing.',
       details: [
         'Raise funds for professional smart contract audit',
-        'Deploy contracts to Polygon mainnet',
+        'Deploy contracts to Base mainnet',
         'Complete security verification and testing',
         'Establish initial community and partnerships'
       ],

@@ -3,11 +3,11 @@ import React from 'react';
 const tokenMap = {
   ETH: '/assets/token-logos/eth.svg',
   USDC: '/assets/token-logos/usdc.svg',
-  POL: '/assets/token-logos/polygon.svg',
+  BASE: '/assets/token-logos/base.svg',
 };
 
 interface Props {
-  token: 'ETH' | 'USDC' | 'POL';
+  token: 'ETH' | 'USDC' | 'BASE';
   size?: number;
 }
 
