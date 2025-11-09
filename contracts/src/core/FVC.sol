@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
  * @title FVC
- * @dev ERC20 with hard cap and role-gated mint/burn. Minimal, audit-friendly.
+ * @dev ERC20 with hard cap and role-gated mint/burn.
  */
 contract FVC is ERC20Capped, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -14,7 +14,7 @@ contract FVC is ERC20Capped, AccessControl {
 
     constructor(address admin)
         ERC20("First Venture Capital", "FVC")
-        ERC20Capped(1_000_000_000 ether) // 1B cap
+        ERC20Capped(1_000_000_000 ether)
     {
         require(admin != address(0), "zero admin");
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
@@ -23,7 +23,7 @@ contract FVC is ERC20Capped, AccessControl {
     }
 
     function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
-        _mint(to, amount); // cap enforced by ERC20Capped
+        _mint(to, amount);
     }
 
     function burn(uint256 amount) external onlyRole(BURNER_ROLE) {
