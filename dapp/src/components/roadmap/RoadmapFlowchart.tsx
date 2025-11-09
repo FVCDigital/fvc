@@ -28,7 +28,7 @@ const RoadmapFlowchart: React.FC = () => {
         'FVC token contract deployed with vesting integration',
         'Bonding contract with multi-round system operational',
         'Frontend application with atomic components built',
-        'Testnet deployment on Polygon Amoy completed'
+        'Testnet deployment on Base Sepolia completed'
       ],
       timeline: 'Q3 2025',
       status: 'completed',

@@ -1,10 +1,11 @@
 // Staking contract configuration and ABIs
 
-export const STAKING_ADDRESS = (process.env.NEXT_PUBLIC_STAKING_ADDRESS || '0xaFd47CAb6bDDf962328CE344545Ac35142805Ee1') as `0x${string}`;
-export const FVC_ADDRESS = (process.env.NEXT_PUBLIC_FVC_ADDRESS || '0x932BdEaa6aA6Af42F866dbC74966883e8690A742') as `0x${string}`;
-export const USDC_ADDRESS = (process.env.NEXT_PUBLIC_USDC_ADDRESS || '0x144BB175D6eA1107846378528E7Fc94B140b0c5a') as `0x${string}`;
-export const FAUCET_ADDRESS = (process.env.NEXT_PUBLIC_FAUCET_ADDRESS || '0xA85473C6310D751CBaA878C3C96E8971dE2bC0eb') as `0x${string}`;
-export const YIELD_DISTRIBUTOR_ADDRESS = (process.env.NEXT_PUBLIC_YIELD_DISTRIBUTOR_ADDRESS || '0x60156C3290A98BD8025Bf17772dA0f338852b69E') as `0x${string}`;
+export const STAKING_ADDRESS = process.env.NEXT_PUBLIC_STAKING_ADDRESS as `0x${string}`;
+export const FVC_ADDRESS = process.env.NEXT_PUBLIC_FVC_ADDRESS as `0x${string}`;
+export const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_ADDRESS as `0x${string}`;
+export const FAUCET_ADDRESS = process.env.NEXT_PUBLIC_FAUCET_ADDRESS as `0x${string}`;
+export const ADAPTER_ADDRESS = process.env.NEXT_PUBLIC_ADAPTER_ADDRESS as `0x${string}`;
+export const A_USDC_ADDRESS = process.env.NEXT_PUBLIC_AUSDC_ADDRESS as `0x${string}`;
 
 // StakingRewards ABI
 export const stakingRewardsABI = [
@@ -113,6 +114,11 @@ export const usdcABI = [
     stateMutability: 'view',
     type: 'function',
   },
+] as const;
+
+// AaveYieldAdapter minimal ABI
+export const adapterABI = [
+  { inputs: [], name: 'principal', outputs: [{ name: '', type: 'uint256' }], stateMutability: 'view', type: 'function' },
 ] as const;
 
 // FVCFaucet ABI

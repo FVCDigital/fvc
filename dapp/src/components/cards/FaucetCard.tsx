@@ -54,7 +54,7 @@ const FaucetCard: React.FC = () => {
         width: '100%',
         margin: '0 auto',
       }}>
-        <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, textAlign: 'center' }}>
+      <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, textAlign: 'center', wordBreak: 'break-word' }}>
           Get Testnet FVC
         </div>
         <div style={{ fontSize: 14, color: theme.secondaryText, textAlign: 'center' }}>
@@ -74,12 +74,13 @@ const FaucetCard: React.FC = () => {
       background: theme.modalBackground,
       color: theme.primaryText,
       borderRadius: 16,
-      padding: 32,
+      padding: 24,
       border: `1px solid ${theme.darkBorder}`,
       fontFamily: 'Inter, sans-serif',
-      maxWidth: 600,
+      maxWidth: '100%',
       width: '100%',
       margin: '0 auto',
+      boxSizing: 'border-box',
     }}>
       <div style={{ marginBottom: 24 }}>
         <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>

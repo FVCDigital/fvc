@@ -18,7 +18,7 @@ const TestnetBanner: React.FC = () => {
       zIndex: 1000,
       boxSizing: 'border-box',
     }}>
-      TESTNET: FVC Token is currently on testnet (Polygon Amoy). Do not use real funds.
+      TESTNET: FVC Token is currently on Base Sepolia. Do not use real funds.
     </div>
   );
 };

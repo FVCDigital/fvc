@@ -2,7 +2,7 @@ import React from 'react';
 import { useAccount, useReadContract } from 'wagmi';
 import { formatUnits } from 'viem';
 import { theme } from '@/constants/theme';
-import { STAKING_ADDRESS, FVC_ADDRESS, stakingRewardsABI, fvcABI } from '@/contracts/staking';
+import { STAKING_ADDRESS, FVC_ADDRESS, stakingRewardsABI, fvcABI, ADAPTER_ADDRESS, A_USDC_ADDRESS, adapterABI, usdcABI } from '@/contracts/staking';
 
 const DashboardStats: React.FC = () => {
   const { address } = useAccount();
@@ -34,6 +34,25 @@ const DashboardStats: React.FC = () => {
     args: address ? [address] : undefined,
   });
 
+  // Adapter principal and aUSDC balance (yield = balance - principal)
+  const { data: principal } = useReadContract({
+    address: ADAPTER_ADDRESS,
+    abi: adapterABI,
+    functionName: 'principal',
+  });
+  const { data: aTokenBalance } = useReadContract({
+    address: A_USDC_ADDRESS,
+    abi: usdcABI,
+    functionName: 'balanceOf',
+    args: ADAPTER_ADDRESS ? [ADAPTER_ADDRESS] : undefined,
+  });
+
+  const yieldUsdc = (() => {
+    const p = principal ? BigInt(principal as unknown as string) : 0n;
+    const b = aTokenBalance ? BigInt(aTokenBalance as unknown as string) : 0n;
+    return b > p ? b - p : 0n;
+  })();
+
   const stats = [
     {
       label: 'Total Value Staked',
@@ -58,6 +77,12 @@ const DashboardStats: React.FC = () => {
       value: earnedRewards ? `${Number(formatUnits(earnedRewards, 6)).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC` : '0 USDC',
       icon: '💰',
       color: '#8B5CF6',
+    },
+    {
+      label: 'Aave Yield (Adapter)',
+      value: `${Number(formatUnits(yieldUsdc, 6)).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`,
+      icon: '🏦',
+      color: '#22D3EE',
     },
   ];
 
