@@ -53,3 +53,11 @@ contracts/src/sale/Test*.sol
 contracts/src/sale/Custom*.sol
 contracts/scripts_backup_*/
 .env.deploy
+
+# secrets (never commit)
+.env
+*.env
+**/.env
+**/.env.*
+dapp/.env.local
+contracts/.env
