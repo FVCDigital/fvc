@@ -1,24 +1,33 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const FVC = process.env.FVC_ADDRESS!;
-  const USDC = process.env.USDC_ADDRESS!;
-  const TRANSFER_OWNERSHIP_TO = process.env.TRANSFER_OWNERSHIP_TO; // optional
-  if (!FVC || !USDC) throw new Error("Missing FVC_ADDRESS or USDC_ADDRESS");
+  const FVC = process.env.FVC_ADDRESS!; // FVC token (18dp)
+  const USDC = process.env.USDC_ADDRESS!; // Rewards token (6dp) Correct Base Sepolia USDC
+  const OWNER = process.env.OWNER_SAFE!; // Gnosis Safe address
+
+  if (!FVC) throw new Error("Missing FVC_ADDRESS");
+  if (!USDC) throw new Error("Missing USDC_ADDRESS");
+  if (!OWNER) throw new Error("Missing OWNER_SAFE");
 
   const [deployer] = await ethers.getSigners();
   console.log("Deployer:", deployer.address);
+  console.log("FVC:", FVC);
+  console.log("USDC:", USDC);
+  console.log("Owner (Safe):", OWNER);
 
   const Staking = await ethers.getContractFactory("Staking");
   const staking = await Staking.deploy(FVC, USDC);
   await staking.waitForDeployment();
-  const addr = await staking.getAddress();
-  console.log("Staking:", addr);
 
-  if (TRANSFER_OWNERSHIP_TO) {
-    await (await staking.transferOwnership(TRANSFER_OWNERSHIP_TO)).wait();
-    console.log("Ownership transferred to:", TRANSFER_OWNERSHIP_TO);
-  }
+  const stakingAddr = await staking.getAddress();
+  console.log("Staking deployed:", stakingAddr);
+
+  // Transfer ownership to Safe
+  const tx = await staking.transferOwnership(OWNER);
+  await tx.wait();
+  console.log("Ownership transferred to:", OWNER);
+
+  console.log("ENV to update:\nNEXT_PUBLIC_STAKING_ADDRESS=", stakingAddr);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
