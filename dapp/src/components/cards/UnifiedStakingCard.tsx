@@ -23,6 +23,7 @@ function formatTime(seconds: number): string {
 
 const UnifiedStakingCard: React.FC = () => {
   const { address } = useAccount();
+  const faucetConfigured = /^0x[a-fA-F0-9]{40}$/.test(String(FAUCET_ADDRESS || ''));
   const [stakeAmount, setStakeAmount] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [apy, setApy] = useState(8.5); // Mock APY that "updates"
@@ -64,6 +65,7 @@ const UnifiedStakingCard: React.FC = () => {
     abi: faucetABI,
     functionName: 'canClaim',
     args: address ? [address] : undefined,
+    query: { enabled: !!address && faucetConfigured },
   });
 
   const { data: userInfo } = useReadContract({
@@ -71,6 +73,7 @@ const UnifiedStakingCard: React.FC = () => {
     abi: faucetABI,
     functionName: 'getUserInfo',
     args: address ? [address] : undefined,
+    query: { enabled: !!address && faucetConfigured },
   });
 
   // Write contracts
@@ -141,7 +144,7 @@ const UnifiedStakingCard: React.FC = () => {
   };
 
   const handleFaucetClaim = () => {
-    if (!address) return;
+    if (!address || !faucetConfigured) return;
     faucetClaim({
       address: FAUCET_ADDRESS,
       abi: faucetABI,
@@ -161,10 +164,10 @@ const UnifiedStakingCard: React.FC = () => {
     }
   };
 
-  const canClaim = claimStatus?.[0] ?? false;
-  const remainingCooldown = Number(claimStatus?.[1] ?? 0);
-  const remainingClaims = Number(claimStatus?.[2] ?? 0);
-  const totalClaims = Number(userInfo?.[0] ?? 0);
+  const canClaim = faucetConfigured ? (claimStatus?.[0] ?? false) : false;
+  const remainingCooldown = faucetConfigured ? Number(claimStatus?.[1] ?? 0) : 0;
+  const remainingClaims = faucetConfigured ? Number(claimStatus?.[2] ?? 0) : 0;
+  const totalClaims = faucetConfigured ? Number(userInfo?.[0] ?? 0) : 0;
   const hasLowBalance = fvcBalance ? Number(formatUnits(fvcBalance, 18)) < 1000 : true;
 
   if (!address) {
@@ -287,7 +290,7 @@ const UnifiedStakingCard: React.FC = () => {
       </div>
 
       {/* Faucet Section (if low balance) */}
-      {hasLowBalance && remainingClaims > 0 && (
+      {faucetConfigured && hasLowBalance && remainingClaims > 0 && (
         <div style={{
           background: 'linear-gradient(135deg, rgba(56,189,248,0.1) 0%, rgba(16,185,129,0.1) 100%)',
           borderRadius: 12,
@@ -306,17 +309,17 @@ const UnifiedStakingCard: React.FC = () => {
             </div>
             <button
               onClick={handleFaucetClaim}
-              disabled={!canClaim || isFaucetClaiming || remainingClaims === 0}
+              disabled={!faucetConfigured || !canClaim || isFaucetClaiming || remainingClaims === 0}
               style={{
                 padding: '10px 20px',
                 borderRadius: 10,
                 border: 'none',
-                background: !canClaim || isFaucetClaiming || remainingClaims === 0 ? theme.darkBorder : theme.generalButton,
+                background: !faucetConfigured || !canClaim || isFaucetClaiming || remainingClaims === 0 ? theme.darkBorder : theme.generalButton,
                 color: '#000000',
                 fontSize: 14,
                 fontWeight: 700,
-                cursor: !canClaim || isFaucetClaiming || remainingClaims === 0 ? 'not-allowed' : 'pointer',
-                opacity: !canClaim || isFaucetClaiming || remainingClaims === 0 ? 0.5 : 1,
+                cursor: !faucetConfigured || !canClaim || isFaucetClaiming || remainingClaims === 0 ? 'not-allowed' : 'pointer',
+                opacity: !faucetConfigured || !canClaim || isFaucetClaiming || remainingClaims === 0 ? 0.5 : 1,
               }}
             >
               {isFaucetClaiming ? 'Claiming...' : 'Claim 10 FVC'}

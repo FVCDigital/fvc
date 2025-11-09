@@ -14,12 +14,16 @@ function formatTime(seconds: number): string {
 
 const FaucetCard: React.FC = () => {
   const { address } = useAccount();
+  const faucetConfigured = /^0x[a-fA-F0-9]{40}$/.test(String(FAUCET_ADDRESS || ''));
 
   const { data: claimStatus } = useReadContract({
     address: FAUCET_ADDRESS,
     abi: faucetABI,
     functionName: 'canClaim',
     args: address ? [address] : undefined,
+    // Gate the read until faucet is configured and wallet connected
+    // to avoid disabled UI incorrectly showing "Max Claims Reached".
+    query: { enabled: !!address && faucetConfigured },
   });
 
   const { data: userInfo } = useReadContract({
@@ -27,13 +31,14 @@ const FaucetCard: React.FC = () => {
     abi: faucetABI,
     functionName: 'getUserInfo',
     args: address ? [address] : undefined,
+    query: { enabled: !!address && faucetConfigured },
   });
 
   const { data: claimHash, writeContract: claim } = useWriteContract();
   const { isLoading: isClaiming } = useWaitForTransactionReceipt({ hash: claimHash });
 
   const handleClaim = () => {
-    if (!address) return;
+    if (!address || !faucetConfigured) return;
     claim({
       address: FAUCET_ADDRESS,
       abi: faucetABI,
@@ -64,10 +69,10 @@ const FaucetCard: React.FC = () => {
     );
   }
 
-  const canClaim = claimStatus?.[0] ?? false;
-  const remainingCooldown = Number(claimStatus?.[1] ?? 0);
-  const remainingClaims = Number(claimStatus?.[2] ?? 0);
-  const totalClaims = Number(userInfo?.[0] ?? 0);
+  const canClaim = faucetConfigured ? (claimStatus?.[0] ?? false) : false;
+  const remainingCooldown = faucetConfigured ? Number(claimStatus?.[1] ?? 0) : 0;
+  const remainingClaims = faucetConfigured ? Number(claimStatus?.[2] ?? 0) : 0;
+  const totalClaims = faucetConfigured ? Number(userInfo?.[0] ?? 0) : 0;
 
   return (
     <div style={{
@@ -91,68 +96,87 @@ const FaucetCard: React.FC = () => {
         </div>
       </div>
 
-      <div style={{
-        background: '#1A1A1A',
-        borderRadius: 12,
-        padding: 20,
-        marginBottom: 20,
-        border: `1px solid ${theme.darkBorder}`,
-      }}>
+      {!faucetConfigured && (
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-          gap: 16,
+          marginBottom: 16,
+          padding: 16,
+          background: '#1A1A1A',
+          borderRadius: 12,
+          border: `1px solid ${theme.darkBorder}`,
+          fontSize: 14,
+          color: theme.secondaryText,
+          textAlign: 'center',
         }}>
-          <div>
-            <div style={{ fontSize: 12, color: theme.secondaryText, marginBottom: 4 }}>
-              Claims Used
-            </div>
-            <div style={{ fontSize: 20, fontWeight: 700 }}>
-              {totalClaims} / 5
-            </div>
-          </div>
+          Faucet unavailable: not configured.
+        </div>
+      )}
 
-          <div>
-            <div style={{ fontSize: 12, color: theme.secondaryText, marginBottom: 4 }}>
-              Remaining Claims
+      {faucetConfigured && (
+        <div style={{
+          background: '#1A1A1A',
+          borderRadius: 12,
+          padding: 20,
+          marginBottom: 20,
+          border: `1px solid ${theme.darkBorder}`,
+        }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            gap: 16,
+          }}>
+            <div>
+              <div style={{ fontSize: 12, color: theme.secondaryText, marginBottom: 4 }}>
+                Claims Used
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 700 }}>
+                {totalClaims} / 5
+              </div>
             </div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: theme.generalButton }}>
-              {remainingClaims}
-            </div>
-          </div>
 
-          <div>
-            <div style={{ fontSize: 12, color: theme.secondaryText, marginBottom: 4 }}>
-              Next Claim
+            <div>
+              <div style={{ fontSize: 12, color: theme.secondaryText, marginBottom: 4 }}>
+                Remaining Claims
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: theme.generalButton }}>
+                {remainingClaims}
+              </div>
             </div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: canClaim ? '#10B981' : theme.secondaryText }}>
-              {canClaim ? 'Now' : formatTime(remainingCooldown)}
+
+            <div>
+              <div style={{ fontSize: 12, color: theme.secondaryText, marginBottom: 4 }}>
+                Next Claim
+              </div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: canClaim ? '#10B981' : theme.secondaryText }}>
+                {canClaim ? 'Now' : formatTime(remainingCooldown)}
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       <button
         onClick={handleClaim}
-        disabled={!canClaim || isClaiming || remainingClaims === 0}
+        disabled={!faucetConfigured || !canClaim || isClaiming || remainingClaims === 0}
         style={{
           width: '100%',
           padding: '16px',
           borderRadius: 12,
           border: 'none',
-          background: !canClaim || isClaiming || remainingClaims === 0 
+          background: !faucetConfigured || !canClaim || isClaiming || remainingClaims === 0 
             ? theme.darkBorder 
             : theme.generalButton,
-          color: !canClaim || isClaiming || remainingClaims === 0 ? theme.secondaryText : '#000000',
+          color: !faucetConfigured || !canClaim || isClaiming || remainingClaims === 0 ? theme.secondaryText : '#000000',
           fontSize: 16,
           fontWeight: 700,
-          cursor: !canClaim || isClaiming || remainingClaims === 0 ? 'not-allowed' : 'pointer',
+          cursor: !faucetConfigured || !canClaim || isClaiming || remainingClaims === 0 ? 'not-allowed' : 'pointer',
           fontFamily: 'Inter, sans-serif',
-          opacity: !canClaim || isClaiming || remainingClaims === 0 ? 0.5 : 1,
+          opacity: !faucetConfigured || !canClaim || isClaiming || remainingClaims === 0 ? 0.5 : 1,
         }}
       >
         {isClaiming
           ? 'Claiming...'
+          : !faucetConfigured
+          ? 'Faucet Unavailable'
           : remainingClaims === 0
           ? 'Max Claims Reached'
           : !canClaim
@@ -160,7 +184,7 @@ const FaucetCard: React.FC = () => {
           : 'Claim 10 FVC'}
       </button>
 
-      {remainingClaims === 0 && (
+      {faucetConfigured && remainingClaims === 0 && (
         <div style={{
           marginTop: 16,
           padding: 16,
