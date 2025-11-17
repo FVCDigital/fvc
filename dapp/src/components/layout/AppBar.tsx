@@ -1,5 +1,6 @@
 import React from 'react';
 import ConnectWalletButton from '@/components/wallet/ConnectWalletButton';
+import NetworkSelector from '@/components/wallet/NetworkSelector';
 import { theme } from '@/constants/theme';
 import { TabId } from '@/constants/tabs';
 
@@ -19,7 +20,7 @@ const AppBar: React.FC<AppBarProps> = ({
   onMenuToggle
 }) => (
   <header
-    className="flex items-center justify-end py-4"
+    className="flex items-center justify-between py-4"
     style={{
       background: theme.modalBackground,
       borderBottom: `1px solid ${theme.modalButton}`,
@@ -29,12 +30,33 @@ const AppBar: React.FC<AppBarProps> = ({
       top: 0,
       left: isMobile ? 0 : 280,
       right: 0,
+      paddingLeft: isMobile ? 16 : 48,
       paddingRight: isMobile ? 16 : 48,
       boxSizing: 'border-box',
     }}
   >
-    {/* Right side - Wallet Only (Desktop) or Wallet + Burger Menu (Mobile) */}
+    {/* Left side - Logo */}
+    {!isMobile && (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        fontFamily: 'Inter, sans-serif',
+      }}>
+        <img 
+          src="/logo.png" 
+          alt="Logo" 
+          style={{
+            height: 40,
+            width: 'auto',
+          }} 
+        />
+      </div>
+    )}
+    
+    {/* Right side - Network Selector + Wallet (Desktop) or Wallet + Burger Menu (Mobile) */}
     <div className="flex items-center gap-4">
+      <NetworkSelector />
       <ConnectWalletButton />
       {isMobile && (
         <button
@@ -60,4 +82,4 @@ const AppBar: React.FC<AppBarProps> = ({
   </header>
 );
 
-export default AppBar; 
+export default AppBar;

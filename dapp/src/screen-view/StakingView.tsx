@@ -1,6 +1,6 @@
 import React from 'react';
 import { CenteredFlexCol } from '@/components/atomic/CenteredFlexCol';
-import UnifiedStakingCard from '@/components/cards/UnifiedStakingCard';
+import StakingCard from '@/components/cards/StakingCard';
 import { theme } from '@/constants/theme';
 
 const StakingView: React.FC = () => {
@@ -10,7 +10,7 @@ const StakingView: React.FC = () => {
 
   return (
     <CenteredFlexCol>
-      <UnifiedStakingCard />
+      <StakingCard />
       <button
         onClick={handleViewPartners}
         style={{

@@ -4,22 +4,22 @@ import { FaDiscord, FaTelegram, FaXTwitter } from 'react-icons/fa6';
 import { useRouter } from 'next/router';
 
 const socials = [
-  { icon: <FaDiscord size={20} />, label: 'Discord' },
-  { icon: <FaXTwitter size={20} />, label: 'X' },
-  { icon: <FaTelegram size={20} />, label: 'Telegram' },
+  { icon: <FaDiscord size={24} />, label: 'Discord' },
+  { icon: <FaXTwitter size={24} />, label: 'X' },
+  { icon: <FaTelegram size={24} />, label: 'Telegram' },
 ];
 
 const cardStyle: React.CSSProperties = {
-  maxWidth: 420,
+  maxWidth: 520,
   width: '100%',
-  borderRadius: 20,
-  boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+  borderRadius: 24,
+  boxShadow: '0 20px 60px rgba(0,0,0,0.4), 0 0 100px rgba(56,189,248,0.15)',
   background: theme.modalBackground,
-  padding: 36,
+  padding: 48,
   margin: '0 16px',
   display: 'flex',
   flexDirection: 'column',
-  gap: 24,
+  gap: 28,
   alignItems: 'center',
   outline: `1px solid ${theme.modalButton}`,
   outlineOffset: 0,
@@ -42,51 +42,60 @@ const logoStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  width: 56,
-  height: 56,
-  borderRadius: 16,
-  background: 'none',
-  marginBottom: 8,
-  fontWeight: 700,
-  fontSize: 24,
-  color: theme.primaryText,
-  letterSpacing: 2,
-  fontFamily: 'Inter, sans-serif',
+  marginBottom: 12,
 };
 
 const titleStyle: React.CSSProperties = {
-  fontWeight: 700, fontSize: 22, color: theme.primaryText, textAlign: 'center', fontFamily: 'Inter, sans-serif'
+  fontWeight: 800, 
+  fontSize: 28, 
+  color: theme.primaryText, 
+  textAlign: 'center', 
+  fontFamily: 'Inter, sans-serif',
+  lineHeight: 1.3,
 };
 
 const subtitleStyle: React.CSSProperties = {
-  fontSize: 16, color: theme.secondaryText, textAlign: 'center', maxWidth: 340, fontFamily: 'Inter, sans-serif'
+  fontSize: 17, 
+  color: theme.secondaryText, 
+  textAlign: 'center', 
+  maxWidth: 420, 
+  fontFamily: 'Inter, sans-serif',
+  lineHeight: 1.6,
 };
 
 const buttonStyle: React.CSSProperties = {
   display: 'block',
   width: '100%',
-  background: theme.modalButton,
-  color: theme.primaryText,
-  fontWeight: 600,
-  fontSize: 16,
-  borderRadius: 8,
-  padding: '14px 0',
+  background: theme.gradientPrimary,
+  color: '#FFFFFF',
+  fontWeight: 700,
+  fontSize: 18,
+  borderRadius: 12,
+  padding: '16px 0',
   textAlign: 'center',
   textDecoration: 'none',
-  marginTop: 8,
-  boxShadow: '0 2px 8px rgba(56,189,248,0.08)',
-  transition: 'background 0.2s',
+  marginTop: 12,
+  boxShadow: '0 4px 20px rgba(56,189,248,0.3)',
+  transition: 'all 0.3s ease',
   fontFamily: 'Inter, sans-serif',
   border: 'none',
   cursor: 'pointer',
 };
 
 const socialsStyle: React.CSSProperties = {
-  display: 'flex', gap: 16, marginTop: 8
+  display: 'flex', 
+  gap: 20, 
+  marginTop: 12
 };
 
 const disclaimerStyle: React.CSSProperties = {
-  fontSize: 12, color: theme.secondaryText, textAlign: 'center', marginTop: 8, fontFamily: 'Inter, sans-serif'
+  fontSize: 13, 
+  color: theme.secondaryText, 
+  textAlign: 'center', 
+  marginTop: 12, 
+  fontFamily: 'Inter, sans-serif',
+  lineHeight: 1.5,
+  maxWidth: 440,
 };
 
 const LandingModal: React.FC = () => {
@@ -95,12 +104,19 @@ const LandingModal: React.FC = () => {
     <div style={overlayStyle}>
       <div style={cardStyle}>
         <div style={logoStyle}>
-          FVC
+          <img 
+            src="/logo.png" 
+            alt="Logo" 
+            style={{
+              height: 80,
+              width: 'auto',
+            }} 
+          />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
-          <div style={titleStyle}>Your Wallet. Your Vote. Your Venture Fund.</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+          <div style={titleStyle}>Your Wallet. Your Vote.<br/>Your Venture Fund.</div>
           <div style={subtitleStyle}>
-            Join the world’s first interest-free, community-governed protocol for startup funding.
+            Join the world's first interest-free, community-governed protocol for startup funding. Powered by transparent on-chain governance and sustainable treasury yields.
           </div>
         </div>
         <button
@@ -108,8 +124,16 @@ const LandingModal: React.FC = () => {
           onClick={() => {
             window.location.hash = '#/dashboard';
           }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 6px 30px rgba(56,189,248,0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 20px rgba(56,189,248,0.3)';
+          }}
         >
-          Get Started
+          Enter Protocol
         </button>
         <div style={socialsStyle}>
           {socials.map(({ icon, label }) => (
@@ -120,10 +144,19 @@ const LandingModal: React.FC = () => {
                 background: 'none',
                 border: 'none',
                 color: theme.secondaryText,
-                fontSize: 20,
+                fontSize: 24,
                 cursor: 'pointer',
-                padding: 0,
-                transition: 'color 0.2s',
+                padding: 8,
+                transition: 'all 0.2s ease',
+                borderRadius: 8,
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = theme.generalButton;
+                e.currentTarget.style.background = theme.modalButton;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = theme.secondaryText;
+                e.currentTarget.style.background = 'none';
               }}
               tabIndex={-1}
             >
@@ -132,7 +165,7 @@ const LandingModal: React.FC = () => {
           ))}
         </div>
         <div style={disclaimerStyle}>
-          FCA Disclaimer: This protocol is designed for FCA-compliant, community-governed venture funding. Participation may be subject to regulatory requirements in your jurisdiction.
+          <strong>Regulatory Notice:</strong> This protocol is designed for FCA-compliant, community-governed venture funding. Participation may be subject to regulatory requirements in your jurisdiction. Currently operating on testnet.
         </div>
       </div>
     </div>
