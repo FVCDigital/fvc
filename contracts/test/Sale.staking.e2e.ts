@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 
 import type { Contract } from "ethers";
 
-describe("TokenSale + Staking e2e", function () {
+describe("Sale + Staking e2e", function () {
   let deployer: any;
   let buyer: any;
   let beneficiary: any;
@@ -33,11 +33,11 @@ describe("TokenSale + Staking e2e", function () {
     await usdc.connect(deployer).mint(buyer.address, ethers.parseUnits("10000", 6));
     await usdt.connect(deployer).mint(buyer.address, ethers.parseUnits("10000", 6));
 
-    // Deploy TokenSale (beneficiary = beneficiary signer)
-    const TokenSale = await ethers.getContractFactory("TokenSale");
+    // Deploy Sale (beneficiary = beneficiary signer)
+    const Sale = await ethers.getContractFactory("Sale");
     const rate = 25_000; // $0.025 per FVC, 6 decimals
     const cap = ethers.parseUnits("1000000", 6); // 1,000,000 stable
-    sale = await TokenSale.deploy(await fvc.getAddress(), beneficiary.address, rate, cap);
+    sale = await Sale.deploy(await fvc.getAddress(), beneficiary.address, rate, cap);
     await sale.waitForDeployment();
 
     // Grant MINTER_ROLE to sale contract
