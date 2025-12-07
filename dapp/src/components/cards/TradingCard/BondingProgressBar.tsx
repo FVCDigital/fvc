@@ -1,20 +1,21 @@
 import React from 'react';
-import { theme } from '@/constants/theme';
-
-const interFont: React.CSSProperties = { fontFamily: 'Inter, sans-serif' };
+import { Progress } from '@/components/ui/progress';
 
 const BondingProgressBar: React.FC<{ progress: number }> = ({ progress }) => (
-  <div style={{ width: '100%', maxWidth: 340, margin: '0 0 18px 0' }}>
-    <div style={{ fontSize: 13, color: theme.secondaryText, marginBottom: 4, ...interFont }}>
+  <div className="w-full mb-5">
+    <div className="text-xs text-muted-foreground mb-1.5 font-medium">
       Bonding Round Progress
     </div>
-    <div style={{ width: '100%', height: 10, background: theme.modalButton, borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
-      <div style={{ width: `${progress}%`, height: '100%', background: theme.generalButton, borderRadius: 6, transition: 'width 0.3s' }} />
+    <div className="h-2.5 w-full bg-secondary rounded-full overflow-hidden">
+      <div 
+        className="h-full bg-primary transition-all duration-300 ease-in-out"
+        style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+      />
     </div>
-    <div style={{ fontSize: 12, color: theme.secondaryText, marginTop: 2, textAlign: 'right', ...interFont }}>
+    <div className="text-xs text-muted-foreground mt-1 text-right font-medium">
       {progress.toFixed(2)}% of round allocated
     </div>
   </div>
 );
 
-export default BondingProgressBar; 
+export default BondingProgressBar;
