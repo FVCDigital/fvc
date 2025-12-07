@@ -1,6 +1,9 @@
 import React from 'react';
 import { RoadmapStage } from './types';
-import { theme } from '@/constants/theme';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { FaXmark } from 'react-icons/fa6';
 
 interface RoadmapModalProps {
   stage: RoadmapStage | null;
@@ -13,245 +16,73 @@ const RoadmapModal: React.FC<RoadmapModalProps> = ({ stage, isOpen, onClose }) =
 
   const isCurrent = stage.status === 'current';
   const isCompleted = stage.status === 'completed';
-  const isFuture = stage.status === 'future';
-
-  // Check screen size for responsive behavior
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  const isNarrowScreen = typeof window !== 'undefined' && window.innerWidth < 1024;
-  const sidebarWidth = 280;
-
-  const modalOverlayStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: isNarrowScreen && !isMobile ? `${sidebarWidth}px` : '0',
-    right: 0,
-    bottom: 0,
-    background: 'rgba(0, 0, 0, 0.7)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-    padding: isMobile ? '16px' : '20px',
-    boxSizing: 'border-box',
-  };
-
-  // Modal styling to match roadmap cards
-  let modalBackground = '';
-  let modalBorderColor = '';
-  let textColor = '';
-  let secondaryTextColor = '';
-
-  if (isCurrent) {
-    modalBackground = 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)';
-    modalBorderColor = 'rgba(255, 255, 255, 0.8)';
-    textColor = theme.primaryText;
-    secondaryTextColor = theme.secondaryText;
-  } else if (isCompleted) {
-    modalBackground = 'linear-gradient(135deg, rgba(243, 244, 246, 0.98) 0%, rgba(229, 231, 235, 0.95) 100%)';
-    modalBorderColor = 'rgba(243, 244, 246, 0.8)';
-    textColor = '#374151';
-    secondaryTextColor = '#6B7280';
-  } else {
-    modalBackground = 'linear-gradient(135deg, rgba(107, 114, 128, 0.25) 0%, rgba(75, 85, 99, 0.2) 100%)';
-    modalBorderColor = 'rgba(107, 114, 128, 0.3)';
-    textColor = '#9CA3AF';
-    secondaryTextColor = '#9CA3AF';
-  }
-
-  const modalStyle: React.CSSProperties = {
-    background: theme.modalBackground,
-    border: `1px solid ${theme.darkBorder}`,
-    borderRadius: isMobile ? '12px' : '16px',
-    padding: isMobile ? '20px' : isNarrowScreen ? '24px' : '32px',
-    maxWidth: isMobile ? '90vw' : isNarrowScreen ? '400px' : '500px',
-    width: '100%',
-    maxHeight: isMobile ? '85vh' : '80vh',
-    overflow: 'auto',
-    position: 'relative',
-    boxShadow: isCurrent 
-      ? '0 20px 60px rgba(56,189,248,0.2), 0 8px 25px rgba(0, 0, 0, 0.3)'
-      : isCompleted
-      ? '0 20px 60px rgba(0, 0, 0, 0.3), 0 8px 25px rgba(0, 0, 0, 0.2)'
-      : '0 20px 60px rgba(42,42,42,0.2), 0 8px 25px rgba(0, 0, 0, 0.2)',
-    backdropFilter: 'blur(10px)',
-    fontFamily: 'Inter, sans-serif',
-    boxSizing: 'border-box',
-    minHeight: isMobile ? '300px' : 'auto',
-  };
-
-  const closeButtonStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: '16px',
-    right: '16px',
-    background: 'none',
-    border: 'none',
-    color: secondaryTextColor,
-    fontSize: '20px',
-    cursor: 'pointer',
-    padding: '4px',
-    borderRadius: '4px',
-    transition: 'all 0.2s ease',
-    opacity: 0.7,
-  };
-
-
-
-  const headerStyle: React.CSSProperties = {
-    textAlign: 'center',
-    marginBottom: '28px',
-  };
-
-  const iconStyle: React.CSSProperties = {
-    fontSize: '48px',
-    textAlign: 'center',
-    marginBottom: '16px',
-    filter: isCurrent ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))' : 'none',
-  };
-
-  const titleStyle: React.CSSProperties = {
-    fontSize: '24px',
-    fontWeight: 700,
-    color: textColor,
-    margin: 0,
-    marginBottom: '8px',
-  };
-
-  const subtitleStyle: React.CSSProperties = {
-    fontSize: '18px',
-    color: secondaryTextColor,
-    margin: 0,
-    marginBottom: '16px',
-    opacity: 0.9,
-  };
-
-  const descriptionStyle: React.CSSProperties = {
-    fontSize: '16px',
-    color: secondaryTextColor,
-    margin: 0,
-    marginBottom: '28px',
-    lineHeight: 1.5,
-    opacity: 0.8,
-  };
-
-  const detailsTitleStyle: React.CSSProperties = {
-    fontSize: '18px',
-    fontWeight: 600,
-    color: textColor,
-    margin: 0,
-    marginBottom: '16px',
-  };
-
-  const detailsListStyle: React.CSSProperties = {
-    margin: 0,
-    padding: 0,
-    listStyle: 'none',
-    marginBottom: '24px',
-  };
-
-  const detailItemStyle: React.CSSProperties = {
-    fontSize: '14px',
-    color: textColor,
-    margin: 0,
-    marginBottom: '12px',
-    lineHeight: 1.4,
-    display: 'flex',
-    alignItems: 'flex-start',
-    opacity: 0.9,
-  };
-
-  const timelineStyle: React.CSSProperties = {
-    textAlign: 'center',
-    padding: '12px 20px',
-    borderRadius: '12px',
-    border: '1px solid',
-    fontSize: '14px',
-    fontWeight: 600,
-    marginTop: '24px',
-  };
-
-  // Timeline styling based on status
-  let timelineStatusStyles: React.CSSProperties = {};
-  if (isCurrent) {
-    timelineStatusStyles = {
-      background: `rgba(59, 130, 246, 0.1)`,
-      color: theme.primaryText,
-      borderColor: `rgba(59, 130, 246, 0.3)`,
-    };
-  } else if (isCompleted) {
-    timelineStatusStyles = {
-      background: `rgba(34, 197, 94, 0.1)`,
-      color: '#22C55E',
-      borderColor: `rgba(34, 197, 94, 0.3)`,
-    };
-  } else {
-    timelineStatusStyles = {
-      background: `rgba(107, 114, 128, 0.1)`,
-      color: '#6B7280',
-      borderColor: `rgba(107, 114, 128, 0.3)`,
-    };
-  }
-
-  const getBulletColor = () => {
-    if (isCurrent) return theme.modalButton;
-    if (isCompleted) return '#22C55E';
-    return '#6B7280';
-  };
 
   return (
-    <div style={modalOverlayStyle} onClick={onClose}>
-      <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
-        {/* Close Button */}
-        <button 
-          style={closeButtonStyle} 
+    <div 
+      className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div 
+        className={cn(
+          "relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-xl border shadow-2xl animate-in zoom-in-95 duration-200",
+          isCurrent && "bg-card border-sky-500/50 shadow-sky-500/20",
+          isCompleted && "bg-card border-emerald-500/50 shadow-emerald-500/20",
+          !isCurrent && !isCompleted && "bg-card border-border shadow-black/40"
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4 h-8 w-8 rounded-full opacity-70 hover:opacity-100"
           onClick={onClose}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
         >
-          ✕
-        </button>
+          <FaXmark className="h-4 w-4" />
+        </Button>
 
-        {/* Header */}
-        <div style={headerStyle}>
-          <div style={iconStyle}>
+        <div className="p-8 text-center">
+          <div className={cn(
+            "text-5xl mb-6",
+            isCurrent && "drop-shadow-lg"
+          )}>
             {stage.icon}
           </div>
-          <h2 style={titleStyle}>
+          
+          <h2 className="text-2xl font-bold mb-2 text-foreground">
             {stage.title}
           </h2>
-          <h3 style={subtitleStyle}>
+          <h3 className="text-lg text-muted-foreground font-medium mb-6">
             {stage.subtitle}
           </h3>
-        </div>
 
-        {/* Description */}
-        <p style={descriptionStyle}>
-          {stage.description}
-        </p>
+          <p className="text-base text-muted-foreground leading-relaxed mb-8">
+            {stage.description}
+          </p>
 
-        {/* Details */}
-        <div>
-          <h4 style={detailsTitleStyle}>Key Details:</h4>
-          <ul style={detailsListStyle}>
-            {stage.details.map((detail, index) => (
-              <li key={index} style={detailItemStyle}>
-                <span style={{ 
-                  marginRight: '12px', 
-                  marginTop: '2px',
-                  color: getBulletColor(),
-                  fontSize: '16px',
-                  fontWeight: 'bold',
-                }}>
-                  •
-                </span>
-                {detail}
-              </li>
-            ))}
-          </ul>
-        </div>
+          <div className="text-left bg-muted/30 rounded-xl p-6 border border-border">
+            <h4 className="text-sm font-bold uppercase tracking-wider mb-4 text-foreground">Key Details</h4>
+            <ul className="space-y-3">
+              {stage.details.map((detail, index) => (
+                <li key={index} className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <span className={cn(
+                    "mt-1.5 h-1.5 w-1.5 rounded-full shrink-0",
+                    isCurrent ? "bg-sky-500" : isCompleted ? "bg-emerald-500" : "bg-muted-foreground"
+                  )} />
+                  <span className="leading-relaxed">{detail}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* Timeline */}
-        <div style={{...timelineStyle, ...timelineStatusStyles}}>
-          ⏱️ Timeline: {stage.timeline}
+          <div className={cn(
+            "mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold border",
+            isCurrent && "bg-sky-500/10 text-sky-500 border-sky-500/20",
+            isCompleted && "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+            !isCurrent && !isCompleted && "bg-muted text-muted-foreground border-border"
+          )}>
+            <span>⏱️</span>
+            Timeline: {stage.timeline}
+          </div>
         </div>
       </div>
     </div>
