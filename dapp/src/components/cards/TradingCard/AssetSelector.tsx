@@ -1,40 +1,36 @@
 import React from 'react';
-import { theme } from '@/constants/theme';
+import { cn } from '@/lib/utils';
 import { TokenLogoWithBadge } from './TokenLogoWithBadge';
+import { Button } from '@/components/ui/button';
 
-const interFont: React.CSSProperties = { fontFamily: 'Inter, sans-serif' };
+interface AssetSelectorProps {
+  assets: any[];
+  selectedAsset: any;
+  setSelectedAsset: (a: any) => void;
+}
 
-const AssetSelector: React.FC<{ assets: any[], selectedAsset: any, setSelectedAsset: (a: any) => void }> = ({ assets, selectedAsset, setSelectedAsset }) => (
-  <div style={{ display: 'flex', gap: 12, width: '100%', justifyContent: 'center', marginBottom: 10 }}>
+const AssetSelector: React.FC<AssetSelectorProps> = ({ assets, selectedAsset, setSelectedAsset }) => (
+  <div className="flex gap-3 w-full justify-center mb-4">
     {assets.map((asset) => (
-      <button
+      <Button
         key={asset.symbol}
         type="button"
+        variant={selectedAsset.symbol === asset.symbol ? "default" : "outline"}
         onClick={() => setSelectedAsset(asset)}
-        style={{
-          minWidth: 60,
-          padding: '8px 10px',
-          borderRadius: 14,
-          border: selectedAsset.symbol === asset.symbol ? `2px solid ${theme.generalButton}` : `1.5px solid ${theme.modalButton}`,
-          background: selectedAsset.symbol === asset.symbol ? theme.generalButton : theme.appBackground,
-          color: selectedAsset.symbol === asset.symbol ? theme.buttonText : theme.primaryText,
-          fontWeight: 700,
-          fontSize: 16,
-          letterSpacing: 1,
-          cursor: 'pointer',
-          boxShadow: selectedAsset.symbol === asset.symbol ? '0 2px 8px rgba(56,189,248,0.10)' : 'none',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 7,
-          transition: 'border 0.15s, background 0.15s',
-          ...interFont,
-        }}
+        className={cn(
+          "h-auto py-2 px-4 rounded-xl font-bold tracking-wide transition-all",
+          selectedAsset.symbol === asset.symbol 
+            ? "shadow-md scale-105" 
+            : "text-muted-foreground hover:text-foreground"
+        )}
       >
-        <TokenLogoWithBadge token={asset.symbol as 'ETH' | 'USDC' | 'POL'} size={24} />
-        {asset.symbol}
-      </button>
+        <div className="flex items-center gap-2">
+          <TokenLogoWithBadge token={asset.symbol as 'ETH' | 'USDC' | 'POL'} size={24} />
+          {asset.symbol}
+        </div>
+      </Button>
     ))}
   </div>
 );
 
-export default AssetSelector; 
+export default AssetSelector;
