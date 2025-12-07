@@ -1,15 +1,11 @@
 import React from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { theme } from '@/constants/theme';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const ConnectWalletButton: React.FC = () => {
   return (
-    <div
-      className="flex items-center justify-center"
-      style={{
-        padding: '0.25rem 0.75rem',
-      }}
-    >
+    <div className="flex items-center justify-center px-3 py-1">
       <ConnectButton.Custom>
         {({
           account,
@@ -36,113 +32,65 @@ const ConnectWalletButton: React.FC = () => {
               {(() => {
                 if (!connected) {
                   return (
-                    <button
+                    <Button
                       onClick={openConnectModal}
-                      type="button"
-                      style={{
-                        background: theme.generalButton,
-                        color: theme.buttonText,
-                        border: 'none',
-                        borderRadius: 8,
-                        padding: '8px 16px',
-                        fontSize: 14,
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        fontFamily: 'Inter, sans-serif',
-                        transition: 'all 0.2s ease',
-                      }}
+                      variant="default"
+                      size="sm"
+                      className="font-semibold shadow-md"
                     >
                       Connect Wallet
-                    </button>
+                    </Button>
                   );
                 }
 
                 if (chain.unsupported) {
                   return (
-                    <button
+                    <Button
                       onClick={openChainModal}
-                      type="button"
-                      style={{
-                        background: '#ef4444',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: 8,
-                        padding: '8px 16px',
-                        fontSize: 14,
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        fontFamily: 'Inter, sans-serif',
-                      }}
+                      variant="destructive"
+                      size="sm"
+                      className="font-semibold shadow-md"
                     >
                       Wrong network
-                    </button>
+                    </Button>
                   );
                 }
 
                 return (
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button
+                  <div className="flex gap-2">
+                    <Button
                       onClick={openChainModal}
-                      type="button"
-                      style={{
-                        background: theme.modalBackground,
-                        color: theme.primaryText,
-                        border: `1px solid ${theme.modalButton}`,
-                        borderRadius: 8,
-                        padding: '6px 12px',
-                        fontSize: 12,
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        fontFamily: 'Inter, sans-serif',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 4,
-                      }}
+                      variant="outline"
+                      size="sm"
+                      className="h-9 gap-1.5 px-3 bg-background/50 backdrop-blur-sm border-border hover:bg-muted"
                     >
                       {chain.hasIcon && (
                         <div
-                          style={{
-                            background: chain.iconBackground,
-                            width: 12,
-                            height: 12,
-                            borderRadius: 999,
-                            overflow: 'hidden',
-                            marginRight: 4,
-                          }}
+                          className="w-4 h-4 rounded-full overflow-hidden bg-muted"
                         >
                           {chain.iconUrl && (
                             <img
                               alt={chain.name ?? 'Chain icon'}
                               src={chain.iconUrl}
-                              style={{ width: 12, height: 12 }}
+                              className="w-full h-full"
                             />
                           )}
                         </div>
                       )}
-                      {chain.name}
-                    </button>
+                      <span className="text-xs font-semibold">{chain.name}</span>
+                    </Button>
 
-                    <button
+                    <Button
                       onClick={openAccountModal}
-                      type="button"
-                      style={{
-                        background: theme.generalButton,
-                        color: theme.buttonText,
-                        border: 'none',
-                        borderRadius: 8,
-                        padding: '8px 16px',
-                        fontSize: 14,
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        fontFamily: 'Inter, sans-serif',
-                        transition: 'all 0.2s ease',
-                      }}
+                      variant="default"
+                      size="sm"
+                      className="h-9 font-semibold shadow-md"
                     >
                       {account.displayName}
                       {account.displayBalance
                         ? ` (${account.displayBalance})`
                         : ''}
-                    </button>
+                    </Button>
                   </div>
                 );
               })()}
@@ -154,4 +102,4 @@ const ConnectWalletButton: React.FC = () => {
   );
 };
 
-export default ConnectWalletButton; 
+export default ConnectWalletButton;
