@@ -3,7 +3,7 @@
  * @module components/layout/MainLayout
  */
 import React from 'react';
-import { theme } from '@/constants/theme';
+import { cn } from '@/lib/utils';
 
 /**
  * Props for MainLayout component
@@ -26,43 +26,31 @@ interface MainLayoutProps {
  * @returns React.JSX.Element
  */
 export default function MainLayout({ children, isMobile, isClient, fullWidth = false }: MainLayoutProps): React.JSX.Element {
-  const mainStyle: React.CSSProperties = {
-    marginLeft: isClient && !isMobile ? 280 : 0,
-    marginTop: 64 + 40, // AppBar height + Banner height
-    height: 'calc(100vh - 104px)',
-    display: 'flex',
-    flexDirection: 'column',
-    background: theme.appBackground,
-    color: theme.primaryText,
-    width: isClient && !isMobile ? 'calc(100% - 280px)' : '100%',
-    boxSizing: 'border-box',
-    overflow: 'hidden',
-  };
-
-  const contentStyle: React.CSSProperties = {
-    paddingTop: fullWidth ? 20 : 0,
-    paddingBottom: isClient && isMobile ? 80 : 20,
-    paddingLeft: isClient && isMobile ? 16 : 32,
-    paddingRight: isClient && isMobile ? 16 : 32,
-    background: theme.appBackground,
-    width: '100%',
-    maxWidth: '100%',
-    overflowY: fullWidth ? 'auto' : 'hidden',
-    overflowX: 'hidden',
-    height: '100%',
-  };
-
   return (
-    <div style={mainStyle}>
-      <main className="flex-1 flex flex-col items-center" style={contentStyle}>
+    <div 
+      className={cn(
+        "flex flex-col min-h-screen bg-background text-foreground transition-[margin] duration-300",
+        isClient && !isMobile ? "ml-[280px] w-[calc(100%-280px)]" : "ml-0 w-full"
+      )}
+      style={{
+        marginTop: 64 + 40, // AppBar height + Banner height
+        height: 'calc(100vh - 104px)',
+      }}
+    >
+      <main 
+        className={cn(
+          "flex-1 flex flex-col items-center overflow-x-hidden w-full max-w-full h-full bg-background",
+          fullWidth ? "overflow-y-auto pt-5" : "overflow-hidden",
+          isClient && isMobile ? "px-4 pb-20" : "px-8 pb-5"
+        )}
+      >
         {!fullWidth && <br/>}
-        <div style={{ 
-          width: '100%', 
-          maxWidth: fullWidth ? '100%' : 1200, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: 20 
-        }}>
+        <div 
+          className={cn(
+            "w-full flex flex-col gap-5",
+            fullWidth ? "max-w-full" : "max-w-[1200px]"
+          )}
+        >
           {children}
         </div>
       </main>
