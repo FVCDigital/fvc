@@ -1,7 +1,7 @@
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 
-// Base Sepolia Testnet contract addresses (deployed contracts)
-export const BASE_SEPOLIA_CONTRACTS = {
+// Polygon Testnet contract addresses (deployed contracts)
+export const POLYGON_TESTNET_CONTRACTS = {
   FVC: "0xA23e293B02EDc0a847b5215aE814CBc710f8c1B2",
   BONDING: "0xF4b7B5D028C09E773b2df6087968872BB36856eA", // CORRECT TREASURY BONDING - USDC goes to 0x7f1EE89fDB16b57930b7F53Bb998f25d917F35D9
   USDC: "0x79a3c7c1459B4d68C39A6db2716C0f4BaE190dfc",
@@ -18,7 +18,7 @@ export const MAINNET_CONTRACTS = {
 // Use this to switch between environments
 export const CONTRACTS = process.env.NODE_ENV === 'production' 
   ? MAINNET_CONTRACTS 
-  : BASE_SEPOLIA_CONTRACTS; // Default to Base Sepolia testnet
+  : POLYGON_TESTNET_CONTRACTS; // Default to Polygon testnet
 
 // New milestone-based bonding ABI
 export const BONDING_ABI = [
