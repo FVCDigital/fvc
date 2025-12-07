@@ -1,7 +1,9 @@
 import React from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { theme } from '@/constants/theme';
 import { FAUCET_ADDRESS, faucetABI } from '@/contracts/staking';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 function formatTime(seconds: number): string {
   if (seconds === 0) return 'Now';
@@ -21,8 +23,6 @@ const FaucetCard: React.FC = () => {
     abi: faucetABI,
     functionName: 'canClaim',
     args: address ? [address] : undefined,
-    // Gate the read until faucet is configured and wallet connected
-    // to avoid disabled UI incorrectly showing "Max Claims Reached".
     query: { enabled: !!address && faucetConfigured },
   });
 
@@ -48,24 +48,14 @@ const FaucetCard: React.FC = () => {
 
   if (!address) {
     return (
-      <div style={{
-        background: theme.modalBackground,
-        color: theme.primaryText,
-        borderRadius: 16,
-        padding: 32,
-        border: `1px solid ${theme.darkBorder}`,
-        fontFamily: 'Inter, sans-serif',
-        maxWidth: 600,
-        width: '100%',
-        margin: '0 auto',
-      }}>
-      <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, textAlign: 'center', wordBreak: 'break-word' }}>
-          Get Testnet FVC
-        </div>
-        <div style={{ fontSize: 14, color: theme.secondaryText, textAlign: 'center' }}>
-          Connect your wallet to claim free testnet FVC tokens
-        </div>
-      </div>
+      <Card className="w-full max-w-[800px] mx-auto bg-card/80 backdrop-blur-sm border-border">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold mb-2">Get Testnet FVC</CardTitle>
+          <CardDescription>
+            Connect your wallet to claim free testnet FVC tokens
+          </CardDescription>
+        </CardHeader>
+      </Card>
     );
   }
 
@@ -73,132 +63,81 @@ const FaucetCard: React.FC = () => {
   const remainingCooldown = faucetConfigured ? Number(claimStatus?.[1] ?? 0) : 0;
   const remainingClaims = faucetConfigured ? Number(claimStatus?.[2] ?? 0) : 0;
   const totalClaims = faucetConfigured ? Number(userInfo?.[0] ?? 0) : 0;
+  const isMaxClaimsReached = remainingClaims === 0;
 
   return (
-    <div style={{
-      background: theme.modalBackground,
-      color: theme.primaryText,
-      borderRadius: 16,
-      padding: 24,
-      border: `1px solid ${theme.darkBorder}`,
-      fontFamily: 'Inter, sans-serif',
-      maxWidth: '100%',
-      width: '100%',
-      margin: '0 auto',
-      boxSizing: 'border-box',
-    }}>
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
-          Get Testnet FVC
-        </div>
-        <div style={{ fontSize: 14, color: theme.secondaryText }}>
+    <Card className="w-full max-w-[500px] mx-auto bg-card/80 backdrop-blur-sm border-border shadow-xl">
+      <CardHeader>
+        <CardTitle className="text-xl font-bold">Get Testnet FVC</CardTitle>
+        <CardDescription>
           Claim free testnet tokens to try staking. Each claim gives you 10 FVC.
-        </div>
-      </div>
+        </CardDescription>
+      </CardHeader>
 
-      {!faucetConfigured && (
-        <div style={{
-          marginBottom: 16,
-          padding: 16,
-          background: '#1A1A1A',
-          borderRadius: 12,
-          border: `1px solid ${theme.darkBorder}`,
-          fontSize: 14,
-          color: theme.secondaryText,
-          textAlign: 'center',
-        }}>
-          Faucet unavailable: not configured.
-        </div>
-      )}
+      <CardContent className="space-y-4">
+        {!faucetConfigured && (
+          <div className="p-4 rounded-lg bg-muted/50 border border-border text-sm text-muted-foreground text-center">
+            Faucet unavailable: not configured.
+          </div>
+        )}
 
-      {faucetConfigured && (
-        <div style={{
-          background: '#1A1A1A',
-          borderRadius: 12,
-          padding: 20,
-          marginBottom: 20,
-          border: `1px solid ${theme.darkBorder}`,
-        }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-            gap: 16,
-          }}>
-            <div>
-              <div style={{ fontSize: 12, color: theme.secondaryText, marginBottom: 4 }}>
-                Claims Used
+        {faucetConfigured && (
+          <div className="bg-muted/30 rounded-xl p-5 border border-border">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Claims Used</div>
+                <div className="text-xl font-bold">{totalClaims} / 5</div>
               </div>
-              <div style={{ fontSize: 20, fontWeight: 700 }}>
-                {totalClaims} / 5
-              </div>
-            </div>
 
-            <div>
-              <div style={{ fontSize: 12, color: theme.secondaryText, marginBottom: 4 }}>
-                Remaining Claims
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Remaining</div>
+                <div className="text-xl font-bold text-primary">{remainingClaims}</div>
               </div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: theme.generalButton }}>
-                {remainingClaims}
-              </div>
-            </div>
 
-            <div>
-              <div style={{ fontSize: 12, color: theme.secondaryText, marginBottom: 4 }}>
-                Next Claim
-              </div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: canClaim ? '#10B981' : theme.secondaryText }}>
-                {canClaim ? 'Now' : formatTime(remainingCooldown)}
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-semibold">Next Claim</div>
+                <div className={cn(
+                  "text-xl font-bold",
+                  canClaim ? "text-green-500" : "text-muted-foreground"
+                )}>
+                  {canClaim ? 'Now' : formatTime(remainingCooldown)}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </CardContent>
 
-      <button
-        onClick={handleClaim}
-        disabled={!faucetConfigured || !canClaim || isClaiming || remainingClaims === 0}
-        style={{
-          width: '100%',
-          padding: '16px',
-          borderRadius: 12,
-          border: 'none',
-          background: !faucetConfigured || !canClaim || isClaiming || remainingClaims === 0 
-            ? theme.darkBorder 
-            : theme.generalButton,
-          color: !faucetConfigured || !canClaim || isClaiming || remainingClaims === 0 ? theme.secondaryText : '#000000',
-          fontSize: 16,
-          fontWeight: 700,
-          cursor: !faucetConfigured || !canClaim || isClaiming || remainingClaims === 0 ? 'not-allowed' : 'pointer',
-          fontFamily: 'Inter, sans-serif',
-          opacity: !faucetConfigured || !canClaim || isClaiming || remainingClaims === 0 ? 0.5 : 1,
-        }}
-      >
-        {isClaiming
-          ? 'Claiming...'
-          : !faucetConfigured
-          ? 'Faucet Unavailable'
-          : remainingClaims === 0
-          ? 'Max Claims Reached'
-          : !canClaim
-          ? `Cooldown Active (${formatTime(remainingCooldown)})`
-          : 'Claim 10 FVC'}
-      </button>
+      <CardFooter className="flex flex-col gap-4">
+        <Button
+          onClick={handleClaim}
+          disabled={!faucetConfigured || !canClaim || isClaiming || isMaxClaimsReached}
+          className={cn(
+            "w-full font-bold text-base h-12 shadow-lg transition-all",
+            !faucetConfigured || !canClaim || isClaiming || isMaxClaimsReached
+              ? "opacity-50 cursor-not-allowed" 
+              : "hover:-translate-y-0.5"
+          )}
+          variant={(!faucetConfigured || !canClaim || isClaiming || isMaxClaimsReached) ? "secondary" : "default"}
+        >
+          {isClaiming
+            ? 'Claiming...'
+            : !faucetConfigured
+            ? 'Faucet Unavailable'
+            : isMaxClaimsReached
+            ? 'Max Claims Reached'
+            : !canClaim
+            ? `Cooldown Active (${formatTime(remainingCooldown)})`
+            : 'Claim 10 FVC'}
+        </Button>
 
-      {faucetConfigured && remainingClaims === 0 && (
-        <div style={{
-          marginTop: 16,
-          padding: 16,
-          background: '#1A1A1A',
-          borderRadius: 12,
-          border: `1px solid ${theme.darkBorder}`,
-          fontSize: 14,
-          color: theme.secondaryText,
-          textAlign: 'center',
-        }}>
-          You've reached the maximum claims. Use your FVC to test staking!
-        </div>
-      )}
-    </div>
+        {faucetConfigured && isMaxClaimsReached && (
+          <div className="w-full p-3 bg-muted/30 rounded-lg border border-border text-sm text-muted-foreground text-center">
+            You've reached the maximum claims. Use your FVC to test staking!
+          </div>
+        )}
+      </CardFooter>
+    </Card>
   );
 };
 
