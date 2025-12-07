@@ -1,18 +1,16 @@
 import React from 'react';
-import { theme } from '@/constants/theme';
 import { formatUnits } from 'viem';
 import { useBondingContractFVCBalance } from '@/utils/contracts/bondingContract';
-
-const interFont: React.CSSProperties = { fontFamily: 'Inter, sans-serif' };
+import { cn } from '@/lib/utils';
 
 interface BondingStatsProps {
   totalBonded: bigint;
   epochCap: bigint;
   currentDiscount: number;
   initialDiscount: number;
-  fvcAllocated?: bigint; // Add actual FVC allocated from contract
-  fvcSold?: bigint; // Add actual FVC sold from contract
-  bondingContractBalance?: bigint; // Add actual bonding contract balance
+  fvcAllocated?: bigint;
+  fvcSold?: bigint;
+  bondingContractBalance?: bigint;
 }
 
 const BondingStats: React.FC<BondingStatsProps> = ({ 
@@ -24,68 +22,33 @@ const BondingStats: React.FC<BondingStatsProps> = ({
   fvcSold = 0n,
   bondingContractBalance = 0n
 }) => {
-  // Get actual bonding contract FVC balance
   const { bondingContractFVCBalance, isLoading: isLoadingBalance } = useBondingContractFVCBalance();
   
-  // Calculate correct FVC remaining (allocated - sold)
   const fvcBought = fvcSold;
-  const fvcRemaining = fvcAllocated - fvcSold; // Use allocated minus sold, not contract balance
+  const fvcRemaining = fvcAllocated - fvcSold;
 
-  // Debug logging
-  console.log('BondingStats Debug:');
-  console.log('bondingContractFVCBalance:', bondingContractFVCBalance.toString());
-  console.log('fvcSold:', fvcSold.toString());
-  console.log('fvcAllocated:', fvcAllocated.toString());
-  console.log('fvcBought:', fvcBought.toString());
-  console.log('fvcRemaining:', fvcRemaining.toString());
-
-  // Format numbers for display with fallbacks
   const fvcBoughtFormatted = fvcBought && typeof fvcBought === 'bigint' ? parseFloat(formatUnits(fvcBought, 18)).toLocaleString() : '0';
   const fvcRemainingFormatted = fvcRemaining && typeof fvcRemaining === 'bigint' ? parseFloat(formatUnits(fvcRemaining, 18)).toLocaleString() : '10,000,000';
   const fvcAllocatedFormatted = fvcAllocated && typeof fvcAllocated === 'bigint' ? parseFloat(formatUnits(fvcAllocated, 18)).toLocaleString() : '10,000,000';
 
   return (
-    <div style={{
-      background: 'rgba(56,189,248,0.05)',
-      border: '1px solid rgba(56,189,248,0.2)',
-      borderRadius: 12,
-      padding: '16px',
-      marginBottom: 16,
-      width: '100%'
-    }}>
-      <h3 style={{
-        fontSize: 16,
-        fontWeight: 600,
-        color: theme.primaryText,
-        marginBottom: 12,
-        textAlign: 'center',
-        ...interFont
-      }}>
+    <div className="w-full bg-sky-500/5 border border-sky-500/20 rounded-xl p-4 mb-4">
+      <h3 className="text-sm font-semibold text-foreground mb-3 text-center">
         Round Statistics
       </h3>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 14, color: theme.secondaryText, ...interFont }}>
-            FVC Allocated:
-          </span>
-          <span style={{ fontSize: 14, fontWeight: 500, color: theme.primaryText, ...interFont }}>
-            {fvcAllocatedFormatted} FVC
-          </span>
+      <div className="space-y-2">
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-muted-foreground">FVC Allocated:</span>
+          <span className="font-medium text-foreground">{fvcAllocatedFormatted} FVC</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 14, color: theme.secondaryText, ...interFont }}>
-            FVC Bought:
-          </span>
-          <span style={{ fontSize: 14, fontWeight: 500, color: theme.primaryText, ...interFont }}>
-            {fvcBoughtFormatted} FVC
-          </span>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-muted-foreground">FVC Bought:</span>
+          <span className="font-medium text-foreground">{fvcBoughtFormatted} FVC</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 14, color: theme.secondaryText, ...interFont }}>
-            FVC Remaining:
-          </span>
-          <span style={{ fontSize: 14, fontWeight: 500, color: theme.primaryText, ...interFont }}>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-muted-foreground">FVC Remaining:</span>
+          <span className="font-medium text-foreground">
             {isLoadingBalance ? 'Loading...' : fvcRemainingFormatted} FVC
           </span>
         </div>
@@ -94,4 +57,4 @@ const BondingStats: React.FC<BondingStatsProps> = ({
   );
 };
 
-export default BondingStats; 
+export default BondingStats;

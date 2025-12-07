@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { formatUnits, parseUnits } from 'viem';
-import { theme } from '@/constants/theme';
 import {
   STAKING_ADDRESS,
   FVC_ADDRESS,
   stakingRewardsABI,
   fvcABI,
 } from '@/contracts/staking';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 const StakingCard: React.FC = () => {
   const { address } = useAccount();
@@ -95,25 +98,12 @@ const StakingCard: React.FC = () => {
 
   if (!address) {
     return (
-      <div style={{
-        background: theme.modalBackground,
-        color: theme.primaryText,
-        borderRadius: 16,
-        padding: 32,
-        boxShadow: `0 4px 24px ${theme.accentGlow}`,
-        margin: '16px auto',
-        maxWidth: 480,
-        width: '100%',
-        border: `1px solid ${theme.darkBorder}`,
-        fontFamily: 'Inter, sans-serif',
-      }}>
-        <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 8, textAlign: 'center' }}>
-          Staking
-        </div>
-        <div style={{ fontSize: 14, color: theme.secondaryText, textAlign: 'center' }}>
-          Connect wallet to stake
-        </div>
-      </div>
+      <Card className="max-w-[480px] w-full mx-auto my-4 shadow-xl border-border bg-card/80 backdrop-blur-sm">
+        <CardHeader className="text-center">
+          <CardTitle className="mb-2">Staking</CardTitle>
+          <CardDescription>Connect wallet to stake</CardDescription>
+        </CardHeader>
+      </Card>
     );
   }
 
@@ -121,319 +111,139 @@ const StakingCard: React.FC = () => {
   const hasRewards = rewardsValue > 0;
 
   return (
-    <div style={{
-      background: theme.modalBackground,
-      color: theme.primaryText,
-      borderRadius: 16,
-      padding: 24,
-      boxShadow: `0 4px 24px ${theme.accentGlow}`,
-      margin: '16px auto',
-      maxWidth: 480,
-      width: '100%',
-      border: `1px solid ${theme.darkBorder}`,
-      fontFamily: 'Inter, sans-serif',
-      boxSizing: 'border-box',
-    }}>
-      {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 20, fontWeight: 600, marginBottom: 4 }}>Staking</div>
-        <div style={{ fontSize: 13, color: theme.secondaryText }}>
-          Stake FVC to earn USDC rewards
-        </div>
-      </div>
+    <Card className="max-w-[480px] w-full mx-auto my-4 shadow-xl border-border bg-card/80 backdrop-blur-sm">
+      <CardHeader>
+        <CardTitle>Staking</CardTitle>
+        <CardDescription>Stake FVC to earn USDC rewards</CardDescription>
+      </CardHeader>
 
-      {/* Stats */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 12,
-        marginBottom: 20,
-      }}>
-        <div style={{
-          background: `${theme.darkBorder}40`,
-          borderRadius: 12,
-          padding: 16,
-        }}>
-          <div style={{ fontSize: 11, color: theme.secondaryText, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Staked
+      <CardContent className="space-y-5">
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-muted/30 rounded-xl p-4 border border-border">
+            <div className="text-[11px] text-muted-foreground mb-1.5 uppercase tracking-wide font-medium">
+              Staked
+            </div>
+            <div className="text-lg font-bold text-foreground">
+              {stakedBalance ? Number(formatUnits(stakedBalance, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0.00'}
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">FVC</div>
           </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: theme.primaryText }}>
-            {stakedBalance ? Number(formatUnits(stakedBalance, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0.00'}
+
+          <div className="bg-green-500/10 rounded-xl p-4 border border-green-500/20">
+            <div className="text-[11px] text-muted-foreground mb-1.5 uppercase tracking-wide font-medium">
+              Rewards
+            </div>
+            <div className="text-lg font-bold text-green-500">
+              {rewardsValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">USDC</div>
           </div>
-          <div style={{ fontSize: 11, color: theme.secondaryText, marginTop: 2 }}>FVC</div>
         </div>
 
-        <div style={{
-          background: `${theme.success}15`,
-          borderRadius: 12,
-          padding: 16,
-          border: `1px solid ${theme.success}30`,
-        }}>
-          <div style={{ fontSize: 11, color: theme.secondaryText, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-            Rewards
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: theme.success }}>
-            {rewardsValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}
-          </div>
-          <div style={{ fontSize: 11, color: theme.secondaryText, marginTop: 2 }}>USDC</div>
-        </div>
-      </div>
-
-      {/* Claim Button */}
-      {hasRewards && (
-        <button
-          onClick={handleClaim}
-          disabled={isClaiming}
-          style={{
-            width: '100%',
-            padding: '14px',
-            borderRadius: 12,
-            border: 'none',
-            background: isClaiming ? theme.darkBorder : theme.success,
-            color: '#FFFFFF',
-            fontSize: 15,
-            fontWeight: 600,
-            cursor: isClaiming ? 'not-allowed' : 'pointer',
-            fontFamily: 'Inter, sans-serif',
-            opacity: isClaiming ? 0.6 : 1,
-            marginBottom: 20,
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            if (!isClaiming) {
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.opacity = '0.9';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.opacity = '1';
-          }}
-        >
-          {isClaiming ? 'Claiming...' : `Claim ${rewardsValue.toFixed(2)} USDC`}
-        </button>
-      )}
-
-      {/* Mode Toggle */}
-      <div style={{
-        display: 'flex',
-        background: `${theme.darkBorder}40`,
-        borderRadius: 12,
-        padding: 4,
-        marginBottom: 16,
-      }}>
-        <button
-          onClick={() => setIsStakeMode(true)}
-          style={{
-            flex: 1,
-            padding: '10px',
-            borderRadius: 8,
-            border: 'none',
-            background: isStakeMode ? theme.generalButton : 'transparent',
-            color: isStakeMode ? theme.buttonText : theme.secondaryText,
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: 'pointer',
-            fontFamily: 'Inter, sans-serif',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          Stake
-        </button>
-        <button
-          onClick={() => setIsStakeMode(false)}
-          style={{
-            flex: 1,
-            padding: '10px',
-            borderRadius: 8,
-            border: 'none',
-            background: !isStakeMode ? theme.generalButton : 'transparent',
-            color: !isStakeMode ? theme.buttonText : theme.secondaryText,
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: 'pointer',
-            fontFamily: 'Inter, sans-serif',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          Unstake
-        </button>
-      </div>
-
-      {/* Input */}
-      <div style={{
-        background: `${theme.darkBorder}40`,
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16,
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 8,
-        }}>
-          <div style={{ fontSize: 12, color: theme.secondaryText }}>
-            {isStakeMode ? 'Amount to stake' : 'Amount to unstake'}
-          </div>
-          <div style={{ fontSize: 12, color: theme.secondaryText }}>
-            Balance: {isStakeMode 
-              ? (fvcBalance ? Number(formatUnits(fvcBalance, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0')
-              : (stakedBalance ? Number(formatUnits(stakedBalance, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0')
-            } FVC
-          </div>
-        </div>
-        <div style={{ position: 'relative' }}>
-          <input
-            type="number"
-            placeholder="0.0"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '12px 60px 12px 12px',
-              borderRadius: 8,
-              border: `1px solid ${theme.darkBorder}`,
-              background: theme.modalBackground,
-              color: theme.primaryText,
-              fontSize: 20,
-              fontWeight: 600,
-              fontFamily: 'Inter, sans-serif',
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-          />
-          <button
-            onClick={setMax}
-            style={{
-              position: 'absolute',
-              right: 8,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              background: `${theme.generalButton}30`,
-              color: theme.generalButton,
-              border: 'none',
-              borderRadius: 6,
-              padding: '6px 10px',
-              fontSize: 11,
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = theme.generalButton;
-              e.currentTarget.style.color = theme.buttonText;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = `${theme.generalButton}30`;
-              e.currentTarget.style.color = theme.generalButton;
-            }}
+        {/* Claim Button */}
+        {hasRewards && (
+          <Button
+            onClick={handleClaim}
+            disabled={isClaiming}
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold"
+            size="lg"
           >
-            MAX
-          </button>
-        </div>
-      </div>
+            {isClaiming ? 'Claiming...' : `Claim ${rewardsValue.toFixed(2)} USDC`}
+          </Button>
+        )}
 
-      {/* Action Buttons */}
-      {isStakeMode ? (
-        <div style={{ display: 'flex', gap: 8 }}>
+        {/* Mode Toggle */}
+        <div className="flex bg-muted/40 p-1 rounded-xl">
           <button
-            onClick={handleApprove}
-            disabled={isApproving || !amount}
-            style={{
-              flex: 1,
-              padding: '14px',
-              borderRadius: 12,
-              border: 'none',
-              background: isApproving || !amount ? theme.darkBorder : `${theme.generalButton}30`,
-              color: isApproving || !amount ? theme.secondaryText : theme.generalButton,
-              fontSize: 15,
-              fontWeight: 600,
-              cursor: isApproving || !amount ? 'not-allowed' : 'pointer',
-              fontFamily: 'Inter, sans-serif',
-              opacity: isApproving || !amount ? 0.5 : 1,
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              if (!isApproving && amount) {
-                e.currentTarget.style.background = theme.generalButton;
-                e.currentTarget.style.color = theme.buttonText;
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isApproving && amount) {
-                e.currentTarget.style.background = `${theme.generalButton}30`;
-                e.currentTarget.style.color = theme.generalButton;
-              }
-            }}
+            onClick={() => setIsStakeMode(true)}
+            className={cn(
+              "flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all",
+              isStakeMode 
+                ? "bg-primary text-primary-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            {isApproving ? 'Approving...' : 'Approve'}
+            Stake
           </button>
           <button
-            onClick={handleStake}
-            disabled={isStaking || !amount}
-            style={{
-              flex: 1,
-              padding: '14px',
-              borderRadius: 12,
-              border: 'none',
-              background: isStaking || !amount ? theme.darkBorder : theme.generalButton,
-              color: theme.buttonText,
-              fontSize: 15,
-              fontWeight: 600,
-              cursor: isStaking || !amount ? 'not-allowed' : 'pointer',
-              fontFamily: 'Inter, sans-serif',
-              opacity: isStaking || !amount ? 0.5 : 1,
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              if (!isStaking && amount) {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.opacity = '0.9';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.opacity = '1';
-            }}
+            onClick={() => setIsStakeMode(false)}
+            className={cn(
+              "flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all",
+              !isStakeMode 
+                ? "bg-primary text-primary-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            {isStaking ? 'Staking...' : 'Stake'}
+            Unstake
           </button>
         </div>
-      ) : (
-        <button
-          onClick={handleWithdraw}
-          disabled={isWithdrawing || !amount}
-          style={{
-            width: '100%',
-            padding: '14px',
-            borderRadius: 12,
-            border: 'none',
-            background: isWithdrawing || !amount ? theme.darkBorder : theme.generalButton,
-            color: theme.buttonText,
-            fontSize: 15,
-            fontWeight: 600,
-            cursor: isWithdrawing || !amount ? 'not-allowed' : 'pointer',
-            fontFamily: 'Inter, sans-serif',
-            opacity: isWithdrawing || !amount ? 0.5 : 1,
-            transition: 'all 0.2s ease',
-          }}
-          onMouseEnter={(e) => {
-            if (!isWithdrawing && amount) {
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.opacity = '0.9';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.opacity = '1';
-          }}
-        >
-          {isWithdrawing ? 'Unstaking...' : 'Unstake'}
-        </button>
-      )}
-    </div>
+
+        {/* Input */}
+        <div className="bg-muted/30 rounded-xl p-4 border border-border">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs text-muted-foreground">
+              {isStakeMode ? 'Amount to stake' : 'Amount to unstake'}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Balance: {isStakeMode 
+                ? (fvcBalance ? Number(formatUnits(fvcBalance, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0')
+                : (stakedBalance ? Number(formatUnits(stakedBalance, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0')
+              } FVC
+            </span>
+          </div>
+          <div className="relative">
+            <Input
+              type="number"
+              placeholder="0.0"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="pr-16 h-12 text-lg font-semibold bg-background"
+            />
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={setMax}
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-7 text-[10px] font-bold text-primary hover:text-primary hover:bg-primary/10"
+            >
+              MAX
+            </Button>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        {isStakeMode ? (
+          <div className="flex gap-3">
+            <Button
+              onClick={handleApprove}
+              disabled={isApproving || !amount}
+              variant="secondary"
+              className="flex-1 font-semibold"
+              size="lg"
+            >
+              {isApproving ? 'Approving...' : 'Approve'}
+            </Button>
+            <Button
+              onClick={handleStake}
+              disabled={isStaking || !amount}
+              className="flex-1 font-semibold"
+              size="lg"
+            >
+              {isStaking ? 'Staking...' : 'Stake'}
+            </Button>
+          </div>
+        ) : (
+          <Button
+            onClick={handleWithdraw}
+            disabled={isWithdrawing || !amount}
+            className="w-full font-semibold"
+            size="lg"
+          >
+            {isWithdrawing ? 'Unstaking...' : 'Unstake'}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
