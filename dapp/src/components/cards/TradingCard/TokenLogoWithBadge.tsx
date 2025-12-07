@@ -4,10 +4,11 @@ const tokenMap = {
   ETH: '/assets/token-logos/eth.svg',
   USDC: '/assets/token-logos/usdc.svg',
   BASE: '/assets/token-logos/base.svg',
+  POL: '/assets/token-logos/polygon.svg',
 };
 
 interface Props {
-  token: 'ETH' | 'USDC' | 'BASE';
+  token: 'ETH' | 'USDC' | 'BASE' | 'POL';
   size?: number;
 }
 
