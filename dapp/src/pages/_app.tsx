@@ -4,7 +4,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 import type { AppProps } from 'next/app';
 import { getDefaultConfig, RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
-import { mainnet, polygon, polygonAmoy } from 'wagmi/chains';
+import { polygon, polygonAmoy, baseSepolia, bscTestnet } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { theme } from '@/constants/theme';
 
@@ -13,7 +13,7 @@ const projectId = '54d704a3ccdf59ce20365f11281123bd'; // original WalletConnect 
 const config = getDefaultConfig({
   appName: 'FVC',
   projectId,
-  chains: [mainnet, polygon, polygonAmoy],
+  chains: [polygonAmoy, baseSepolia, bscTestnet],
   ssr: true,
 });
 
