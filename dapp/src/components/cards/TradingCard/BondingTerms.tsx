@@ -1,25 +1,11 @@
 import React from 'react';
-import { theme } from '@/constants/theme';
-
-const interFont: React.CSSProperties = { fontFamily: 'Inter, sans-serif' };
 
 const BondingTerms: React.FC = () => (
-  <div style={{
-    background: 'rgba(56,189,248,0.1)',
-    padding: '16px',
-    borderRadius: 10,
-    marginTop: 20,
-    width: '100%',
-    fontSize: 14,
-    color: theme.secondaryText,
-    lineHeight: 1.5,
-    border: 'none',
-    ...interFont,
-  }}>
-    <div style={{ fontWeight: 600, marginBottom: 8, color: theme.primaryText }}>
+  <div className="bg-sky-500/10 p-4 rounded-xl mt-5 w-full text-sm text-muted-foreground leading-relaxed">
+    <div className="font-semibold mb-2 text-foreground">
       Bonding Terms & Conditions
     </div>
-    <ul style={{ margin: 0, paddingLeft: '16px' }}>
+    <ul className="list-disc pl-4 space-y-1">
       <li>$FVC is sold at a discount (20% initial, decreasing to 10% over epoch).</li>
       <li>Target valuation: $0.80 - $0.90 per FVC in Round 1.</li>
       <li>Tokens are locked until the bonding round concludes.</li>
@@ -31,4 +17,4 @@ const BondingTerms: React.FC = () => (
   </div>
 );
 
-export default BondingTerms; 
+export default BondingTerms;
