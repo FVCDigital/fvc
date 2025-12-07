@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import RoadmapCard from './RoadmapCard';
 import RoadmapModal from './RoadmapModal';
 import { RoadmapStage } from './types';
-import { theme } from '@/constants/theme';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6';
 
 const RoadmapFlowchart: React.FC = () => {
   const [selectedStage, setSelectedStage] = useState<RoadmapStage | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const handleCardClick = (stage: RoadmapStage) => {
     setSelectedStage(stage);
@@ -16,6 +19,18 @@ const RoadmapFlowchart: React.FC = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedStage(null);
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentIndex < roadmapStages.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    }
   };
 
   const roadmapStages: RoadmapStage[] = [
@@ -28,7 +43,7 @@ const RoadmapFlowchart: React.FC = () => {
         'FVC token contract deployed with vesting integration',
         'Bonding contract with multi-round system operational',
         'Frontend application with atomic components built',
-        'Testnet deployment on Base Sepolia completed'
+        'Testnet deployment on Polygon completed'
       ],
       timeline: 'Q3 2025',
       status: 'completed',
@@ -41,7 +56,7 @@ const RoadmapFlowchart: React.FC = () => {
       description: 'Initial fundraising round to secure professional audit and establish protocol foundation. This stage focuses on building trust and ensuring security through comprehensive auditing.',
       details: [
         'Raise funds for professional smart contract audit',
-        'Deploy contracts to Base mainnet',
+        'Deploy contracts to Polygon mainnet',
         'Complete security verification and testing',
         'Establish initial community and partnerships'
       ],
@@ -64,240 +79,86 @@ const RoadmapFlowchart: React.FC = () => {
       status: 'future',
       icon: '🔓',
     },
-    {
-      id: 3,
-      title: 'Stage 3',
-      subtitle: 'Governance & Community',
-      description: 'Launch of decentralised governance system allowing FVC holders to participate in protocol decisions and community building.',
-      details: [
-        'Deploy governance contracts and voting system',
-        'Establish community governance framework',
-        'First governance proposals and voting rounds',
-        'Community treasury and funding mechanisms'
-      ],
-      timeline: 'Q2 2026',
-      status: 'future',
-      icon: '🗳️',
-    },
-    {
-      id: 4,
-      title: 'Stage 4',
-      subtitle: 'SME Launch & Operations',
-      description: 'Launch of the first Small and Medium Enterprise (SME) partnerships and operational protocols for real-world business integration.',
-      details: [
-        'Partner with first SME businesses',
-        'Implement operational protocols and workflows',
-        'Establish revenue sharing mechanisms',
-        'Scale operations and business development'
-      ],
-      timeline: 'Q3 2026',
-      status: 'future',
-      icon: '🏢',
-    },
-    {
-      id: 5,
-      title: 'Stage 5',
-      subtitle: 'Staking & Rewards',
-      description: 'Implementation of staking mechanisms allowing FVC holders to earn rewards and participate in protocol growth.',
-      details: [
-        'Deploy staking contracts and reward systems',
-        'Establish staking pools and APY mechanisms',
-        'Launch liquidity mining programs',
-        'Implement reward distribution algorithms'
-      ],
-      timeline: 'Q4 2026',
-      status: 'future',
-      icon: '💎',
-    },
-    {
-      id: 6,
-      title: 'Stage 6',
-      subtitle: 'Scaling & Expansion',
-      description: 'Protocol expansion to multiple chains, additional business partnerships, and advanced features for enterprise adoption.',
-      details: [
-        'Multi-chain deployment and cross-chain bridges',
-        'Advanced enterprise features and APIs',
-        'International expansion and partnerships',
-        'Protocol optimization and performance improvements'
-      ],
-      timeline: 'Q1 2027',
-      status: 'future',
-      icon: '🚀',
-    }
   ];
-
-  // Responsive container styles - prevent overflow like dashboard
-  const containerStyle: React.CSSProperties = {
-    width: '100%',
-    maxWidth: '1000px',
-    margin: '0 auto',
-    padding: '16px',
-    fontFamily: 'Inter, sans-serif',
-    boxSizing: 'border-box',
-    overflow: 'hidden', // Prevent horizontal overflow
-  };
-
-  const titleStyle: React.CSSProperties = {
-    textAlign: 'center',
-    marginBottom: '32px',
-  };
-
-  const mainTitleStyle: React.CSSProperties = {
-    fontSize: 'clamp(20px, 4vw, 28px)',
-    fontWeight: 700,
-    color: theme.primaryText,
-    margin: 0,
-    marginBottom: '12px',
-  };
-
-  const subtitleStyle: React.CSSProperties = {
-    fontSize: 'clamp(12px, 2.5vw, 16px)',
-    color: theme.secondaryText,
-    margin: 0,
-  };
-
-  // Timeline container - more compact
-  const timelineStyle: React.CSSProperties = {
-    position: 'relative',
-    padding: '24px 0',
-  };
-
-  // Clean timeline line - subtle and minimal
-  const timelineLineStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: '50%',
-    top: '60px',
-    bottom: '60px',
-    width: '1px',
-    background: `linear-gradient(to bottom, transparent, ${theme.modalButton}, transparent)`,
-    transform: 'translateX(-50%)',
-    zIndex: 1,
-    opacity: 0.3,
-  };
-
-  const cardsContainerStyle: React.CSSProperties = {
-    position: 'relative',
-    zIndex: 2,
-  };
-
-  // Simple card wrapper - single column for all screen sizes
-  const getCardWrapperStyle = (): React.CSSProperties => {
-    return {
-      position: 'relative',
-      marginBottom: '32px',
-      display: 'flex',
-      justifyContent: 'center',
-      width: '100%',
-      boxSizing: 'border-box',
-      overflow: 'hidden',
-    };
-  };
-
 
 
   return (
-    <div style={containerStyle}>
+    <div className="w-full min-h-screen flex flex-col font-sans overflow-hidden">
       {/* Title */}
-      <div style={titleStyle}>
-        <h1 style={mainTitleStyle}>Roadmap</h1>
-        <p style={subtitleStyle}>Our journey to build the future of decentralised finance</p>
+      <div className="text-center py-12 px-4">
+        <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight">Roadmap</h1>
+        <p className="text-lg text-muted-foreground">Swipe to explore our journey</p>
       </div>
 
-      {/* Timeline */}
-      <div style={timelineStyle}>
-        {/* Clean timeline line */}
-        <div style={timelineLineStyle} />
-        
-        <div style={cardsContainerStyle}>
-          {roadmapStages.map((stage, index) => (
-            <div key={stage.id} style={getCardWrapperStyle()}>
-              {/* Card */}
-              <div style={{ 
-                width: '100%',
-                maxWidth: '400px',
-                boxSizing: 'border-box',
-              }}>
-                <RoadmapCard 
-                  stage={stage} 
-                  onClick={() => handleCardClick(stage)} 
-                />
-              </div>
-            </div>
-          ))}
+      {/* Card container with navigation */}
+      <div className="relative flex-1 flex items-center justify-center w-full px-4">
+        {/* Left button */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handlePrev}
+          disabled={currentIndex === 0}
+          className={cn(
+            "rounded-full h-12 w-12 mr-4 shrink-0 transition-all shadow-lg hidden md:flex",
+            currentIndex === 0 ? "opacity-0 pointer-events-none" : "hover:scale-110 border-primary/20"
+          )}
+        >
+          <FaChevronLeft className="h-5 w-5" />
+        </Button>
+
+        {/* Current card */}
+        <div className="flex-1 max-w-[400px] w-full transform transition-all duration-300">
+          <RoadmapCard 
+            stage={roadmapStages[currentIndex]} 
+            onClick={() => handleCardClick(roadmapStages[currentIndex])} 
+          />
         </div>
+
+        {/* Right button */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleNext}
+          disabled={currentIndex === roadmapStages.length - 1}
+          className={cn(
+            "rounded-full h-12 w-12 ml-4 shrink-0 transition-all shadow-lg hidden md:flex",
+            currentIndex === roadmapStages.length - 1 ? "opacity-0 pointer-events-none" : "hover:scale-110 border-primary/20"
+          )}
+        >
+          <FaChevronRight className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* Dots indicator */}
+      <div className="flex justify-center gap-3 py-8">
+        {roadmapStages.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={cn(
+              "h-2.5 rounded-full transition-all duration-300",
+              currentIndex === index ? "w-8 bg-primary" : "w-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+            )}
+            aria-label={`Go to stage ${index}`}
+          />
+        ))}
       </div>
 
       {/* Legend */}
-      <div style={{
-        marginTop: '40px',
-        padding: '20px',
-        background: theme.modalBackground,
-        borderRadius: '12px',
-        border: `1px solid ${theme.darkBorder}`,
-        textAlign: 'center',
-      }}>
-        <h3 style={{
-          fontSize: '16px',
-          fontWeight: 600,
-          color: theme.primaryText,
-          margin: '0 0 16px 0',
-        }}>Legend</h3>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: 'clamp(16px, 4vw, 32px)',
-          flexWrap: 'wrap',
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}>
-            <div style={{
-              width: '12px',
-              height: '12px',
-              borderRadius: '50%',
-              background: '#10B981',
-            }} />
-            <span style={{
-              fontSize: 'clamp(12px, 2.5vw, 14px)',
-              color: theme.primaryText,
-              fontWeight: 500,
-            }}>DONE</span>
+      <div className="mx-4 mb-8 p-6 bg-card/50 backdrop-blur-sm rounded-xl border border-border max-w-2xl md:mx-auto w-full">
+        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground text-center mb-6">Legend</h3>
+        <div className="flex justify-center gap-8 flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+            <span className="text-sm font-bold text-foreground">DONE</span>
           </div>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}>
-            <div style={{
-              width: '12px',
-              height: '12px',
-              borderRadius: '50%',
-              background: '#38BDF8',
-            }} />
-            <span style={{
-              fontSize: 'clamp(12px, 2.5vw, 14px)',
-              color: theme.primaryText,
-              fontWeight: 500,
-            }}>CURRENT</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-sky-500 shadow-sm shadow-sky-500/50" />
+            <span className="text-sm font-bold text-foreground">CURRENT</span>
           </div>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}>
-            <div style={{
-              width: '12px',
-              height: '12px',
-              borderRadius: '50%',
-              background: '#6B7280',
-            }} />
-            <span style={{
-              fontSize: 'clamp(12px, 2.5vw, 14px)',
-              color: theme.primaryText,
-              fontWeight: 500,
-            }}>FUTURE</span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-muted-foreground" />
+            <span className="text-sm font-bold text-muted-foreground">FUTURE</span>
           </div>
         </div>
       </div>
@@ -310,8 +171,6 @@ const RoadmapFlowchart: React.FC = () => {
           onClose={handleCloseModal}
         />
       )}
-
-
     </div>
   );
 };
