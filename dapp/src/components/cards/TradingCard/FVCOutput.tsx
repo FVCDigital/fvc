@@ -1,25 +1,10 @@
 import React from 'react';
-import { theme } from '@/constants/theme';
-
-const interFont: React.CSSProperties = { fontFamily: 'Inter, sans-serif' };
+import { cn } from '@/lib/utils';
 
 const FVCOutput: React.FC<{ fvcAmount: string, currentDiscount: number }> = ({ fvcAmount, currentDiscount }) => (
-  <div style={{
-    width: '100%',
-    padding: '10px 14px',
-    borderRadius: 10,
-    border: `1.5px solid ${theme.modalButton}`,
-    background: theme.appBackground,
-    color: theme.primaryText,
-    fontSize: 18,
-    height: 44,
-    display: 'flex',
-    alignItems: 'center',
-    boxSizing: 'border-box',
-    ...interFont,
-  }}>
+  <div className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-lg font-medium h-12 flex items-center shadow-sm">
     {fvcAmount ? `${fvcAmount} FVC (${currentDiscount}% discount)` : `FVC (${currentDiscount}% discount)`}
   </div>
 );
 
-export default FVCOutput; 
+export default FVCOutput;
