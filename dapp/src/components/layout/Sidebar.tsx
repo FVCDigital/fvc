@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { theme } from '@/constants/theme';
+import React from 'react';
 import { FaDiscord, FaTelegram, FaXTwitter, FaXmark } from 'react-icons/fa6';
 import { TabId } from '@/constants/tabs';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
   activeTab: TabId;
@@ -37,163 +38,69 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const sidebarContent = (
-    <div style={{
-      position: 'fixed',
-      left: 0,
-      top: 0,
-      bottom: 0,
-      width: 280,
-      background: '#08090A',
-      borderRight: `1px solid ${theme.modalButton}`,
-      display: 'flex',
-      flexDirection: 'column',
-      zIndex: 1002,
-      fontFamily: 'Inter, sans-serif',
-      transform: isMobile && !isOpen ? 'translateX(-100%)' : 'translateX(0)',
-      transition: 'transform 0.3s ease',
-    }}>
+  const SidebarContent = () => (
+    <div className={cn(
+      "fixed left-0 top-0 bottom-0 w-[280px] bg-card border-r border-border flex flex-col z-[1002] transition-transform duration-300 ease-in-out font-sans",
+      isMobile && !isOpen ? "-translate-x-full" : "translate-x-0"
+    )}>
       {/* Header with Logo and Mobile Close Button */}
-      <div style={{
-        padding: '32px 24px',
-        borderBottom: `1px solid ${theme.modalButton}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-        }}>
+      <div className="p-6 h-[80px] border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-3">
           <img 
             src="/logo.png" 
             alt="Logo" 
-            style={{
-              height: 48,
-              width: 'auto',
-            }} 
+            className="h-12 w-auto"
           />
           {!isMobile && (
-            <div style={{
-              background: 'linear-gradient(90deg, #FCD34D 0%, #FBBF24 100%)',
-              color: '#000000',
-              padding: '4px 10px',
-              borderRadius: 6,
-              fontSize: 10,
-              fontWeight: 700,
-              fontFamily: 'Inter, sans-serif',
-              width: 'fit-content',
-            }}>
+            <div className="bg-gradient-to-r from-yellow-300 to-amber-400 text-black px-2.5 py-1 rounded-md text-[10px] font-bold font-sans w-fit">
               TESTNET
             </div>
           )}
         </div>
         {isMobile && onClose && (
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: theme.primaryText,
-              cursor: 'pointer',
-              padding: 8,
-              borderRadius: 8,
-              transition: 'all 0.2s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = theme.modalButton;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'none';
-            }}
+            className="h-10 w-10 p-2 text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             <FaXmark size={24} />
-          </button>
+          </Button>
         )}
       </div>
 
       {/* Navigation Tabs */}
-      <div style={{ flex: 1, padding: '24px 0' }}>
+      <div className="flex-1 py-6 overflow-y-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => handleTabClick(tab.id as TabId)}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              padding: '16px 24px',
-              background: activeTab === tab.id ? 'rgba(56,189,248,0.1)' : 'transparent',
-              color: activeTab === tab.id ? theme.primaryText : theme.secondaryText,
-              border: 'none',
-              borderLeft: activeTab === tab.id ? `3px solid ${theme.generalButton}` : '3px solid transparent',
-              cursor: 'pointer',
-              fontSize: 16,
-              fontWeight: activeTab === tab.id ? 600 : 500,
-              transition: 'all 0.2s ease',
-              textAlign: 'left',
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== tab.id) {
-                e.currentTarget.style.background = 'rgba(56,189,248,0.05)';
-                e.currentTarget.style.color = theme.primaryText;
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== tab.id) {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = theme.secondaryText;
-              }
-            }}
+            className={cn(
+              "w-full flex items-center gap-3 px-6 py-4 text-base font-medium transition-all duration-200 text-left border-l-[3px]",
+              activeTab === tab.id 
+                ? "bg-primary/10 text-primary border-primary font-semibold" 
+                : "text-muted-foreground border-transparent hover:bg-primary/5 hover:text-foreground"
+            )}
           >
-            <span style={{ fontSize: 20 }}>{tab.icon}</span>
+            <span className="text-xl">{tab.icon}</span>
             {tab.label}
           </button>
         ))}
       </div>
 
       {/* Social Links */}
-      <div style={{
-        padding: '24px',
-        borderTop: `1px solid ${theme.modalButton}`,
-      }}>
-        <div style={{
-          fontSize: 12,
-          color: theme.secondaryText,
-          marginBottom: 16,
-          fontWeight: 600,
-          textTransform: 'uppercase',
-          letterSpacing: 1,
-        }}>
+      <div className="p-6 border-t border-border">
+        <div className="text-xs text-muted-foreground mb-4 font-semibold uppercase tracking-widest">
           Community
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div className="flex gap-3">
           {socialLinks.map((link) => (
             <a
               key={link.name}
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                color: theme.secondaryText,
-                textDecoration: 'none',
-                transition: 'all 0.2s ease',
-                padding: 8,
-                borderRadius: 8,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = theme.primaryText;
-                e.currentTarget.style.background = theme.modalButton;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = theme.secondaryText;
-                e.currentTarget.style.background = 'transparent';
-              }}
+              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
               {link.icon}
             </a>
@@ -201,12 +108,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
         
         {/* Version Info */}
-        <div style={{
-          marginTop: 20,
-          fontSize: 11,
-          color: theme.secondaryText,
-          textAlign: 'center',
-        }}>
+        <div className="mt-5 text-[11px] text-muted-foreground text-center">
           v1.0.0-testnet
         </div>
       </div>
@@ -220,26 +122,15 @@ const Sidebar: React.FC<SidebarProps> = ({
         {isOpen && (
           <div
             onClick={onClose}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(0, 0, 0, 0.7)',
-              backdropFilter: 'blur(4px)',
-              zIndex: 1001,
-            }}
+            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[1001]"
           />
         )}
-
-        {/* Mobile Sidebar */}
-        {sidebarContent}
+        <SidebarContent />
       </>
     );
   }
 
-  return sidebarContent;
+  return <SidebarContent />;
 };
 
 export default Sidebar;

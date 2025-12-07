@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { theme } from '@/constants/theme';
+import React, { useState } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import TabSwitcher from './TabSwitcher';
 import AssetSelector from './AssetSelector';
@@ -10,14 +9,13 @@ import CardPaymentForm from './CardPaymentForm';
 import BondingTerms from './BondingTerms';
 import useKYC from '@/utils/hooks/useKYC';
 import KYCButton from '@/components/cards/KYCButton';
-import { useBondingFlow, useMockUSDCBalance, useBondingContractBalance } from '@/utils/handlers/bondingHandler';
+import { useBondingFlow, useBondingContractBalance } from '@/utils/handlers/bondingHandler';
 import { useCurrentDiscount, useCurrentRound, useCurrentPrice, useCurrentPrices, useEthUsdPrice, CONTRACTS } from '@/utils/contracts/bondingContract';
-import { parseUnits, formatUnits } from 'viem';
+import { formatUnits } from 'viem';
 import { 
   calculateFVCAmount, 
   calculateFVCAmountFromUSDC,
   calculateFVCAmountFromETH,
-  calculateRequiredETH,
   getAssetDisplayName, 
   getActionButtonText, 
   shouldShowApproveButton,
@@ -25,7 +23,9 @@ import {
 } from '@/utils';
 import { Asset } from '@/types';
 import BondingStats from './BondingStats';
-
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const ASSETS: Asset[] = [
   { 
@@ -45,8 +45,6 @@ const ASSETS: Asset[] = [
     color: '#627EEA'
   },
 ];
-
-const percentButtons = [0, 25, 50, 75, 100];
 
 interface RoundConfig {
   roundId: bigint;
@@ -75,24 +73,21 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   const {
     bondAmount,
     setBondAmount,
-    step,
     errorMessage,
     handleApprove,
     handleBond: handleBondFlow,
-    resetFlow,
     isApproving,
     isBonding,
     isApproved,
-    isBonded,
   } = useBondingFlow(selectedAsset);
 
   // Contract data
-  const { discount, isLoading: isLoadingDiscount } = useCurrentDiscount();
-  const { currentRound, isLoading: isLoadingRound } = useCurrentRound();
+  const { discount } = useCurrentDiscount();
+  const { currentRound } = useCurrentRound();
   const { bondingContractBalance, isLoading: isLoadingBalance } = useBondingContractBalance();
-  const { price: currentPrice, isLoading: isLoadingPrice } = useCurrentPrice();
+  const { price: currentPrice } = useCurrentPrice();
   const { prices: currentPrices, isLoading: isLoadingPrices } = useCurrentPrices();
-  const { ethUsdPrice, isLoading: isLoadingEthPrice } = useEthUsdPrice();
+  const { ethUsdPrice } = useEthUsdPrice();
 
   // Handle the new contract structure - currentRound is now an array
   const round = currentRound && Array.isArray(currentRound) ? {
@@ -107,20 +102,6 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
     isActive: currentRound[8],
     totalBonded: currentRound[9]
   } as RoundConfig : undefined;
-
-  // Debug logging for contract data
-  console.log('Contract Data Debug:');
-  console.log('currentRound:', currentRound);
-  console.log('round:', round);
-  console.log('discount:', discount);
-  console.log('bondingContractBalance:', bondingContractBalance);
-  console.log('isLoadingRound:', isLoadingRound);
-  console.log('isLoadingDiscount:', isLoadingDiscount);
-  console.log('isLoadingBalance:', isLoadingBalance);
-  console.log('CONTRACTS:', CONTRACTS);
-  console.log('NODE_ENV:', process.env.NODE_ENV);
-  console.log('NEXT_PUBLIC_NETWORK:', process.env.NEXT_PUBLIC_NETWORK);
-  console.log('User address:', address);
 
   // Balance - Use real balance for both ETH and USDC
   const ethBalance = useBalance({ 
@@ -146,21 +127,9 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   const fvcAmount = selectedAsset.symbol === 'USDC' 
     ? calculateFVCAmountFromUSDC(bondAmount, currentPrice)
     : selectedAsset.symbol === 'ETH' && ethUsdPrice && currentPrice
-      ? calculateFVCAmountFromETH(bondAmount, ethUsdPrice, currentPrice) // bondAmount (ETH), ethUsdPrice, fvcUsdPrice
-      : calculateFVCAmount(bondAmount, discount as bigint | undefined, selectedAsset); // Fallback for legacy
+      ? calculateFVCAmountFromETH(bondAmount, ethUsdPrice, currentPrice)
+      : calculateFVCAmount(bondAmount, discount as bigint | undefined, selectedAsset);
   
-  // Debug logging
-  console.log('=== BONDING DEBUG ===');
-  console.log('Selected Asset:', selectedAsset.symbol);
-  console.log('Bond Amount:', bondAmount);
-  console.log('Current Price (FVC/USDC):', currentPrice);
-  console.log('ETH/USD Price:', ethUsdPrice);
-  console.log('Current Prices (FVC in USDC/ETH):', currentPrices);
-  console.log('Calculated FVC Amount:', fvcAmount);
-  console.log('Discount:', discount);
-  console.log('Contract Addresses:', CONTRACTS);
-  console.log('===================');
-
   const handlePercent = (pct: number) => {
     if (!balance?.data) return;
     const value = calculatePercentageAmount(balance.data.formatted, pct, selectedAsset.decimals);
@@ -169,7 +138,6 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
 
   const handleBond = async () => {
     if (!address) return;
-    // For ETH bonding, we need to pass the FVC amount
     if (selectedAsset.symbol === 'ETH') {
       await handleBondFlow(fvcAmount);
     } else {
@@ -183,235 +151,150 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   };
 
   return (
-    <div style={{
-      background: theme.modalBackground,
-      color: theme.primaryText,
-      borderRadius: 16,
-      padding: 28,
-      fontWeight: 500,
-      fontSize: 20,
-      boxShadow: '0 4px 24px rgba(56,189,248,0.10)',
-      margin: '16px auto',
-      maxWidth: 'min(600px, 90vw)',
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: 200,
-      border: `1px solid ${theme.modalButton}`,
-      boxSizing: 'border-box',
-      fontFamily: 'Inter, sans-serif',
-    }}>
-      <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Bonding</div>
-      <div style={{ fontSize: 16, color: theme.secondaryText, marginBottom: 16, textAlign: 'center' }}>
-        Bond {getAssetDisplayName(selectedAsset)} for FVC tokens at a discount
-      </div>
+    <Card className="max-w-[600px] w-full mx-auto my-4 shadow-xl border-border bg-card/80 backdrop-blur-sm">
+      <CardHeader className="text-center pb-2">
+        <CardTitle className="text-2xl font-bold">Bonding</CardTitle>
+        <CardDescription>
+          Bond {getAssetDisplayName(selectedAsset)} for FVC tokens at a discount
+        </CardDescription>
+      </CardHeader>
       
-      <TabSwitcher tab={tab} setTab={setTab} />
-      
-      {tab === 'wallet' && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '100%' }}>
-          <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Wallet Payment</div>
-          <div style={{ fontSize: 16, color: theme.secondaryText, marginBottom: 16, textAlign: 'center' }}>
-            Connect your wallet to bond {getAssetDisplayName(selectedAsset)} for FVC tokens
-          </div>
-          
-          {/* Current Round Info */}
-          {round && (
-            <div style={{ 
-              background: 'rgba(56,189,248,0.1)', 
-              padding: '12px 16px', 
-              borderRadius: 8, 
-              marginBottom: 16,
-              width: '100%',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: 14, color: theme.secondaryText }}>
+      <CardContent className="flex flex-col items-center">
+        <TabSwitcher tab={tab} setTab={setTab} />
+        
+        {tab === 'wallet' && (
+          <div className="w-full flex flex-col items-center">
+            
+            {/* Current Round Info */}
+            {round && (
+              <div className="bg-sky-500/10 text-sky-600 dark:text-sky-400 px-4 py-3 rounded-xl mb-4 text-sm font-medium w-full text-center border border-sky-500/20">
                 Round {Number(round.roundId)} • {Number(round.initialDiscount)}% → {Number(round.finalDiscount)}% discount
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Asset Selector */}
-          <AssetSelector assets={ASSETS} selectedAsset={selectedAsset} setSelectedAsset={setSelectedAsset} />
-          
-          {/* Bonding Progress */}
-          {round && (
-            <BondingProgressBar 
-              progress={Number(round.totalBonded) / Number(round.epochCap) * 100} 
+            {/* Asset Selector */}
+            <AssetSelector assets={ASSETS} selectedAsset={selectedAsset} setSelectedAsset={setSelectedAsset} />
+            
+            {/* Bonding Progress */}
+            {round && (
+              <BondingProgressBar 
+                progress={Number(round.totalBonded) / Number(round.epochCap) * 100} 
+              />
+            )}
+
+            {/* Bonding Stats */}
+            <BondingStats
+              totalBonded={round?.totalBonded || 0n}
+              epochCap={round?.epochCap || 0n}
+              currentDiscount={discount ? Number(discount) : 0}
+              initialDiscount={round?.initialDiscount ? Number(round.initialDiscount) : 20}
+              fvcAllocated={round?.fvcAllocated || 0n}
+              fvcSold={round?.fvcSold || 0n}
+              bondingContractBalance={bondingContractBalance}
             />
-          )}
 
-          {/* Bonding Stats */}
-          <BondingStats
-            totalBonded={round?.totalBonded || 0n}
-            epochCap={round?.epochCap || 0n}
-            currentDiscount={discount ? Number(discount) : 0}
-            initialDiscount={round?.initialDiscount ? Number(round.initialDiscount) : 20}
-            fvcAllocated={round?.fvcAllocated || 0n}
-            fvcSold={round?.fvcSold || 0n}
-            bondingContractBalance={bondingContractBalance}
-          />
-
-          {/* Price Display */}
-          {currentPrices && !isLoadingPrices && (
-            <div style={{ 
-              background: 'rgba(56,189,248,0.1)', 
-              padding: '12px 16px', 
-              borderRadius: 8, 
-              marginBottom: 16,
-              width: '100%',
-              textAlign: 'center'
-            }}>
-              <div style={{ fontSize: 14, color: theme.secondaryText, marginBottom: 4 }}>
-                Current FVC Price
-              </div>
-              <div style={{ fontSize: 16, fontWeight: 600, color: theme.primaryText }}>
-                ${(Number(currentPrices[0]) / 1000).toFixed(3)} USDC
-              </div>
-              {currentPrices[1] > 0n && (
-                <div style={{ fontSize: 14, color: theme.secondaryText }}>
-                  {formatUnits(currentPrices[1], 18)} ETH
+            {/* Price Display */}
+            {currentPrices && !isLoadingPrices && (
+              <div className="bg-sky-500/10 rounded-xl p-3 mb-4 w-full text-center border border-sky-500/20">
+                <div className="text-xs text-muted-foreground mb-1 font-medium">
+                  Current FVC Price
                 </div>
-              )}
-            </div>
-          )}
+                <div className="text-base font-bold text-foreground">
+                  ${(Number(currentPrices[0]) / 1000).toFixed(3)} USDC
+                </div>
+                {currentPrices[1] > 0n && (
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {formatUnits(currentPrices[1], 18)} ETH
+                  </div>
+                )}
+              </div>
+            )}
 
+            {/* Amount Input */}
+            <AmountInput 
+              input={bondAmount}
+              setInput={setBondAmount}
+              balance={balance}
+              isLoading={isLoadingBalance}
+              selectedAsset={selectedAsset}
+              handlePercent={handlePercent}
+            />
 
+            {/* FVC Output */}
+            <FVCOutput fvcAmount={fvcAmount} currentDiscount={discount ? Number(discount) : 0} />
 
-          {/* Amount Input */}
-          <AmountInput 
-            input={bondAmount}
-            setInput={setBondAmount}
-            balance={balance}
-            isLoading={isLoadingBalance}
-            selectedAsset={selectedAsset}
-            handlePercent={handlePercent}
-          />
+            {/* Bonding Terms */}
+            <BondingTerms />
 
-          {/* FVC Output */}
-          <FVCOutput fvcAmount={fvcAmount} currentDiscount={discount ? Number(discount) : 0} />
-
-          {/* Bonding Terms */}
-          <BondingTerms />
-
-          {/* Action Buttons */}
-          {shouldShowApproveButton(selectedAsset, isApproved) ? (
-            <button
-              onClick={handleApproveClick}
-              disabled={isApproving || !address}
-              style={{
-                width: '100%',
-                padding: '12px 24px',
-                borderRadius: 10,
-                border: 'none',
-                background: isApproving ? theme.modalButton : theme.generalButton,
-                color: theme.buttonText,
-                fontSize: 18,
-                fontWeight: 600,
-                cursor: isApproving ? 'not-allowed' : 'pointer',
-                marginTop: 16,
-                fontFamily: 'Inter, sans-serif',
-              }}
-            >
-              {isApproving ? 'Approving USDC...' : 'Approve USDC'}
-            </button>
-          ) : (
-            <button
-              onClick={handleBond}
-              disabled={isBonding || !address}
-              style={{
-                width: '100%',
-                padding: '12px 24px',
-                borderRadius: 10,
-                border: 'none',
-                background: isBonding ? theme.modalButton : theme.generalButton,
-                color: theme.buttonText,
-                fontSize: 18,
-                fontWeight: 600,
-                cursor: isBonding ? 'not-allowed' : 'pointer',
-                marginTop: 16,
-                fontFamily: 'Inter, sans-serif',
-              }}
-            >
-              {getActionButtonText(selectedAsset, isBonding, isApproved, isApproving)}
-            </button>
-          )}
-
-          {errorMessage && (
-            <div style={{ 
-              color: '#ef4444', 
-              fontSize: 14, 
-              marginTop: 8, 
-              textAlign: 'center',
-              padding: '8px 12px',
-              background: 'rgba(239,68,68,0.1)',
-              borderRadius: 6
-            }}>
-              {errorMessage}
-            </div>
-          )}
-        </div>
-      )}
-      
-      {tab === 'card' && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: 340 }}>
-          <div style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Card Payment</div>
-          <div style={{ fontSize: 16, color: theme.secondaryText, marginBottom: 16, textAlign: 'center' }}>
-            Enter your card details to purchase FVC
-          </div>
-          
-          {!isVerified ? (
-            <>
-              <KYCButton
-                onClick={() => {
-                  setShowKycModal(true);
-                  setTimeout(() => { triggerVerification(); }, 0);
-                }}
-                style={{
-                  fontWeight: 600,
-                  fontSize: 18,
-                  padding: '12px 24px',
-                  margin: '24px 0',
-                }}
+            {/* Action Buttons */}
+            {shouldShowApproveButton(selectedAsset, isApproved) ? (
+              <Button
+                onClick={handleApproveClick}
+                disabled={isApproving || !address}
+                className="w-full mt-6 h-12 text-lg font-bold"
+                size="lg"
+                variant={isApproving ? "secondary" : "default"}
               >
-                Verify KYC
-              </KYCButton>
-              {showKycModal && <QrModal onClose={() => setShowKycModal(false)} />}
-            </>
-          ) : (
-            <CardPaymentForm cardNumber={cardNumber} setCardNumber={setCardNumber} expiry={expiry} setExpiry={setExpiry} cvc={cvc} setCvc={setCvc} />
-          )}
+                {isApproving ? 'Approving USDC...' : 'Approve USDC'}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleBond}
+                disabled={isBonding || !address}
+                className="w-full mt-6 h-12 text-lg font-bold"
+                size="lg"
+                variant={isBonding ? "secondary" : "default"}
+              >
+                {getActionButtonText(selectedAsset, isBonding, isApproved, isApproving)}
+              </Button>
+            )}
 
-          {/* Bonding Terms for Card Tab */}
-          <div style={{
-            background: 'rgba(56,189,248,0.1)',
-            padding: '16px',
-            borderRadius: 10,
-            marginTop: 16,
-            width: '100%',
-            fontSize: 14,
-            color: theme.secondaryText,
-            lineHeight: 1.5
-          }}>
-            <div style={{ fontWeight: 600, marginBottom: 8, color: theme.primaryText }}>
-              Bonding Terms & Conditions
-            </div>
-            <ul style={{ margin: 0, paddingLeft: '16px' }}>
-              <li>$FVC is sold at a discount (20% initial, decreasing to 10% over epoch).</li>
-              <li>Target valuation: $0.80 - $0.90 per FVC in Round 1.</li>
-              <li>Tokens are locked until the bonding round concludes.</li>
-              <li>Max 1M FVC per wallet during bonding (0.1% of total supply).</li>
-              <li>KYC required for all transactions.</li>
-              <li>Discount decreases as epoch progresses (early buyers get better rates).</li>
-              <li>See Litepaper for full details.</li>
-            </ul>
+            {errorMessage && (
+              <div className="text-destructive text-sm mt-3 text-center bg-destructive/10 p-2 rounded-md w-full border border-destructive/20">
+                {errorMessage}
+              </div>
+            )}
           </div>
-        </div>
-      )}
-    </div>
+        )}
+        
+        {tab === 'card' && (
+          <div className="w-full max-w-[340px] flex flex-col items-center">
+            <div className="text-2xl font-bold mb-2">Card Payment</div>
+            <div className="text-base text-muted-foreground mb-4 text-center">
+              Enter your card details to purchase FVC
+            </div>
+            
+            {!isVerified ? (
+              <>
+                <KYCButton
+                  onClick={() => {
+                    setShowKycModal(true);
+                    setTimeout(() => { triggerVerification(); }, 0);
+                  }}
+                  style={{
+                    fontWeight: 600,
+                    fontSize: 18,
+                    padding: '12px 24px',
+                    margin: '24px 0',
+                    width: '100%',
+                    borderRadius: '10px',
+                  }}
+                >
+                  Verify KYC
+                </KYCButton>
+                {showKycModal && <QrModal onClose={() => setShowKycModal(false)} />}
+              </>
+            ) : (
+              <CardPaymentForm cardNumber={cardNumber} setCardNumber={setCardNumber} expiry={expiry} setExpiry={setExpiry} cvc={cvc} setCvc={setCvc} />
+            )}
+
+            {/* Bonding Terms for Card Tab */}
+            <BondingTerms />
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
-export default TradingCard; 
+export default TradingCard;
