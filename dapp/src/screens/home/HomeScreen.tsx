@@ -6,13 +6,10 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAccount } from 'wagmi';
 import useKYC from '@/utils/hooks/useKYC';
-import { KYCCard } from '@/components/cards';
 import AppBar from '@/components/layout/AppBar';
 import Sidebar from '@/components/layout/Sidebar';
 import MainLayout from '@/components/layout/MainLayout';
 import TabContent from '@/components/layout/TabContent';
-import TestnetBanner from '@/components/layout/TestnetBanner';
-import { theme } from '@/constants/theme';
 import { useHashRouting } from '@/hooks/useHashRouting';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { Toaster } from '@/components/ui/toaster';
@@ -46,7 +43,7 @@ export default function HomeScreen(): React.JSX.Element {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: theme.appBackground }}>
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* AppBar */}
       {isClient && (
         <AppBar 

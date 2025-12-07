@@ -1,14 +1,7 @@
 import React from 'react';
 import ConnectWalletButton from '@/components/wallet/ConnectWalletButton';
-import NetworkSelector from '@/components/wallet/NetworkSelector';
-import { theme } from '@/constants/theme';
-import { TabId } from '@/constants/tabs';
-
-interface TabItem {
-  id: TabId;
-  label: string;
-  icon?: React.ReactNode;
-}
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface AppBarProps {
   isMobile?: boolean;
@@ -20,63 +13,36 @@ const AppBar: React.FC<AppBarProps> = ({
   onMenuToggle
 }) => (
   <header
-    className="flex items-center justify-between py-4"
-    style={{
-      background: theme.modalBackground,
-      borderBottom: `1px solid ${theme.modalButton}`,
-      minHeight: 64,
-      zIndex: 1001,
-      position: 'fixed',
-      top: 0,
-      left: isMobile ? 0 : 280,
-      right: 0,
-      paddingLeft: isMobile ? 16 : 48,
-      paddingRight: isMobile ? 16 : 48,
-      boxSizing: 'border-box',
-    }}
+    className={cn(
+      "fixed top-0 right-0 z-[1001] flex items-center justify-between py-4 border-b border-border bg-card/80 backdrop-blur-md",
+      isMobile ? "left-0 px-4" : "left-[280px] px-12"
+    )}
+    style={{ minHeight: 64 }}
   >
     {/* Left side - Logo */}
     {!isMobile && (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        fontFamily: 'Inter, sans-serif',
-      }}>
+      <div className="flex items-center gap-3 font-sans">
         <img 
           src="/logo.png" 
           alt="Logo" 
-          style={{
-            height: 40,
-            width: 'auto',
-          }} 
+          className="h-10 w-auto"
         />
       </div>
     )}
     
-    {/* Right side - Network Selector + Wallet (Desktop) or Wallet + Burger Menu (Mobile) */}
-    <div className="flex items-center gap-4">
-      <NetworkSelector />
+    {/* Right side - Wallet (Desktop) or Wallet + Burger Menu (Mobile) */}
+    <div className="flex items-center gap-4 ml-auto">
       <ConnectWalletButton />
       {isMobile && (
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onMenuToggle}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: theme.primaryText,
-            cursor: 'pointer',
-            padding: '12px',
-            borderRadius: 8,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.2s ease',
-          }}
+          className="text-foreground"
           aria-label="Open menu"
         >
-          <span style={{ fontSize: 20, fontWeight: 'bold' }}>☰</span>
-        </button>
+          <span className="text-xl font-bold">☰</span>
+        </Button>
       )}
     </div>
   </header>
