@@ -18,7 +18,7 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
       onClick={onClick}
       className={cn(
         "relative cursor-pointer transition-all duration-300 min-h-[140px] border w-full overflow-hidden group hover:-translate-y-1",
-        isCurrent && "bg-sky-500/10 border-sky-500 text-sky-100 shadow-[0_8px_25px_-5px_rgba(56,189,248,0.3)] animate-pulse",
+        isCurrent && "bg-sky-500/10 border-sky-500 text-sky-100 shadow-[0_8px_25px_-5px_rgba(56,189,248,0.3)] animate-subtle-pulse",
         isCompleted && "bg-emerald-500/5 border-emerald-900/50 text-emerald-100 shadow-md hover:shadow-lg hover:shadow-emerald-900/20",
         isFuture && "bg-muted/40 border-border text-muted-foreground opacity-70 grayscale-[0.3] hover:opacity-100 hover:grayscale-0",
         "flex flex-col justify-between"

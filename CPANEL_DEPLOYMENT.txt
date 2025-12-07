@@ -1,0 +1,79 @@
+FVC DAPP - CPANEL DEPLOYMENT INSTRUCTIONS
+==========================================
+
+Archive: fvc-dapp-cpanel.zip
+Built: 19 November 2025
+Network: Base Sepolia (84532), BNB Testnet (97), Polygon Amoy (80002)
+
+DEPLOYMENT STEPS:
+-----------------
+
+1. LOGIN TO CPANEL
+   - Access your cPanel hosting account
+   - Navigate to File Manager
+
+2. EXTRACT FILES
+   - Upload fvc-dapp-cpanel.zip to public_html/
+   - Right-click → Extract
+   - Move contents of 'out' folder to root of public_html/
+   - Delete the 'out' folder and zip file
+
+3. VERIFY STRUCTURE
+   public_html/
+   ├── .htaccess          (mod_rewrite configuration)
+   ├── index.html         (home page)
+   ├── 404.html
+   ├── logo.png
+   ├── _next/             (Next.js assets)
+   ├── assets/            (static assets)
+   └── roadmap/
+
+4. CONFIGURE DOMAIN
+   - Ensure domain points to public_html/
+   - .htaccess handles routing automatically
+
+5. SSL CERTIFICATE
+   - Enable AutoSSL in cPanel
+   - Or install Let's Encrypt certificate
+
+FEATURES:
+---------
+✓ Multi-chain support (Base, BNB, Polygon)
+✓ Wallet connectivity (MetaMask, WalletConnect, Coinbase)
+✓ Token sale interface
+✓ Staking dashboard
+✓ Trading/bonding interface
+✓ Responsive design
+✓ Static export (no Node.js required)
+
+CONTRACT ADDRESSES:
+-------------------
+Base Sepolia (84532):
+  FVC: 0x7dA82193bf0671Bb1683Dd6488E914436827ae8e
+  TokenSale: 0xd59b3F0EA3Daa359Ec799EB77c36a7bF8926c812
+  Staking: 0x404307557837CDe827f7B4bbb5ea12bD69a6F7F5
+  USDC: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
+
+BNB Testnet (97):
+  FVC: 0x6c44664be09dC32dF8b7B03dAC3d65D1984358fF
+  TokenSale: 0x0b98e70EC5dae765c5a361c5EDFBB856787fb56A
+  Staking: 0xAA8C1C430634D16b37f8132c88607EfA1924c064
+  USDC: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
+
+Polygon Amoy (80002):
+  FVC: 0x0b98e70EC5dae765c5a361c5EDFBB856787fb56A
+  TokenSale: 0xAA8C1C430634D16b37f8132c88607EfA1924c064
+  Staking: 0x18E68709b00b792429aF671a7ADd0Ac0D2dF335A
+  USDC: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
+
+NOTES:
+------
+- Testnet deployment only
+- MetaMask async-storage warning is non-critical
+- HTTPS recommended for wallet security
+- Clear browser cache after deployment
+
+SUPPORT:
+--------
+For issues, check browser console for errors.
+Ensure wallet is connected to correct testnet.

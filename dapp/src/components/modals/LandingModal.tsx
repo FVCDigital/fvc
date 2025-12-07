@@ -110,6 +110,7 @@ const LandingModal: React.FC = () => {
             style={{
               height: 80,
               width: 'auto',
+              borderRadius: 16,
             }} 
           />
         </div>

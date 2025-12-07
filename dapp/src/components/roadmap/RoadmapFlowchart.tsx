@@ -83,15 +83,15 @@ const RoadmapFlowchart: React.FC = () => {
 
 
   return (
-    <div className="w-full min-h-screen flex flex-col font-sans overflow-hidden">
+    <div className="w-full h-full flex flex-col font-sans overflow-hidden">
       {/* Title */}
-      <div className="text-center py-12 px-4">
-        <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight">Roadmap</h1>
-        <p className="text-lg text-muted-foreground">Swipe to explore our journey</p>
+      <div className="text-center py-6 px-4 shrink-0">
+        <h1 className="text-3xl md:text-4xl font-bold mb-2 tracking-tight">Roadmap</h1>
+        <p className="text-sm text-muted-foreground">Swipe to explore our journey</p>
       </div>
 
       {/* Card container with navigation */}
-      <div className="relative flex-1 flex items-center justify-center w-full px-4">
+      <div className="relative flex-1 flex items-center justify-center w-full px-4 min-h-0">
         {/* Left button */}
         <Button
           variant="outline"
@@ -99,15 +99,15 @@ const RoadmapFlowchart: React.FC = () => {
           onClick={handlePrev}
           disabled={currentIndex === 0}
           className={cn(
-            "rounded-full h-12 w-12 mr-4 shrink-0 transition-all shadow-lg hidden md:flex",
+            "rounded-full h-10 w-10 mr-4 shrink-0 transition-all shadow-lg hidden md:flex",
             currentIndex === 0 ? "opacity-0 pointer-events-none" : "hover:scale-110 border-primary/20"
           )}
         >
-          <FaChevronLeft className="h-5 w-5" />
+          <FaChevronLeft className="h-4 w-4" />
         </Button>
 
         {/* Current card */}
-        <div className="flex-1 max-w-[400px] w-full transform transition-all duration-300">
+        <div className="flex-1 max-w-[380px] w-full transform transition-all duration-300">
           <RoadmapCard 
             stage={roadmapStages[currentIndex]} 
             onClick={() => handleCardClick(roadmapStages[currentIndex])} 
@@ -121,23 +121,23 @@ const RoadmapFlowchart: React.FC = () => {
           onClick={handleNext}
           disabled={currentIndex === roadmapStages.length - 1}
           className={cn(
-            "rounded-full h-12 w-12 ml-4 shrink-0 transition-all shadow-lg hidden md:flex",
+            "rounded-full h-10 w-10 ml-4 shrink-0 transition-all shadow-lg hidden md:flex",
             currentIndex === roadmapStages.length - 1 ? "opacity-0 pointer-events-none" : "hover:scale-110 border-primary/20"
           )}
         >
-          <FaChevronRight className="h-5 w-5" />
+          <FaChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
       {/* Dots indicator */}
-      <div className="flex justify-center gap-3 py-8">
+      <div className="flex justify-center gap-2 py-4 shrink-0">
         {roadmapStages.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
             className={cn(
-              "h-2.5 rounded-full transition-all duration-300",
-              currentIndex === index ? "w-8 bg-primary" : "w-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+              "h-2 rounded-full transition-all duration-300",
+              currentIndex === index ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
             )}
             aria-label={`Go to stage ${index}`}
           />
@@ -145,20 +145,20 @@ const RoadmapFlowchart: React.FC = () => {
       </div>
 
       {/* Legend */}
-      <div className="mx-4 mb-8 p-6 bg-card/50 backdrop-blur-sm rounded-xl border border-border max-w-2xl md:mx-auto w-full">
-        <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground text-center mb-6">Legend</h3>
-        <div className="flex justify-center gap-8 flex-wrap">
+      <div className="mx-4 mb-4 p-4 bg-card/50 backdrop-blur-sm rounded-xl border border-border max-w-xl md:mx-auto w-full shrink-0">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground text-center mb-3">Legend</h3>
+        <div className="flex justify-center gap-6 flex-wrap">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
-            <span className="text-sm font-bold text-foreground">DONE</span>
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+            <span className="text-xs font-bold text-foreground">DONE</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-sky-500 shadow-sm shadow-sky-500/50" />
-            <span className="text-sm font-bold text-foreground">CURRENT</span>
+            <div className="w-2.5 h-2.5 rounded-full bg-sky-500 shadow-sm shadow-sky-500/50" />
+            <span className="text-xs font-bold text-foreground">CURRENT</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-muted-foreground" />
-            <span className="text-sm font-bold text-muted-foreground">FUTURE</span>
+            <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground" />
+            <span className="text-xs font-bold text-muted-foreground">FUTURE</span>
           </div>
         </div>
       </div>

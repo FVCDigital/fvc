@@ -40,19 +40,23 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const SidebarContent = () => (
     <div className={cn(
-      "fixed left-0 top-0 bottom-0 w-[280px] bg-card border-r border-border flex flex-col z-[1002] transition-transform duration-300 ease-in-out font-sans",
+      "fixed left-0 top-0 bottom-0 w-[280px] flex flex-col z-[1002] transition-transform duration-300 ease-in-out font-sans",
+      "bg-black/60 backdrop-blur-2xl border-r border-white/5",
       isMobile && !isOpen ? "-translate-x-full" : "translate-x-0"
     )}>
-      {/* Header with Logo and Mobile Close Button */}
-      <div className="p-6 h-[80px] border-b border-border flex items-center justify-between">
+      {/* Header with Logo */}
+      <div className="p-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img 
-            src="/logo.png" 
-            alt="Logo" 
-            className="h-12 w-auto"
-          />
+          <div className="relative">
+            <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-full"></div>
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="h-10 w-auto relative z-10 rounded-xl"
+            />
+          </div>
           {!isMobile && (
-            <div className="bg-gradient-to-r from-yellow-300 to-amber-400 text-black px-2.5 py-1 rounded-md text-[10px] font-bold font-sans w-fit">
+            <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 text-yellow-400 border border-yellow-400/30 px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wider">
               TESTNET
             </div>
           )}
@@ -62,45 +66,58 @@ const Sidebar: React.FC<SidebarProps> = ({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="h-10 w-10 p-2 text-muted-foreground hover:text-foreground hover:bg-muted"
+            className="h-8 w-8 text-muted-foreground"
           >
-            <FaXmark size={24} />
+            <FaXmark size={20} />
           </Button>
         )}
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex-1 py-6 overflow-y-auto">
+      <div className="flex-1 px-4 py-6 space-y-2">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => handleTabClick(tab.id as TabId)}
             className={cn(
-              "w-full flex items-center gap-3 px-6 py-4 text-base font-medium transition-all duration-200 text-left border-l-[3px]",
+              "w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
               activeTab === tab.id 
-                ? "bg-primary/10 text-primary border-primary font-semibold" 
-                : "text-muted-foreground border-transparent hover:bg-primary/5 hover:text-foreground"
+                ? "text-white bg-white/10 border border-white/5 shadow-lg shadow-cyan-500/5" 
+                : "text-gray-400 hover:text-white hover:bg-white/5"
             )}
           >
-            <span className="text-xl">{tab.icon}</span>
-            {tab.label}
+            {/* Active Glow Indicator */}
+            {activeTab === tab.id && (
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-50" />
+            )}
+            
+            <span className={cn(
+              "text-xl transition-transform duration-300",
+              activeTab === tab.id ? "scale-110" : "group-hover:scale-110"
+            )}>{tab.icon}</span>
+            <span className="relative z-10 font-space tracking-wide">{tab.label}</span>
+            
+            {/* Right Arrow on Active */}
+            {activeTab === tab.id && (
+              <div className="ml-auto w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+            )}
           </button>
         ))}
       </div>
 
       {/* Social Links */}
-      <div className="p-6 border-t border-border">
-        <div className="text-xs text-muted-foreground mb-4 font-semibold uppercase tracking-widest">
+      <div className="p-6 m-4 rounded-2xl bg-white/5 border border-white/5">
+        <div className="text-[10px] text-gray-500 mb-4 font-bold uppercase tracking-[0.2em]">
           Community
         </div>
-        <div className="flex gap-3">
+        <div className="flex justify-between">
           {socialLinks.map((link) => (
             <a
               key={link.name}
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className="p-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-cyan-500/10"
             >
               {link.icon}
             </a>
@@ -108,7 +125,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
         
         {/* Version Info */}
-        <div className="mt-5 text-[11px] text-muted-foreground text-center">
+        <div className="mt-4 pt-4 border-t border-white/5 text-[10px] text-gray-600 text-center font-mono">
           v1.0.0-testnet
         </div>
       </div>
@@ -122,7 +139,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         {isOpen && (
           <div
             onClick={onClose}
-            className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[1001]"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[1001] animate-in fade-in duration-200"
           />
         )}
         <SidebarContent />

@@ -25,7 +25,7 @@ const AppBar: React.FC<AppBarProps> = ({
         <img 
           src="/logo.png" 
           alt="Logo" 
-          className="h-10 w-auto"
+          className="h-10 w-auto rounded-xl"
         />
       </div>
     )}

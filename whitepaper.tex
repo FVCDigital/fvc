@@ -1,0 +1,1790 @@
+%%
+% This is the Eisvogel pandoc LaTeX template.
+%
+% For usage information and examples visit the official GitHub page:
+% https://github.com/Wandmalfarbe/pandoc-latex-template
+%%
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names,table}{xcolor}
+\documentclass[
+  paper=a4,
+  ,captions=tableheading
+]{scrartcl}
+\usepackage{xcolor}
+\usepackage[margin=2.5cm,includehead=true,includefoot=true,centering,]{geometry}
+\usepackage{amsmath,amssymb}
+
+
+% add backlinks to footnote references, cf. https://tex.stackexchange.com/questions/302266/make-footnote-clickable-both-ways
+\usepackage{footnotebackref}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+% Use setspace anyway because we change the default line spacing.
+% The spacing is changed early to affect the titlepage and the TOC.
+\usepackage{setspace}
+\setstretch{1.2}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{listings}
+\newcommand{\passthrough}[1]{#1}
+\lstset{defaultdialect=[5.3]Lua}
+\lstset{defaultdialect=[x86masm]Assembler}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+% Make use of float-package and set default placement for figures to H.
+% The option H means 'PUT IT HERE' (as  opposed to the standard h option which means 'You may put it here if you like').
+\usepackage{float}
+\floatplacement{figure}{H}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\definecolor{default-linkcolor}{HTML}{A50000}
+\definecolor{default-filecolor}{HTML}{A50000}
+\definecolor{default-citecolor}{HTML}{4077C0}
+\definecolor{default-urlcolor}{HTML}{4077C0}
+
+\hypersetup{
+  hidelinks,
+  breaklinks=true,
+  pdfcreator={LaTeX via pandoc with the Eisvogel template}}
+\author{}
+\date{}
+
+
+%
+% for the background color of the title page
+%
+
+%
+% break urls
+%
+\PassOptionsToPackage{hyphens}{url}
+
+%
+% When using babel or polyglossia with biblatex, loading csquotes is recommended
+% to ensure that quoted texts are typeset according to the rules of your main language.
+%
+\usepackage{csquotes}
+
+%
+% captions
+%
+\definecolor{caption-color}{HTML}{777777}
+\usepackage[font={stretch=1.2}, textfont={color=caption-color}, position=top, skip=4mm, labelfont=bf, singlelinecheck=false, justification=raggedright]{caption}
+\setcapindent{0em}
+
+%
+% blockquote
+%
+\definecolor{blockquote-border}{RGB}{221,221,221}
+\definecolor{blockquote-text}{RGB}{119,119,119}
+\usepackage{mdframed}
+\newmdenv[rightline=false,bottomline=false,topline=false,linewidth=3pt,linecolor=blockquote-border,skipabove=\parskip]{customblockquote}
+\renewenvironment{quote}{\begin{customblockquote}\list{}{\rightmargin=0em\leftmargin=0em}%
+\item\relax\color{blockquote-text}\ignorespaces}{\unskip\unskip\endlist\end{customblockquote}}
+
+%
+% Source Sans Pro as the default font family
+% Source Code Pro for monospace text
+%
+% 'default' option sets the default
+% font family to Source Sans Pro, not \sfdefault.
+%
+% Note that the font has been officially renamed to `Source Sans 3`, and
+% the version provided by the `sourcesanspro` package is slightly outdated.
+% You can install the newer version locally and use it, for example, with
+% `mainfont: "Source Sans 3"` in the YAML metadata (requires XeTeX or LuaTeX).
+%
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+    \usepackage[default]{sourcesanspro}
+  \usepackage{sourcecodepro}
+  \else % if not pdftex
+    \usepackage[default]{sourcesanspro}
+  \usepackage{sourcecodepro}
+
+  % XeLaTeX specific adjustments for straight quotes: https://tex.stackexchange.com/a/354887
+  % This issue is already fixed (see https://github.com/silkeh/latex-sourcecodepro/pull/5) but the
+  % fix is still unreleased.
+  % TODO: Remove this workaround when the new version of sourcecodepro is released on CTAN.
+  \ifxetex
+    \makeatletter
+    \defaultfontfeatures[\ttfamily]
+      { Numbers   = \sourcecodepro@figurestyle,
+        Scale     = \SourceCodePro@scale,
+        Extension = .otf }
+    \setmonofont
+      [ UprightFont    = *-\sourcecodepro@regstyle,
+        ItalicFont     = *-\sourcecodepro@regstyle It,
+        BoldFont       = *-\sourcecodepro@boldstyle,
+        BoldItalicFont = *-\sourcecodepro@boldstyle It ]
+      {SourceCodePro}
+    \makeatother
+  \fi
+  \fi
+
+%
+% heading color
+%
+\definecolor{heading-color}{RGB}{40,40,40}
+% By default, the KOMA-Script classes will typeset sectioning headings in
+% sans-serif. Use the normal body font for headings.
+\addtokomafont{disposition}{\normalfont\color{heading-color}\bfseries}
+
+%
+% variables for title, author and date
+%
+\usepackage{titling}
+\title{}
+\author{}
+\date{}
+
+%
+% tables
+%
+
+%
+% remove paragraph indentation
+%
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+
+%
+%
+% Listings
+%
+%
+
+
+%
+% general listing colors
+%
+\definecolor{listing-background}{HTML}{F7F7F7}
+\definecolor{listing-rule}{HTML}{B3B2B3}
+\definecolor{listing-numbers}{HTML}{B3B2B3}
+\definecolor{listing-text-color}{HTML}{000000}
+\definecolor{listing-keyword}{HTML}{435489}
+\definecolor{listing-keyword-2}{HTML}{1284CA} % additional keywords
+\definecolor{listing-keyword-3}{HTML}{9137CB} % additional keywords
+\definecolor{listing-identifier}{HTML}{435489}
+\definecolor{listing-string}{HTML}{00999A}
+\definecolor{listing-comment}{HTML}{8E8E8E}
+
+\lstdefinestyle{eisvogel_listing_style}{
+  language         = java,
+  numbers          = left,
+  xleftmargin      = 2.7em,
+  framexleftmargin = 2.5em,
+  backgroundcolor  = \color{listing-background},
+  basicstyle       = \color{listing-text-color}\linespread{1.0}%
+                      \lst@ifdisplaystyle%
+                      \small%
+                      \fi\ttfamily{},
+  breaklines       = true,
+  frame            = single,
+  framesep         = 0.19em,
+  rulecolor        = \color{listing-rule},
+  frameround       = ffff,
+  tabsize          = 4,
+  numberstyle      = \color{listing-numbers},
+  aboveskip        = 1.0em,
+  belowskip        = 0.1em,
+  abovecaptionskip = 0em,
+  belowcaptionskip = 1.0em,
+  keywordstyle     = {\color{listing-keyword}\bfseries},
+  keywordstyle     = {[2]\color{listing-keyword-2}\bfseries},
+  keywordstyle     = {[3]\color{listing-keyword-3}\bfseries\itshape},
+  sensitive        = true,
+  identifierstyle  = \color{listing-identifier},
+  commentstyle     = \color{listing-comment},
+  stringstyle      = \color{listing-string},
+  showstringspaces = false,
+  escapeinside     = {/*@}{@*/}, % Allow LaTeX inside these special comments
+  literate         =
+  {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+  {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+  {à}{{\`a}}1 {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1
+  {À}{{\`A}}1 {È}{{\`E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1
+  {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1
+  {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1
+  {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1
+  {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1
+  {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1
+  {ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1
+  {€}{{\EUR}}1 {£}{{\pounds}}1 {«}{{\guillemotleft}}1
+  {»}{{\guillemotright}}1 {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?`}}1
+  {…}{{\ldots}}1 {≥}{{>=}}1 {≤}{{<=}}1 {„}{{\glqq}}1 {“}{{\grqq}}1
+  {”}{{''}}1
+}
+\lstset{style=eisvogel_listing_style}
+
+%
+% Java (Java SE 12, 2019-06-22)
+%
+\lstdefinelanguage{Java}{
+  morekeywords={
+    % normal keywords (without data types)
+    abstract,assert,break,case,catch,class,continue,default,
+    do,else,enum,exports,extends,final,finally,for,if,implements,
+    import,instanceof,interface,module,native,new,package,private,
+    protected,public,requires,return,static,strictfp,super,switch,
+    synchronized,this,throw,throws,transient,try,volatile,while,
+    % var is an identifier
+    var
+  },
+  morekeywords={[2] % data types
+    % primitive data types
+    boolean,byte,char,double,float,int,long,short,
+    % String
+    String,
+    % primitive wrapper types
+    Boolean,Byte,Character,Double,Float,Integer,Long,Short
+    % number types
+    Number,AtomicInteger,AtomicLong,BigDecimal,BigInteger,DoubleAccumulator,DoubleAdder,LongAccumulator,LongAdder,Short,
+    % other
+    Object,Void,void
+  },
+  morekeywords={[3] % literals
+    % reserved words for literal values
+    null,true,false,
+  },
+  sensitive,
+  morecomment  = [l]//,
+  morecomment  = [s]{/*}{*/},
+  morecomment  = [s]{/**}{*/},
+  morestring   = [b]",
+  morestring   = [b]',
+}
+
+\lstdefinelanguage{XML}{
+  morestring      = [b]",
+  moredelim       = [s][\bfseries\color{listing-keyword}]{<}{\ },
+  moredelim       = [s][\bfseries\color{listing-keyword}]{</}{>},
+  moredelim       = [l][\bfseries\color{listing-keyword}]{/>},
+  moredelim       = [l][\bfseries\color{listing-keyword}]{>},
+  morecomment     = [s]{<?}{?>},
+  morecomment     = [s]{<!--}{-->},
+  commentstyle    = \color{listing-comment},
+  stringstyle     = \color{listing-string},
+  identifierstyle = \color{listing-identifier}
+}
+
+%
+% header and footer
+%
+\usepackage[headsepline,footsepline]{scrlayer-scrpage}
+
+\newpairofpagestyles{eisvogel-header-footer}{
+  \clearpairofpagestyles
+  \ihead*{}
+  \chead*{}
+  \ohead*{}
+  \ifoot*{}
+  \cfoot*{}
+  \ofoot*{\thepage}
+  \addtokomafont{pageheadfoot}{\upshape}
+}
+\pagestyle{eisvogel-header-footer}
+
+
+
+%
+% Define watermark
+%
+
+\begin{document}
+
+\title{DeFi's First Venture Fund Token - \$FVC}
+\author{AKH DIGITAL Team\thanks{info@akh-digital.com}}
+\maketitle
+
+\begin{abstract}
+\section*{Executive Summary}
+The First Venture Capital (\$FVC) token represents a paradigm shift in
+decentralised finance: the world's first interest-free,
+community-governed token for venture capital and business grants. We're
+providing the solution small businesses have been waiting for:
+access to capital. Instead of giving away 30\% equity for \$200k,
+receive funding through community governance. The community that funds
+you becomes your biggest supporters. With a focus on sensible funding
+and maintaining complete decentralisation, we aim to provide liquidity
+to those that need it, and perpetual profitability.
+\end{abstract}
+
+\section{1. Market Problem}\label{market-problem}
+
+Small and medium-sized enterprises (SMEs) face a critical financing gap
+in both Web3 and traditional industries. UK early-stage startup funding
+has declined to a six-year low, with fewer fundraising rounds despite
+rising average deal sizes. Traditional venture capital funding cycles
+typically exceed six months, delaying capital deployment and restricting
+access to timely capital. This challenge is particularly acute for
+FCA-authorised and compliant startups navigating regulatory constraints
+whilst seeking growth capital.
+
+The UK government has recognised this financing gap through significant
+policy initiatives, including ministerial reports on SME access to
+finance and substantial funding packages aimed at supporting small
+business growth. Despite these efforts, structural barriers persist:
+retail investors remain largely excluded from early-stage opportunities,
+DeFi tokens lack clear legal certainty within the UK regulatory
+framework, and traditional financing models impose lengthy approval
+processes that hinder innovation.
+
+This capital bottleneck restricts innovation, diminishes the
+competitiveness of the UK technology sector, and leaves promising
+ventures without access to the resources they need to scale. The market
+demands a new approach---one that leverages blockchain technology for
+transparency and automation, employs tokenisation to make capital
+raising more efficient and accessible, and provides decentralised
+governance whilst maintaining regulatory compliance. Those who fail to
+adapt to this fundamental shift in finance risk being left behind as
+tokenised financial infrastructure transforms global markets.
+
+\section{2. Token Solution}\label{token-solution}
+
+\subsection{2.1 Two Simple Functions, Infinite
+Possibilities}\label{two-simple-functions-infinite-possibilities}
+
+Web3 companies deposit collateral, get immediate liquidity. No interest,
+no banks, no waiting. The token earns fees on every grant.
+
+The community votes to fund promising SMEs
+and startups. In return, smart contracts automatically capture a
+percentage of their revenues. One successful investment can generate
+millions in perpetual income.
+
+\subsection{2.2 The Magic:
+Decentralisation}\label{the-magic-decentralisation}
+
+No fund managers. No monopoly on authority. Your wallet. Your vote. Your venture fund.
+
+Token holders ARE the venture capitalists:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Vote} on which SMEs and startups
+  to fund
+\item
+  \textbf{Earn} from every investment
+\item
+  \textbf{Govern} all token parameters
+\item
+  \textbf{Own} the entire ecosystem
+\end{itemize}
+
+\subsection{2.3 Single-Token System}\label{single-token-system}
+
+AKH DIGITAL introduces a single-token system comprising:
+
+\begin{itemize}
+\tightlist
+\item{\textbf{\$FVC (Governance Token):}} Tradable, fixed-supply ERC-20 token used for bonding, price discovery, governance rights and revenue distribution.
+\item
+  \textbf{Bonding Contracts:} Allocate \$FVC at a discount in exchange
+  for stable reserves; funds directed to the treasury.
+\item
+  \textbf{Staking Mechanism:} \$FVC tokens locked for 3--12 months,
+  yielding percentage of ecosystem revenue funded from audited SMEs and startups profit repayments.
+\item
+  \textbf{Quadratic Governance:} Vote power equals square root of staked
+  \$FVC to limit concentration.
+\item
+  \textbf{Compliance Layer:} On-chain KYC via Sumsub verified process;
+  whitelist registry enforcing AML and sector eligibility.
+\end{itemize}
+
+\section{3. Staking Framework}\label{staking-framework}
+
+The FVC ecosystem implements the Synthetix proportional staking pattern, an audited mechanism deployed across billions in Total Value Locked. Users stake FVC tokens into \texttt{StakingRewards.sol} to earn USDC rewards distributed proportionally based on stake weight and duration.
+
+Crucially, FVC utilises a \textbf{Non-Dilutive Settlement} model: we pay rewards in \textbf{USDC} (revenue) rather than printing new FVC tokens (inflation). This preserves token value by ensuring yield is derived from actual economic output generated by the \textbf{Active Treasury Engine} rather than supply dilution.
+
+The Sustainability Ratio ($S_r$) of the ecosystem is expressed as:
+
+\[
+S_r = \frac{\text{Treasury Revenue (USDC)}}{\text{Token Inflation (FVC)}} > 1
+\]
+
+In traditional DeFi, $S_r < 1$ (Ponzi dynamics). In FVC, because inflation is minimised and rewards are external (USDC), $S_r$ is designed to trend positive.
+
+The reward distribution follows:
+
+\[
+r_i = \frac{s_i}{S} \cdot R \cdot t
+\]
+
+$r_i$ represents individual rewards, $s_i$ the user's staked balance, $S$ total staked supply, $R$ the per-second reward rate, and $t$ elapsed time. This system eschews tiered lockups in favour of continuous accrual, maintaining capital efficiency whilst eliminating lock-in friction for participants. Rewards derive from SME revenue-sharing agreements and Real World Asset (RWA) returns, creating sustainable yield backed by productive economic activity.
+
+\begin{enumerate}
+    \item{\textbf{Staking Rewards}} - A competitive APY from SME revenue repayments
+    \item{\textbf{Priority Access}} - First rights to investment opportunities
+    \item{\textbf{Governance Rights}} - Vote on protocol decisions with quadratic weighting
+\end{enumerate}
+\newpage
+\section{4. Tokenomics}\label{token-distribution-mechanics}
+
+\subsection{4.1 Overview}\label{overview-1}
+
+The FVC Ecosystem Token Distribution Mechanics ensure fair, transparent,
+and controlled distribution of the \$FVC token supply while maintaining
+price stability and preventing market manipulation.
+
+\textbf{Presale (23.0\%)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Allocation:} 230,000,000 FVC tokens
+  (includes seed round, private presale, and all sales before public launch)
+\item
+  \textbf{Schedule:} Vesting terms subject to negotiation based on
+  market conditions
+\item
+  \textbf{Target:} Raise amount to be determined based on market demand
+\item
+  \textbf{Note:} Tokens are minted on-demand through bonding contracts.
+  Unallocated tokens remain unminted, with the allocation adjusting
+  based on actual market demand rather than predetermined distribution.
+\end{itemize}
+
+\textbf{Founders, Team \& Partners (25.0\%)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Allocation:} 250,000,000 FVC tokens
+\item
+  \textbf{Schedule:} Vesting terms subject to negotiation with institutional investors
+\item
+  \textbf{Performance Ties:} Milestone-based unlocks with clawbacks
+\end{itemize}
+
+\textbf{Marketing \& Community (10.0\%)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Allocation:} 100,000,000 FVC tokens (provisional)
+\item
+  \textbf{Governance:} Professional delegates, reviewers, tooling
+\item
+  \textbf{Airdrops:} Sybil-resistant programmes with retention metrics
+\item
+  \textbf{Staged Releases:} Milestone-based unlocks with KPIs
+\end{itemize}
+
+\textbf{Treasury (35.0\%)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Allocation:} 350,000,000 FVC tokens
+\item
+  \textbf{Purpose:} Flexible allocation for ecosystem needs, grants, partnerships, and strategic initiatives
+\item
+  \textbf{Control:} Multi-signature safe wallet with governance oversight
+\item
+  \textbf{Note:} Used for operational flexibility and long-term ecosystem development
+\end{itemize}
+
+\textbf{Security Reserve (2.0\%)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Allocation:} 20,000,000 FVC tokens
+\item
+  \textbf{Purpose:} Emergency security fund for protocol protection and incident response
+\item
+  \textbf{Governance:} Subject to community governance approval for deployment
+\item
+  \textbf{Note:} Reserved for security incidents, bug bounties, and protocol defence
+\end{itemize}
+
+\textbf{Liquidity Provision (5.0\%)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Allocation:} 50,000,000 FVC tokens
+\item
+  \textbf{Initial Pools:} Uniswap V3 (FVC/USDC, FVC/WETH)
+\item
+  \textbf{Range Management:} Concentrated liquidity for efficiency
+\item
+  \textbf{Market Quality:} Reduced slippage and better price discovery
+\end{itemize}
+
+\textbf{Treasury Operations (USDC)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Capital Source:} USDC from multi-signature safe wallet for operational expenses
+\item
+  \textbf{Grant Deployment:} Primary capital pool for SME funding operations
+\item
+  \textbf{Staking Funding:} APY from grant repayment revenues and liquidation fees
+\item
+  \textbf{Revenue Allocation:} Revenues allocated to staking yields, reserves, and buy-and-burn operations
+\item
+  \textbf{Note:} Buy-and-burn mechanism purchases FVC from the market and burns tokens, providing price support without minting new supply
+\end{itemize}
+
+
+\section{5. Technical Architecture}\label{technical-architecture}
+
+FVC is a \textbf{Capital Deployment Operating System}. It is a modular, upgradeable Web3 infrastructure stack focused
+on compliant venture funding. It operates on Ethereum-compatible
+networks and integrates modern tooling for secure, maintainable
+development across contracts, frontend, and infrastructure layers.
+
+\subsection{5.1 Deployed Smart Contracts (MVP)}\label{deployed-smart-contracts}
+
+\textbf{Core Contracts}
+
+\begin{itemize}
+\tightlist
+\item
+  \passthrough{\lstinline!FVC.sol!} --- ERC20 token with 1 billion token cap, role-based minting and burning
+  \begin{itemize}
+  \tightlist
+  \item
+    MINTER\_ROLE for Sale contract to mint on-demand
+  \item
+    BURNER\_ROLE for buy-and-burn operations
+  \item
+    Standard ERC20Capped implementation with AccessControl
+  \end{itemize}
+\end{itemize}
+
+\textbf{Token Sale}
+
+\begin{itemize}
+\tightlist
+\item
+  \passthrough{\lstinline!Sale.sol!} --- Fixed-price sale accepting USDC/USDT
+  \begin{itemize}
+  \tightlist
+  \item
+    Mints FVC on-demand when purchased
+  \item
+    Owner-controlled rate, cap, and active status
+  \item
+    \textbf{Automated Vesting:} Large purchases trigger automatic vesting schedule creation
+  \item
+    Sends stablecoins to treasury Safe
+  \end{itemize}
+\end{itemize}
+
+\textbf{Vesting}
+
+\begin{itemize}
+\tightlist
+\item
+  \passthrough{\lstinline!Vesting.sol!} --- Time-based vesting logic
+  \begin{itemize}
+  \tightlist
+  \item
+    Enforces linear vesting schedules with optional cliff periods
+  \item
+    Managed by Gnosis Safe governance or automated via Sale contract
+  \item
+    Supports revocable schedules for team performance accountability
+  \item
+    \textbf{Vested Amount Calculation:}
+    \[
+    V = \begin{cases} 
+    0 & \text{if } t < \text{cliff} \\
+    \text{total} \times \frac{t - \text{start}}{\text{duration}} & \text{if } t \geq \text{cliff}
+    \end{cases}
+    \]
+  \end{itemize}
+\end{itemize}
+
+\textbf{Staking}
+
+\begin{itemize}
+\tightlist
+\item
+  \passthrough{\lstinline!Staking.sol!} --- Synthetix proportional staking pattern
+  \begin{itemize}
+  \tightlist
+  \item
+    Stake FVC, earn USDC rewards
+  \item
+    No lock period, withdraw anytime
+  \item
+    Owner adds rewards via \passthrough{\lstinline!notifyRewardAmount()!}
+  \item
+    Battle-tested pattern used by Curve, Uniswap, and SushiSwap
+  \end{itemize}
+\end{itemize}
+
+\textbf{Testnet Utilities}
+
+\begin{itemize}
+\tightlist
+\item
+  \passthrough{\lstinline!FVCFaucet.sol!} --- Testnet-only token distribution
+\item
+  \passthrough{\lstinline!MockStable.sol!} --- Test USDC for development
+\end{itemize}
+
+\subsection{5.2 Treasury Management (Active Treasury Engine)}\label{treasury-management}
+
+FVC operates an \textbf{Active Treasury Engine} rather than a static vault. While currently secured by a Gnosis Safe Governance Module for the Genesis Phase, the architecture is designed to use \textbf{Yield Adapters} to programmatically route idle capital into low-risk, liquidity-grade strategies (such as Aave or RWA vaults) to generate continuous revenue.
+
+The efficiency of the Active Treasury ($E_t$) is defined as the summation of yield generated across $n$ deployed adapters ($A_i$) minus operational latency ($L_o$):
+
+\[
+E_t = \sum_{i=1}^{n} (A_i \cdot r_i) - L_o
+\]
+
+Where $r_i$ is the risk-adjusted return rate of adapter $i$. Unlike static treasuries where $E_t \approx 0$, FVC maximises $E_t$ through algorithmic rebalancing.
+
+\textbf{Multi-Signature Safe Wallet (3-of-5)}
+
+\begin{itemize}
+\tightlist
+\item
+  Holds USDC reserves and manages \textbf{Algorithmic Risk Management} parameters
+\item
+  Manages FVC token minting permissions
+\item
+  Controls TokenSale and Staking contracts
+\end{itemize}
+
+\textbf{Safe Transaction Flow}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Proposal created by signer
+\item
+  Requires 3 of 5 signatures to execute
+\item
+  Executes on-chain via Safe proxy contract
+\end{enumerate}
+
+\textbf{Common Operations}
+
+\begin{itemize}
+\tightlist
+\item
+  Grant TokenSale MINTER\_ROLE: \passthrough{\lstinline!fvc.grantRole(MINTER\_ROLE, saleAddress)!}
+\item
+  Add staking rewards: \passthrough{\lstinline!staking.notifyRewardAmount(usdcAmount)!}
+\item
+  Mint team tokens: \passthrough{\lstinline!fvc.mint(teamWallet, amount)!}
+\item
+  Buy-and-burn: Swap USDC for FVC on DEX, then \passthrough{\lstinline!fvc.burn(amount)!}
+\item
+  Update sale parameters: \passthrough{\lstinline!sale.setRate()!}, \passthrough{\lstinline!sale.setCap()!}, \passthrough{\lstinline!sale.setActive()!}
+\end{itemize}
+
+\textbf{Safe Integration}
+
+\begin{itemize}
+\tightlist
+\item
+  ABI interfaces allow Safe to call any contract function
+\item
+  No custom integration contracts needed
+\item
+  All operations transparent and auditable on-chain
+\end{itemize}
+
+\subsection{5.3 Contract ABIs \& External Integration}\label{contract-abis-external-integration}
+
+\textbf{Application Binary Interface (ABI)}
+
+\begin{itemize}
+\tightlist
+\item
+  JSON specification of contract functions and events
+\item
+  Enables frontend, Safe wallet, and external services to interact with contracts
+\item
+  Generated automatically during compilation
+\end{itemize}
+
+\textbf{Key Integrations}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Frontend (dApp) → Contracts:} Uses ethers.js with TypeChain for type-safe calls
+\item
+  \textbf{Gnosis Safe → Contracts:} Safe UI reads contract ABIs, displays function parameters for signers, constructs transaction calldata, executes after threshold signatures collected
+\item
+  \textbf{Backend Services → Contracts:} Event monitoring for TokenSale purchases, staking reward distribution automation, revenue tracking for buy-and-burn
+\end{itemize}
+
+\textbf{Event Emissions}
+
+\begin{itemize}
+\tightlist
+\item
+  All state changes emit events for off-chain tracking
+\item
+  Frontend and backend listen to events for real-time updates
+\item
+  Examples: TokensPurchased, Staked, RewardPaid
+\end{itemize}
+
+\subsection{5.4 Planned Contracts (Phase 2+)}\label{planned-contracts}
+
+\textbf{Governance Infrastructure}
+
+\begin{itemize}
+\tightlist
+\item
+  On-chain voting for protocol parameters
+\item
+  Proposal creation and execution
+\item
+  Timelock for security delays
+\item
+  Emergency pause mechanisms
+\end{itemize}
+
+\textbf{Advanced Compliance}
+
+\begin{itemize}
+\tightlist
+\item
+  KYC/AML verification integration
+\item
+  On-chain whitelist management
+\item
+  Regulatory reporting tools
+\end{itemize}
+
+\textbf{Treasury Automation}
+
+\begin{itemize}
+\tightlist
+\item
+  Automated revenue distribution
+\item
+  Grant milestone releases
+\item
+  Vesting schedules for team and investors
+\end{itemize}
+
+\textbf{Additional Staking}
+
+\begin{itemize}
+\tightlist
+\item
+  Tiered lock-up periods with APY multipliers
+\item
+  LP token staking
+\item
+  NFT staking for governance weight
+\end{itemize}
+
+\textbf{Note:} Phase 2 contracts will be developed, audited, and deployed based on ecosystem needs and governance decisions
+
+%%%
+%\begin{figure}
+%\centering
+%\pandocbounded{\includegraphics[keepaspectratio]{images/ecosystem.png}}
+%\caption{FVC Ecosystem Architecture}
+%\end{figure}
+%%%
+\subsection{5.5 Security Measures}\label{security-measures}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Multi-Signature Security}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Multi-signature wallets} requiring 3 out of 5 authorised
+    signers (founders) to approve any transaction
+  \item
+    \textbf{Treasury operations} protected by Gnosis Safe implementation
+    with role-based access control
+  \item
+    \textbf{Emergency functions} require consensus among guardian
+    signers
+  \end{itemize}
+\item
+  \textbf{Timelock Implementation}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Timelock delay} of 48 hours between governance proposal
+    approval and execution
+  \item
+    \textbf{Gives token holders time to react} if they disagree with
+    decisions or identify security concerns
+  \item
+    \textbf{Variable delays} based on operation criticality (7 days for
+    critical operations)
+  \item
+    \textbf{Maximum delay cap} of 30 days for complex multi-step
+    operations
+  \end{itemize}
+\item
+  \textbf{Guardian Powers}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Special emergency functions} that can immediately stop
+    system functions during crises
+  \item
+    \textbf{Can pause/unpause smart contracts} to prevent exploits
+  \item
+    \textbf{Funds cannot be moved} during emergency pauses
+  \item
+    \textbf{Governance can be bypassed} during emergency situations
+  \item
+    \textbf{3-of-5 multisig controls this mechanism}
+  \end{itemize}
+\end{itemize}
+
+\subsection{5.3 Upgrade Mechanisms}\label{upgrade-mechanisms}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{UUPS Proxy Implementation}
+\end{itemize}
+
+The ecosystem implements OpenZeppelin's UUPS (Universal Upgradeable Proxy
+Standard), a smart contract design pattern that allows developers to
+upgrade contract logic while preserving the contract's address, state
+and user balances. It works by delegating function calls to a nested
+module within a contract, while FVC.sol contains a permanent address
+users interact with, the actual logic is delegated to another
+implementation which is upgradeable, changing nothing from the user's
+perspective.
+
+\subsection{5.4 Integration Architecture: How You Connect with Borrower
+Systems}\label{integration-architecture-how-you-connect-with-borrower-systems}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{External API Integration}
+\end{itemize}
+
+The system connects with established financial and legal infrastructure
+through secure API integrations. Sumsub provides KYC/AML verification
+services with real-time status updates. DocuSign enables automated legal
+document management and digital signature collection. Banking APIs
+facilitate traditional payment processing and account verification for
+SME borrowers.
+
+All external integrations implement proper authentication, rate
+limiting, and error handling to ensure reliable operation. Fallback
+mechanisms and manual processing capabilities provide continuity during
+external service disruptions.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Oracle Integration Framework}
+\end{itemize}
+
+The ecosystem integrates with multiple oracle systems for critical data
+feeds. Chainlink price oracles provide real-time FVC/USD pricing for
+bonding calculations and treasury management. Custom KYC compliance
+oracles connect with external identity verification providers, enabling
+automated eligibility verification while maintaining user privacy.
+
+Oracle integration includes redundancy and validation mechanisms to
+prevent manipulation or single points of failure. Price feeds implement
+staleness checks and circuit breakers to halt operations during oracle
+failures. KYC oracles utilise cryptographic attestations and
+multi-provider verification for enhanced security.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Borrower System Integration}
+\end{itemize}
+
+The ecosystem connects with SME borrowers through standardised
+revenue-sharing contract interfaces, enabling automated payment
+processing and transparent revenue distribution. Borrowers deploy
+ecosystem-compliant contracts that handle payment schedules, late fee
+calculations, and automatic revenue forwarding to the ecosystem treasury.
+
+The integration system supports multiple payment methods including
+direct cryptocurrency transfers, traditional bank integration through
+Plaid/Yodlee APIs, and manual payment processing for complex
+arrangements. All payments are tracked on-chain with immutable records
+for audit and compliance purposes.
+
+\subsection{Data Architecture: On-Chain vs Off-Chain Data
+Strategy}\label{data-architecture-on-chain-vs-off-chain-data-strategy}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{On-Chain Data Strategy}
+\end{itemize}
+
+Critical ecosystem data including token balances, governance votes,
+vesting schedules, and parameter configurations are stored directly on
+the blockchain, ensuring immutability, transparency, and decentralised
+access. Smart contracts emit comprehensive events for all state changes,
+enabling efficient indexing and real-time monitoring.
+
+On-chain storage optimisation reduces gas costs through packed data
+structures, efficient storage layouts, and event-based rather than
+storage-based logging where appropriate. The system prioritises data
+integrity and accessibility while managing storage costs through careful
+architectural decisions.
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Off-Chain Data Management}
+\end{itemize}
+
+Privacy-sensitive information including KYC documents, legal agreements,
+and business plans are stored off-chain using the InterPlanetary File
+System (IPFS) for decentralised document storage. Documents are
+encrypted where necessary and referenced on-chain through immutable
+content hashes, ensuring integrity while maintaining privacy compliance.
+
+The off-chain storage strategy includes redundancy through multiple IPFS
+pinning services, automated backup procedures, and document lifecycle
+management. Access controls ensure that sensitive documents are only
+available to authorised parties while maintaining transparency for
+public information.
+
+\subsection{5.6 Tooling Stack}\label{tooling-stack}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Hardhat:} Full-stack Ethereum development environment for
+  compiling, testing, deploying, and upgrading Solidity contracts.
+\item
+  \textbf{OpenZeppelin:} Secure libraries used for implementing ERC20,
+  access control, and upgradeability via proxy patterns.
+\item
+  \textbf{Node.js \& npm:} JavaScript runtime (v18+ LTS recommended)
+  with npm for dependency management and script execution.
+\item
+  \textbf{TypeChain:} Generates type-safe TypeScript bindings from
+  contract ABIs for use in both backend and frontend layers.
+\item
+  \textbf{wagmi \& viem:} TypeScript-native libraries for wallet
+  connections and contract interactions in React-based dApps.
+\end{itemize}
+
+\section{6. Dual-Channel Presale Architecture}\label{dual-channel-presale-architecture}
+
+\subsection{6.1 Presale Overview}\label{presale-overview}
+
+\textbf{Total Allocation:} 230,000,000 tokens (23.0\% of total supply) distributed through seed round, private presale, and all sales before public launch.
+
+\textbf{Vesting Terms:} Subject to negotiation with institutional investors based on market conditions and investor requirements.
+
+\subsection{Community Channel (Bonding Mechanism)}\label{community-channel-bonding-mechanism}
+
+The pre-sale phase incorporates a bonding mechanism with milestone-based pricing and controlled token distribution. This approach ensures controlled access whilst maintaining transparent price discovery.
+
+The pricing is programmed as a reverse Dutch auction where the price starts low and gets higher to reward early clients. The only caveat is the prices have milestones rather than a gradual increase.
+
+\subsection{6.3 Private Channel (OTC Swap)}\label{private-channel-otc-swap}
+
+Parallel private channel for accredited investors featuring fixed pricing, allowlist verification, and custom allocation limits. Provides negotiated terms for institutional participants.
+
+\section{7. Grants System}\label{grants-system}
+
+\subsection{7.1 Dual Grant System}\label{dual-grant-system}
+
+FVC offers two grant categories designed to serve different
+SME and startup stages and capital needs.
+All grants are interest-free and structured to align incentives between
+the ecosystem and funded projects.
+
+\subsubsection{Small Grants}\label{small-grants}
+
+Small grants provide fast, accessible funding for early-stage projects
+through a founder-friendly structure. Borrowers deposit minimal
+collateral in yield-bearing assets. Projects share a small percentage of
+revenue over a fixed period---no interest, no predetermined returns,
+just aligned incentives. Fast-track vetting ensures quick deployment for
+hackathon winners, MVP development, and bridge funding. Collateral only
+serves as fraud protection, never liquidated for revenue shortfalls.
+This model beats traditional lending terms while generating sustainable
+ecosystem returns through actual business performance rather than
+interest.
+
+\textbf{Structure:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Amount:} \$25,000 - \$100,000
+\item
+  \textbf{Collateral Requirement:} 10-30\% put down in stable assets:
+  BTC, ETH, USDC et cetera, helping to protect staked funds.
+\item
+  \textbf{Revenue Share:} A percentage of gross revenue for 18-24 months
+\item
+  \textbf{Approval:} Fast-track vetting (72 - 168 hours)
+\item
+  \textbf{Liquidation:} Only triggered by fraud, misuse of funds, or
+  project abandonment
+\end{itemize}
+
+\subsubsection{7.1.2 Large Strategic Grants}\label{large-strategic-grants}
+
+Large grants fund established firms through two models: revenue share
+agreements that preserve founder equity, or direct token/equity
+investments for strategic partnerships. Projects undergo community
+vetting where FVC token holders evaluate team, technology, and market
+fit. Selected projects access capital plus FVC's ecosystem of advisors
+and community supporters. Revenue shares run for a fixed term or
+perpetually, generating sustainable yield for stakers without dilution.
+Token/equity returns flow to the treasury and stakers constantly and
+upon exit. This dual approach supports projects whether they're seeking
+non-dilutive capital or established projects offering strategic
+allocations.
+
+\textbf{Type A: Revenue Share Agreement}
+
+\textbf{Structure:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Amount:} \$100,000 - \$500,000+
+\item
+  \textbf{Duration:} Perpetual or a fixed term
+\item
+  \textbf{Revenue Share:} A percentage of monthly gross revenue
+\item
+  \textbf{Approval:} Community vote after comprehensive vetting
+\item
+  \textbf{Collateral:} None required
+\end{itemize}
+
+\textbf{Type B: Equity/Token Investment}
+
+\textbf{Structure:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Amount:} \$100,000 - \$500,000+
+\item
+  \textbf{Investment Type:} Direct equity or token allocation
+\item
+  \textbf{Ownership:} A fixed percentage depending on stage and amount
+\item
+  \textbf{Approval:} Community vote with enhanced due diligence and the
+  same comprehensive vetting
+\item
+  \textbf{Rights:} Standard investor protections (pro-rata, information
+  rights)
+\end{itemize}
+
+SMEs and funded firms remit an agreed share of revenues at fixed time periods. Treasury allocates these revenues to: staking yields, FVC reserves and to buy and burn FVC.
+
+\subsubsection{7.1.3 The Vetting Advantage}\label{the-vetting-advantage}
+
+Unlike pure DAOs where anyone can propose anything, FVC employs a
+specialised team that filters applications first:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  SMEs and startups Apply → Professional
+  pitch deck, revenue model, team background
+\item
+  Expert Review → Our team eliminates obvious failures (90\% filtered)
+\item
+  Due Diligence → Deep dive on the top 10\%
+\item
+  Community Vote → Only pre-vetted, high-quality projects reach token
+  holders
+\end{enumerate}
+
+Token holders vote on winners, rather than wading through garbage.
+Professional filtering + community wisdom = superior returns.
+
+\subsubsection{How Funding Works}\label{how-funding-works}
+
+Application → Vetting (1 week) → Community Vote (3 days) → Instant
+Funding
+
+\textbf{Smart Contract Deployment:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Approved projects get custom revenue-sharing contracts}
+\item
+  \textbf{A percentage of all revenues flow back automatically}
+\item
+  \textbf{No trust required - code enforces the agreement}
+\item
+  \textbf{Forever returns from one-time investments}
+\end{itemize}
+
+\textbf{What Projects Receive:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Stable assets directly to their wallets (e.g.~ETH, BTC, USDC)}
+\item
+  \textbf{Marketing support from our community}
+\item
+  \textbf{Follow-on funding priority}
+\end{itemize}
+
+Professional vetting eliminates 90\% of noise. Community governance
+selects from curated excellence. Every funded project has passed both
+institutional-grade diligence AND community approval. Higher success
+rates, better returns, happier token holders.
+
+\subsection{Compliance and
+Verification}\label{compliance-and-verification}
+
+FVC implements a comprehensive revenue verification system that
+applies uniformly to all grant recipients, ensuring transparency and
+accountability across the portfolio. By combining on-chain automation
+with off-chain attestation, FVC maintains accurate revenue
+tracking while minimising trust assumptions. This hybrid approach
+enables verification of both crypto-native and traditional revenue
+streams, creating a robust framework for sustainable revenue sharing.
+
+Whitelist mechanism ties wallet address to a zero-knowledge proof
+generated via Sumsub KYC process, the approved KYC and identity
+attestation provider. Periodic identity verification ensures AML
+compliance and sector-specific eligibility. No alternative providers
+accepted without governance proposal and approval. Quarterly legal
+reviews mandated. Registry excludes gambling, meme coins, adult content,
+and unlicensed finance.
+
+FVC's verification team, led by our CFA Accountant specialising
+in revenue analysis, actively monitors for revenue manipulation tactics
+including restructuring schemes, related-party transactions, and
+artificial revenue deferrals. This professional oversight ensures
+revenue sharing captures genuine business performance, with any attempts
+to game the system triggering immediate investigation and potential
+default proceedings.
+
+\subsubsection{7.2.1 Enforcement and
+Punishments}\label{enforcement-and-punishments}
+
+FVC enforces revenue reporting through progressive penalties
+designed to maintain compliance while allowing for operational
+realities. Monthly reports receive a 7-day grace period for late
+submission, after which the issue is escalated to the compliance team.
+Missing filings result in immediate suspension from ecosystem
+benefits including additional funding, community support, and governance
+participation. Material misrepresentation or persistent non-compliance
+triggers formal default proceedings, with smart contracts automatically
+calculating accrued obligations and initiating recovery processes. All
+enforcement actions are transparent, with status updates published to
+maintain accountability while giving struggling projects opportunity to
+remedy before severe consequences.
+
+\subsection{Vetting Process}\label{vetting-process}
+
+Grant applications undergo two-stage evaluation to ensure quality while
+preserving decentralised governance. FVC's specialised due diligence
+team---comprising chartered accountants, technical analysts, and
+industry veterans---assesses each project's financial health, revenue
+authenticity, technical feasibility, and market viability. Only projects
+meeting strict operational and financial criteria advance to community
+voting, accompanied by comprehensive vetting reports. This combination
+of professional diligence and community governance ensures informed
+capital allocation decisions while significantly reducing default risk
+across the portfolio.
+
+\section{8. Governance}\label{governance-section}
+
+\subsection{8.1 Overview}\label{overview}
+
+The FVC ecosystem contains a sophisticated, multi-layered governance
+system designed to balance community participation with operational
+efficiency. Our governance framework draws inspiration from successful
+DeFi protocols while introducing innovative mechanisms specifically
+tailored for SME funding operations.
+
+\subsection{8.2 Core Governance
+Architecture}\label{core-governance-architecture}
+
+\textbf{Governance Token}: \$FVC serves as the primary governance token
+with a fixed supply of 1 billion tokens. Each \$FVC token represents
+voting power in ecosystem decisions, with additional mechanisms to
+prevent concentration of power.
+
+\textbf{Quadratic Voting Implementation}: FVC employs quadratic
+voting to ensure democratic participation while mitigating whale
+dominance. Voting power is calculated as the square root of
+staked/locked tokens, creating a more equitable distribution of
+influence. The Cost of Influence ($C_I$) for a desired Vote Weight ($W_v$) increases exponentially:
+
+\[
+C_I = (W_v)^2
+\]
+
+Therefore, to double influence ($2W_v$), an entity must stake four times the capital ($4C_I$), making governance capture economically inefficient.
+
+\begin{center}
+\text{Voting Power} = \sqrt{\text{Staked Tokens}}
+\end{center}
+
+{Voting Mechanisms: Quorum Requirements, Vote
+Delegation}\label{voting-mechanisms-quorum-requirements-vote-delegation}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Quorum Requirements:} 10\% of current veFVC supply must
+  participate for vote validity. This ensures meaningful community engagement; prevents low participation rates and allows for dynamic adjustment based on ecosystem maturity.
+
+  \textbf{Vote Delegation System:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Delegate Selection:} Holders can delegate votes to trusted
+    community representatives
+  \item
+    \textbf{Transparency:} Public profiles and voting records for all
+    delegates
+  \item
+    \textbf{Accountability:} Performance tracking and community
+    oversight
+  \item
+    \textbf{Institutional Support:} Professional governance management
+    for large holders
+  \end{itemize}
+\item
+  \textbf{Voting Power Distribution:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Quadratic Voting:} Natural reduction of whale influence
+  \item
+    \textbf{Staking Requirements:} Voting power tied to staked/locked
+    tokens
+  \item
+    \textbf{Anti-Flash Loan:} 1-day delay prevents borrowed-power
+    manipulation
+  \end{itemize}
+\end{itemize}
+
+\subsection{8.3 Emergency Procedures: Circuit Breakers, Emergency
+Pause}\label{emergency-procedures-circuit-breakers-emergency-pause}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Pause Guardian System:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Multi-signature wallet (3 of 5 signers) with emergency pause
+    capabilities}
+  \item
+    \textbf{Scope:} Can pause bonding, staking, and treasury operations
+  \item
+    \textbf{Limitations:} Cannot access funds or bypass governance
+    mechanisms
+  \item
+    \textbf{Cooldown:} 24-hour minimum between emergency pauses
+  \item
+    \textbf{Maximum Duration:} 7-day pause limit with governance review
+  \end{itemize}
+\item
+  \textbf{Emergency Response Protocol:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Immediate Activation:} Pause capability for security
+    incidents
+  \item
+    \textbf{Community Notification:} Alert within 1 hour of activation
+  \item
+    \textbf{Governance Review:} Community assessment within 24 hours
+  \item
+    \textbf{Recovery Process:} Automatic unpause after cooldown unless
+    extended
+  \end{itemize}
+\item
+  \textbf{On-Chain Circuit Breaker:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    An automated \textbf{Algorithmic Risk Management} tool that mechanically suspends protocol operations during extreme market volatility to protect asset backing.
+  \item
+    \textbf{Treasury Limits:} Daily and single transfer caps prevent
+    excessive outflows
+  \item
+    \textbf{Parameter Bounds:} Hard limits on critical ecosystem
+    parameters
+  \item
+    \textbf{Emergency Fund:} Dedicated resources for crisis response
+  \end{itemize}
+\end{itemize}
+
+\subsection{8.4 Governance Attack Prevention: Anti-Manipulation
+Measures}\label{governance-attack-prevention-anti-manipulation-measures}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Voting Power Protection:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Snapshot Mechanism:} Voting power measured at fixed block
+    height
+  \item
+    \textbf{Anti-Flash Loan:} 1-day delay prevents borrowed-power
+    manipulation
+  \item
+    \textbf{Quadratic Voting:} Naturally reduces whale influence
+  \item
+    \textbf{Staking Requirements:} Voting power tied to locked tokens
+  \end{itemize}
+\item
+  \textbf{Identity Verification:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{KYC Integration:} Sumsub implementation for regulatory
+    compliance
+  \item
+    \textbf{Whitelist Management:} Controlled access to bonding and
+    governance
+  \item
+    \textbf{Delegate Disclosures:} Public profiles for all voting
+    representatives
+  \item
+    \textbf{Reputation System:} Track record of successful proposals and
+    voting
+  \end{itemize}
+\item
+  \textbf{Technical Safeguards:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Reentrancy Protection:} Standard OpenZeppelin security
+    patterns
+  \item
+    \textbf{Access Controls:} Role-based permissions for administrative
+    functions
+  \item
+    \textbf{Event Logging:} Complete audit trail for all governance
+    actions
+  \item
+    \textbf{Upgrade Controls:} All contract modifications require
+    governance approval
+  \end{itemize}
+\end{itemize}
+
+\section{9. Distribution
+Infrastructure}\label{distribution-infrastructure}
+
+\textbf{Smart Contract System}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{VestingVault Contract:} Automated token distribution and
+  vesting management
+\item
+  \textbf{Multi-Signature Control:} Treasury and guardian oversight
+\item
+  \textbf{Emergency Pause:} Ability to halt distribution in emergencies
+\item
+  \textbf{Audit Trail:} Complete on-chain record of all distributions
+\end{itemize}
+
+\textbf{Multi-Signature Treasury}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Gnosis Safe:} 3-of-5 multi-signature wallet
+\item
+  \textbf{Founder Signers:} 3 founding team members
+\item
+  \textbf{Advisor Signers:} 2 strategic advisors
+\item
+  \textbf{Transaction Requirements:} Minimum 3 signatures
+\end{itemize}
+
+\section{10. Market Making Strategy}\label{market-making-strategy}
+
+\textbf{Initial Liquidity Provision}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{DEX Pools:} Uniswap V3 (FVC/USDC), Uniswap V3 (FVC/WETH)
+\item
+  \textbf{Initial Liquidity:} 50,000,000 FVC + equivalent USDC/ETH
+\item
+  \textbf{Range Management:} Concentrated liquidity for capital
+  efficiency
+\end{itemize}
+
+\textbf{Liquidity Mining Incentives}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Base Rewards:} Yield for FVC/USDC liquidity providers
+\item
+  \textbf{Tiered Structure:} Higher rewards for longer-term provision
+\item
+  \textbf{Performance Metrics:} Volume and retention-based bonuses \#
+  14. Risk Management \& Exit Strategy
+\end{itemize}
+
+\section{11. Risks and Mitigations}\label{risks-and-mitigations}
+
+\subsection{11.1 Purpose}\label{purpose}
+
+The purpose of this Risk Management Policy is to establish a structured
+framework for identifying, assessing, mitigating, and monitoring risks
+associated with FVC providing funding to SMEs and startups in the cryptocurrency and blockchain
+industry. This policy ensures that AKH Digital Ltd.~operates in line
+with industry best practices, regulatory expectations, and
+Shariah-compliant financing principles.
+
+\subsection{11.2 Due Diligence}\label{due-diligence}
+
+The FVC Team evaluates grant applicants across multiple risk dimensions
+before advancing projects to community vote. Our systematic approach
+ensures only financially stable, technically sound, and credibly led
+projects receive funding, protecting ecosystem resources while
+maintaining high quality standards.
+
+\textbf{Core Requirements:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Financial Health:} Minimum 6-12 months runway demonstrated
+  through bank statements and financial projections
+\item
+  \textbf{Team Verification:} Comprehensive background checks on all
+  founders and directors including KYC, credit history, and reputational
+  assessment
+\item
+  \textbf{Technical Assessment:} Code review, architecture evaluation,
+  and security audit status for technical projects
+\item
+  \textbf{Risk Scoring:} Quantitative matrix evaluating financial
+  stability, team credibility, technical soundness, and regulatory
+  compliance
+\item
+  \textbf{Minimum Threshold:} Projects must achieve predetermined risk
+  score across all categories to proceed to community voting
+\end{itemize}
+
+Projects failing any single criterion are rejected without exception,
+ensuring consistent standards across the portfolio.
+
+\subsection{11.3 Collateral and Security}\label{collateral-and-security}
+
+FVC mitigates default risk through a robust collateral framework for
+small grants, requiring borrowers to secure funding with digital assets
+held in ecosystem-controlled smart contracts. This system provides
+capital protection while maintaining transparent, automated enforcement
+mechanisms that eliminate subjective decision-making in default
+scenarios.
+
+\textbf{Collateral Framework:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Accepted Assets:} BTC, ETH, and stablecoins (USDC, USDT) held
+  in multi-signature escrow contracts
+\item
+  \textbf{Collateralisation Ratio:} Tiered system depending on grant
+  size and risk level. 10-30\% of grant value, with borrowers retaining
+  staking yields
+\item
+  \textbf{Monitoring System:} Real-time mark-to-market valuation with
+  automated alerts
+\item
+  \textbf{Margin Calls:} Triggered when collateral value falls below
+  25\%, requiring top-up within 48 hours
+\item
+  \textbf{Liquidation Protocol:} Automatic liquidation upon three missed
+  payments or collateral dropping below threshold
+\item
+  \textbf{Recovery Process:} Collateral sold to recover grant principal,
+  excess returned to borrower
+\end{itemize}
+
+\subsection{11.4 Revenue}\label{revenue}
+
+FVC structures repayments through revenue-sharing agreements rather than
+interest-bearing loans, aligning ecosystem success with borrower growth
+while eliminating fixed payment pressure during low-revenue periods.
+Smart contract automation and transparent reporting requirements ensure
+consistent revenue capture without relying on borrower goodwill.
+
+\textbf{Revenue Structure:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Sharing Model:} Fixed percentage of gross revenues rather than
+  interest payments
+\item
+  \textbf{Payment Automation:} Smart contracts automatically route
+  revenue shares from on-chain income
+\item
+  \textbf{Web3 Reporting:} Direct on-chain revenue verification through
+  ecosystem integrations
+\item
+  \textbf{Traditional Business:} Monthly bank statement reconciliation;
+  quarterly financial statements verified by chartered accountants as
+  well as full annual audits
+\item
+  \textbf{Enforcement:} Three missed payments trigger default
+  proceedings and collateral liquidation where applicable
+\end{itemize}
+
+This approach ensures sustainable repayment aligned with actual business
+performance rather than arbitrary payment schedules.
+
+\subsection{11.5 Treasury Concentration}\label{treasury-concentration}
+
+FVC maintains strict concentration limits to ensure sustainable revenue
+generation and minimise single-point-of-failure risks across the grant
+portfolio. The treasury deploys capital across diverse sectors and
+geographies, preventing overexposure to any single project, sector, or
+regulatory jurisdiction.
+
+\textbf{Concentration Limits:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Per-Project Cap:} Capped amount of available treasury allocated
+  to any single grant recipient. Subject to change
+\item
+  \textbf{Sector Diversification:} Grants distributed equally across
+  varied sectors on-chain and off
+\item
+\textbf{Geographic Distribution:} Projects spanning multiple
+jurisdictions to reduce regulatory concentration
+\item
+  \textbf{Revenue Source Variety:} Balance between established firms
+  and emerging projects spanning Web2, Web3 and real world firms.
+\item
+  \textbf{Staged Deployment:} Initial grants limited to a smaller
+  percentage of treasury, increasing only after successful repayment
+  history
+\end{itemize}
+
+This disciplined approach to capital deployment ensures the ecosystem
+maintains diverse revenue streams while protecting treasury resources
+from concentrated default risk.
+
+\subsection{11.6 Default and Insolvency}\label{default-and-insolvency}
+
+When funded projects become insolvent or cease operations, FVC employs
+multiple recovery mechanisms to minimise losses and protect treasury
+resources. Our layered approach combines immediate collateral recovery
+with longer-term asset claims, ensuring maximum value recovery while
+maintaining transparent loss accounting for token holders.
+
+\textbf{Recovery Mechanisms:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Collateral Liquidation:} Immediate conversion of escrowed
+  collateral to recover principal
+\item
+  \textbf{Asset Recovery Rights:} Contractual claims on intellectual
+  property, token reserves, or equity stakes in parent entities
+\item
+  \textbf{Loss Buffer Reserve:} A percentage of treasury maintained in
+  stablecoins to absorb expected defaults and aid in mitigating risk
+\item
+  \textbf{Transparent Write-Offs:} Losses recorded according to
+  established accounting standards with public reporting
+\end{itemize}
+
+Default proceedings prioritise speed of recovery and capital
+preservation, with recovered funds redistributed to active grants rather
+than individual compensation.
+
+\subsection{11.7 Counterparty and Compliance
+Risk}\label{counterparty-and-compliance-risk}
+
+FVC maintains strict compliance standards through comprehensive
+KYC/AML procedures and continuous monitoring of all grant recipients.
+This proactive approach prevents regulatory violations, protects the
+ecosystem from sanctions exposure, and ensures all funded projects meet
+international compliance standards.
+
+\textbf{Compliance Framework:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Identity Verification:} Mandatory KYC/AML checks including
+  Ultimate Beneficial Owner (UBO) identification
+\item
+  \textbf{Blockchain Analytics:} Continuous monitoring transaction
+  screening
+\item
+  \textbf{Ongoing Surveillance:} Real-time alerts for suspicious
+  activity or regulatory changes
+\item
+  \textbf{Exclusion Criteria:} Automatic rejection of projects with
+  sanctions exposure or regulatory violations
+\item
+  \textbf{Quarterly Reviews:} Regular compliance audits of all active
+  grant recipients
+\item
+  \textbf{Geographic Restrictions:} Prohibited jurisdictions list
+  maintained and updated monthly
+\end{itemize}
+
+\subsection{11.8 Regulation, Jurisdiction and Shariah
+Compliancy}\label{regulation-and-shariah-compliancy}
+
+FVC operates within established regulatory frameworks while
+maintaining ethical finance principles through its revenue-sharing
+model. The ecosystem's structure deliberately avoids interest-based
+returns, aligning with both modern regulatory requirements and Islamic
+finance principles through genuine risk-sharing arrangements.
+
+\textbf{Jurisdictional Strategy:}
+
+The project is legally structured in the British Virgin Islands (BVI)
+based on specific legal counsel to mitigate Collective Investment
+Scheme (CIS) risks within the United Kingdom. This offshore structuring
+provides a robust legal foundation for the initial deployment phases.
+
+\textbf{UK Regulatory Roadmap (2028-2029):}
+
+FVC maintains active, provisional engagement with UK government
+officials, including the Office of the Business Secretary. The
+strategic roadmap targets the establishment of a fully regulated
+exchange within the UK jurisdiction by 2028/29, contingent upon
+financial stability milestones and the evolving UK crypto-asset
+regulatory framework. This long-term vision aligns with growing UK
+appetite for crypto-asset innovation and job creation.
+
+\textbf{Compliance Measures:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Regulatory Alignment:} Strategic BVI incorporation with
+  roadmap for UK regulatory integration
+\item
+  \textbf{Revenue-Sharing Structure:} Interest-free model based on
+  actual business performance rather than predetermined returns
+\item
+  \textbf{Shariah Principles:} Independent Shariah advisory panel to
+  consistently ensure regulations are followed
+\item
+  \textbf{Legal Reviews:} Annual legal assessments to ensure continued
+  compliance
+\item
+  \textbf{Transparent Reporting:} Public compliance updates and
+  regulatory correspondence
+\end{itemize}
+
+This dual approach ensures broad accessibility while maintaining
+regulatory compliance across jurisdictions.
+
+\section{12. Exit \& Recovery Strategy}\label{exit-recovery-strategy}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Revenue-Based Exit:} Companies repay via revenue share until
+  fixed term is reached or perpetually
+\item
+  \textbf{Equity Conversion:} In certain cases, revenue-sharing
+  agreements may convert into equity
+\item
+  \textbf{Collateral Exit:} Default triggers automatic collateral
+  liquidation
+\item
+  \textbf{Token Exit:} Token allocations received as part of agreements
+  either liquidated or held as long-term treasury assets
+\end{itemize}
+
+\end{document}

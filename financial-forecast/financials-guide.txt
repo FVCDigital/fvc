@@ -1,0 +1,197 @@
+A. Core Business Revenues
+
+For AKH Digital:
+	•	Asset Management Fees
+	•	Management fees (AUM-based %)
+	•	Performance fees (e.g., 20% on gains)
+	•	Exchange Revenues (future)
+	•	Trading fees
+	•	Listing fees
+	•	Withdrawal/deposit fees
+	•	Spread revenue or maker/taker fees
+	•	Advisory/Consulting
+	•	Token launch advisory
+	•	Treasury management services
+
+B. Token-Project Revenues
+
+Your tokenomics should link to:
+	•	Treasury growth from:
+	•	Crypto trading profits
+	•	Equity in Web3 startups
+	•	Equity/returns from UK SMEs
+	•	Staking rewards model
+	•	DAO fees / transaction fees
+	•	Exchange listing revenue if measurable
+	•	Token buyback mechanisms that affect token price
+
+⸻
+
+2. Cost Modelling (Fixed + Variable)
+
+Break into categories for forecasting clarity.
+
+A. Operating Expenses
+	•	Salaries + consultants (technology, legal, AML, ops, research, trading)
+	•	Marketing (community, KOLs, PR, listings)
+	•	Compliance/legal (BVI incorporation, FCA sandbox 2026, licensing)
+	•	Tech infrastructure (servers, APIs, smart contracts, cybersecurity)
+	•	Software subscriptions
+
+B. Token-Related Costs
+	•	Smart contract development + audits
+	•	Liquidity pools (initial liquidity provision)
+	•	Token issuance cost
+	•	Market-making services
+	•	Exchange listing fees
+
+C. Capital Expenditures
+	•	Platform development (exchange, dashboard, trading interfaces)
+	•	Treasury allocation (startup investments, SME loans)
+
+⸻
+
+3. Cash Flow Management
+
+Crypto companies need dual modelling:
+
+A. Fiat cash flow
+	•	Salaries
+	•	Operations
+	•	Licensing
+	•	Legal
+
+B. Crypto cash flow
+	•	Treasury token allocations
+	•	LP positions
+	•	Staking yields
+	•	Volatility impact on runway
+
+Include:
+	•	Fiat → crypto bridge assumptions
+	•	Stablecoin treasury segregation
+	•	“Runway at $X per month burn” scenarios
+
+⸻
+
+4. Market Assumptions (sensitivity-tested)
+
+Your model must stress-test assumptions because crypto is volatile.
+
+Consider:
+	•	Token price scenarios (bull/base/bear)
+	•	Bitcoin + ETH correlation impact on treasury
+	•	Exchange volume assumptions
+	•	AUM growth based on historical crypto cycles
+	•	VC/institutional market appetite
+
+You should model 3–5 scenarios, not just one.
+
+⸻
+
+5. Tokenomics Impact
+
+Your tokenomics directly influence financial forecasts.
+
+You must model:
+	•	Token supply schedule (vesting, unlocks)
+	•	Circulating supply vs. market cap effects
+	•	Treasury growth vs. token price
+	•	Buyback/burn mechanisms
+	•	Staking reward inflation
+	•	DAO governance fund outflows
+
+This ensures the token is:
+	•	sustainable
+	•	attractive
+	•	non-inflationary
+	•	compliant
+
+⸻
+
+6. Regulatory Costs + Timelines
+
+Since you’re planning:
+	•	BVI setup
+	•	FCA sandbox Q4 2026
+	•	Temporary registration mid-2027
+
+Forecast:
+	•	Compliance personnel costs
+	•	Legal opinion costs
+	•	Licensing fees
+	•	Audits (financial + smart contract)
+
+Include buffers (20–30% contingency).
+
+⸻
+
+7. Investor Expectations + Capital Strategy
+
+Since you’re raising capital through the token:
+
+Forecast:
+	•	Pre-sale revenue
+	•	Private round discounts + vesting impact
+	•	Public sale revenue
+	•	Exchange liquidity requirements
+	•	Treasury composition post-raise
+
+Model what you promise investors:
+	•	APY?
+	•	Treasury ROI expectations?
+	•	Value-accrual for long-term holders?
+
+⸻
+
+8. Risk Modelling
+
+Include:
+	•	Crypto market crashes (30–70% drawdowns)
+	•	Regulatory delays
+	•	Exchange launch delays
+	•	Smart contract exploit risks (mitigate via audits)
+	•	Reduced AUM from investor withdrawals
+
+Add:
+	•	Risk buffers
+	•	Insurance plans
+	•	Conservative scenario modelling
+
+⸻
+
+9. KPIs for Ongoing Forecast Management
+
+Your forecast must track measurable KPIs such as:
+
+For Asset Management
+	•	AUM growth
+	•	Monthly returns (net of fees)
+	•	Management fee revenue
+	•	Performance fee revenue
+
+For Token
+	•	Market cap
+	•	Liquidity depth
+	•	Daily active holders
+	•	Treasury value
+	•	Treasury ROI
+
+For Exchange
+	•	Daily trading volume
+	•	New user onboarding
+	•	Conversion rate to KYC
+	•	Revenue per active user
+
+These KPIs let you update forecasts every quarter.
+
+⸻
+
+10. Forecast Time Horizons
+
+Use:
+	•	3–5 year financial model (required for investors)
+	•	12-month detailed cash flow forecast
+	•	Token economy 10-year supply schedule
+
+This keeps financials + tokenomics aligned.
