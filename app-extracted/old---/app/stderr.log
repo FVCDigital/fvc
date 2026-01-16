@@ -1,0 +1,54 @@
+file:///home/fvcdigital/public_html/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined in ES module scope, you can use import instead
+This file is being treated as an ES module because it has a '.js' file extension and '/home/fvcdigital/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+    at file:///home/fvcdigital/public_html/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:436:37)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.17.0
+file:///home/fvcdigital/public_html/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined in ES module scope, you can use import instead
+This file is being treated as an ES module because it has a '.js' file extension and '/home/fvcdigital/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+    at file:///home/fvcdigital/public_html/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:436:37)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.17.0
+file:///home/fvcdigital/public_html/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined in ES module scope, you can use import instead
+This file is being treated as an ES module because it has a '.js' file extension and '/home/fvcdigital/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+    at file:///home/fvcdigital/public_html/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:436:37)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.17.0

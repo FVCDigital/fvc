@@ -1,0 +1,76 @@
+file:///home/fvcdigital/public_html/TradingCard/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined in ES module scope, you can use import instead
+This file is being treated as an ES module because it has a '.js' file extension and '/home/fvcdigital/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+    at file:///home/fvcdigital/public_html/TradingCard/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:436:37)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.17.0
+file:///home/fvcdigital/public_html/TradingCard/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined in ES module scope, you can use import instead
+This file is being treated as an ES module because it has a '.js' file extension and '/home/fvcdigital/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+    at file:///home/fvcdigital/public_html/TradingCard/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:436:37)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.17.0
+file:///home/fvcdigital/public_html/TradingCard/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined in ES module scope, you can use import instead
+This file is being treated as an ES module because it has a '.js' file extension and '/home/fvcdigital/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+    at file:///home/fvcdigital/public_html/TradingCard/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:436:37)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.17.0
+node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module '/home/fvcdigital/public_html/TradingCard//app.js'
+Require stack:
+- /usr/local/lsws/fcgi-bin/lsnode.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Module._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+    at startApplication (/usr/local/lsws/fcgi-bin/lsnode.js:48:15)
+    at Object.<anonymous> (/usr/local/lsws/fcgi-bin/lsnode.js:16:1) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [ '/usr/local/lsws/fcgi-bin/lsnode.js' ]
+}
+
+Node.js v22.17.0

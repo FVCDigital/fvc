@@ -41,6 +41,20 @@ const config: HardhatUserConfig = {
       gas: 5000000,
       timeout: 600000,
     },
+    "bsc-testnet": {
+      url: process.env.BSC_TESTNET_RPC || "https://data-seed-prebsc-1-s1.binance.org:8545",
+      accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
+      chainId: 97,
+      gasPrice: 10000000000,
+      timeout: 600000,
+    },
+    "bsc-mainnet": {
+      url: process.env.BSC_MAINNET_RPC || "https://bsc-dataseed1.binance.org",
+      accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
+      chainId: 56,
+      gasPrice: 5000000000,
+      timeout: 600000,
+    },
   },
   paths: {
     sources: "./src",

@@ -1,0 +1,17 @@
+{
+  "network": "bsc-testnet",
+  "chainId": "97",
+  "deployer": "0x378882BE42e860E9F78B1736d85307AE17d4c402",
+  "treasury": "0x378882BE42e860E9F78B1736d85307AE17d4c402",
+  "fvc": "0xE288F7BB9E7F27512A41651399c68FBAf33f27B9",
+  "sale": "0xCd27Ca92257EF6C7F0eFB9a673CAB0cE104B4500",
+  "vesting": "0xde578D96fa5Aa5DC39E2010AC781288dEDd7a6D6",
+  "usdc": "0x18E68709b00b792429aF671a7ADd0Ac0D2dF335A",
+  "usdt": "0x5Bf93672B6E932E7fB6E753B085a4a5fe7E84da1",
+  "rate": "0.025",
+  "cap": "1000000.0",
+  "vestingThreshold": "50000.0",
+  "cliffDays": 180,
+  "vestingDays": 730,
+  "deployedAt": "2026-01-16T17:17:49.030Z"
+}

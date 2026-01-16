@@ -1,0 +1,629 @@
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:400:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Module._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+
+Node.js v22.16.0
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:387:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:323:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1371:24)
+    at Module._compile (node:internal/modules/cjs/loader:1511:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1572:16)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1096:12)
+    at Module.require (node:internal/modules/cjs/loader:1298:19)
+    at require (node:internal/modules/helpers:182:18)
+
+Node.js v20.19.2
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:387:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:323:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1371:24)
+    at Module._compile (node:internal/modules/cjs/loader:1511:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1572:16)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1096:12)
+    at Module.require (node:internal/modules/cjs/loader:1298:19)
+    at require (node:internal/modules/helpers:182:18)
+
+Node.js v20.19.2
+file:///home/fvcdigital/app/app.js:1
+var http = require('http');
+           ^
+
+ReferenceError: require is not defined
+    at file:///home/fvcdigital/app/app.js:1:12
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:387:35)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:323:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1371:24)
+    at Module._compile (node:internal/modules/cjs/loader:1511:5)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1572:16)
+    at Module.load (node:internal/modules/cjs/loader:1275:32)
+    at Module._load (node:internal/modules/cjs/loader:1096:12)
+    at Module.require (node:internal/modules/cjs/loader:1298:19)
+    at require (node:internal/modules/helpers:182:18)
+
+Node.js v20.19.2
