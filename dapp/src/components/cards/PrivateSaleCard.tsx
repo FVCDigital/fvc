@@ -276,21 +276,38 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
       setIsSuccess(true);
       setBondAmount('');
       setIsProcessing(false);
+
+      // Prompt MetaMask to track $FVC so it appears in the wallet (EIP-747)
+      if (window.ethereum) {
+        const fvcAddress = CONTRACTS.FVC as string;
+        if (fvcAddress) {
+          window.ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: fvcAddress,
+                symbol: 'FVC',
+                decimals: 18,
+                image: `${window.location.origin}/assets/fvc-logo.png`,
+              },
+            },
+          }).catch(() => {});
+        }
+      }
       
       // Refresh contract data to show updated numbers
       setTimeout(() => {
         refetchSaleProgress();
         refetchCurrentMilestone();
         refetchMilestones();
-        // Refresh both balances
         if (selectedAsset.symbol === 'USDC') {
           usdcBalance.refetch();
         } else {
           ethBalance.refetch();
         }
-      }, 2000); // Wait 2 seconds for blockchain to settle
+      }, 2000);
       
-      // Reset success state after 5 seconds
       setTimeout(() => {
         setIsSuccess(false);
       }, 5000);
