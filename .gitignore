@@ -49,7 +49,9 @@ dapp/tsconfig.tsbuildinfo
 # Development and test scripts
 # keep scripts tracked
 contracts/scripts/*.json
-contracts/scripts/*.ts
+
+# Whitepaper source (built separately)
+Whitepaper/
 contracts/src/sale/Test*.sol
 contracts/src/sale/Custom*.sol
 contracts/scripts_backup_*/
