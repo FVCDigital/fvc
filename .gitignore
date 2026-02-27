@@ -34,6 +34,7 @@ dapp/.env.example
 # Hardhat compilation artifacts
 contracts/artifacts/
 contracts/cache/
+contracts/typechain-types/
 
 # Dependencies and build files
 package-lock.json
