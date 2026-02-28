@@ -1,0 +1,138 @@
+FVC SEPOLIA DEPLOYMENT — CONTINUATION STEPS
+=============================================
+
+WHAT'S ALREADY DONE:
+- Sale.sol updated with buyWithETH() function (ETH, USDC, USDT all supported)
+- Sale.test.ts: 58 tests all passing
+- buy-fvc-wizard.js: updated UI with all three payment methods
+- Website deployed to cPanel (fvcdigital.com)
+- app-extracted removed from fvc repo, lives in its own FVCDigital/fvcdigital repo
+- Sepolia deployment script created: contracts/scripts/deploy-sepolia.ts
+
+=============================================
+STEP 1: CREATE contracts/.env
+=============================================
+
+Create the file contracts/.env with these three values:
+
+    DEPLOYER_PRIVATE_KEY=<private_key_of_wallet_with_sepolia_eth>
+    ETHEREUM_SEPOLIA_RPC=https://rpc.sepolia.org
+    TREASURY_ADDRESS=<your_gnosis_safe_address_on_sepolia>
+
+The deployer wallet needs ~0.05 Sepolia ETH for gas.
+Get Sepolia ETH: https://sepoliafaucet.com or https://www.alchemy.com/faucets/ethereum-sepolia
+
+The TREASURY_ADDRESS is your Gnosis Safe on Sepolia. This becomes the owner
+of the Sale contract and receives all payments.
+
+=============================================
+STEP 2: DEPLOY TO SEPOLIA
+=============================================
+
+    cd contracts
+    npx hardhat run scripts/deploy-sepolia.ts --network sepolia
+
+This will:
+- Deploy Mock USDC and USDT (with 1M minted to deployer for testing)
+- Deploy FVC token
+- Deploy Vesting contract
+- Deploy Sale contract with rate = $0.05/FVC
+- Set ETH/USD rate to $2,500
+- Accept USDC and USDT
+- Configure vesting (>= $50k purchases)
+- Activate the sale
+- Save all addresses to contracts/deployments-sepolia.json
+- Print the .env values for cPanel
+
+=============================================
+STEP 3: UPDATE CPANEL .ENV
+=============================================
+
+The deployment script prints the exact values. SSH into cPanel and update:
+
+    ssh fvcdigital@cpanel.fvcdigital.com
+
+Edit ~/.env and replace the BSC_ values with the Sepolia ones:
+
+    BSC_CHAIN_ID=11155111
+    BSC_RPC_URL=https://rpc.sepolia.org
+    BSC_FVC_ADDRESS=<from deployment output>
+    BSC_SALE_ADDRESS=<from deployment output>
+    BSC_VESTING_ADDRESS=<from deployment output>
+    BSC_USDC_ADDRESS=<from deployment output>
+    BSC_USDT_ADDRESS=<from deployment output>
+
+Then clear the config cache:
+
+    php artisan config:cache
+
+=============================================
+STEP 4: TEST THE PURCHASE FLOW
+=============================================
+
+1. Go to fvcdigital.com/buy-fvc
+2. Connect MetaMask (must be on Sepolia, chain ID 11155111)
+3. The wizard will prompt to switch network if needed
+
+To test USDC/USDT purchases:
+- You need Mock USDC/USDT in your wallet
+- The deployer wallet has 1M of each from deployment
+- Transfer some to your test wallet, OR
+- Call mockUsdc.mint(yourAddress, amount) from the deployer
+
+To test ETH purchases:
+- Just use Sepolia ETH (from faucet)
+- Select ETH payment method
+- Enter amount and confirm
+
+After purchase, click "Add FVC to Wallet" to see FVC in MetaMask
+with the logo.
+
+=============================================
+STEP 5: GNOSIS SAFE OPERATIONS (FUTURE)
+=============================================
+
+To change sale parameters after deployment, use the Gnosis Safe:
+
+1. Go to https://app.safe.global
+2. Select your Safe on Sepolia (chain ID 11155111)
+3. New Transaction > Transaction Builder
+4. Enter the Sale contract address
+5. Use these function signatures:
+
+   Change FVC price:
+     Function: setRate(uint256)
+     Value for $0.05: 50000
+     Value for $0.10: 100000
+
+   Change ETH/USD rate:
+     Function: setEthUsdRate(uint256)
+     Value for $2,500: 2500000000
+     Value for $3,000: 3000000000
+
+   Pause sale:
+     Function: setActive(bool)
+     Value: false
+
+   Resume sale:
+     Function: setActive(bool)
+     Value: true
+
+   Update cap:
+     Function: setCap(uint256)
+     Value for $10M: 10000000000000
+
+6. Submit and confirm with required signers
+
+=============================================
+STEP 6: MAINNET DEPLOYMENT (WHEN READY)
+=============================================
+
+For Ethereum mainnet:
+- Use real USDC: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
+- Use real USDT: 0xdAC17F958D2ee523a2206206994597C13D831ec7
+- Update TREASURY_ADDRESS to mainnet Gnosis Safe
+- Update ETHEREUM_SEPOLIA_RPC to a mainnet RPC
+- Modify deploy-sepolia.ts to skip MockStable deployment
+  and use real token addresses instead
+- Set ETH_USD_RATE to current market price
