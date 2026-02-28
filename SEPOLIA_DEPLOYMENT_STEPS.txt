@@ -1,13 +1,26 @@
 FVC SEPOLIA DEPLOYMENT — CONTINUATION STEPS
 =============================================
 
-WHAT'S ALREADY DONE:
-- Sale.sol updated with buyWithETH() function (ETH, USDC, USDT all supported)
-- Sale.test.ts: 58 tests all passing
-- buy-fvc-wizard.js: updated UI with all three payment methods
-- Website deployed to cPanel (fvcdigital.com)
-- app-extracted removed from fvc repo, lives in its own FVCDigital/fvcdigital repo
+This file contains everything needed for a fresh Cursor agent session
+to pick up where we left off and complete the Sepolia deployment.
+
+CURRENT STATE:
+- Sale.sol: updated with buyWithETH() function (ETH, USDC, USDT all supported)
+- Sale.test.ts: 58 tests all passing (run: cd contracts && npx hardhat test test/Sale.test.ts)
+- buy-fvc-wizard.js: updated UI with USDC/USDT active, ETH active, credit/debit coming soon
+- Website deployed to cPanel at fvcdigital.com via SSH (user: fvcdigital, host: cpanel.fvcdigital.com)
+- app-extracted removed from fvc repo, lives in its own repo at FVCDigital/fvcdigital on GitHub
 - Sepolia deployment script created: contracts/scripts/deploy-sepolia.ts
+- The cPanel server .env currently points at BSC testnet (chain ID 97, BSC RPC, BSC contract addresses)
+- The Laravel config keys are named BSC_ (in config/services.php under 'bsc'). Do NOT rename them.
+  Just repoint the values to Sepolia. This is intentional to avoid touching Laravel config files.
+
+WHAT STILL NEEDS TO BE DONE:
+1. Create contracts/.env with deployer key, Sepolia RPC, and Gnosis Safe address
+2. Run the Sepolia deployment script
+3. Update the cPanel server .env with deployed Sepolia addresses
+4. Clear Laravel config cache on the server
+5. Test the purchase flow on fvcdigital.com/buy-fvc
 
 =============================================
 STEP 1: CREATE contracts/.env
@@ -19,11 +32,15 @@ Create the file contracts/.env with these three values:
     ETHEREUM_SEPOLIA_RPC=https://rpc.sepolia.org
     TREASURY_ADDRESS=<your_gnosis_safe_address_on_sepolia>
 
-The deployer wallet needs ~0.05 Sepolia ETH for gas.
-Get Sepolia ETH: https://sepoliafaucet.com or https://www.alchemy.com/faucets/ethereum-sepolia
-
-The TREASURY_ADDRESS is your Gnosis Safe on Sepolia. This becomes the owner
-of the Sale contract and receives all payments.
+IMPORTANT NOTES:
+- The deployer must be a regular wallet (EOA), NOT the Gnosis Safe.
+  Hardhat cannot sign transactions with a Gnosis Safe.
+- The deployment script sets the Gnosis Safe as the beneficiary/owner
+  of the Sale contract. The Safe receives all funds and controls the contract.
+- The deployer wallet needs ~0.05 Sepolia ETH for gas.
+- Get Sepolia ETH: https://sepoliafaucet.com or https://www.alchemy.com/faucets/ethereum-sepolia
+- The TREASURY_ADDRESS is the Gnosis Safe on Sepolia. This becomes the owner
+  of the Sale contract and receives all payments (ETH, USDC, USDT).
 
 =============================================
 STEP 2: DEPLOY TO SEPOLIA
@@ -32,27 +49,37 @@ STEP 2: DEPLOY TO SEPOLIA
     cd contracts
     npx hardhat run scripts/deploy-sepolia.ts --network sepolia
 
-This will:
-- Deploy Mock USDC and USDT (with 1M minted to deployer for testing)
-- Deploy FVC token
-- Deploy Vesting contract
-- Deploy Sale contract with rate = $0.05/FVC
-- Set ETH/USD rate to $2,500
-- Accept USDC and USDT
-- Configure vesting (>= $50k purchases)
-- Activate the sale
-- Save all addresses to contracts/deployments-sepolia.json
-- Print the .env values for cPanel
+The script automatically:
+- Deploys Mock USDC and USDT (with 1M minted to deployer for testing)
+- Deploys FVC token (ERC-20, 18 decimals)
+- Deploys Vesting contract
+- Deploys Sale contract with:
+    - rate = 50000 ($0.05 per FVC in 6-decimal stablecoin units)
+    - ethUsdRate = 2500000000 ($2,500 per ETH in 6-decimal units)
+    - cap = $10,000,000
+- Grants MINTER_ROLE to Sale and Vesting contracts
+- Accepts USDC and USDT as payment tokens
+- Configures vesting (purchases >= $50k get 180-day cliff, 730-day vesting)
+- Transfers Vesting ownership to Sale contract
+- Activates the sale (setActive(true))
+- Saves all addresses to contracts/deployments-sepolia.json
+- Prints the exact .env values needed for cPanel
+
+After deployment, the Sale contract is fully operational. No Gnosis Safe
+transactions are needed to start — the script handles all configuration.
 
 =============================================
 STEP 3: UPDATE CPANEL .ENV
 =============================================
 
-The deployment script prints the exact values. SSH into cPanel and update:
+The deployment script prints the exact values to paste. SSH into cPanel:
 
     ssh fvcdigital@cpanel.fvcdigital.com
 
-Edit ~/.env and replace the BSC_ values with the Sepolia ones:
+NOTE: rsync is NOT available on the server. Use scp for file transfers.
+
+Edit ~/.env and replace the existing BSC_ values with the Sepolia ones.
+The key names stay as BSC_ (the Laravel config reads them as BSC_):
 
     BSC_CHAIN_ID=11155111
     BSC_RPC_URL=https://rpc.sepolia.org
@@ -62,9 +89,17 @@ Edit ~/.env and replace the BSC_ values with the Sepolia ones:
     BSC_USDC_ADDRESS=<from deployment output>
     BSC_USDT_ADDRESS=<from deployment output>
 
-Then clear the config cache:
+Then rebuild the Laravel config cache (REQUIRED or changes won't take effect):
 
     php artisan config:cache
+
+Also clear the view cache for good measure:
+
+    php artisan view:clear
+
+The full command from local machine:
+
+    ssh fvcdigital@cpanel.fvcdigital.com "cd ~ && php artisan config:cache && php artisan view:clear"
 
 =============================================
 STEP 4: TEST THE PURCHASE FLOW
@@ -75,40 +110,75 @@ STEP 4: TEST THE PURCHASE FLOW
 3. The wizard will prompt to switch network if needed
 
 To test USDC/USDT purchases:
-- You need Mock USDC/USDT in your wallet
+- You need Mock USDC/USDT in your test wallet
 - The deployer wallet has 1M of each from deployment
 - Transfer some to your test wallet, OR
 - Call mockUsdc.mint(yourAddress, amount) from the deployer
+- The mock contracts are standard ERC-20 with a public mint() function
 
 To test ETH purchases:
 - Just use Sepolia ETH (from faucet)
-- Select ETH payment method
+- Select ETH payment method in the wizard
 - Enter amount and confirm
+- No token approval needed for ETH (simpler flow than USDC/USDT)
 
-After purchase, click "Add FVC to Wallet" to see FVC in MetaMask
-with the logo.
+After purchase:
+- Click "Add FVC to Wallet" button on the confirmation screen
+- This calls wallet_watchAsset (EIP-747) to add FVC to MetaMask
+- The FVC logo (FVC.svg) is served from fvcdigital.com/assets/images/FVC.svg
+- FVC will NOT appear in MetaMask automatically — the user must click the button
+
+Price verification:
+- At rate = 50000, $100 USDC buys 2,000 FVC
+- At rate = 50000 and ethUsdRate = 2500000000, 1 ETH buys 50,000 FVC
+- The wizard shows a live estimate when entering ETH amounts
 
 =============================================
-STEP 5: GNOSIS SAFE OPERATIONS (FUTURE)
+STEP 5: UPLOADING CHANGES TO CPANEL
 =============================================
 
-To change sale parameters after deployment, use the Gnosis Safe:
+To upload changed files to the live site:
 
+    scp <local_file> fvcdigital@cpanel.fvcdigital.com:<remote_path>
+
+Key file paths (local -> remote):
+    app-extracted/public_html/assets/js/buy-fvc-wizard.js -> ~/public_html/assets/js/buy-fvc-wizard.js
+    app-extracted/resources/views/site/buy-fvc.blade.php  -> ~/resources/views/site/buy-fvc.blade.php
+    app-extracted/resources/views/site/page.blade.php     -> ~/resources/views/site/page.blade.php
+    app-extracted/resources/views/site/blocks/*.blade.php -> ~/resources/views/site/blocks/
+    app-extracted/resources/views/components/*.blade.php  -> ~/resources/views/components/
+    app-extracted/public_html/assets/images/*              -> ~/public_html/assets/images/
+
+After uploading blade templates, always clear the view cache:
+
+    ssh fvcdigital@cpanel.fvcdigital.com "php artisan view:clear && php artisan config:cache"
+
+=============================================
+STEP 6: GNOSIS SAFE OPERATIONS (FUTURE)
+=============================================
+
+The Sale contract owner is the Gnosis Safe (TREASURY_ADDRESS).
+Only the Safe can call these functions after deployment.
+
+To change sale parameters:
 1. Go to https://app.safe.global
 2. Select your Safe on Sepolia (chain ID 11155111)
 3. New Transaction > Transaction Builder
-4. Enter the Sale contract address
+4. Enter the Sale contract address (from deployments-sepolia.json)
 5. Use these function signatures:
 
    Change FVC price:
      Function: setRate(uint256)
      Value for $0.05: 50000
      Value for $0.10: 100000
+     Value for $0.25: 250000
 
-   Change ETH/USD rate:
+   Change ETH/USD rate (update periodically to track market):
      Function: setEthUsdRate(uint256)
+     Value for $2,000: 2000000000
      Value for $2,500: 2500000000
      Value for $3,000: 3000000000
+     Set to 0 to disable ETH purchases entirely.
 
    Pause sale:
      Function: setActive(bool)
@@ -121,18 +191,46 @@ To change sale parameters after deployment, use the Gnosis Safe:
    Update cap:
      Function: setCap(uint256)
      Value for $10M: 10000000000000
+     Value for $20M: 20000000000000
+
+   Accept a new token:
+     Function: setAcceptedToken(address,bool,uint8)
+     Args: <token_address>, true, <decimals>
 
 6. Submit and confirm with required signers
 
 =============================================
-STEP 6: MAINNET DEPLOYMENT (WHEN READY)
+STEP 7: MAINNET DEPLOYMENT (WHEN READY)
 =============================================
 
 For Ethereum mainnet:
 - Use real USDC: 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
 - Use real USDT: 0xdAC17F958D2ee523a2206206994597C13D831ec7
+- Do NOT deploy MockStable — modify deploy-sepolia.ts (or create deploy-mainnet.ts)
+  to skip mock deployment and use the real token addresses above
 - Update TREASURY_ADDRESS to mainnet Gnosis Safe
-- Update ETHEREUM_SEPOLIA_RPC to a mainnet RPC
-- Modify deploy-sepolia.ts to skip MockStable deployment
-  and use real token addresses instead
-- Set ETH_USD_RATE to current market price
+- Update ETHEREUM_SEPOLIA_RPC to a mainnet RPC (e.g. Alchemy, Infura)
+- Set ETH_USD_RATE to current market price at time of deployment
+- Update cPanel .env BSC_CHAIN_ID to 1 (Ethereum mainnet)
+- Update cPanel .env BSC_RPC_URL to mainnet RPC
+- The deployer needs real ETH for gas (~0.05 ETH)
+- Consider a contract audit before mainnet deployment
+
+=============================================
+REFERENCE: SALE CONTRACT ABI (for Gnosis Safe / ethers.js)
+=============================================
+
+function buy(address stable, uint256 amount) external
+function buyWithETH() external payable
+function setRate(uint256 newRate) external onlyOwner
+function setEthUsdRate(uint256 newEthUsdRate) external onlyOwner
+function setCap(uint256 newCap) external onlyOwner
+function setActive(bool _active) external onlyOwner
+function setAcceptedToken(address token, bool allowed, uint8 decimals) external onlyOwner
+function setVestingConfig(address _vestingContract, uint256 _threshold, uint256 _cliff, uint256 _duration) external onlyOwner
+function rate() external view returns (uint256)
+function ethUsdRate() external view returns (uint256)
+function cap() external view returns (uint256)
+function raised() external view returns (uint256)
+function active() external view returns (bool)
+function isAccepted(address) external view returns (bool)
