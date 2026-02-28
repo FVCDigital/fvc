@@ -1,7 +1,0 @@
-# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
-PassengerAppRoot "/home/fvcdigital/public_html/TradingCard"
-PassengerBaseURI "/TradingCard"
-PassengerNodejs "/home/fvcdigital/nodevenv/public_html/TradingCard/19/bin/node"
-PassengerAppType node
-PassengerStartupFile app.js
-# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END

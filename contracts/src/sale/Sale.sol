@@ -60,6 +60,9 @@ contract Sale is Ownable, ReentrancyGuard {
     /// @notice TokenVesting contract address (optional, set by owner)
     IVesting public vestingContract;
 
+    /// @notice ETH price in USD with 6 decimals (e.g. 2500e6 = $2,500 per ETH), set by owner
+    uint256 public ethUsdRate;
+
     /// @notice Minimum purchase amount (6 decimals) to trigger vesting
     uint256 public vestingThreshold;
 
@@ -70,9 +73,11 @@ contract Sale is Ownable, ReentrancyGuard {
     // ============ EVENTS ============
 
     event TokensPurchased(address indexed buyer, address indexed stable, uint256 paymentAmount, uint256 tokenAmount);
+    event TokensPurchasedWithETH(address indexed buyer, uint256 ethAmount, uint256 usdEquivalent, uint256 tokenAmount);
     event TokensPurchasedWithVesting(address indexed buyer, uint256 tokenAmount, uint256 cliff, uint256 duration);
     event RateUpdated(uint256 newRate);
     event CapUpdated(uint256 newCap);
+    event EthUsdRateUpdated(uint256 newEthUsdRate);
     event SaleStatusChanged(bool active);
     event AcceptedTokenUpdated(address indexed token, bool allowed);
     event VestingConfigUpdated(address indexed vestingContract, uint256 threshold, uint256 cliff, uint256 duration);
@@ -86,6 +91,8 @@ contract Sale is Ownable, ReentrancyGuard {
     error Sale__ZeroCap();
     error Sale__CapExceeded();
     error Sale__TokenNotAccepted();
+    error Sale__EthNotEnabled();
+    error Sale__EthTransferFailed();
 
     // ============ CONSTRUCTOR ============
 
@@ -169,6 +176,51 @@ contract Sale is Ownable, ReentrancyGuard {
         }
     }
 
+    /**
+     * @notice Buy FVC with native ETH/BNB at the owner-set ethUsdRate
+     * @dev Converts msg.value to a 6-decimal USD equivalent, then applies the same FVC rate
+     *      ETH is forwarded to the beneficiary (Gnosis Safe)
+     */
+    function buyWithETH() external payable nonReentrant {
+        if (!active) revert Sale__Inactive();
+        if (ethUsdRate == 0) revert Sale__EthNotEnabled();
+        if (msg.value == 0) revert Sale__ZeroAmount();
+
+        // msg.value is 18 decimals. ethUsdRate is USD per 1 ETH in 6 decimals.
+        // usdEquivalent (6 decimals) = msg.value * ethUsdRate / 1e18
+        uint256 usdEquivalent = (msg.value * ethUsdRate) / 1e18;
+        if (usdEquivalent == 0) revert Sale__ZeroAmount();
+        if (raised + usdEquivalent > cap) revert Sale__CapExceeded();
+
+        uint256 tokenAmount = (usdEquivalent * 1e18) / rate;
+
+        raised += usdEquivalent;
+
+        // Forward ETH to beneficiary
+        (bool sent, ) = beneficiary.call{value: msg.value}("");
+        if (!sent) revert Sale__EthTransferFailed();
+
+        if (
+            address(vestingContract) != address(0) &&
+            vestingThreshold > 0 &&
+            usdEquivalent >= vestingThreshold
+        ) {
+            saleToken.mint(address(vestingContract), tokenAmount);
+            vestingContract.createVestingSchedule(
+                msg.sender,
+                tokenAmount,
+                block.timestamp,
+                defaultCliff,
+                defaultDuration
+            );
+            emit TokensPurchasedWithVesting(msg.sender, tokenAmount, defaultCliff, defaultDuration);
+        } else {
+            saleToken.mint(msg.sender, tokenAmount);
+        }
+
+        emit TokensPurchasedWithETH(msg.sender, msg.value, usdEquivalent, tokenAmount);
+    }
+
     // ============ OWNER CONTROLS ============
 
     /**
@@ -186,6 +238,15 @@ contract Sale is Ownable, ReentrancyGuard {
         if (newRate == 0) revert Sale__ZeroRate();
         rate = newRate;
         emit RateUpdated(newRate);
+    }
+
+    /**
+     * @notice Set ETH/USD price (6 decimals). Set to 0 to disable ETH purchases.
+     * @param newEthUsdRate USD per 1 ETH in 6 decimals (e.g. 2500e6 = $2,500)
+     */
+    function setEthUsdRate(uint256 newEthUsdRate) external onlyOwner {
+        ethUsdRate = newEthUsdRate;
+        emit EthUsdRateUpdated(newEthUsdRate);
     }
 
     /**

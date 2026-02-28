@@ -317,9 +317,204 @@ describe("Ethereum Presale ? Sale Contract", function () {
     });
   });
 
-  // ????????????????????????????????????????????????
+  // ------------------------------------------------
+  // BUY WITH ETH
+  // ------------------------------------------------
+
+  describe("Buy FVC with ETH", function () {
+    const ETH_USD_RATE = ethers.parseUnits("2500", 6); // $2,500 per ETH
+
+    beforeEach(async () => {
+      await sale.connect(beneficiary).setEthUsdRate(ETH_USD_RATE);
+    });
+
+    it("mints FVC to buyer wallet", async () => {
+      const ethAmount = ethers.parseEther("1"); // 1 ETH = $2,500
+      const usdEquivalent = (ethAmount * ETH_USD_RATE) / BigInt(1e18);
+      const expectedFVC = (usdEquivalent * BigInt(1e18)) / BigInt(RATE);
+
+      await sale.connect(buyer).buyWithETH({ value: ethAmount });
+      expect(await fvc.balanceOf(buyer.address)).to.equal(expectedFVC);
+    });
+
+    it("1 ETH at $2,500 and $0.025/FVC = 100,000 FVC", async () => {
+      const ethAmount = ethers.parseEther("1");
+      await sale.connect(buyer).buyWithETH({ value: ethAmount });
+      expect(await fvc.balanceOf(buyer.address)).to.equal(ethers.parseEther("100000"));
+    });
+
+    it("0.1 ETH at $2,500 = $250 = 10,000 FVC", async () => {
+      const ethAmount = ethers.parseEther("0.1");
+      await sale.connect(buyer).buyWithETH({ value: ethAmount });
+      expect(await fvc.balanceOf(buyer.address)).to.equal(ethers.parseEther("10000"));
+    });
+
+    it("forwards ETH to beneficiary (Gnosis Safe)", async () => {
+      const ethAmount = ethers.parseEther("2");
+      const balBefore = await ethers.provider.getBalance(beneficiary.address);
+
+      await sale.connect(buyer).buyWithETH({ value: ethAmount });
+
+      const balAfter = await ethers.provider.getBalance(beneficiary.address);
+      expect(balAfter - balBefore).to.equal(ethAmount);
+    });
+
+    it("tracks raised in USD-equivalent (6 decimals)", async () => {
+      const ethAmount = ethers.parseEther("1");
+      await sale.connect(buyer).buyWithETH({ value: ethAmount });
+
+      const expectedRaised = (ethAmount * ETH_USD_RATE) / BigInt(1e18);
+      expect(await sale.raised()).to.equal(expectedRaised);
+    });
+
+    it("emits TokensPurchasedWithETH event", async () => {
+      const ethAmount = ethers.parseEther("0.5");
+      const usdEquivalent = (ethAmount * ETH_USD_RATE) / BigInt(1e18);
+      const expectedFVC = (usdEquivalent * BigInt(1e18)) / BigInt(RATE);
+
+      await expect(
+        sale.connect(buyer).buyWithETH({ value: ethAmount })
+      )
+        .to.emit(sale, "TokensPurchasedWithETH")
+        .withArgs(buyer.address, ethAmount, usdEquivalent, expectedFVC);
+    });
+
+    it("emits ERC-20 Transfer event from zero address (mint)", async () => {
+      const ethAmount = ethers.parseEther("0.2");
+      const usdEquivalent = (ethAmount * ETH_USD_RATE) / BigInt(1e18);
+      const expectedFVC = (usdEquivalent * BigInt(1e18)) / BigInt(RATE);
+
+      await expect(
+        sale.connect(buyer).buyWithETH({ value: ethAmount })
+      )
+        .to.emit(fvc, "Transfer")
+        .withArgs(ethers.ZeroAddress, buyer.address, expectedFVC);
+    });
+
+    it("mixed ETH + USDC purchases track combined raised", async () => {
+      const ethAmount = ethers.parseEther("1");
+      const usdcAmount = ethers.parseUnits("5000", 6);
+
+      await sale.connect(buyer).buyWithETH({ value: ethAmount });
+
+      await usdc.connect(buyer).approve(await sale.getAddress(), usdcAmount);
+      await sale.connect(buyer).buy(await usdc.getAddress(), usdcAmount);
+
+      const ethUsd = (ethAmount * ETH_USD_RATE) / BigInt(1e18);
+      expect(await sale.raised()).to.equal(ethUsd + usdcAmount);
+    });
+
+    it("cap applies to ETH purchases", async () => {
+      const smallCap = ethers.parseUnits("1000", 6); // $1,000 cap
+      await sale.connect(beneficiary).setCap(smallCap);
+
+      // 1 ETH = $2,500 which exceeds $1,000 cap
+      await expect(
+        sale.connect(buyer).buyWithETH({ value: ethers.parseEther("1") })
+      ).to.be.revertedWithCustomError(sale, "Sale__CapExceeded");
+    });
+
+    it("owner can update ethUsdRate", async () => {
+      const newRate = ethers.parseUnits("3000", 6);
+      await sale.connect(beneficiary).setEthUsdRate(newRate);
+      expect(await sale.ethUsdRate()).to.equal(newRate);
+    });
+
+    it("rate change affects subsequent ETH purchases", async () => {
+      await sale.connect(buyer).buyWithETH({ value: ethers.parseEther("1") });
+      const balAt2500 = await fvc.balanceOf(buyer.address);
+
+      // Double ETH price: same ETH buys twice the USD equivalent
+      await sale.connect(beneficiary).setEthUsdRate(ethers.parseUnits("5000", 6));
+      await sale.connect(buyer).buyWithETH({ value: ethers.parseEther("1") });
+      const balAfter = await fvc.balanceOf(buyer.address);
+
+      const secondPurchaseFVC = balAfter - balAt2500;
+      expect(secondPurchaseFVC).to.equal(balAt2500 * 2n);
+    });
+
+    it("setting ethUsdRate to 0 disables ETH purchases", async () => {
+      await sale.connect(beneficiary).setEthUsdRate(0);
+      await expect(
+        sale.connect(buyer).buyWithETH({ value: ethers.parseEther("1") })
+      ).to.be.revertedWithCustomError(sale, "Sale__EthNotEnabled");
+    });
+
+    it("reverts with zero msg.value", async () => {
+      await expect(
+        sale.connect(buyer).buyWithETH({ value: 0 })
+      ).to.be.revertedWithCustomError(sale, "Sale__ZeroAmount");
+    });
+
+    it("reverts when sale is inactive", async () => {
+      await sale.connect(beneficiary).setActive(false);
+      await expect(
+        sale.connect(buyer).buyWithETH({ value: ethers.parseEther("1") })
+      ).to.be.revertedWithCustomError(sale, "Sale__Inactive");
+    });
+
+    it("non-owner cannot set ethUsdRate", async () => {
+      await expect(
+        sale.connect(buyer).setEthUsdRate(ethers.parseUnits("3000", 6))
+      ).to.be.reverted;
+    });
+  });
+
+  // ------------------------------------------------
+  // ETH + VESTING
+  // ------------------------------------------------
+
+  describe("ETH purchases with vesting", function () {
+    const ETH_USD_RATE = ethers.parseUnits("2500", 6);
+    let vesting: Contract;
+
+    beforeEach(async () => {
+      await sale.connect(beneficiary).setEthUsdRate(ETH_USD_RATE);
+
+      const Vesting = await ethers.getContractFactory("Vesting");
+      vesting = await Vesting.deploy(await fvc.getAddress());
+      await vesting.waitForDeployment();
+      await vesting.transferOwnership(await sale.getAddress());
+
+      const threshold = ethers.parseUnits("50000", 6); // $50k
+      const cliff = 180 * 24 * 60 * 60;
+      const duration = 730 * 24 * 60 * 60;
+
+      await sale.connect(beneficiary).setVestingConfig(
+        await vesting.getAddress(),
+        threshold,
+        cliff,
+        duration
+      );
+    });
+
+    it("ETH purchase below threshold mints directly", async () => {
+      // 1 ETH = $2,500 (below $50k threshold)
+      await sale.connect(buyer).buyWithETH({ value: ethers.parseEther("1") });
+      expect(await fvc.balanceOf(buyer.address)).to.be.gt(0);
+    });
+
+    it("ETH purchase at threshold triggers vesting", async () => {
+      // 20 ETH = $50,000 (at threshold)
+      await sale.connect(buyer).buyWithETH({ value: ethers.parseEther("20") });
+
+      expect(await fvc.balanceOf(buyer.address)).to.equal(0);
+
+      const usdEquivalent = (ethers.parseEther("20") * ETH_USD_RATE) / BigInt(1e18);
+      const expectedFVC = (usdEquivalent * BigInt(1e18)) / BigInt(RATE);
+      expect(await fvc.balanceOf(await vesting.getAddress())).to.equal(expectedFVC);
+    });
+
+    it("ETH purchase above threshold emits vesting event", async () => {
+      await expect(
+        sale.connect(buyer).buyWithETH({ value: ethers.parseEther("25") })
+      ).to.emit(sale, "TokensPurchasedWithVesting");
+    });
+  });
+
+  // ------------------------------------------------
   // REVERT CONDITIONS
-  // ????????????????????????????????????????????????
+  // ------------------------------------------------
 
   describe("Revert conditions", function () {
     it("reverts when sale is inactive", async () => {

@@ -65,3 +65,6 @@ contracts/scripts_backup_*/
 **/.env.*
 dapp/.env.local
 contracts/.env
+
+# Website (separate repo: fvcdigital)
+app-extracted/
