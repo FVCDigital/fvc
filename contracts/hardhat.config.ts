@@ -3,15 +3,19 @@ import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
+import "solidity-coverage";
 import * as dotenv from "dotenv";
 
 dotenv.config();
+
+const isCoverage = process.env.COVERAGE === "true";
 
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.24",
     settings: {
-      viaIR: true,
+      // viaIR is incompatible with solidity-coverage instrumentation
+      viaIR: isCoverage ? false : true,
       optimizer: {
         enabled: true,
         runs: 200,
