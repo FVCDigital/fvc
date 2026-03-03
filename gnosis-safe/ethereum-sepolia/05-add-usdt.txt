@@ -1,0 +1,18 @@
+ADD USDT AS ACCEPTED PAYMENT TOKEN — SEPOLIA
+=============================================
+
+Safe:    0xE20c89da2138951655DbbbE6E6db01fe561EBe82
+To:      0x685866FA0841e918C3452Fe480eFD792bA912088  (Sale contract)
+Value:   0
+Method:  setAcceptedToken(address token, bool allowed, uint8 decimals_)
+
+Args:
+  token     = 0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0  (Sepolia USDT)
+  allowed   = true
+  decimals_ = 6
+
+Calldata:
+0x8bd7bba1000000000000000000000000aa8e23fb1079ea71e0a56f48a2aa51851d8433d000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000006
+
+ABI (paste into Transaction Builder):
+[{"inputs":[{"internalType":"address","name":"token","type":"address"},{"internalType":"bool","name":"allowed","type":"bool"},{"internalType":"uint8","name":"decimals_","type":"uint8"}],"name":"setAcceptedToken","outputs":[],"stateMutability":"nonpayable","type":"function"}]
