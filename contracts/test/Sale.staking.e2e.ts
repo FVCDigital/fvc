@@ -37,7 +37,7 @@ describe("Sale + Staking e2e", function () {
     const Sale = await ethers.getContractFactory("Sale");
     const rate = 25_000; // $0.025 per FVC, 6 decimals
     const cap = ethers.parseUnits("1000000", 6); // 1,000,000 stable
-    sale = await Sale.deploy(await fvc.getAddress(), beneficiary.address, rate, cap);
+    sale = await Sale.deploy(await fvc.getAddress(), beneficiary.address, rate, cap, ethers.ZeroAddress);
     await sale.waitForDeployment();
 
     // Grant MINTER_ROLE to sale contract
