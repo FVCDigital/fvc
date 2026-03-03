@@ -53,7 +53,8 @@ describe("Ethereum Presale ? Sale Contract", function () {
       await fvc.getAddress(),
       beneficiary.address,
       RATE,
-      CAP
+      CAP,
+      ethers.ZeroAddress  // no Chainlink oracle — uses manual ethUsdRate
     );
     await sale.waitForDeployment();
 
