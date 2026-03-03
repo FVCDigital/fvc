@@ -42,7 +42,7 @@ async function main() {
 
   const threshold = await sale.vestingThreshold();
   console.log("vestingThreshold:", ethers.formatUnits(threshold, 6), "USDC");
-  if (threshold > 0n) {
+  if (threshold > BigInt(0)) {
     console.error("\n⚠️  vestingThreshold is not 0. Set it to 0 via Gnosis Safe first.");
     console.error("   See: gnosis-safe/ethereum-sepolia/01-set-vesting-threshold.txt");
     process.exit(1);
@@ -72,12 +72,12 @@ async function main() {
     process.exit(1);
   }
 
-  if (schedulesAfter <= schedulesBefore) {
+  if (Number(schedulesAfter) <= Number(schedulesBefore)) {
     console.error("\n✗ No new vesting schedule created. Something is wrong.");
     process.exit(1);
   }
 
-  const scheduleId = schedulesAfter - 1n;
+  const scheduleId = Number(schedulesAfter) - 1;
   const schedule = await vesting.getVestingSchedule(wallet.address, scheduleId);
   const releasable = await vesting.releasableAmount(wallet.address, scheduleId);
 

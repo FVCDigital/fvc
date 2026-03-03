@@ -1,0 +1,18 @@
+{
+  "network": "sepolia",
+  "chainId": 11155111,
+  "deployer": "0x020fd3bDCB2716B15c5ac0D2B242f26a5c54AcA6",
+  "treasury": "0xE20c89da2138951655DbbbE6E6db01fe561EBe82",
+  "fvc": "0x52F7608fC35AefDa12B3b66131E9554f64e72eC9",
+  "sale": "0x685866FA0841e918C3452Fe480eFD792bA912088",
+  "vesting": "0x068D068e92F5725697Ca838388e2F76536a3fAf7",
+  "usdc": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+  "rate": "0.05",
+  "chainlinkFeed": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+  "ethUsdFallback": "2500",
+  "cap": "10000000",
+  "vestingThreshold": "50000",
+  "cliffDays": 180,
+  "vestingDays": 730,
+  "deployedAt": "2026-03-03T18:31:50.572Z"
+}

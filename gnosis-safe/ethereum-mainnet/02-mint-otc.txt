@@ -1,0 +1,81 @@
+================================================================================
+GNOSIS SAFE — ETHEREUM MAINNET
+OTC Mint — Bespoke per-investor vesting terms
+================================================================================
+
+Safe:    [GNOSIS_SAFE_ADDRESS]
+Sale:    [SALE_ADDRESS]
+Network: Ethereum Mainnet (chainId 1)
+
+HOW IT WORKS
+------------
+mintOTC bypasses the sale entirely — no USDC payment on-chain.
+Payment is off-chain (wire, SAFE tx, etc.).
+Each call creates one vesting schedule with its own cliff and duration.
+Same investor can receive multiple calls — each gets a separate schedule ID.
+duration = 0 means no vesting: FVC minted directly to wallet.
+
+--------------------------------------------------------------------------------
+TRANSACTION — mintOTC
+--------------------------------------------------------------------------------
+To:     [SALE_ADDRESS]
+Value:  0
+
+ABI:
+[{"inputs":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"fvcAmount","type":"uint256"},{"internalType":"uint256","name":"cliff","type":"uint256"},{"internalType":"uint256","name":"duration","type":"uint256"}],"name":"mintOTC","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+
+Method: mintOTC
+Parameters:
+  recipient (address): [INVESTOR_WALLET]
+  fvcAmount (uint256): [AMOUNT in wei — see table below]
+  cliff (uint256):     [SECONDS — see table below]
+  duration (uint256):  [SECONDS — see table below]
+
+--------------------------------------------------------------------------------
+AMOUNT REFERENCE (fvcAmount in wei)
+--------------------------------------------------------------------------------
+  100,000 FVC  →  100000000000000000000000
+  500,000 FVC  →  500000000000000000000000
+1,000,000 FVC  →  1000000000000000000000000
+4,000,000 FVC  →  4000000000000000000000000
+10,000,000 FVC →  10000000000000000000000000
+
+Formula: amount * 10^18
+
+--------------------------------------------------------------------------------
+CLIFF / DURATION REFERENCE (in seconds)
+--------------------------------------------------------------------------------
+  3 months  →   7776000
+  6 months  →  15552000
+ 12 months  →  31536000
+ 18 months  →  47304000
+ 24 months  →  63072000
+
+--------------------------------------------------------------------------------
+COMMON SEED ROUND CONFIGURATIONS
+--------------------------------------------------------------------------------
+
+Standard seed (12mo cliff, 24mo total):
+  cliff:    31536000
+  duration: 63072000
+
+Early investor (6mo cliff, 18mo total):
+  cliff:    15552000
+  duration: 47304000
+
+Strategic partner (no cliff, 12mo linear):
+  cliff:    0
+  duration: 31536000
+
+No vesting (direct mint):
+  cliff:    0
+  duration: 0
+
+================================================================================
+NOTES
+================================================================================
+- Does NOT increment sale.raised() — OTC is off-chain payment
+- Emits TokensPurchasedWithVesting (if duration > 0) or TokensPurchased (if duration = 0)
+- Investor can check their schedules via getAllSchedules(wallet) on the Vesting contract
+- Investor releases tokens by calling release(scheduleId) on the Vesting contract
+================================================================================
