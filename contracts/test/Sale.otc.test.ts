@@ -39,7 +39,7 @@ describe("Sale – OTC minting & vesting curve", function () {
     await usdc.mint(buyer.address, ethers.parseUnits("500000", 6));
 
     const Sale = await ethers.getContractFactory("Sale");
-    sale = await Sale.deploy(await fvc.getAddress(), owner.address, RATE, CAP);
+    sale = await Sale.deploy(await fvc.getAddress(), owner.address, RATE, CAP, ethers.ZeroAddress);
     await sale.waitForDeployment();
 
     const MINTER_ROLE = await fvc.MINTER_ROLE();
