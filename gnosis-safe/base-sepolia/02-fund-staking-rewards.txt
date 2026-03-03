@@ -1,0 +1,76 @@
+================================================================================
+GNOSIS SAFE — BASE SEPOLIA
+Fund Staking Rewards
+================================================================================
+
+Safe:    0x468D5B7fb6201f7cFbbA9A08B3bF49474145F61f
+Staking: 0x404307557837CDe827f7B4bbb5ea12bD69a6F7F5
+USDC:    0x036CbD53842c5426634e7929541eC2318f3dCF7e
+Network: Base Sepolia
+
+Execute after users have staked. Run as a batch of 3.
+
+--------------------------------------------------------------------------------
+TRANSACTION 1 — Approve USDC to Staking
+--------------------------------------------------------------------------------
+To:     0x036CbD53842c5426634e7929541eC2318f3dCF7e
+Value:  0
+
+ABI:
+[{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]
+
+Method: approve
+Parameters:
+  spender (address): 0x404307557837CDe827f7B4bbb5ea12bD69a6F7F5
+  amount (uint256):  10000000000
+
+Note: 10,000 USDC (6 decimals)
+
+--------------------------------------------------------------------------------
+TRANSACTION 2 — Transfer USDC to Staking
+--------------------------------------------------------------------------------
+To:     0x036CbD53842c5426634e7929541eC2318f3dCF7e
+Value:  0
+
+ABI:
+[{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}]
+
+Method: transfer
+Parameters:
+  to (address):     0x404307557837CDe827f7B4bbb5ea12bD69a6F7F5
+  amount (uint256): 10000000000
+
+--------------------------------------------------------------------------------
+TRANSACTION 3 — Notify Reward Amount
+--------------------------------------------------------------------------------
+To:     0x404307557837CDe827f7B4bbb5ea12bD69a6F7F5
+Value:  0
+
+ABI:
+[{"inputs":[{"internalType":"uint256","name":"reward","type":"uint256"}],"name":"notifyRewardAmount","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+
+Method: notifyRewardAmount
+Parameters:
+  reward (uint256): 10000000000
+
+Note: Must match amount transferred in Transaction 2.
+
+================================================================================
+OPTIONAL — Change Rewards Duration
+================================================================================
+⚠️  Can only execute when block.timestamp > periodFinish (after current period ends)
+
+To:     0x404307557837CDe827f7B4bbb5ea12bD69a6F7F5
+Value:  0
+
+ABI:
+[{"inputs":[{"internalType":"uint256","name":"_rewardsDuration","type":"uint256"}],"name":"setRewardsDuration","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+
+Method: setRewardsDuration
+Parameters:
+  _rewardsDuration (uint256): [SECONDS]
+    1 day:   86400
+    7 days:  604800
+    14 days: 1209600
+    30 days: 2592000
+================================================================================

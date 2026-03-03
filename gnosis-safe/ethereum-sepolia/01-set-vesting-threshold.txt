@@ -1,0 +1,42 @@
+================================================================================
+GNOSIS SAFE — ETHEREUM SEPOLIA
+Set vestingThreshold to 0 (vest ALL purchases — seed phase)
+================================================================================
+
+Safe:    0xE20c89da2138951655DbbbE6E6db01fe561EBe82
+Sale:    0x685866FA0841e918C3452Fe480eFD792bA912088
+Network: Ethereum Sepolia (chainId 11155111)
+
+--------------------------------------------------------------------------------
+TRANSACTION — setVestingThreshold(0)
+--------------------------------------------------------------------------------
+To:     0x685866FA0841e918C3452Fe480eFD792bA912088
+Value:  0
+
+ABI:
+[{"inputs":[{"internalType":"uint256","name":"threshold","type":"uint256"}],"name":"setVestingThreshold","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+
+Method: setVestingThreshold
+Parameters:
+  threshold (uint256): 0
+
+Effect: Every purchase of any size will create a vesting schedule.
+        No FVC is minted directly to buyer wallets until cliff expires.
+
+--------------------------------------------------------------------------------
+TO RESTORE (after testing):
+--------------------------------------------------------------------------------
+Same transaction with threshold = 50000000000  (50,000 USDC in 6 decimals)
+
+================================================================================
+FOR MAINNET SEED PHASE
+================================================================================
+
+Same transaction on mainnet Sale contract with threshold = 0.
+This means every buyer — regardless of purchase size — gets vested tokens.
+Appropriate for seed/private round where all participants are vested.
+
+To reopen direct minting for public sale later:
+  setVestingThreshold(50000000000)  — only purchases >= $50k are vested
+  or
+  setVestingThreshold(0)            — keep all purchases vested
