@@ -628,6 +628,96 @@ describe("Ethereum Presale ? Sale Contract", function () {
     });
   });
 
+  // ------------------------------------------------
+  // Cap boundary (kills S01)
+  // ------------------------------------------------
+
+  describe("Cap exact boundary", function () {
+    it("purchase at exactly cap succeeds, one unit over reverts", async () => {
+      const exactCap = ethers.parseUnits("10000", 6);
+      await sale.connect(beneficiary).setCap(exactCap);
+
+      await usdc.connect(buyer).approve(await sale.getAddress(), exactCap + 1n);
+      // Exact cap should succeed
+      await sale.connect(buyer).buy(await usdc.getAddress(), exactCap);
+      expect(await sale.raised()).to.equal(exactCap);
+
+      // One unit over should revert
+      await usdc.connect(buyer).approve(await sale.getAddress(), 1n);
+      await expect(
+        sale.connect(buyer).buy(await usdc.getAddress(), 1n)
+      ).to.be.revertedWithCustomError(sale, "Sale__CapExceeded");
+    });
+  });
+
+  // ------------------------------------------------
+  // OTC cliff > duration guard (kills S11)
+  // ------------------------------------------------
+
+  describe("mintOTC cliff validation", function () {
+    let vesting: Contract;
+
+    beforeEach(async () => {
+      const Vesting = await ethers.getContractFactory("Vesting");
+      vesting = await Vesting.deploy(await fvc.getAddress());
+      await vesting.waitForDeployment();
+      await vesting.transferOwnership(await sale.getAddress());
+      await sale.connect(beneficiary).setVestingConfig(
+        await vesting.getAddress(),
+        ethers.parseUnits("1", 6),
+        180 * 24 * 60 * 60,
+        730 * 24 * 60 * 60
+      );
+    });
+
+    it("mintOTC reverts when cliff > duration", async () => {
+      const cliff = 400 * 24 * 60 * 60;
+      const duration = 365 * 24 * 60 * 60;
+      await expect(
+        sale.connect(beneficiary).mintOTC(buyer.address, ethers.parseEther("1000"), cliff, duration)
+      ).to.be.revertedWith("Cliff > duration");
+    });
+  });
+
+  // ------------------------------------------------
+  // setVestingThreshold / setDefaultVesting
+  // ------------------------------------------------
+
+  describe("setVestingThreshold and setDefaultVesting", function () {
+    it("owner can update vestingThreshold standalone", async () => {
+      await sale.connect(beneficiary).setVestingThreshold(ethers.parseUnits("25000", 6));
+      expect(await sale.vestingThreshold()).to.equal(ethers.parseUnits("25000", 6));
+    });
+
+    it("owner can update defaultCliff and defaultDuration via setDefaultVesting", async () => {
+      const newCliff = 90 * 24 * 60 * 60;
+      const newDuration = 365 * 24 * 60 * 60;
+      await sale.connect(beneficiary).setDefaultVesting(newCliff, newDuration);
+      expect(await sale.defaultCliff()).to.equal(newCliff);
+      expect(await sale.defaultDuration()).to.equal(newDuration);
+    });
+
+    it("setDefaultVesting reverts when cliff > duration", async () => {
+      const cliff = 400 * 24 * 60 * 60;
+      const duration = 365 * 24 * 60 * 60;
+      await expect(
+        sale.connect(beneficiary).setDefaultVesting(cliff, duration)
+      ).to.be.revertedWith("Cliff > duration");
+    });
+
+    it("non-owner cannot call setVestingThreshold", async () => {
+      await expect(
+        sale.connect(buyer).setVestingThreshold(0)
+      ).to.be.reverted;
+    });
+
+    it("non-owner cannot call setDefaultVesting", async () => {
+      await expect(
+        sale.connect(buyer).setDefaultVesting(0, 365 * 24 * 60 * 60)
+      ).to.be.reverted;
+    });
+  });
+
   // ????????????????????????????????????????????????
   // VESTING (large purchases)
   // ????????????????????????????????????????????????
