@@ -1,6 +1,7 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
+import "@nomicfoundation/hardhat-verify";
 import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import "solidity-coverage";
@@ -25,6 +26,14 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       chainId: 1337,
+      forking: process.env.FORK
+        ? {
+            url: process.env.ETHEREUM_MAINNET_RPC || "https://eth-mainnet.g.alchemy.com/v2/6tgWso4UXVZmfMyP0ErKJ",
+            enabled: true,
+            // Pin to block after all deployer config txs (grantRole DEFAULT_ADMIN, transferOwnership Vesting)
+            blockNumber: 24579710,
+          }
+        : undefined,
     },
     localhost: {
       url: "http://127.0.0.1:8545",
@@ -59,6 +68,21 @@ const config: HardhatUserConfig = {
       gasPrice: 5000000000,
       timeout: 600000,
     },
+    sepolia: {
+      url: process.env.ETHEREUM_SEPOLIA_RPC || "https://ethereum-sepolia-rpc.publicnode.com",
+      accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
+      chainId: 11155111,
+      timeout: 600000,
+    },
+    mainnet: {
+      url: process.env.ETHEREUM_MAINNET_RPC || "https://eth-mainnet.g.alchemy.com/v2/6tgWso4UXVZmfMyP0ErKJ",
+      accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
+      chainId: 1,
+      timeout: 600000,
+    },
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY || "",
   },
   paths: {
     sources: "./src",
