@@ -1,4 +1,4 @@
-import { ethers, upgrades } from "hardhat";
+import { ethers } from "hardhat";
 import { expect } from "chai";
 
 describe("FVC Token", function () {
@@ -9,7 +9,7 @@ describe("FVC Token", function () {
   beforeEach(async () => {
     [admin, user] = await ethers.getSigners();
     const FVC = await ethers.getContractFactory("FVC");
-    fvc = await FVC.deploy("First Venture Capital", "FVC", admin.address);
+    fvc = await FVC.deploy(admin.address);
     await fvc.waitForDeployment();
   });
 
@@ -19,7 +19,7 @@ describe("FVC Token", function () {
   });
 
   it("admin should have MINTER_ROLE", async () => {
-    const role = await fvc.getMinterRole();
+    const role = await fvc.MINTER_ROLE();
     expect(await fvc.hasRole(role, admin.address)).to.be.true;
   });
 
