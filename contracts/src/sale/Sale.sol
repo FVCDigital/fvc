@@ -17,12 +17,12 @@ interface IVesting {
         uint256 startTime,
         uint256 cliff,
         uint256 duration
-    ) external;
+    ) external returns (uint256 scheduleId);
 }
 
 /**
  * @title Sale
- * @notice Fixed-price tranche sale accepting USDC/USDT, mints FVC on purchase
+ * @notice Fixed-price tranche sale accepting USDC/USDT, mints FVC on purchase 
  * @dev Owner (Gnosis Safe) controls rate, cap, active state, and accepted tokens
  * @dev Large purchases (>= vestingThreshold) are automatically vested via TokenVesting contract
  */
@@ -311,5 +311,39 @@ contract Sale is Ownable, ReentrancyGuard {
         require(_cliff <= _duration, "Cliff > duration");
         defaultCliff = _cliff;
         defaultDuration = _duration;
+    }
+
+    /**
+     * @notice OTC mint: owner mints FVC directly to any wallet, optionally with a custom vesting schedule.
+     * @dev Payment is handled off-chain (wire, SAFE tx, etc.). This records no `raised` increment.
+     * @param recipient Wallet to receive tokens (or vesting beneficiary)
+     * @param fvcAmount Raw FVC amount (18 decimals)
+     * @param cliff Cliff in seconds (0 = no cliff). Ignored when vestingContract is unset.
+     * @param duration Total vesting duration in seconds. Pass 0 to mint directly with no vesting.
+     */
+    function mintOTC(
+        address recipient,
+        uint256 fvcAmount,
+        uint256 cliff,
+        uint256 duration
+    ) external onlyOwner nonReentrant {
+        if (recipient == address(0)) revert Sale__ZeroAddress();
+        if (fvcAmount == 0) revert Sale__ZeroAmount();
+
+        if (duration > 0 && address(vestingContract) != address(0)) {
+            require(cliff <= duration, "Cliff > duration");
+            saleToken.mint(address(vestingContract), fvcAmount);
+            vestingContract.createVestingSchedule(
+                recipient,
+                fvcAmount,
+                block.timestamp,
+                cliff,
+                duration
+            );
+            emit TokensPurchasedWithVesting(recipient, fvcAmount, cliff, duration);
+        } else {
+            saleToken.mint(recipient, fvcAmount);
+            emit TokensPurchased(recipient, address(0), 0, fvcAmount);
+        }
     }
 }
