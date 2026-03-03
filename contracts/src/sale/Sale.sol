@@ -20,22 +20,43 @@ interface IVesting {
     ) external returns (uint256 scheduleId);
 }
 
+interface AggregatorV3Interface {
+    function decimals() external view returns (uint8);
+    function latestRoundData()
+        external
+        view
+        returns (
+            uint80 roundId,
+            int256 answer,
+            uint256 startedAt,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        );
+}
+
 /**
  * @title Sale
- * @notice Fixed-price tranche sale accepting USDC/USDT, mints FVC on purchase 
- * @dev Owner (Gnosis Safe) controls rate, cap, active state, and accepted tokens
- * @dev Large purchases (>= vestingThreshold) are automatically vested via TokenVesting contract
+ * @notice Fixed-price tranche sale accepting USDC/USDT and native ETH, mints FVC on purchase.
+ * @dev ETH/USD price is sourced from a Chainlink AggregatorV3 price feed.
+ *      If the feed is stale (> stalenessThreshold seconds) or address(0), the contract
+ *      falls back to the owner-set ethUsdRate manual override.
+ *      Large purchases (>= vestingThreshold) are automatically vested via the Vesting contract.
  */
 contract Sale is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     // ============ IMMUTABLES ============
 
-    /// @notice Token being sold (FVC)
     IFVC public immutable saleToken;
-
-    /// @notice Treasury/beneficiary receiving stablecoins (Gnosis Safe)
     address public immutable beneficiary;
+
+    // ============ CHAINLINK ============
+
+    /// @notice Chainlink ETH/USD price feed (8 decimals). address(0) = disabled.
+    AggregatorV3Interface public priceFeed;
+
+    /// @notice Maximum age of a Chainlink answer before it is considered stale (default 1 hour)
+    uint256 public stalenessThreshold = 1 hours;
 
     // ============ STATE VARIABLES ============
 
@@ -57,18 +78,22 @@ contract Sale is Ownable, ReentrancyGuard {
     /// @notice Decimals for each accepted token
     mapping(address => uint8) public tokenDecimals;
 
-    /// @notice TokenVesting contract address (optional, set by owner)
+    /// @notice Vesting contract address (optional)
     IVesting public vestingContract;
 
-    /// @notice ETH price in USD with 6 decimals (e.g. 2500e6 = $2,500 per ETH), set by owner
+    /// @notice Manual ETH/USD fallback (6 decimals, e.g. 2500e6 = $2,500).
+    ///         Used when priceFeed is address(0) or its answer is stale.
+    ///         Set to 0 to disable ETH purchases entirely when oracle is also absent.
     uint256 public ethUsdRate;
 
-    /// @notice Minimum purchase amount (6 decimals) to trigger vesting
+    /// @notice Minimum purchase (6 decimals) to trigger vesting
     uint256 public vestingThreshold;
 
-    /// @notice Default vesting parameters (can be overridden per purchase)
-    uint256 public defaultCliff;      // e.g., 180 days
-    uint256 public defaultDuration;   // e.g., 730 days
+    /// @notice Default vesting cliff in seconds
+    uint256 public defaultCliff;
+
+    /// @notice Default vesting total duration in seconds
+    uint256 public defaultDuration;
 
     // ============ EVENTS ============
 
@@ -78,6 +103,8 @@ contract Sale is Ownable, ReentrancyGuard {
     event RateUpdated(uint256 newRate);
     event CapUpdated(uint256 newCap);
     event EthUsdRateUpdated(uint256 newEthUsdRate);
+    event PriceFeedUpdated(address newPriceFeed);
+    event StalenessThresholdUpdated(uint256 newThreshold);
     event SaleStatusChanged(bool active);
     event AcceptedTokenUpdated(address indexed token, bool allowed);
     event VestingConfigUpdated(address indexed vestingContract, uint256 threshold, uint256 cliff, uint256 duration);
@@ -93,20 +120,23 @@ contract Sale is Ownable, ReentrancyGuard {
     error Sale__TokenNotAccepted();
     error Sale__EthNotEnabled();
     error Sale__EthTransferFailed();
+    error Sale__OracleInvalidPrice();
 
     // ============ CONSTRUCTOR ============
 
     /**
-     * @param _saleToken FVC token address (must expose mint)
-     * @param _beneficiary Treasury/beneficiary address (Gnosis Safe)
-     * @param _initialRate Stable units (6d) per 1 FVC (18d)
-     * @param _initialCap Maximum stable (6d) to raise
+     * @param _saleToken    FVC token address
+     * @param _beneficiary  Treasury address (Gnosis Safe)
+     * @param _initialRate  Stable units (6d) per 1 FVC (18d)
+     * @param _initialCap   Maximum stable (6d) to raise
+     * @param _priceFeed    Chainlink ETH/USD AggregatorV3 address (address(0) to disable oracle)
      */
     constructor(
         address _saleToken,
         address _beneficiary,
         uint256 _initialRate,
-        uint256 _initialCap
+        uint256 _initialCap,
+        address _priceFeed
     ) {
         if (_saleToken == address(0) || _beneficiary == address(0)) revert Sale__ZeroAddress();
         if (_initialRate == 0) revert Sale__ZeroRate();
@@ -117,78 +147,64 @@ contract Sale is Ownable, ReentrancyGuard {
         rate = _initialRate;
         cap = _initialCap;
 
+        if (_priceFeed != address(0)) {
+            priceFeed = AggregatorV3Interface(_priceFeed);
+        }
+
         transferOwnership(_beneficiary);
     }
 
     // ============ PURCHASE ============
 
     /**
-     * @notice Buy FVC with an accepted stablecoin at the fixed rate
-     * @param stable Address of accepted stablecoin (e.g., USDC or USDT)
-     * @param amount Amount of stablecoin (6 decimals)
+     * @notice Buy FVC with an accepted stablecoin at the fixed rate.
      */
     function buy(address stable, uint256 amount) external nonReentrant {
         if (!active) revert Sale__Inactive();
         if (!isAccepted[stable]) revert Sale__TokenNotAccepted();
         if (amount == 0) revert Sale__ZeroAmount();
-        
-        uint8 decimals = tokenDecimals[stable];
-        require(decimals > 0, "Token decimals not configured");
-        
-        // Normalize amount to 6 decimals for cap tracking
-        uint256 normalizedAmount = decimals == 6 ? amount : (decimals < 6 ? amount * 10**(6 - decimals) : amount / 10**(decimals - 6));
-        
+
+        uint8 dec = tokenDecimals[stable];
+        require(dec > 0, "Token decimals not configured");
+
+        uint256 normalizedAmount = dec == 6
+            ? amount
+            : (dec < 6 ? amount * 10 ** (6 - dec) : amount / 10 ** (dec - 6));
+
         if (raised + normalizedAmount > cap) revert Sale__CapExceeded();
 
-        // Calculate FVC amount
-        // Rate is defined as: (stable with 6 decimals) per (1 FVC with 18 decimals)
-        // Normalize input to 6 decimals, then scale to 18 decimals for FVC
         uint256 tokenAmount = (normalizedAmount * 1e18) / rate;
 
-        // Effects (track in normalized 6-decimal units)
         raised += normalizedAmount;
 
-        // Interactions
         IERC20(stable).safeTransferFrom(msg.sender, beneficiary, amount);
 
-        // Check if purchase should be vested
+        _mintOrVest(msg.sender, tokenAmount, normalizedAmount);
+
         if (
             address(vestingContract) != address(0) &&
             vestingThreshold > 0 &&
             normalizedAmount >= vestingThreshold
         ) {
-            // Large purchase - create vesting schedule
-            saleToken.mint(address(vestingContract), tokenAmount);
-            
-            vestingContract.createVestingSchedule(
-                msg.sender,
-                tokenAmount,
-                block.timestamp,
-                defaultCliff,
-                defaultDuration
-            );
-
             emit TokensPurchasedWithVesting(msg.sender, tokenAmount, defaultCliff, defaultDuration);
         } else {
-            // Small purchase - mint directly (no vesting)
-            saleToken.mint(msg.sender, tokenAmount);
             emit TokensPurchased(msg.sender, stable, amount, tokenAmount);
         }
     }
 
     /**
-     * @notice Buy FVC with native ETH/BNB at the owner-set ethUsdRate
-     * @dev Converts msg.value to a 6-decimal USD equivalent, then applies the same FVC rate
-     *      ETH is forwarded to the beneficiary (Gnosis Safe)
+     * @notice Buy FVC with native ETH.
+     * @dev Price sourced from Chainlink oracle. Falls back to ethUsdRate if oracle is
+     *      absent or stale. Reverts if neither source is available.
      */
     function buyWithETH() external payable nonReentrant {
         if (!active) revert Sale__Inactive();
-        if (ethUsdRate == 0) revert Sale__EthNotEnabled();
         if (msg.value == 0) revert Sale__ZeroAmount();
 
-        // msg.value is 18 decimals. ethUsdRate is USD per 1 ETH in 6 decimals.
-        // usdEquivalent (6 decimals) = msg.value * ethUsdRate / 1e18
-        uint256 usdEquivalent = (msg.value * ethUsdRate) / 1e18;
+        uint256 usdPerEth = _getEthUsdPrice();
+        if (usdPerEth == 0) revert Sale__EthNotEnabled();
+
+        uint256 usdEquivalent = (msg.value * usdPerEth) / 1e18;
         if (usdEquivalent == 0) revert Sale__ZeroAmount();
         if (raised + usdEquivalent > cap) revert Sale__CapExceeded();
 
@@ -196,44 +212,29 @@ contract Sale is Ownable, ReentrancyGuard {
 
         raised += usdEquivalent;
 
-        // Forward ETH to beneficiary
         (bool sent, ) = beneficiary.call{value: msg.value}("");
         if (!sent) revert Sale__EthTransferFailed();
+
+        _mintOrVest(msg.sender, tokenAmount, usdEquivalent);
+
+        emit TokensPurchasedWithETH(msg.sender, msg.value, usdEquivalent, tokenAmount);
 
         if (
             address(vestingContract) != address(0) &&
             vestingThreshold > 0 &&
             usdEquivalent >= vestingThreshold
         ) {
-            saleToken.mint(address(vestingContract), tokenAmount);
-            vestingContract.createVestingSchedule(
-                msg.sender,
-                tokenAmount,
-                block.timestamp,
-                defaultCliff,
-                defaultDuration
-            );
             emit TokensPurchasedWithVesting(msg.sender, tokenAmount, defaultCliff, defaultDuration);
-        } else {
-            saleToken.mint(msg.sender, tokenAmount);
         }
-
-        emit TokensPurchasedWithETH(msg.sender, msg.value, usdEquivalent, tokenAmount);
     }
 
     // ============ OWNER CONTROLS ============
 
-    /**
-     * @notice Set sale active status (this is the explicit commence/stop signal)
-     */
     function setActive(bool _active) external onlyOwner {
         active = _active;
         emit SaleStatusChanged(_active);
     }
 
-    /**
-     * @notice Update price (stable 6d per 1 FVC)
-     */
     function setRate(uint256 newRate) external onlyOwner {
         if (newRate == 0) revert Sale__ZeroRate();
         rate = newRate;
@@ -241,8 +242,8 @@ contract Sale is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Set ETH/USD price (6 decimals). Set to 0 to disable ETH purchases.
-     * @param newEthUsdRate USD per 1 ETH in 6 decimals (e.g. 2500e6 = $2,500)
+     * @notice Set the manual ETH/USD fallback rate (6 decimals).
+     *         Set to 0 to disable ETH purchases when oracle is also absent.
      */
     function setEthUsdRate(uint256 newEthUsdRate) external onlyOwner {
         ethUsdRate = newEthUsdRate;
@@ -250,37 +251,37 @@ contract Sale is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Update total cap (stable 6d)
+     * @notice Update the Chainlink price feed address. Pass address(0) to rely solely on manual rate.
      */
+    function setPriceFeed(address newFeed) external onlyOwner {
+        priceFeed = AggregatorV3Interface(newFeed);
+        emit PriceFeedUpdated(newFeed);
+    }
+
+    /**
+     * @notice Update the maximum age of an oracle answer before it is treated as stale.
+     */
+    function setStalenessThreshold(uint256 newThreshold) external onlyOwner {
+        stalenessThreshold = newThreshold;
+        emit StalenessThresholdUpdated(newThreshold);
+    }
+
     function setCap(uint256 newCap) external onlyOwner {
         if (newCap == 0) revert Sale__ZeroCap();
         cap = newCap;
         emit CapUpdated(newCap);
     }
 
-    /**
-     * @notice Allow or disallow a stablecoin (e.g., USDC, USDT)
-     * @param token Token address
-     * @param allowed Whether token is accepted
-     * @param decimals Token decimals (required if allowed=true)
-     */
-    function setAcceptedToken(address token, bool allowed, uint8 decimals) external onlyOwner {
+    function setAcceptedToken(address token, bool allowed, uint8 decimals_) external onlyOwner {
         if (token == address(0)) revert Sale__ZeroAddress();
         if (allowed) {
-            require(decimals > 0 && decimals <= 18, "Invalid decimals");
-            tokenDecimals[token] = decimals;
+            require(decimals_ > 0 && decimals_ <= 18, "Invalid decimals");
+            tokenDecimals[token] = decimals_;
         }
         isAccepted[token] = allowed;
         emit AcceptedTokenUpdated(token, allowed);
     }
 
-    /**
-     * @notice Configure vesting parameters (Gnosis Safe controlled)
-     * @param _vestingContract TokenVesting contract address
-     * @param _threshold Minimum purchase amount (6 decimals) to trigger vesting (e.g., 50_000e6 = £50k)
-     * @param _cliff Cliff duration in seconds (e.g., 180 days)
-     * @param _duration Total vesting duration in seconds (e.g., 730 days)
-     */
     function setVestingConfig(
         address _vestingContract,
         uint256 _threshold,
@@ -294,19 +295,10 @@ contract Sale is Ownable, ReentrancyGuard {
         emit VestingConfigUpdated(_vestingContract, _threshold, _cliff, _duration);
     }
 
-    /**
-     * @notice Update vesting threshold only
-     * @param _threshold New threshold (6 decimals)
-     */
     function setVestingThreshold(uint256 _threshold) external onlyOwner {
         vestingThreshold = _threshold;
     }
 
-    /**
-     * @notice Update default vesting parameters
-     * @param _cliff New cliff duration in seconds
-     * @param _duration New total duration in seconds
-     */
     function setDefaultVesting(uint256 _cliff, uint256 _duration) external onlyOwner {
         require(_cliff <= _duration, "Cliff > duration");
         defaultCliff = _cliff;
@@ -314,12 +306,8 @@ contract Sale is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice OTC mint: owner mints FVC directly to any wallet, optionally with a custom vesting schedule.
-     * @dev Payment is handled off-chain (wire, SAFE tx, etc.). This records no `raised` increment.
-     * @param recipient Wallet to receive tokens (or vesting beneficiary)
-     * @param fvcAmount Raw FVC amount (18 decimals)
-     * @param cliff Cliff in seconds (0 = no cliff). Ignored when vestingContract is unset.
-     * @param duration Total vesting duration in seconds. Pass 0 to mint directly with no vesting.
+     * @notice OTC mint: owner mints FVC to any wallet with optional custom vesting.
+     *         Payment is off-chain. Does not increment raised.
      */
     function mintOTC(
         address recipient,
@@ -345,5 +333,72 @@ contract Sale is Ownable, ReentrancyGuard {
             saleToken.mint(recipient, fvcAmount);
             emit TokensPurchased(recipient, address(0), 0, fvcAmount);
         }
+    }
+
+    // ============ VIEWS ============
+
+    /**
+     * @notice Returns the current ETH/USD price (6 decimals) from oracle or fallback.
+     *         Returns 0 if neither source is available (ETH purchases will revert).
+     */
+    function getEthUsdPrice() external view returns (uint256 price, bool fromOracle) {
+        (price, fromOracle) = _getEthUsdPriceWithSource();
+    }
+
+    // ============ INTERNAL ============
+
+    function _mintOrVest(address buyer, uint256 tokenAmount, uint256 normalizedUsd) internal {
+        if (
+            address(vestingContract) != address(0) &&
+            vestingThreshold > 0 &&
+            normalizedUsd >= vestingThreshold
+        ) {
+            saleToken.mint(address(vestingContract), tokenAmount);
+            vestingContract.createVestingSchedule(
+                buyer,
+                tokenAmount,
+                block.timestamp,
+                defaultCliff,
+                defaultDuration
+            );
+        } else {
+            saleToken.mint(buyer, tokenAmount);
+        }
+    }
+
+    /**
+     * @dev Returns ETH/USD price in 6 decimals.
+     *      Priority: live oracle → manual fallback → 0 (disabled).
+     *      Oracle is skipped if address(0) or answer is stale/non-positive.
+     */
+    function _getEthUsdPrice() internal view returns (uint256) {
+        (uint256 price, ) = _getEthUsdPriceWithSource();
+        return price;
+    }
+
+    function _getEthUsdPriceWithSource() internal view returns (uint256 price, bool fromOracle) {
+        if (address(priceFeed) != address(0)) {
+            try priceFeed.latestRoundData() returns (
+                uint80,
+                int256 answer,
+                uint256,
+                uint256 updatedAt,
+                uint80
+            ) {
+                bool fresh = (block.timestamp - updatedAt) <= stalenessThreshold;
+                if (answer > 0 && fresh) {
+                    uint8 feedDecimals = priceFeed.decimals();
+                    // Normalise to 6 decimals
+                    if (feedDecimals >= 6) {
+                        price = uint256(answer) / 10 ** (feedDecimals - 6);
+                    } else {
+                        price = uint256(answer) * 10 ** (6 - feedDecimals);
+                    }
+                    return (price, true);
+                }
+            } catch {}
+        }
+        // Fallback to manual rate
+        return (ethUsdRate, false);
     }
 }
