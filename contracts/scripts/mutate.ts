@@ -52,7 +52,7 @@ const mutations: Mutation[] = [
     id: "S04",
     file: SALE,
     description: "raised increment removed (cap tracking broken)",
-    find: "        // Effects (track in normalized 6-decimal units)\n        raised += normalizedAmount;",
+    find: "        raised += normalizedAmount;",
     replace: "        // MUTANT: raised not incremented",
   },
   {
@@ -87,8 +87,8 @@ const mutations: Mutation[] = [
     id: "S09",
     file: SALE,
     description: "ETH USD conversion: division becomes multiplication",
-    find: "        uint256 usdEquivalent = (msg.value * ethUsdRate) / 1e18;",
-    replace: "        uint256 usdEquivalent = (msg.value * ethUsdRate) * 1e18;",
+    find: "        uint256 usdEquivalent = (msg.value * usdPerEth) / 1e18;",
+    replace: "        uint256 usdEquivalent = (msg.value * usdPerEth) * 1e18;",
   },
   {
     id: "S10",
