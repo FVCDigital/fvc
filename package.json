@@ -18,6 +18,7 @@
     "hardhat": "^2.25.0",
     "hardhat-deploy": "^1.0.4",
     "postcss": "^8.4.24",
+    "solidity-coverage": "^0.8.17",
     "tailwindcss": "^3.3.2",
     "tailwindcss-animate": "^1.0.7",
     "ts-node": "^10.9.2",
