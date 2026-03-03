@@ -1,0 +1,11 @@
+Please push the Chainlink work from your machine.
+
+Needed:
+- contracts/src/sale/Sale.sol with 5-arg constructor (_priceFeed)
+- Chainlink ETH/USD purchase support (buyWithETH, AggregatorV3Interface)
+- Oracle staleness check and manual fallback
+- contracts/test/Sale.test.ts with Chainlink oracle edge case suite
+- Any other files modified as part of that work
+
+Current state here: 117 tests passing on 4-arg Sale constructor (no Chainlink).
+Target: 113+ tests passing with Chainlink integrated.
