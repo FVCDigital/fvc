@@ -195,7 +195,7 @@ For OTC deals (off-chain payment, bespoke terms):
 TEST RESULTS
 ================================================================================
 
-Spec tests:     113 / 113 passing
+Spec tests:     117 / 117 passing
 Coverage:
   Sale.sol      100% statements, 100% functions, 100% lines,  75% branches
   Vesting.sol    98% statements, 100% functions, 100% lines,  72% branches
@@ -287,6 +287,7 @@ dd6f8e5e  Creates OTC minting test suite covering direct mint, vested mint, mult
 3a120a1a  Fixes Sale staking e2e test to use correct MINTER_ROLE accessor and setAcceptedToken signature
 8418a3d1  Fixes FVC token test constructor args and MINTER_ROLE accessor
 074dde20  Implements custom Hardhat mutation testing script with 22 critical operator mutants for Sale and Vesting
+5345fa9d  Fixes Vesting test import after PC revert, restores full multi-schedule suite (117 tests passing)
 
 
 ================================================================================
