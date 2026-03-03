@@ -3,12 +3,13 @@ import React from 'react';
 const tokenMap = {
   ETH: '/assets/token-logos/eth.svg',
   USDC: '/assets/token-logos/usdc.svg',
-  BASE: '/assets/token-logos/base.svg',
+  BASE: '/assets/token-logos/base.png',
+  BNB: '/assets/token-logos/bnb.png',
   POL: '/assets/token-logos/polygon.svg',
 };
 
 interface Props {
-  token: 'ETH' | 'USDC' | 'BASE' | 'POL';
+  token: 'ETH' | 'USDC' | 'BASE' | 'BNB' | 'POL';
   size?: number;
 }
 

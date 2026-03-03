@@ -28,8 +28,12 @@ export type { IERC165 } from "./@openzeppelin/contracts/utils/introspection/IERC
 export { IERC165__factory } from "./factories/@openzeppelin/contracts/utils/introspection/IERC165__factory";
 export type { FVC } from "./src/core/FVC";
 export { FVC__factory } from "./factories/src/core/FVC__factory";
+export type { MockAggregatorV3 } from "./src/mocks/MockAggregatorV3";
+export { MockAggregatorV3__factory } from "./factories/src/mocks/MockAggregatorV3__factory";
 export type { MockStable } from "./src/mocks/MockStable";
 export { MockStable__factory } from "./factories/src/mocks/MockStable__factory";
+export type { AggregatorV3Interface } from "./src/sale/Sale.sol/AggregatorV3Interface";
+export { AggregatorV3Interface__factory } from "./factories/src/sale/Sale.sol/AggregatorV3Interface__factory";
 export type { IFVC } from "./src/sale/Sale.sol/IFVC";
 export { IFVC__factory } from "./factories/src/sale/Sale.sol/IFVC__factory";
 export type { IVesting } from "./src/sale/Sale.sol/IVesting";

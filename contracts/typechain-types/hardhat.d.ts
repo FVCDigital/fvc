@@ -58,9 +58,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FVC__factory>;
     getContractFactory(
+      name: "MockAggregatorV3",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.MockAggregatorV3__factory>;
+    getContractFactory(
       name: "MockStable",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MockStable__factory>;
+    getContractFactory(
+      name: "AggregatorV3Interface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AggregatorV3Interface__factory>;
     getContractFactory(
       name: "IFVC",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -146,10 +154,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.FVC>;
     getContractAt(
+      name: "MockAggregatorV3",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.MockAggregatorV3>;
+    getContractAt(
       name: "MockStable",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.MockStable>;
+    getContractAt(
+      name: "AggregatorV3Interface",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AggregatorV3Interface>;
     getContractAt(
       name: "IFVC",
       address: string | ethers.Addressable,
@@ -231,9 +249,17 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.FVC>;
     deployContract(
+      name: "MockAggregatorV3",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockAggregatorV3>;
+    deployContract(
       name: "MockStable",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MockStable>;
+    deployContract(
+      name: "AggregatorV3Interface",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.AggregatorV3Interface>;
     deployContract(
       name: "IFVC",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -319,10 +345,20 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.FVC>;
     deployContract(
+      name: "MockAggregatorV3",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.MockAggregatorV3>;
+    deployContract(
       name: "MockStable",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MockStable>;
+    deployContract(
+      name: "AggregatorV3Interface",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.AggregatorV3Interface>;
     deployContract(
       name: "IFVC",
       args: any[],

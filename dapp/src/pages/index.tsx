@@ -24,7 +24,7 @@ export default function LandingPage() {
 
   // Show loading state during SSR
   if (!isClient) {
-    return <div style={{ background: '#08090A', minHeight: '100vh' }} />;
+    return <div className="min-h-screen bg-background" />;
   }
 
   // Check if we're accessing a hash route (main app)
@@ -34,4 +34,4 @@ export default function LandingPage() {
 
   // Show landing page for root path
   return <LandingModal />;
-} 
+}

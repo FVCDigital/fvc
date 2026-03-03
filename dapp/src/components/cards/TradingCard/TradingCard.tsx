@@ -258,38 +258,29 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
         )}
         
         {tab === 'card' && (
-          <div className="w-full max-w-[340px] flex flex-col items-center">
-            <div className="text-2xl font-bold mb-2">Card Payment</div>
-            <div className="text-base text-muted-foreground mb-4 text-center">
-              Enter your card details to purchase FVC
+          <div className="w-full flex flex-col items-center">
+            <div className="text-2xl font-bold mb-2">Buy Crypto with Card</div>
+            <div className="text-base text-muted-foreground mb-4 text-center max-w-[400px]">
+              Purchase USDC or ETH with your credit card, then use it to bond for FVC tokens
             </div>
             
-            {!isVerified ? (
-              <>
-                <KYCButton
-                  onClick={() => {
-                    setShowKycModal(true);
-                    setTimeout(() => { triggerVerification(); }, 0);
-                  }}
-                  style={{
-                    fontWeight: 600,
-                    fontSize: 18,
-                    padding: '12px 24px',
-                    margin: '24px 0',
-                    width: '100%',
-                    borderRadius: '10px',
-                  }}
-                >
-                  Verify KYC
-                </KYCButton>
-                {showKycModal && <QrModal onClose={() => setShowKycModal(false)} />}
-              </>
-            ) : (
-              <CardPaymentForm cardNumber={cardNumber} setCardNumber={setCardNumber} expiry={expiry} setExpiry={setExpiry} cvc={cvc} setCvc={setCvc} />
-            )}
+            <CardPaymentForm 
+              bondAmount={bondAmount} 
+              selectedAsset={selectedAsset}
+              onSuccess={() => {
+                // After successful purchase, prompt user to switch to wallet tab
+                setTimeout(() => {
+                  if (confirm('Crypto purchased! Switch to Wallet tab to bond for FVC?')) {
+                    setTab('wallet');
+                  }
+                }, 2000);
+              }}
+            />
 
             {/* Bonding Terms for Card Tab */}
-            <BondingTerms />
+            <div className="mt-6 w-full max-w-[400px]">
+              <BondingTerms />
+            </div>
           </div>
         )}
       </CardContent>
