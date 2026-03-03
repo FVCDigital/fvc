@@ -183,8 +183,7 @@ contract Sale is Ownable, ReentrancyGuard {
 
         if (
             address(vestingContract) != address(0) &&
-            vestingThreshold > 0 &&
-            normalizedAmount >= vestingThreshold
+            (vestingThreshold == 0 || normalizedAmount >= vestingThreshold)
         ) {
             emit TokensPurchasedWithVesting(msg.sender, tokenAmount, defaultCliff, defaultDuration);
         } else {
@@ -221,8 +220,7 @@ contract Sale is Ownable, ReentrancyGuard {
 
         if (
             address(vestingContract) != address(0) &&
-            vestingThreshold > 0 &&
-            usdEquivalent >= vestingThreshold
+            (vestingThreshold == 0 || usdEquivalent >= vestingThreshold)
         ) {
             emit TokensPurchasedWithVesting(msg.sender, tokenAmount, defaultCliff, defaultDuration);
         }
@@ -350,8 +348,7 @@ contract Sale is Ownable, ReentrancyGuard {
     function _mintOrVest(address buyer, uint256 tokenAmount, uint256 normalizedUsd) internal {
         if (
             address(vestingContract) != address(0) &&
-            vestingThreshold > 0 &&
-            normalizedUsd >= vestingThreshold
+            (vestingThreshold == 0 || normalizedUsd >= vestingThreshold)
         ) {
             saleToken.mint(address(vestingContract), tokenAmount);
             vestingContract.createVestingSchedule(

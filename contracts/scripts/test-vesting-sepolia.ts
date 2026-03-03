@@ -9,7 +9,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const SALE_ADDRESS    = "0x685866FA0841e918C3452Fe480eFD792bA912088";
-const VESTING_ADDRESS = "0xc4b6d70Fd384CA3CAD335e45a041717b56622737";
+const VESTING_ADDRESS = "0x068D068e92F5725697Ca838388e2F76536a3fAf7";
 const FVC_ADDRESS     = "0x52F7608fC35AefDa12B3b66131E9554f64e72eC9";
 const USDC_ADDRESS    = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
 const AMOUNT_USDC     = ethers.parseUnits("2", 6); // 2 USDC
@@ -42,9 +42,9 @@ async function main() {
 
   const threshold = await sale.vestingThreshold();
   console.log("vestingThreshold:", ethers.formatUnits(threshold, 6), "USDC");
-  if (threshold > BigInt(0)) {
-    console.error("\n⚠️  vestingThreshold is not 0. Set it to 0 via Gnosis Safe first.");
-    console.error("   See: gnosis-safe/ethereum-sepolia/01-set-vesting-threshold.txt");
+  // threshold=1 means vest everything (0 disables vesting in the contract)
+  if (threshold > BigInt(50000000000)) {
+    console.error("\n⚠️  vestingThreshold is > $50k. Lower it first so the test purchase triggers vesting.");
     process.exit(1);
   }
 
