@@ -8,8 +8,14 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title Vesting
- * @notice Vesting contract with cliff support - owner (Gnosis Safe) manually creates schedules
- * @dev Owner can create, modify, and revoke vesting schedules
+ * @notice Per-investor, multi-schedule vesting with cliff support.
+ *         Each investor wallet can hold any number of independent schedules,
+ *         each with its own amount, cliff, and duration. This supports:
+ *           - Standard public-sale vesting (uniform terms, auto-created by Sale.sol)
+ *           - Negotiated seed/OTC terms (bespoke cliff/duration per investor)
+ *           - Top-up allocations to existing investors without disturbing prior schedules
+ * @dev Owner (Gnosis Safe via Sale.sol or directly) creates and manages schedules.
+ *      Beneficiaries call release(scheduleId) to claim vested tokens.
  */
 contract Vesting is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -17,29 +23,32 @@ contract Vesting is Ownable, ReentrancyGuard {
     // ============ STRUCTS ============
 
     struct VestingSchedule {
-        uint256 totalAmount;    // Total tokens to vest
-        uint256 released;       // Tokens already released
-        uint256 startTime;      // Vesting start timestamp
-        uint256 cliff;          // Cliff duration in seconds (e.g., 180 days)
-        uint256 duration;       // Total vesting duration in seconds (e.g., 730 days)
-        bool revoked;           // Can be revoked by owner
+        uint256 totalAmount;  // Total tokens to vest
+        uint256 released;     // Tokens already released
+        uint256 startTime;    // Vesting start timestamp
+        uint256 cliff;        // Cliff duration in seconds (0 = no cliff)
+        uint256 duration;     // Total vesting duration in seconds
+        bool revoked;
     }
 
     // ============ STATE VARIABLES ============
 
-    /// @notice Token being vested (FVC)
     IERC20 public immutable token;
 
-    /// @notice Vesting schedules per beneficiary
-    mapping(address => VestingSchedule) public schedules;
+    /// @notice schedules[beneficiary][scheduleId] => VestingSchedule
+    mapping(address => mapping(uint256 => VestingSchedule)) public schedules;
 
-    /// @notice Total tokens held in vesting
+    /// @notice Number of schedules created per beneficiary
+    mapping(address => uint256) public scheduleCount;
+
+    /// @notice Total tokens committed across all active schedules
     uint256 public totalVesting;
 
     // ============ EVENTS ============
 
     event VestingScheduleCreated(
         address indexed beneficiary,
+        uint256 indexed scheduleId,
         uint256 amount,
         uint256 startTime,
         uint256 cliff,
@@ -47,44 +56,43 @@ contract Vesting is Ownable, ReentrancyGuard {
     );
     event VestingScheduleModified(
         address indexed beneficiary,
+        uint256 indexed scheduleId,
         uint256 newAmount,
         uint256 newCliff,
         uint256 newDuration
     );
-    event TokensReleased(address indexed beneficiary, uint256 amount);
-    event VestingRevoked(address indexed beneficiary, uint256 refunded);
+    event TokensReleased(address indexed beneficiary, uint256 indexed scheduleId, uint256 amount);
+    event VestingRevoked(address indexed beneficiary, uint256 indexed scheduleId, uint256 refunded);
 
     // ============ ERRORS ============
 
     error Vesting__ZeroAddress();
     error Vesting__ZeroAmount();
     error Vesting__InvalidDuration();
-    error Vesting__ScheduleExists();
     error Vesting__NoSchedule();
     error Vesting__NothingToRelease();
-    error Vesting__BeforeCliff();
     error Vesting__AlreadyRevoked();
     error Vesting__InsufficientBalance();
+    error Vesting__ReleasedAlready();
 
     // ============ CONSTRUCTOR ============
 
-    /**
-     * @param _token Token to vest (FVC)
-     */
     constructor(address _token) {
         if (_token == address(0)) revert Vesting__ZeroAddress();
         token = IERC20(_token);
     }
 
-    // ============ OWNER FUNCTIONS (GNOSIS SAFE) ============
+    // ============ OWNER FUNCTIONS ============
 
     /**
-     * @notice Create vesting schedule for beneficiary
-     * @param beneficiary Address receiving vested tokens
-     * @param amount Total tokens to vest
-     * @param startTime Vesting start timestamp (use block.timestamp for immediate)
-     * @param cliff Cliff duration in seconds (0 for no cliff)
-     * @param duration Total vesting duration in seconds
+     * @notice Create a new vesting schedule for a beneficiary.
+     *         Multiple schedules per address are supported — each gets an auto-incremented ID.
+     * @param beneficiary  Wallet receiving vested tokens
+     * @param amount       Total FVC (18 decimals) to vest
+     * @param startTime    Unix timestamp vesting begins (use block.timestamp for immediate)
+     * @param cliff        Cliff in seconds; 0% is claimable until cliff elapses
+     * @param duration     Total duration in seconds; 100% claimable at startTime + duration
+     * @return scheduleId  The ID assigned to this schedule (0-indexed per beneficiary)
      */
     function createVestingSchedule(
         address beneficiary,
@@ -92,18 +100,17 @@ contract Vesting is Ownable, ReentrancyGuard {
         uint256 startTime,
         uint256 cliff,
         uint256 duration
-    ) external onlyOwner {
+    ) external onlyOwner returns (uint256 scheduleId) {
         if (beneficiary == address(0)) revert Vesting__ZeroAddress();
         if (amount == 0) revert Vesting__ZeroAmount();
         if (duration == 0) revert Vesting__InvalidDuration();
         if (cliff > duration) revert Vesting__InvalidDuration();
-        if (schedules[beneficiary].totalAmount != 0) revert Vesting__ScheduleExists();
 
-        // Ensure contract has enough tokens
         uint256 contractBalance = token.balanceOf(address(this));
         if (contractBalance < totalVesting + amount) revert Vesting__InsufficientBalance();
 
-        schedules[beneficiary] = VestingSchedule({
+        scheduleId = scheduleCount[beneficiary];
+        schedules[beneficiary][scheduleId] = VestingSchedule({
             totalAmount: amount,
             released: 0,
             startTime: startTime,
@@ -112,70 +119,61 @@ contract Vesting is Ownable, ReentrancyGuard {
             revoked: false
         });
 
+        scheduleCount[beneficiary] += 1;
         totalVesting += amount;
 
-        emit VestingScheduleCreated(beneficiary, amount, startTime, cliff, duration);
+        emit VestingScheduleCreated(beneficiary, scheduleId, amount, startTime, cliff, duration);
     }
 
     /**
-     * @notice Modify existing vesting schedule (before any release)
-     * @param beneficiary Address to modify
-     * @param newAmount New total amount
-     * @param newCliff New cliff duration
-     * @param newDuration New total duration
+     * @notice Modify an existing schedule before any tokens have been released.
      */
     function modifyVestingSchedule(
         address beneficiary,
+        uint256 scheduleId,
         uint256 newAmount,
         uint256 newCliff,
         uint256 newDuration
     ) external onlyOwner {
-        VestingSchedule storage schedule = schedules[beneficiary];
-        if (schedule.totalAmount == 0) revert Vesting__NoSchedule();
-        if (schedule.released > 0) revert Vesting__NothingToRelease(); // Can't modify after release started
-        if (schedule.revoked) revert Vesting__AlreadyRevoked();
+        VestingSchedule storage s = _getSchedule(beneficiary, scheduleId);
+        if (s.revoked) revert Vesting__AlreadyRevoked();
+        if (s.released > 0) revert Vesting__ReleasedAlready();
         if (newDuration == 0) revert Vesting__InvalidDuration();
         if (newCliff > newDuration) revert Vesting__InvalidDuration();
 
-        // Adjust totalVesting
-        totalVesting = totalVesting - schedule.totalAmount + newAmount;
+        totalVesting = totalVesting - s.totalAmount + newAmount;
+        s.totalAmount = newAmount;
+        s.cliff = newCliff;
+        s.duration = newDuration;
 
-        schedule.totalAmount = newAmount;
-        schedule.cliff = newCliff;
-        schedule.duration = newDuration;
-
-        emit VestingScheduleModified(beneficiary, newAmount, newCliff, newDuration);
+        emit VestingScheduleModified(beneficiary, scheduleId, newAmount, newCliff, newDuration);
     }
 
     /**
-     * @notice Revoke vesting schedule and return unvested tokens to owner
-     * @param beneficiary Address to revoke
+     * @notice Revoke a schedule; unvested tokens return to owner.
      */
-    function revokeVesting(address beneficiary) external onlyOwner nonReentrant {
-        VestingSchedule storage schedule = schedules[beneficiary];
-        if (schedule.totalAmount == 0) revert Vesting__NoSchedule();
-        if (schedule.revoked) revert Vesting__AlreadyRevoked();
+    function revokeVesting(address beneficiary, uint256 scheduleId) external onlyOwner nonReentrant {
+        VestingSchedule storage s = _getSchedule(beneficiary, scheduleId);
+        if (s.revoked) revert Vesting__AlreadyRevoked();
 
-        uint256 vested = _vestedAmount(schedule);
-        uint256 refund = schedule.totalAmount - vested;
+        uint256 vested = _vestedAmount(s);
+        uint256 refund = s.totalAmount - vested;
 
-        schedule.revoked = true;
+        s.revoked = true;
         totalVesting -= refund;
 
         if (refund > 0) {
             token.safeTransfer(owner(), refund);
         }
 
-        emit VestingRevoked(beneficiary, refund);
+        emit VestingRevoked(beneficiary, scheduleId, refund);
     }
 
     /**
-     * @notice Emergency withdraw tokens (only unvested/unallocated tokens)
-     * @param amount Amount to withdraw
+     * @notice Withdraw unallocated tokens (contract balance minus totalVesting).
      */
     function emergencyWithdraw(uint256 amount) external onlyOwner {
-        uint256 contractBalance = token.balanceOf(address(this));
-        uint256 available = contractBalance - totalVesting;
+        uint256 available = token.balanceOf(address(this)) - totalVesting;
         require(amount <= available, "Exceeds available balance");
         token.safeTransfer(owner(), amount);
     }
@@ -183,37 +181,37 @@ contract Vesting is Ownable, ReentrancyGuard {
     // ============ BENEFICIARY FUNCTIONS ============
 
     /**
-     * @notice Release vested tokens to beneficiary
+     * @notice Release vested tokens from a specific schedule.
+     * @param scheduleId The schedule index to claim from
      */
-    function release() external nonReentrant {
-        VestingSchedule storage schedule = schedules[msg.sender];
-        if (schedule.totalAmount == 0) revert Vesting__NoSchedule();
-        if (schedule.revoked) revert Vesting__AlreadyRevoked();
+    function release(uint256 scheduleId) external nonReentrant {
+        VestingSchedule storage s = _getSchedule(msg.sender, scheduleId);
+        if (s.revoked) revert Vesting__AlreadyRevoked();
 
-        uint256 releasable = _releasableAmount(schedule);
+        uint256 releasable = _releasableAmount(s);
         if (releasable == 0) revert Vesting__NothingToRelease();
 
-        schedule.released += releasable;
+        s.released += releasable;
         totalVesting -= releasable;
 
         token.safeTransfer(msg.sender, releasable);
 
-        emit TokensReleased(msg.sender, releasable);
+        emit TokensReleased(msg.sender, scheduleId, releasable);
     }
 
     // ============ VIEW FUNCTIONS ============
 
     /**
-     * @notice Get releasable amount for beneficiary
+     * @notice Releasable amount for a specific schedule.
      */
-    function releasableAmount(address beneficiary) external view returns (uint256) {
-        return _releasableAmount(schedules[beneficiary]);
+    function releasableAmount(address beneficiary, uint256 scheduleId) external view returns (uint256) {
+        return _releasableAmount(schedules[beneficiary][scheduleId]);
     }
 
     /**
-     * @notice Get vesting schedule details
+     * @notice Full details for a specific schedule — used by investor dashboard.
      */
-    function getVestingSchedule(address beneficiary)
+    function getVestingSchedule(address beneficiary, uint256 scheduleId)
         external
         view
         returns (
@@ -226,45 +224,64 @@ contract Vesting is Ownable, ReentrancyGuard {
             uint256 releasable
         )
     {
-        VestingSchedule memory schedule = schedules[beneficiary];
+        VestingSchedule memory s = schedules[beneficiary][scheduleId];
         return (
-            schedule.totalAmount,
-            schedule.released,
-            schedule.startTime,
-            schedule.cliff,
-            schedule.duration,
-            schedule.revoked,
-            _releasableAmount(schedule)
+            s.totalAmount,
+            s.released,
+            s.startTime,
+            s.cliff,
+            s.duration,
+            s.revoked,
+            _releasableAmount(s)
         );
     }
 
-    // ============ INTERNAL FUNCTIONS ============
-
     /**
-     * @dev Calculate releasable amount
+     * @notice All schedules for a beneficiary — used by investor dashboard to enumerate.
      */
-    function _releasableAmount(VestingSchedule memory schedule) private view returns (uint256) {
-        if (schedule.totalAmount == 0 || schedule.revoked) return 0;
+    function getAllSchedules(address beneficiary)
+        external
+        view
+        returns (VestingSchedule[] memory)
+    {
+        uint256 count = scheduleCount[beneficiary];
+        VestingSchedule[] memory result = new VestingSchedule[](count);
+        for (uint256 i = 0; i < count; i++) {
+            result[i] = schedules[beneficiary][i];
+        }
+        return result;
+    }
 
-        uint256 vested = _vestedAmount(schedule);
-        return vested - schedule.released;
+    // ============ INTERNAL ============
+
+    function _getSchedule(address beneficiary, uint256 scheduleId)
+        internal
+        view
+        returns (VestingSchedule storage)
+    {
+        if (scheduleId >= scheduleCount[beneficiary]) revert Vesting__NoSchedule();
+        return schedules[beneficiary][scheduleId];
+    }
+
+    function _releasableAmount(VestingSchedule memory s) private view returns (uint256) {
+        if (s.totalAmount == 0 || s.revoked) return 0;
+        return _vestedAmount(s) - s.released;
     }
 
     /**
-     * @dev Calculate vested amount
+     * @dev 0% claimable until cliff elapses.
+     *      Linear vesting from cliff end to duration end: 0% → 100%.
      */
-    function _vestedAmount(VestingSchedule memory schedule) private view returns (uint256) {
-        if (schedule.totalAmount == 0) return 0;
+    function _vestedAmount(VestingSchedule memory s) private view returns (uint256) {
+        if (s.totalAmount == 0) return 0;
 
-        uint256 elapsed = block.timestamp - schedule.startTime;
+        uint256 elapsed = block.timestamp - s.startTime;
 
-        // Before cliff
-        if (elapsed < schedule.cliff) return 0;
+        if (elapsed < s.cliff) return 0;
+        if (elapsed >= s.duration) return s.totalAmount;
 
-        // After full duration
-        if (elapsed >= schedule.duration) return schedule.totalAmount;
-
-        // Linear vesting
-        return (schedule.totalAmount * elapsed) / schedule.duration;
+        uint256 vestingWindow = s.duration - s.cliff;
+        uint256 elapsedAfterCliff = elapsed - s.cliff;
+        return (s.totalAmount * elapsedAfterCliff) / vestingWindow;
     }
 }
