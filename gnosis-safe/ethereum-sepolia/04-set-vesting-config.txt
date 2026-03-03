@@ -1,0 +1,33 @@
+================================================================================
+GNOSIS SAFE — ETHEREUM SEPOLIA
+Set Vesting Config (rewire to new Vesting + set 12mo cliff / 24mo duration)
+================================================================================
+
+Safe:    0xE20c89da2138951655DbbbE6E6db01fe561EBe82
+Sale:    0x685866FA0841e918C3452Fe480eFD792bA912088
+Network: Ethereum Sepolia (chainId 11155111)
+
+Execute this after redeploying the Vesting contract.
+This simultaneously:
+  - Points Sale at the new Vesting contract
+  - Sets vestingThreshold to 0 (ALL purchases vested)
+  - Sets cliff to 12 months (365 days)
+  - Sets duration to 24 months (730 days)
+
+--------------------------------------------------------------------------------
+TRANSACTION — setVestingConfig
+--------------------------------------------------------------------------------
+To:     0x685866FA0841e918C3452Fe480eFD792bA912088
+Value:  0
+
+ABI:
+[{"inputs":[{"name":"_vestingContract","type":"address"},{"name":"_threshold","type":"uint256"},{"name":"_cliff","type":"uint256"},{"name":"_duration","type":"uint256"}],"name":"setVestingConfig","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+
+Method: setVestingConfig
+Parameters:
+  _vestingContract: 0x068D068e92F5725697Ca838388e2F76536a3fAf7
+  _threshold:       0
+  _cliff:           31536000
+  _duration:        63072000
+
+================================================================================
