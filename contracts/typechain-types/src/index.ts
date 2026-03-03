@@ -3,9 +3,13 @@
 /* eslint-disable */
 import type * as core from "./core";
 export type { core };
-import type * as interfaces from "./interfaces";
-export type { interfaces };
+import type * as mocks from "./mocks";
+export type { mocks };
+import type * as sale from "./sale";
+export type { sale };
 import type * as staking from "./staking";
 export type { staking };
-import type * as treasury from "./treasury";
-export type { treasury };
+import type * as testnet from "./testnet";
+export type { testnet };
+import type * as vesting from "./vesting";
+export type { vesting };

@@ -2,6 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as core from "./core";
-export * as interfaces from "./interfaces";
+export * as mocks from "./mocks";
+export * as sale from "./sale";
 export * as staking from "./staking";
-export * as treasury from "./treasury";
+export * as testnet from "./testnet";
+export * as vesting from "./vesting";
