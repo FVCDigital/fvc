@@ -41,15 +41,15 @@ describe("Sale + Staking e2e", function () {
     await sale.waitForDeployment();
 
     // Grant MINTER_ROLE to sale contract
-    const MINTER_ROLE = await fvc.getMinterRole();
+    const MINTER_ROLE = await fvc.MINTER_ROLE();
     await fvc.connect(deployer).grantRole(MINTER_ROLE, await sale.getAddress());
 
-    // Accept USDC and USDT
-    await sale.connect(deployer).setAcceptedToken(await usdc.getAddress(), true);
-    await sale.connect(deployer).setAcceptedToken(await usdt.getAddress(), true);
+    // Accept USDC and USDT (Sale owner is beneficiary)
+    await sale.connect(beneficiary).setAcceptedToken(await usdc.getAddress(), true, 6);
+    await sale.connect(beneficiary).setAcceptedToken(await usdt.getAddress(), true, 6);
 
     // Activate sale
-    await sale.connect(deployer).setActive(true);
+    await sale.connect(beneficiary).setActive(true);
 
     // Deploy Staking: stakingToken = FVC, rewardsToken = USDC
     const Staking = await ethers.getContractFactory("Staking");
