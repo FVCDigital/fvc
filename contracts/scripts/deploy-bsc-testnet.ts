@@ -105,7 +105,8 @@ async function main() {
     fvcAddress,
     TREASURY,
     INITIAL_RATE,
-    INITIAL_CAP
+    INITIAL_CAP,
+    ethers.ZeroAddress  // BSC testnet: no Chainlink feed, use setEthUsdRate manually
   );
   await sale.waitForDeployment();
   const saleAddress = await sale.getAddress();
