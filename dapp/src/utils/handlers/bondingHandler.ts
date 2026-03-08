@@ -30,8 +30,7 @@ export const useApproveUSDC = (amount: string) => {
   const handleApprove = async () => {
     if (!amount || !address) return;
     
-    // Use the correct USDC address based on environment
-    const usdcAddress = 'USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC;
+    const usdcAddress = CONTRACTS.USDC;
     
     writeContract({
       address: usdcAddress as `0x${string}`,
@@ -216,12 +215,7 @@ export const useBondingFlow = (selectedAsset?: any) => {
 
 export const useBondingContractBalance = () => {
   // Determine correct FVC address for all environments
-  let fvcAddress: string = '';
-  if ('FVC' in CONTRACTS) {
-    fvcAddress = (CONTRACTS as any).FVC;
-  } else if ('MOCK_FVC' in CONTRACTS) {
-    fvcAddress = (CONTRACTS as any).MOCK_FVC;
-  }
+  const fvcAddress = CONTRACTS.FVC;
 
   const { data: balance, isLoading, error } = useBalance({
     address: CONTRACTS.BONDING as `0x${string}`,
