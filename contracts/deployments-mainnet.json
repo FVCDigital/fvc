@@ -5,6 +5,7 @@
   "treasury": "0xE20c89da2138951655DbbbE6E6db01fe561EBe82",
   "fvc": "0xB84eC31C6B520c3aeA6a19483EB8f88cB55A0556",
   "sale": "0x0E99482aaA074C72756b78eDbdCA61E438729c54",
+  "saleNoVesting": "0xc4b6d70Fd384CA3CAD335e45a041717b56622737",
   "vesting": "0x24263Dce127Ad06cC272897629d6688Ec54df389",
   "usdc": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
   "usdt": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
@@ -19,10 +20,13 @@
     "fvcDeployed": true,
     "vestingDeployed": true,
     "saleDeployed": true,
+    "saleNoVestingDeployed": true,
     "minterRoleGranted": true,
+    "saleNoVestingMinterRoleGranted": true,
     "vestingOwnershipTransferred": true,
     "safeConfigPending": true,
-    "note": "6 remaining config txs must be executed via Gnosis Safe — see gnosis-safe/ethereum-mainnet/04-mainnet-config-batch.json"
+    "note": "saleNoVesting has vestingContract=address(0) — buy() mints directly, no lock-up. Activated via Safe tx 0x102c88e867f96204499676b3d2372b46ed800d55b44453658335dfabccdab270"
   },
-  "deployedAt": "2026-03-03T00:00:00.000Z"
+  "deployedAt": "2026-03-03T00:00:00.000Z",
+  "saleNoVestingDeployedAt": "2026-03-08T00:00:00.000Z"
 }
