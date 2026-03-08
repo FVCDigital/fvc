@@ -38,12 +38,12 @@ const RoadmapFlowchart: React.FC = () => {
       id: 0,
       title: 'Stage 0',
       subtitle: 'Smart Contract Foundation',
-      description: 'Core smart contract architecture, bonding system, and frontend foundation have been completed and deployed to testnet.',
+      description: 'Core smart contract architecture, bonding system, and frontend foundation have been completed and deployed.',
       details: [
         'FVC token contract deployed with vesting integration',
         'Bonding contract with multi-round system operational',
         'Frontend application with atomic components built',
-        'Testnet deployment on Polygon completed'
+        'Deployment on Ethereum completed'
       ],
       timeline: 'Q3 2025',
       status: 'completed',
@@ -56,7 +56,7 @@ const RoadmapFlowchart: React.FC = () => {
       description: 'Initial fundraising round to secure professional audit and establish protocol foundation. This stage focuses on building trust and ensuring security through comprehensive auditing.',
       details: [
         'Raise funds for professional smart contract audit',
-        'Deploy contracts to Polygon mainnet',
+        'Deploy contracts to Ethereum mainnet',
         'Complete security verification and testing',
         'Establish initial community and partnerships'
       ],
