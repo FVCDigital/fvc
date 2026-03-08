@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 369.7 407.6">
+  <!-- Generator: Adobe Illustrator 30.1.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 136)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #fff;
+        opacity: .2;
+      }
+
+      .st1 {
+        fill: url(#Sakib42);
+      }
+
+      .st2 {
+        fill: url(#Sakib4);
+      }
+
+      .st3 {
+        fill: url(#Sakib43);
+      }
+
+      .st4 {
+        fill: url(#Sakib41);
+      }
+    </style>
+    <linearGradient id="Sakib4" x1="330.11" y1="382.02" x2="-13.79" y2="201.66" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9708cc"/>
+      <stop offset="1" stop-color="#43cbff"/>
+    </linearGradient>
+    <linearGradient id="Sakib41" data-name="Sakib4" x1="379.47" y1="287.91" x2="35.57" y2="107.54" xlink:href="#Sakib4"/>
+    <linearGradient id="Sakib42" data-name="Sakib4" x1="350.78" y1="342.59" x2="6.89" y2="162.23" xlink:href="#Sakib4"/>
+    <linearGradient id="Sakib43" data-name="Sakib4" x1="422.44" y1="205.97" x2="78.54" y2="25.61" xlink:href="#Sakib4"/>
+  </defs>
+  <polygon class="st2" points="193.27 330.01 107.99 280.75 107.99 358.36 193.27 407.6 366.74 307.45 299.54 268.64 193.27 330.01"/>
+  <polygon class="st0" points="193.28 337.87 193.28 399.74 114.8 354.43 114.8 292.56 193.28 337.87"/>
+  <polygon class="st4" points="193.27 104.47 107.99 153.71 107.99 231.31 193.27 182.06 300.38 243.9 367.58 282.7 367.58 205.11 300.38 166.31 193.27 104.47"/>
+  <polygon class="st0" points="193.28 112.33 193.28 174.2 114.8 219.5 114.8 157.64 193.28 112.33"/>
+  <polygon class="st1" points="18.96 100.64 .86 111.09 .86 188.68 18.96 178.24 18.96 205.11 18.96 282.7 18.96 306.96 86.15 345.75 86.15 280.75 86.15 243.92 86.15 166.32 86.15 152.23 86.15 148.87 86.15 139.44 86.15 139.44 86.15 61.85 18.96 100.64 18.96 100.64"/>
+  <polygon class="st0" points="25.77 303.03 25.77 166.43 7.68 176.88 7.68 115.02 79.34 73.65 79.34 333.95 25.77 303.03"/>
+  <polygon class="st3" points="193.27 0 107.99 49.24 107.99 126.84 193.27 77.59 300.38 139.43 367.58 178.23 367.58 100.64 193.27 0"/>
+  <polygon class="st0" points="193.28 7.86 193.28 69.73 114.8 115.04 114.8 53.17 193.28 7.86"/>
+</svg>
