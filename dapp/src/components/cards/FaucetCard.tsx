@@ -50,9 +50,9 @@ const FaucetCard: React.FC = () => {
     return (
       <Card className="w-full max-w-[800px] mx-auto bg-card/80 backdrop-blur-sm border-border">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold mb-2">Get Testnet FVC</CardTitle>
+          <CardTitle className="text-2xl font-bold mb-2">Get FVC</CardTitle>
           <CardDescription>
-            Connect your wallet to claim free testnet FVC tokens
+            Connect your wallet to claim FVC tokens
           </CardDescription>
         </CardHeader>
       </Card>
@@ -68,9 +68,9 @@ const FaucetCard: React.FC = () => {
   return (
     <Card className="w-full max-w-[500px] mx-auto bg-card/80 backdrop-blur-sm border-border shadow-xl">
       <CardHeader>
-        <CardTitle className="text-xl font-bold">Get Testnet FVC</CardTitle>
+        <CardTitle className="text-xl font-bold">Get FVC</CardTitle>
         <CardDescription>
-          Claim free testnet tokens to try staking. Each claim gives you 10 FVC.
+          Claim FVC tokens for staking. Each claim gives you 10 FVC.
         </CardDescription>
       </CardHeader>
 
