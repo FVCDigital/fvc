@@ -1,24 +1,13 @@
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 
-// Polygon Testnet contract addresses (deployed contracts)
-export const POLYGON_TESTNET_CONTRACTS = {
-  FVC: "0xA23e293B02EDc0a847b5215aE814CBc710f8c1B2",
-  BONDING: "0xF4b7B5D028C09E773b2df6087968872BB36856eA", // CORRECT TREASURY BONDING - USDC goes to 0x7f1EE89fDB16b57930b7F53Bb998f25d917F35D9
-  USDC: "0x79a3c7c1459B4d68C39A6db2716C0f4BaE190dfc",
+// Ethereum Mainnet contract addresses (from environment variables)
+export const CONTRACTS = {
+  BONDING: (process.env.NEXT_PUBLIC_BONDING_ADDRESS || '') as string,
+  USDC: (process.env.NEXT_PUBLIC_USDC_ADDRESS || '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48') as string,
+  FVC: (process.env.NEXT_PUBLIC_FVC_ADDRESS || '') as string,
+  VESTING: (process.env.NEXT_PUBLIC_VESTING_ADDRESS || '') as string,
+  SALE: (process.env.NEXT_PUBLIC_SALE_ADDRESS || '') as string,
 } as const;
-
-// Mainnet contract addresses (from environment variables)
-export const MAINNET_CONTRACTS = {
-  BONDING: process.env.NEXT_PUBLIC_MAINNET_BONDING_ADDRESS || '',
-  MOCK_USDC: process.env.NEXT_PUBLIC_MAINNET_USDC_ADDRESS || '0x79a3c7c1459B4d68C39A6db2716C0f4BaE190dfc', // Use same USDC for consistency
-  FVC: process.env.NEXT_PUBLIC_MAINNET_FVC_ADDRESS || '',
-  VESTING: process.env.NEXT_PUBLIC_MAINNET_VESTING_ADDRESS || '',
-};
-
-// Use this to switch between environments
-export const CONTRACTS = process.env.NODE_ENV === 'production' 
-  ? MAINNET_CONTRACTS 
-  : POLYGON_TESTNET_CONTRACTS; // Default to Polygon testnet
 
 // New milestone-based bonding ABI
 export const BONDING_ABI = [
@@ -399,7 +388,7 @@ export const BONDING_ABI = [
   }
 ] as const;
 
-// Bonding contract address - using the deployed contract on Amoy
+// Bonding contract address
 export const BONDING_CONTRACT = CONTRACTS.BONDING as `0x${string}`;
 
 // USDC ABI (minimal for approval operations)
