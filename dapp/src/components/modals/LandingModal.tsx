@@ -4,9 +4,9 @@ import { FaDiscord, FaTelegram, FaXTwitter } from 'react-icons/fa6';
 import { useRouter } from 'next/router';
 
 const socials = [
-  { icon: <FaDiscord size={24} />, label: 'Discord' },
-  { icon: <FaXTwitter size={24} />, label: 'X' },
-  { icon: <FaTelegram size={24} />, label: 'Telegram' },
+  { icon: <FaDiscord size={24} />, label: 'Discord', url: 'https://discord.gg/fvc' },
+  { icon: <FaXTwitter size={24} />, label: 'X', url: 'https://x.com/fvcprotocol' },
+  { icon: <FaTelegram size={24} />, label: 'Telegram', url: 'https://t.me/+5_EubY-5euBkNWI0' },
 ];
 
 const cardStyle: React.CSSProperties = {
@@ -137,9 +137,12 @@ const LandingModal: React.FC = () => {
           Enter Protocol
         </button>
         <div style={socialsStyle}>
-          {socials.map(({ icon, label }) => (
-            <button
+          {socials.map(({ icon, label, url }) => (
+            <a
               key={label}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label={label}
               style={{
                 background: 'none',
@@ -150,6 +153,8 @@ const LandingModal: React.FC = () => {
                 padding: 8,
                 transition: 'all 0.2s ease',
                 borderRadius: 8,
+                display: 'inline-flex',
+                textDecoration: 'none',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.color = theme.generalButton;
@@ -159,14 +164,13 @@ const LandingModal: React.FC = () => {
                 e.currentTarget.style.color = theme.secondaryText;
                 e.currentTarget.style.background = 'none';
               }}
-              tabIndex={-1}
             >
               {icon}
-            </button>
+            </a>
           ))}
         </div>
         <div style={disclaimerStyle}>
-          <strong>Regulatory Notice:</strong> This protocol is designed for FCA-compliant, community-governed venture funding. Participation may be subject to regulatory requirements in your jurisdiction. Currently operating on testnet.
+          <strong>Regulatory Notice:</strong> This protocol is designed for FCA-compliant, community-governed venture funding. Participation may be subject to regulatory requirements in your jurisdiction.
         </div>
       </div>
     </div>
