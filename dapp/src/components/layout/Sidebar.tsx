@@ -28,7 +28,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const socialLinks = [
     { name: 'Discord', icon: <FaDiscord size={20} />, url: 'https://discord.gg/fvc' },
     { name: 'X', icon: <FaXTwitter size={20} />, url: 'https://x.com/fvcprotocol' },
-    { name: 'Telegram', icon: <FaTelegram size={20} />, url: 'https://t.me/fvcprotocol' },
+    { name: 'Telegram', icon: <FaTelegram size={20} />, url: 'https://t.me/+5_EubY-5euBkNWI0' },
   ];
 
   const handleTabClick = (tabId: TabId) => {
@@ -56,8 +56,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             />
           </div>
           {!isMobile && (
-            <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 text-yellow-400 border border-yellow-400/30 px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wider">
-              TESTNET
+            <div className="bg-gradient-to-r from-cyan-400/20 to-blue-500/20 text-cyan-400 border border-cyan-400/30 px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wider">
+              MAINNET
             </div>
           )}
         </div>
@@ -126,7 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         
         {/* Version Info */}
         <div className="mt-4 pt-4 border-t border-white/5 text-[10px] text-gray-600 text-center font-mono">
-          v1.0.0-testnet
+          v1.0.0
         </div>
       </div>
     </div>
