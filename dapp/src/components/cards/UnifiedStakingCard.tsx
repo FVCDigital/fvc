@@ -226,7 +226,7 @@ const UnifiedStakingCard: React.FC = () => {
           <div className="bg-gradient-to-br from-primary/10 to-green-500/10 rounded-xl p-5 border border-primary/20">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <div className="font-semibold mb-1">Get Testnet FVC</div>
+                <div className="font-semibold mb-1">Get FVC</div>
                 <div className="text-xs text-muted-foreground">
                   {remainingClaims} claims remaining • {canClaim ? 'Ready now' : `Next claim in ${formatTime(remainingCooldown)}`}
                 </div>
