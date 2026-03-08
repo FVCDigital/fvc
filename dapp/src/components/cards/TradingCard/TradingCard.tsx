@@ -31,7 +31,7 @@ const ASSETS: Asset[] = [
   { 
     symbol: 'USDC', 
     name: 'USD Coin', 
-    address: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`, 
+    address: CONTRACTS.USDC as `0x${string}`, 
     decimals: 6,
     logo: '/assets/usdc-logo.png',
     color: '#2775CA'
@@ -111,7 +111,7 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
   
   const usdcBalance = useBalance({ 
     address: address as `0x${string}` | undefined,
-    token: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`,
+    token: CONTRACTS.USDC as `0x${string}`,
     query: { enabled: !!address }
   });
   
