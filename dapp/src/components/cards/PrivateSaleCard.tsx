@@ -16,7 +16,7 @@ const ASSETS: Asset[] = [
   { 
     symbol: 'USDC', 
     name: 'USD Coin', 
-    address: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`, 
+    address: CONTRACTS.USDC as `0x${string}`, 
     decimals: 6,
     logo: '/assets/usdc-logo.png',
     color: '#2775CA'
@@ -87,7 +87,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   
   const usdcBalance = useBalance({ 
     address: address as `0x${string}` | undefined,
-    token: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`,
+    token: CONTRACTS.USDC as `0x${string}`,
     query: { enabled: !!address }
   });
   
@@ -207,7 +207,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
         // First, approve USDC spending
         console.log('Approving USDC spending...');
         writeUSDC({
-          address: ('USDC' in CONTRACTS ? CONTRACTS.USDC : CONTRACTS.MOCK_USDC) as `0x${string}`,
+          address: CONTRACTS.USDC as `0x${string}`,
           abi: USDC_ABI,
           functionName: 'approve',
           args: [CONTRACTS.BONDING as `0x${string}`, usdcAmountBigInt],
