@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>Buy FVC Tokens — FVC Digital</title>
+  <link rel="stylesheet" href="https://use.typekit.net/sxv2zkv.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <style>
+    body { margin: 0; background: #0B0D10; }
+    .bkvideo { position:fixed;top:0;left:0;width:100%;height:100%;background:#0B0D10 url('/assets/images/bk.webp') center/cover no-repeat;z-index:0; }
+    .bkvideo::after { content:'';position:absolute;inset:0;background:rgba(0,0,0,0.55); }
+
+    /* Password gate */
+    #password-gate { position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center; }
+    .gate-card { background:linear-gradient(135deg,rgba(11,13,16,0.85) 0%,rgba(106,112,228,0.12) 100%);backdrop-filter:blur(10px);border:1px solid rgba(106,112,228,0.2);border-radius:16px;padding:48px 40px;max-width:420px;width:100%;margin:0 16px;box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+
+    /* Steps */
+    .step-item { display:flex;flex-direction:column;align-items:center;position:relative;z-index:2; }
+    .step-circle { width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:1.2rem;color:rgba(255,255,255,0.5);transition:all 0.3s; }
+    .step-circle.active  { background:#6A70E4;border-color:#6A70E4;color:#fff;box-shadow:0 0 20px rgba(106,112,228,0.4); }
+    .step-circle.completed { background:#28a745;border-color:#28a745;color:#fff; }
+    .step-label { margin-top:10px;font-size:0.9rem;text-align:center; }
+    .progress-line { position:absolute;top:25px;left:0;right:0;height:2px;background:rgba(255,255,255,0.1);z-index:1; }
+
+    /* Cards */
+    .wizard-card { background:linear-gradient(135deg,rgba(11,13,16,0.8) 0%,rgba(106,112,228,0.1) 100%);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 8px 32px 0 rgba(0,0,0,0.37);border:1px solid rgba(106,112,228,0.2);border-radius:12px;color:#fff;padding:40px; }
+    .inner-card { background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:20px; }
+    .text-muted-fvc { color:rgba(255,255,255,0.5)!important; }
+    .form-control-fvc { background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:8px;padding:12px 16px;font-size:1.1rem;font-weight:600;width:100%;box-sizing:border-box; }
+    .form-control-fvc:focus { outline:none;border-color:#6A70E4;box-shadow:0 0 0 3px rgba(106,112,228,0.25); }
+    .form-control-fvc::placeholder { color:rgba(255,255,255,0.3); }
+    .input-group-fvc { display:flex; }
+    .input-group-fvc .form-control-fvc { border-radius:8px 0 0 8px;flex:1; }
+    .input-addon { background:rgba(106,112,228,0.2);border:1px solid rgba(255,255,255,0.15);border-left:none;border-radius:0 8px 8px 0;padding:12px 16px;color:#fff;font-weight:700;display:flex;align-items:center; }
+    .btn-primary-fvc { background:#6A70E4;border:none;color:#fff;font-weight:700;font-size:1rem;padding:14px 24px;border-radius:10px;cursor:pointer;width:100%;transition:background 0.2s; }
+    .btn-primary-fvc:hover { background:#7B80F0; }
+    .btn-primary-fvc:disabled { opacity:0.5;cursor:not-allowed; }
+    .btn-outline-fvc { background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);font-weight:600;font-size:0.9rem;padding:10px 20px;border-radius:10px;cursor:pointer;width:100%;transition:all 0.2s; }
+    .btn-outline-fvc:hover { background:rgba(255,255,255,0.08);color:#fff; }
+    .btn-sm-fvc { background:transparent;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7);font-size:0.85rem;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all 0.2s; }
+    .btn-sm-fvc:hover { background:rgba(255,255,255,0.08);color:#fff; }
+    .payment-option { cursor:pointer;transition:all 0.3s;border:2px solid rgba(255,255,255,0.1)!important;border-radius:12px;padding:24px 16px;text-align:center;background:rgba(255,255,255,0.04); }
+    .payment-option:hover { transform:translateY(-5px);box-shadow:0 8px 24px rgba(106,112,228,0.3);border-color:#6A70E4!important; }
+    .payment-option.selected { border-color:#6A70E4!important;background:rgba(106,112,228,0.1); }
+    .badge-success { background:rgba(40,167,69,0.2);color:#28a745;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:600;display:inline-block;margin-bottom:12px; }
+    .alert-success-fvc { background:rgba(40,167,69,0.12);border:1px solid rgba(40,167,69,0.3);border-radius:10px;padding:16px;color:#fff;font-size:14px; }
+    .alert-info-fvc { background:rgba(106,112,228,0.1);border:1px solid rgba(106,112,228,0.25);border-radius:10px;padding:16px;color:#fff;font-size:14px; }
+    .estimate-box { background:rgba(255,255,255,0.06);border-radius:10px;padding:14px;text-align:center;font-weight:700;font-size:1.2rem;color:#fff;min-height:48px;line-height:24px; }
+    .address-box { background:rgba(0,0,0,0.3);border:1px solid rgba(106,112,228,0.3);border-radius:8px;padding:12px 16px;font-family:monospace;font-size:13px;color:#6A70E4;word-break:break-all;cursor:pointer;transition:all 0.2s; }
+    .address-box:hover { background:rgba(106,112,228,0.1); }
+    .spinner { width:48px;height:48px;border:4px solid rgba(106,112,228,0.3);border-top-color:#6A70E4;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 24px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .navbar.bg-dark { background:#0d0f14!important;border-bottom:1px solid rgba(106,112,228,0.15); }
+    .step-indicator-5-hover:hover .step-circle { border-color:#6A70E4;box-shadow:0 0 14px rgba(106,112,228,0.35); }
+  </style>
+</head>
+<body>
+  <div class="bkvideo"></div>
+
+  <!-- ── Password Gate ── -->
+  <div id="password-gate">
+    <div class="gate-card">
+      <div class="text-center mb-4">
+        <img src="/logo.png" alt="FVC" style="height:56px;border-radius:12px;margin-bottom:20px">
+        <h4 class="text-white mb-2">Private Access</h4>
+        <p class="text-muted-fvc" style="font-size:14px">Enter your access code to continue</p>
+      </div>
+      <input type="password" id="gate-input" placeholder="Access code" autofocus
+        class="form-control-fvc mb-3">
+      <div id="gate-error" class="text-danger text-center small mb-3" style="display:none">Invalid access code</div>
+      <button onclick="checkPassword()" class="btn-primary-fvc">Enter</button>
+    </div>
+  </div>
+
+  <!-- ── Main Content ── -->
+  <div id="main-content" style="display:none">
+
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top" style="position:relative;z-index:10">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="https://fvcdigital.com">
+          <img src="/assets/images/FirstVentureCapita-logo.svg" alt="FVC Digital" style="height:40px">
+        </a>
+        <a href="https://fvcdigital.com/buy-fvc" class="btn btn-primary btn-lg ms-auto">Join</a>
+      </div>
+    </header>
+
+    <div class="container py-5" style="position:relative;z-index:2">
+      <div class="row justify-content-center">
+        <div class="col-12 col-lg-10">
+          <h1 class="text-center mb-2 text-white">Buy FVC Tokens</h1>
+          <p class="text-center mb-5 text-muted-fvc">Private allocation — tokens delivered immediately to your wallet, no vesting period</p>
+
+          <!-- Steps -->
+          <div class="row mb-5">
+            <div class="col">
+              <div class="d-flex justify-content-between position-relative">
+                <div class="progress-line"></div>
+                <div class="step-item" id="step-indicator-1">
+                  <div class="step-circle active">1</div>
+                  <div class="step-label text-white">Connect Wallet</div>
+                </div>
+                <div class="step-item" id="step-indicator-2">
+                  <div class="step-circle">2</div>
+                  <div class="step-label text-white">Choose Payment</div>
+                </div>
+                <div class="step-item" id="step-indicator-3">
+                  <div class="step-circle">3</div>
+                  <div class="step-label text-white">Send Payment</div>
+                </div>
+                <div class="step-item" id="step-indicator-4">
+                  <div class="step-circle">4</div>
+                  <div class="step-label text-white">Confirmation</div>
+                </div>
+                <div class="step-item step-indicator-5-hover" id="step-indicator-5" style="cursor:pointer" onclick="goToStep(5)">
+                  <div class="step-circle">5</div>
+                  <div class="step-label text-white">My Holdings</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Wizard -->
+          <div id="wizard-container"></div>
+
+        </div>
+      </div>
+    </div>
+
+    <footer class="mt-5 bg-dark p-3 bg-opacity-50" style="position:relative;z-index:2">
+      <div class="container text-white">
+        <div class="col-12 text-center">&copy; 2026 FVC Coin. All rights reserved.</div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+  <script>
+    // ── Config ──────────────────────────────────────────────────────
+    const CONFIG = {
+      chainId: 1,
+      rpcUrl: 'https://eth-mainnet.g.alchemy.com/v2/6tgWso4UXVZmfMyP0ErKJ',
+      fvcAddress: '0xB84eC31C6B520c3aeA6a19483EB8f88cB55A0556',
+      usdcAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+      fvcLogoUrl: '/assets/images/FVC.svg',
+      fvcRate: 0.03,
+    };
+
+    // No-vesting Sale — vestingContract = address(0), tokens mint directly to buyer
+    const SALE_ADDRESS = '0xc4b6d70Fd384CA3CAD335e45a041717b56622737';
+
+    const ERC20_ABI = [
+      'function balanceOf(address) view returns (uint256)',
+      'function decimals() view returns (uint8)',
+      'function approve(address,uint256) returns (bool)',
+      'function allowance(address,address) view returns (uint256)',
+    ];
+    const FVC_ABI = ['function balanceOf(address) view returns (uint256)'];
+    const SALE_ABI = [
+      'function rate() view returns (uint256)',
+      'function getEffectiveEthUsdPrice() view returns (uint256)',
+      'function buy(address token, uint256 stableAmount) payable',
+      'function buyWithETH() payable',
+      'function active() view returns (bool)',
+    ];
+
+    // ── State ────────────────────────────────────────────────────────
+    let provider = null;
+    let signer = null;
+    let walletAddress = null;
+    let paymentMethod = null; // 'usdc' | 'eth'
+    let currentStep = 1;
+    let completedSteps = new Set();
+    let cachedEthUsd = 2000;
+    let cachedFvcRate = CONFIG.fvcRate;
+    let rpcProvider = null;
+
+    function getRpc() {
+      if (!rpcProvider) rpcProvider = new ethers.providers.JsonRpcProvider(CONFIG.rpcUrl);
+      return rpcProvider;
+    }
+
+    // ── Password ─────────────────────────────────────────────────────
+    const PASSWORD_HASH = '58f26ffafe1a88b4e69f3dc79fd48d4daa0dc067f567472f9a38d0164265df5f';
+
+    async function sha256(text) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    async function checkPassword() {
+      const input = document.getElementById('gate-input').value;
+      const hash = await sha256(input);
+      if (hash === PASSWORD_HASH) {
+        sessionStorage.setItem('hamidou_unlocked', '1');
+        unlock();
+      } else {
+        document.getElementById('gate-error').style.display = 'block';
+        document.getElementById('gate-input').value = '';
+        document.getElementById('gate-input').focus();
+      }
+    }
+    document.getElementById('gate-input').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+
+    function unlock() {
+      document.getElementById('password-gate').style.display = 'none';
+      document.getElementById('main-content').style.display = 'block';
+      prefetchRates();
+      tryAutoConnect();
+      renderStep(1);
+    }
+
+    if (sessionStorage.getItem('hamidou_unlocked') === '1') unlock();
+
+    // ── Wallet ───────────────────────────────────────────────────────
+    function getEth() {
+      if (window.ethereum?.providers?.length) {
+        return window.ethereum.providers.find(p => p.isMetaMask && !p.isBraveWallet) || window.ethereum;
+      }
+      return window.ethereum || null;
+    }
+
+    async function tryAutoConnect() {
+      const eth = getEth();
+      if (!eth) return;
+      try {
+        const accounts = await eth.request({ method: 'eth_accounts' });
+        if (accounts?.length) setupProvider(eth, accounts[0]);
+      } catch(e) {}
+      eth.on('accountsChanged', accs => {
+        if (!accs?.length) { walletAddress = null; provider = null; signer = null; }
+        else setupProvider(eth, accs[0]);
+        renderStep(currentStep);
+      });
+    }
+
+    function setupProvider(eth, address) {
+      walletAddress = address;
+      provider = new ethers.providers.Web3Provider(eth, 'any');
+      signer = provider.getSigner();
+    }
+
+    async function connectWallet() {
+      const eth = getEth();
+      if (!eth) { alert('Please install MetaMask or a Web3 wallet.'); return; }
+      try {
+        const accounts = await eth.request({ method: 'eth_requestAccounts' });
+        if (!accounts?.length) return;
+        setupProvider(eth, accounts[0]);
+        // Switch to mainnet if needed
+        const net = await provider.getNetwork();
+        if (net.chainId !== 1) {
+          try { await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x1' }] }); }
+          catch(e) {}
+        }
+        completeStep(1);
+        goToStep(2);
+      } catch(e) {
+        if (e.code === 4001) alert('Connection rejected.');
+      }
+    }
+
+    // ── Rates ────────────────────────────────────────────────────────
+    async function prefetchRates() {
+      try {
+        const cg = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
+          .then(r => r.json()).catch(() => null);
+        if (cg?.ethereum?.usd) cachedEthUsd = cg.ethereum.usd;
+      } catch(e) {}
+      try {
+        const rpc = getRpc();
+        const sale = new ethers.Contract(SALE_ADDRESS, SALE_ABI, rpc);
+        const [rate, ethUsd] = await Promise.all([sale.rate(), sale.getEffectiveEthUsdPrice()]);
+        cachedFvcRate = Number(rate) / 1e6;
+        if (Number(ethUsd) > 0) cachedEthUsd = Number(ethUsd) / 1e6;
+      } catch(e) {}
+    }
+
+    // ── Steps ────────────────────────────────────────────────────────
+    function completeStep(n) {
+      completedSteps.add(n);
+      const el = document.getElementById('step-indicator-' + n);
+      if (!el) return;
+      const c = el.querySelector('.step-circle');
+      c.classList.remove('active');
+      c.classList.add('completed');
+      c.innerHTML = '<i class="bi bi-check"></i>';
+    }
+
+    function goToStep(n) {
+      // Update step indicators
+      for (let i = 1; i <= 5; i++) {
+        const el = document.getElementById('step-indicator-' + i);
+        if (!el) continue;
+        const c = el.querySelector('.step-circle');
+        if (i === n) {
+          c.classList.remove('completed', 'active');
+          c.innerHTML = String(i);
+          c.classList.add('active');
+        }
+      }
+      currentStep = n;
+      renderStep(n);
+    }
+
+    function renderStep(n) {
+      const container = document.getElementById('wizard-container');
+      switch(n) {
+        case 1: container.innerHTML = renderStep1(); break;
+        case 2: container.innerHTML = renderStep2(); break;
+        case 3: container.innerHTML = renderStep3(); break;
+        case 4: container.innerHTML = renderStep4(); break;
+        case 5: renderStep5(); break;
+      }
+    }
+
+    // ── Step 1: Connect Wallet ────────────────────────────────────────
+    function renderStep1() {
+      const addr = walletAddress ? walletAddress.slice(0,6)+'...'+walletAddress.slice(-4) : null;
+      return `
+        <div class="wizard-card text-center">
+          <div style="font-size:64px;margin-bottom:16px">🔗</div>
+          <h3 class="text-white mb-3">Connect Your Wallet</h3>
+          <p class="text-muted-fvc mb-4">Connect your Web3 wallet to get started</p>
+          ${addr ? `
+            <div class="alert-success-fvc mb-4">
+              <i class="bi bi-check-circle-fill me-2" style="color:#28a745"></i>
+              <strong>Connected:</strong> ${addr}
+            </div>
+            <button class="btn-primary-fvc mb-3" onclick="completeStep(1);goToStep(2)">Continue to Payment →</button>
+            <button class="btn-outline-fvc" onclick="goToStep(5)">🔍 View My Holdings</button>
+          ` : `
+            <button class="btn-primary-fvc mb-4" onclick="connectWallet()" style="max-width:300px;margin:0 auto">
+              <i class="bi bi-wallet2 me-2"></i>Connect Wallet
+            </button>
+            <p class="text-muted-fvc small mb-3"><strong>Network:</strong> Ethereum Mainnet</p>
+            <div class="d-flex justify-content-center gap-2 flex-wrap">
+              ${['MetaMask','Brave Wallet','Coinbase Wallet','Trust Wallet'].map(w =>
+                `<span style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);padding:4px 12px;border-radius:6px;font-size:12px">${w}</span>`
+              ).join('')}
+            </div>
+          `}
+        </div>`;
+    }
+
+    // ── Step 2: Choose Payment ────────────────────────────────────────
+    function renderStep2() {
+      return `
+        <div class="wizard-card">
+          <h3 class="text-white text-center mb-4">Choose Payment Method</h3>
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="payment-option" onclick="selectPayment('usdc')">
+                <img src="/assets/token-logos/usdc.svg" alt="USDC" width="72" height="72" class="mb-3">
+                <h4 class="text-white mb-1">USDC</h4>
+                <p class="text-muted-fvc small">Stablecoin payment</p>
+                <span class="badge-success">Available Now</span>
+                <ul class="text-start" style="color:rgba(255,255,255,0.6);font-size:13px">
+                  <li>Approve USDC, then buy in one flow</li>
+                  <li>FVC minted directly to your wallet</li>
+                  <li>No vesting — immediate delivery</li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="payment-option" onclick="selectPayment('eth')">
+                <img src="/assets/token-logos/eth.svg" alt="ETH" width="72" height="72" class="mb-3">
+                <h4 class="text-white mb-1">ETH</h4>
+                <p class="text-muted-fvc small">Pay with Ether</p>
+                <span class="badge-success">Available Now</span>
+                <ul class="text-start" style="color:rgba(255,255,255,0.6);font-size:13px">
+                  <li>Send ETH directly to the contract</li>
+                  <li>FVC minted directly to your wallet</li>
+                  <li>No vesting — immediate delivery</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="text-center mt-4">
+            <button class="btn-sm-fvc" onclick="goToStep(1)">← Back</button>
+          </div>
+        </div>`;
+    }
+
+    function selectPayment(method) {
+      paymentMethod = method;
+      completeStep(2);
+      goToStep(3);
+    }
+
+    // ── Step 3: Buy ───────────────────────────────────────────────────
+    function renderStep3() {
+      const isEth = paymentMethod === 'eth';
+      const cur = isEth ? 'ETH' : 'USDC';
+      const rateText = isEth
+        ? `1 ETH ≈ $${cachedEthUsd.toFixed(2)} | 1 FVC = $${cachedFvcRate.toFixed(4)}`
+        : `1 FVC = $${cachedFvcRate.toFixed(4)} USDC`;
+
+      return `
+        <div class="wizard-card">
+          <h3 class="text-white text-center mb-4">Buy FVC with ${cur}</h3>
+
+          <div class="alert-info-fvc mb-4">
+            <i class="bi bi-info-circle me-2" style="color:#6A70E4"></i>
+            <strong>On-chain purchase:</strong> FVC is minted directly to your wallet the moment the transaction confirms.
+            No vesting, no lock-up, no waiting.
+          </div>
+
+          <div class="mb-4">
+            <label class="text-white fw-bold small mb-2 d-block">You send (${cur})</label>
+            <div class="input-group-fvc mb-2">
+              <input type="number" id="pay-amount" class="form-control-fvc" placeholder="0.00"
+                step="any" min="0" oninput="updateEstimate()">
+              <div class="input-addon">${cur}</div>
+            </div>
+            ${isEth ? `
+            <div class="input-group-fvc mt-2">
+              <span class="input-addon" style="border-radius:8px 0 0 8px;border-right:none">≈</span>
+              <input type="number" id="pay-amount-usd" class="form-control-fvc" placeholder="or enter USD amount"
+                style="border-radius:0 8px 8px 0" step="any" min="0" oninput="syncEthFromUsd(parseFloat(this.value)||0)">
+              <div class="input-addon">USD</div>
+            </div>
+            <p class="text-muted-fvc small text-center mt-1">Enter ETH <strong>or</strong> USD — the other updates automatically</p>
+            ` : ''}
+            <div class="d-flex gap-2 mt-3" id="pct-btns">
+              ${['25','50','75'].map(p => `<button class="btn-sm-fvc flex-fill" onclick="setPercent(${p})">${p}%</button>`).join('')}
+              <button class="btn-sm-fvc flex-fill" style="border-color:#6A70E4;color:#6A70E4" onclick="setPercent(100)">MAX</button>
+            </div>
+            <p class="text-muted-fvc small text-end mt-1" id="wallet-balance">Balance: loading...</p>
+          </div>
+
+          <div class="mb-4">
+            <label class="text-white fw-bold small mb-2 d-block">You receive (FVC)</label>
+            <div class="estimate-box" id="fvc-estimate">0</div>
+            <p class="text-muted-fvc small text-center mt-1" id="rate-info">${rateText}</p>
+          </div>
+
+          <button class="btn-primary-fvc mb-3" id="send-btn" onclick="sendPayment()" disabled>
+            Buy FVC with ${cur}
+          </button>
+          <button class="btn-outline-fvc" onclick="goToStep(2)">← Back</button>
+        </div>`;
+    }
+
+    // ── Step 3 helpers ────────────────────────────────────────────────
+    let walletBal = null;
+    let walletBalDecimals = 18;
+
+    async function loadBalance() {
+      const el = document.getElementById('wallet-balance');
+      if (!el || !walletAddress) return;
+      try {
+        const rpc = getRpc();
+        if (paymentMethod === 'eth') {
+          const bal = await rpc.getBalance(walletAddress);
+          walletBal = bal; walletBalDecimals = 18;
+          el.textContent = 'Balance: ' + parseFloat(ethers.utils.formatEther(bal)).toFixed(4) + ' ETH';
+        } else {
+          const tc = new ethers.Contract(CONFIG.usdcAddress, ERC20_ABI, rpc);
+          const [dec, bal] = await Promise.all([tc.decimals(), tc.balanceOf(walletAddress)]);
+          walletBal = bal; walletBalDecimals = dec;
+          el.textContent = 'Balance: ' + parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(2) + ' USDC';
+        }
+      } catch(e) {
+        if (el) el.textContent = 'Balance: --';
+      }
+    }
+
+    function updateEstimate() {
+      const amtEl = document.getElementById('pay-amount');
+      const estEl = document.getElementById('fvc-estimate');
+      const sendBtn = document.getElementById('send-btn');
+      if (!amtEl || !estEl) return;
+      const amt = parseFloat(amtEl.value);
+      if (!amt || amt <= 0) { estEl.textContent = '0'; if (sendBtn) sendBtn.disabled = true; return; }
+      if (sendBtn) sendBtn.disabled = false;
+      if (paymentMethod === 'eth') {
+        const usd = amt * cachedEthUsd;
+        const fvc = usd / cachedFvcRate;
+        estEl.textContent = '≈ ' + Math.floor(fvc).toLocaleString() + ' FVC';
+        const usdEl = document.getElementById('pay-amount-usd');
+        if (usdEl && document.activeElement !== usdEl) usdEl.value = usd.toFixed(2);
+      } else {
+        const fvc = amt / cachedFvcRate;
+        estEl.textContent = '≈ ' + Math.floor(fvc).toLocaleString() + ' FVC';
+      }
+    }
+
+    function syncEthFromUsd(usd) {
+      const ethEl = document.getElementById('pay-amount');
+      const estEl = document.getElementById('fvc-estimate');
+      const sendBtn = document.getElementById('send-btn');
+      if (!ethEl || !cachedEthUsd) return;
+      if (!usd || usd <= 0) { if (ethEl) ethEl.value = ''; if (estEl) estEl.textContent = '0'; if (sendBtn) sendBtn.disabled = true; return; }
+      const eth = usd / cachedEthUsd;
+      if (document.activeElement !== ethEl) ethEl.value = eth.toFixed(6);
+      const fvc = usd / cachedFvcRate;
+      if (estEl) estEl.textContent = '≈ ' + Math.floor(fvc).toLocaleString() + ' FVC';
+      if (sendBtn) sendBtn.disabled = false;
+    }
+
+    function setPercent(pct) {
+      if (!walletBal) return;
+      const raw = walletBal.mul(pct).div(100);
+      const val = paymentMethod === 'eth'
+        ? ethers.utils.formatEther(raw)
+        : ethers.utils.formatUnits(raw, walletBalDecimals);
+      const el = document.getElementById('pay-amount');
+      if (el) { el.value = val; updateEstimate(); }
+    }
+
+    function copyAddress() {
+      navigator.clipboard.writeText(CONFIG.treasury).then(() => {
+        const lbl = document.getElementById('copy-label');
+        if (lbl) { lbl.textContent = '✓ copied!'; setTimeout(() => { lbl.textContent = 'click to copy'; }, 2000); }
+      });
+    }
+
+    async function sendPayment() {
+      const amtEl = document.getElementById('pay-amount');
+      if (!amtEl || !parseFloat(amtEl.value)) return;
+      const amt = amtEl.value;
+
+      if (!walletAddress || !signer) { alert('Wallet not connected. Go back to step 1.'); return; }
+
+      const btn = document.getElementById('send-btn');
+      const cur = paymentMethod === 'eth' ? 'ETH' : 'USDC';
+
+      const setBtn = (text, disabled) => { if (btn) { btn.textContent = text; btn.disabled = disabled; } };
+
+      try {
+        const sale = new ethers.Contract(SALE_ADDRESS, SALE_ABI, signer);
+
+        // Verify sale is active before proceeding
+        const rpc = getRpc();
+        const saleRead = new ethers.Contract(SALE_ADDRESS, SALE_ABI, rpc);
+        const isActive = await saleRead.active();
+        if (!isActive) {
+          alert('The sale is not yet active. Please try again shortly.');
+          return;
+        }
+
+        let tx;
+
+        if (paymentMethod === 'eth') {
+          setBtn('Sending ETH...', true);
+          tx = await sale.buyWithETH({ value: ethers.utils.parseEther(amt) });
+
+        } else {
+          const usdc = new ethers.Contract(CONFIG.usdcAddress, ERC20_ABI, signer);
+          const dec = await usdc.decimals();
+          const amountUnits = ethers.utils.parseUnits(amt, dec);
+
+          // Check existing allowance
+          const allowance = await usdc.allowance(walletAddress, SALE_ADDRESS);
+          if (allowance.lt(amountUnits)) {
+            setBtn('Approving USDC...', true);
+            const approveTx = await usdc.approve(SALE_ADDRESS, amountUnits);
+            await approveTx.wait();
+          }
+
+          setBtn('Buying FVC...', true);
+          tx = await sale.buy(CONFIG.usdcAddress, amountUnits);
+        }
+
+        setBtn('Confirming...', true);
+        await tx.wait();
+
+        completeStep(3);
+        goToStep(4);
+        sessionStorage.setItem('hamidou_txhash', tx.hash);
+        sessionStorage.setItem('hamidou_payment', paymentMethod);
+        sessionStorage.setItem('hamidou_amount', amt);
+
+      } catch(e) {
+        const msg = e.code === 4001 ? 'Transaction rejected.'
+          : (e.reason || e.data?.message || e.message || 'Transaction failed.');
+        alert(msg);
+        setBtn(`Buy FVC with ${cur}`, false);
+      }
+    }
+
+    // ── Step 4: Confirmation ──────────────────────────────────────────
+    function renderStep4() {
+      const txHash = sessionStorage.getItem('hamidou_txhash') || '';
+      const payment = sessionStorage.getItem('hamidou_payment') || paymentMethod || '';
+      const amount = sessionStorage.getItem('hamidou_amount') || '';
+      const addr = walletAddress ? walletAddress.slice(0,6)+'...'+walletAddress.slice(-4) : '';
+      const explorerUrl = txHash ? `https://etherscan.io/tx/${txHash}` : '#';
+
+      return `
+        <div class="wizard-card text-center">
+          <div style="width:80px;height:80px;border-radius:50%;background:rgba(40,167,69,0.15);border:3px solid #28a745;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:36px;color:#28a745">✓</div>
+          <h3 class="text-white mb-3">Payment Sent!</h3>
+          <p class="text-muted-fvc mb-4">Your purchase is confirmed on-chain. FVC tokens have been minted directly to your wallet — no vesting, no lock-up.</p>
+
+          <div class="alert-success-fvc text-start mb-4">
+            <strong>Transaction Details:</strong>
+            <ul class="mb-0 mt-2">
+              <li>Wallet: ${addr}</li>
+              <li>Payment: ${amount} ${payment.toUpperCase()}</li>
+              <li>Network: Ethereum Mainnet</li>
+              ${txHash ? `<li>Tx: <a href="${explorerUrl}" target="_blank" style="color:#6A70E4">${txHash.slice(0,10)}...${txHash.slice(-6)}</a></li>` : ''}
+            </ul>
+          </div>
+
+          <div class="alert-success-fvc text-start mb-4">
+            <i class="bi bi-check-circle-fill me-2" style="color:#28a745"></i>
+            <strong>FVC has been minted directly to your wallet.</strong>
+            The tokens are fully unlocked — no vesting, no cliff, no waiting.
+            Check your wallet balance now.
+          </div>
+
+          <button class="btn-primary-fvc mb-3" onclick="addFVCToWallet()">
+            <img src="${CONFIG.fvcLogoUrl}" alt="FVC" style="height:16px;width:16px;margin-right:6px;border-radius:4px">
+            Add FVC to Wallet
+          </button>
+          <button class="btn-outline-fvc mb-3" onclick="goToStep(5)">🔍 View My Holdings</button>
+          <button class="btn-outline-fvc" onclick="goToStep(2);paymentMethod=null;sessionStorage.removeItem('hamidou_txhash')">Make Another Purchase</button>
+        </div>`;
+    }
+
+    // ── Step 5: My Holdings ───────────────────────────────────────────
+    async function renderStep5() {
+      const container = document.getElementById('wizard-container');
+      container.innerHTML = `
+        <div class="wizard-card text-center">
+          <div class="spinner"></div>
+          <p class="text-muted-fvc">Loading your holdings...</p>
+        </div>`;
+
+      if (!walletAddress) {
+        try {
+          const eth = getEth();
+          if (!eth) { alert('Please connect a wallet to view holdings.'); goToStep(1); return; }
+          const accounts = await eth.request({ method: 'eth_requestAccounts' });
+          if (accounts?.length) setupProvider(eth, accounts[0]);
+          else { goToStep(1); return; }
+        } catch(e) { goToStep(1); return; }
+      }
+
+      try {
+        const rpc = getRpc();
+        const fvcContract = new ethers.Contract(CONFIG.fvcAddress, FVC_ABI, rpc);
+        const usdcContract = new ethers.Contract(CONFIG.usdcAddress, ERC20_ABI, rpc);
+        const [fvcBal, usdcBal, ethBal] = await Promise.all([
+          fvcContract.balanceOf(walletAddress),
+          usdcContract.balanceOf(walletAddress),
+          rpc.getBalance(walletAddress),
+        ]);
+
+        const fmtFvc  = parseFloat(ethers.utils.formatEther(fvcBal)).toLocaleString(undefined, { maximumFractionDigits: 4 });
+        const fmtUsdc = parseFloat(ethers.utils.formatUnits(usdcBal, 6)).toFixed(2);
+        const fmtEth  = parseFloat(ethers.utils.formatEther(ethBal)).toFixed(4);
+        const addr    = walletAddress.slice(0,6)+'...'+walletAddress.slice(-4);
+
+        container.innerHTML = `
+          <div class="wizard-card">
+            <div class="text-center mb-4">
+              <div style="font-size:48px;margin-bottom:8px">💰</div>
+              <h3 class="text-white mb-1">Your FVC Holdings</h3>
+              <p class="text-muted-fvc small">${addr}</p>
+            </div>
+
+            <div class="inner-card text-center mb-4">
+              <div class="text-muted-fvc small mb-1">FVC Balance</div>
+              <div style="font-size:2rem;font-weight:700;color:#6A70E4">${fmtFvc} FVC</div>
+              <div class="text-muted-fvc small mt-1">Fully unlocked — no vesting</div>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-6">
+                <div class="inner-card text-center">
+                  <div class="text-muted-fvc small">USDC Balance</div>
+                  <div class="text-white fw-bold fs-5">${fmtUsdc}</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="inner-card text-center">
+                  <div class="text-muted-fvc small">ETH Balance</div>
+                  <div class="text-white fw-bold fs-5">${fmtEth}</div>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn-outline-fvc mb-3" onclick="addFVCToWallet()">
+              <img src="${CONFIG.fvcLogoUrl}" alt="FVC" style="height:16px;width:16px;margin-right:6px;border-radius:4px">
+              Add FVC to Wallet
+            </button>
+            <button class="btn-primary-fvc mb-3" onclick="goToStep(2)">Buy More FVC</button>
+            <button class="btn-sm-fvc" onclick="goToStep(1)">← Back</button>
+          </div>`;
+      } catch(e) {
+        container.innerHTML = `
+          <div class="wizard-card text-center">
+            <div style="font-size:48px;margin-bottom:16px">⚠️</div>
+            <h4 class="text-white">Could not load holdings</h4>
+            <p class="text-muted-fvc">${e.message || 'Network error'}</p>
+            <button class="btn-primary-fvc mt-3" onclick="goToStep(5)">Try Again</button>
+            <button class="btn-outline-fvc mt-2" onclick="goToStep(1)">← Back</button>
+          </div>`;
+      }
+    }
+
+    // Override goToStep to handle async step 5
+    const _goToStep = goToStep;
+    goToStep = function(n) {
+      for (let i = 1; i <= 5; i++) {
+        const el = document.getElementById('step-indicator-' + i);
+        if (!el) continue;
+        const c = el.querySelector('.step-circle');
+        if (i === n) {
+          c.classList.remove('completed', 'active');
+          c.innerHTML = String(i);
+          c.classList.add('active');
+        }
+      }
+      currentStep = n;
+      if (n === 5) { renderStep5(); return; }
+      renderStep(n);
+      if (n === 3) setTimeout(loadBalance, 100);
+    };
+
+    // ── wallet_watchAsset ─────────────────────────────────────────────
+    async function addFVCToWallet() {
+      const eth = getEth();
+      if (!eth || !CONFIG.fvcAddress) return;
+      try {
+        await eth.request({
+          method: 'wallet_watchAsset',
+          params: {
+            type: 'ERC20',
+            options: {
+              address: CONFIG.fvcAddress,
+              symbol: 'FVC',
+              decimals: 18,
+              image: window.location.origin + CONFIG.fvcLogoUrl,
+            },
+          },
+        });
+      } catch(e) {}
+    }
+  </script>
+</body>
+</html>
