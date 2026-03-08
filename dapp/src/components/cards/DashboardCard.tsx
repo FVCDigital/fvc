@@ -122,7 +122,7 @@ const DashboardCard: React.FC<DashboardCardProps> = ({ className = '' }) => {
           }}
         >
           <div style={{ fontSize: 14, color: theme.generalButton, fontWeight: 600 }}>
-            Staking is now live on testnet →
+            Staking is live →
           </div>
         </a>
 
