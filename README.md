@@ -1,6 +1,6 @@
 # First Venture Capital
 
-This repository contains the smart contracts and frontend application for the FVC protocol — a community-governed system for funding SMEs and startups through interest-free grants, revenue-sharing agreements, and equity arrangements on Ethereum.
+This repository contains the smart contracts and frontend application for the FVC protocol, a community-governed system for funding SMEs and startups through interest-free grants, revenue-sharing agreements, and equity arrangements on Ethereum.
 
 Token holders vote on which businesses receive funding and earn USDC from the revenues those businesses generate. Governance uses quadratic voting. Compliance is enforced on-chain via KYC whitelisting.
 
@@ -10,7 +10,7 @@ Token holders vote on which businesses receive funding and earn USDC from the re
 |---|---|
 | `FVC.sol` | ERC-20 governance token, 1B supply cap, role-gated mint/burn, UUPS upgradeable |
 | `Sale.sol` | Fixed-price token sale accepting USDC/USDT, mints on demand, sends proceeds to treasury |
-| `Staking.sol` | Synthetix proportional staking — stake FVC, earn USDC from SME revenue repayments |
+| `Staking.sol` | Synthetix proportional staking. Stake FVC, earn USDC from SME revenue repayments |
 | `Vesting.sol` | Token vesting schedules for team and investor allocations |
 | `FVCFaucet.sol` | Testnet-only faucet |
 
