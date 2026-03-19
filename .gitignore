@@ -19,9 +19,6 @@ contracts/PRIVATE_SALE_DESIGN.md
 contracts/QUESTIONS_GOV_GTM_TOKEN.md
 fvcdigital/
 
-# Local documentation
-docs/
-
 # Email drafts and partnership materials
 *_emails.txt
 *_email.txt
@@ -58,6 +55,19 @@ contracts/src/sale/Test*.sol
 contracts/src/sale/Custom*.sol
 contracts/scripts_backup_*/
 .env.deploy
+
+# Private investor pages
+dapp/public/hamidou.html
+dapp/src/pages/hamidou.tsx
+
+# Backup files
+*.backup
+
+# Transak integration
+dapp/src/utils/hooks/useTransak.tsx
+
+# Test artefacts
+contracts/coverage.json
 
 # secrets (never commit)
 .env

@@ -1,0 +1,13 @@
+<svg width="2400" height="1260" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#DBE9F4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFFDFA;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="2400" height="1260" fill="url(#bgGradient)"/>
+  <image href="data:image/png;base64,$(cat /tmp/fvc-logo.b64)" x="400" y="550" width="160" height="160"/>
+  <text x="590" y="650" font-family="Arial, sans-serif" font-size="50" font-weight="bold" fill="#020617">First Venture Capital</text>
+  <line x1="1200" y1="520" x2="1200" y2="740" stroke="#9CA3AF" stroke-width="3"/>
+  <image href="data:image/png;base64,$(cat /tmp/bnb-logo.b64)" x="1330" y="565" width="468" height="130"/>
+</svg>
