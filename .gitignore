@@ -69,3 +69,63 @@ contracts/.env
 
 # Website (separate repo: fvcdigital)
 app-extracted/
+
+# Private legal documents
+*.docx
+*Due_Diligence*
+*DD_Response*
+DD_Response_*.txt
+
+# Database files
+*.sqlite
+*.sql
+convert-mysql-to-sqlite.py
+
+# Marketing assets (stored separately)
+*.pptx
+FVC\ Pitchdeck.*
+Final\ Version*
+FVC_2_Minute_Pitch.pdf
+First\ Venture\ Capital*
+
+# Personal/private files
+WhatsApp\ Image*
+SOLIDITY_DEVELOPER_CV.md
+efd10f83-9c49-4d0c-bdbb-e6821a082636.pdf
+
+# Internal dev notes
+COMMIT_COMMANDS.txt
+SAFE_TRANSACTIONS.txt
+SAFE_BATCH_TRANSACTIONS.txt
+BUY_FVC_IMPLEMENTATION.md
+DETAILED_IMPLEMENTATION_PLAN.md
+KYC_IMPLEMENTATION_SUMMARY.md
+KYC_STRATEGY.md
+MANUAL_MINT_GUIDE.md
+QUICK_START.md
+RUN_DEV.md
+README_TRANSAK.md
+TRANSAK_*.md
+TRANSAK_*.sh
+deploy-transak.sh
+verify-transak-integration.sh
+TWILL_ANALYSIS_AND_IMPLEMENTATION.md
+BSC_TESTNET_GUIDE.md
+CPANEL_DEPLOYMENT.txt
+SEPOLIA_DEPLOYMENT_STEPS.txt
+_paths_to_purge.txt
+_replacements.txt
+
+# Build/deployment archives
+*.zip
+fvc-dapp-cpanel.zip
+
+# Test coverage reports
+contracts/coverage/
+
+# Announcements (internal drafts)
+announcements/
+
+# Transak integration files
+scripts/install-transak.sh
+scripts/download-twill-files.*
