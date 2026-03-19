@@ -1,97 +1,63 @@
-# FVC Protocol
+# First Venture Capital
 
-A decentralized protocol for venture capital and business grants built on Polygon, featuring interest-free funding through community governance.
+This repository contains the smart contracts and frontend application for the FVC protocol — a community-governed system for funding SMEs and startups through interest-free grants, revenue-sharing agreements, and equity arrangements on Ethereum.
 
-## 🚀 Quick Start
+Token holders vote on which businesses receive funding and earn USDC from the revenues those businesses generate. Governance uses quadratic voting. Compliance is enforced on-chain via KYC whitelisting.
+
+## Contracts
+
+| Contract | Description |
+|---|---|
+| `FVC.sol` | ERC-20 governance token, 1B supply cap, role-gated mint/burn, UUPS upgradeable |
+| `Sale.sol` | Fixed-price token sale accepting USDC/USDT, mints on demand, sends proceeds to treasury |
+| `Staking.sol` | Synthetix proportional staking — stake FVC, earn USDC from SME revenue repayments |
+| `Vesting.sol` | Token vesting schedules for team and investor allocations |
+| `FVCFaucet.sol` | Testnet-only faucet |
+
+All contracts are in `contracts/src/`. Treasury operations are managed through a 3-of-5 Gnosis Safe multisig.
+
+## Repository Structure
+
+```
+contracts/       Solidity contracts (Hardhat)
+dapp/            Next.js frontend
+packages/        Shared TypeScript types and utilities
+subgraph/        TheGraph indexing
+docs/            Whitepaper and token sale terms
+```
+
+## Development
+
+**Prerequisites:** Node.js 18+, Yarn
 
 ```bash
 # Install dependencies
 yarn install
 
-# Run the dapp
-sudo yarn workspace dapp dev
+# Run the dapp locally
+yarn workspace dapp dev
 
-# Deploy contracts to Polygon Amoy testnet
-cd contracts
-npx hardhat run scripts/deployment/deploy-bonding.ts --network amoy
-```
-
-## 📁 Project Structure
-
-```
-fvc-protocol/
-├── contracts/          # Solidity smart contracts
-│   ├── src/
-│   │   ├── core/      # FVC token & bonding contracts
-│   │   ├── sale/      # Private sale & vesting system
-│   │   ├── staking/   # Staking & rewards
-│   │   ├── governance/ # DAO & voting
-│   │   ├── compliance/ # KYC & AML
-│   │   └── treasury/  # Vault management
-│   └── scripts/       # Deployment & testing
-├── dapp/              # Next.js frontend
-├── packages/shared/   # Shared types & utilities
-└── subgraph/         # TheGraph indexing
-```
-
-## 🏗️ Core Contracts
-
-- **FVC.sol** - Main governance token with vesting
-- **Bonding.sol** - Bonding curve for stablecoin exchange
-- **SaleAdmin.sol** - Private sale round management
-- **VestingVault.sol** - Token vesting schedules
-- **FVCGovernor.sol** - DAO governance system
-
-## 🎯 Key Features
-
-- **Interest-free funding** through community governance
-- **Bonding curves** for stablecoin liquidity
-- **Staking rewards** at 8-12% APY
-- **Private sale rounds** with KYC compliance
-- **6-month vesting** for investor tokens
-
-## 🔧 Development
-
-### Prerequisites
-- Node.js 18+
-- Yarn 4.9.2+
-- Hardhat
-- MetaMask or similar wallet
-
-### Commands
-```bash
 # Compile contracts
-npx hardhat compile
+cd contracts && npx hardhat compile
 
-# Run tests
-npx hardhat test
+# Run contract tests
+cd contracts && npx hardhat test
 
-# Deploy to testnet
-npx hardhat run scripts/deployment/deploy-bonding.ts --network amoy
-
-# Start local node
-npx hardhat node
+# Deploy to Ethereum Sepolia
+cd contracts && npx hardhat run scripts/deployment/deploy.ts --network sepolia
 ```
 
-## 🌐 Networks
+## Networks
 
-- **Polygon Amoy** - Testnet (default)
-- **Polygon Mainnet** - Production (when ready)
+The protocol is deployed on Ethereum mainnet. Sepolia is used for testing.
 
-## 📚 Documentation
+## Documentation
 
-- [Protocol Rules](./FVC_PROTOCOL_RULES.txt)
-- [File Layout](./FVC_FILE_LAYOUT.txt)
-- [GitBook Documentation](https://github.com/AKHDigital/fvc-gitbook)
+- [Whitepaper](./docs/Whitepaper.pdf)
+- [Token Sale Terms](./docs/FVC_Token_Sale_Terms_and_Conditions.pdf)
+- [GitBook](https://github.com/FVCDigital/fvc-gitbook)
+- [Website](https://fvcdigital.com)
 
-## 🤝 Contributing
+## License
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guidelines.
-
-## 📄 License
-
-MIT License - see [LICENSE](./LICENSE) file.
-
----
-
-**Note:** This is the development repository. For user documentation, see the [GitBook](https://github.com/AKHDigital/fvc-gitbook).
+MIT — see [LICENSE](./LICENSE).
