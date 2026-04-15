@@ -55,11 +55,17 @@ function clear() {
 
 function header() {
   console.log(`
-  ╔══════════════════════════════════════════╗
-  ║                                          ║
-  ║        FVC SEED INVESTOR TERMINAL        ║
-  ║                                          ║
-  ╚══════════════════════════════════════════╝
+  ╔═════════════════════════════════════════════════════════╗
+  ║                                                         ║
+  ║   ███████ ██    ██  ██████     ██████  ████████  ██████ ║
+  ║   ██      ██    ██ ██         ██    ██    ██    ██      ║
+  ║   █████   ██    ██ ██         ██    ██    ██    ██      ║
+  ║   ██       ██  ██  ██         ██    ██    ██    ██      ║
+  ║   ██        ████    ██████     ██████     ██     ██████ ║
+  ║                                                         ║
+  ║              SEED INVESTOR TERMINAL                     ║
+  ║                                                         ║
+  ╚═════════════════════════════════════════════════════════╝
 `);
 }
 
@@ -112,8 +118,6 @@ async function main() {
   const provider = new ethers.JsonRpcProvider(config.rpcUrl);
   const signer = new ethers.Wallet(config.privateKey, provider);
 
-  console.log(`  Network:  Chain ${config.chainId}`);
-  console.log(`  Signer:   ${signer.address}`);
   console.log(`  Safe:     ${config.safeAddress}`);
   console.log(`  Sale:     ${config.saleAddress}`);
   console.log("\n  ─────────────────────────────────────────────────────────\n");

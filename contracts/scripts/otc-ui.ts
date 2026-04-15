@@ -48,11 +48,17 @@ function clear() {
 
 function header() {
   console.log("\n");
-  console.log("  ╔══════════════════════════════════════════╗");
-  console.log("  ║                                          ║");
-  console.log("  ║        FVC SEED INVESTOR TERMINAL        ║");
-  console.log("  ║                                          ║");
-  console.log("  ╚══════════════════════════════════════════╝");
+  console.log("  ╔═════════════════════════════════════════════════════════╗");
+  console.log("  ║                                                         ║");
+  console.log("  ║   ███████ ██    ██  ██████     ██████  ████████  ██████ ║");
+  console.log("  ║   ██      ██    ██ ██         ██    ██    ██    ██      ║");
+  console.log("  ║   █████   ██    ██ ██         ██    ██    ██    ██      ║");
+  console.log("  ║   ██       ██  ██  ██         ██    ██    ██    ██      ║");
+  console.log("  ║   ██        ████    ██████     ██████     ██     ██████ ║");
+  console.log("  ║                                                         ║");
+  console.log("  ║              SEED INVESTOR TERMINAL                     ║");
+  console.log("  ║                                                         ║");
+  console.log("  ╚═════════════════════════════════════════════════════════╝");
   console.log("\n");
 }
 
@@ -64,8 +70,6 @@ async function main() {
   const network = await ethers.provider.getNetwork();
   const chainId = Number(network.chainId);
 
-  console.log(`  Network:  ${network.name} (${chainId})`);
-  console.log(`  Signer:   ${signer.address}`);
   console.log(`  Safe:     ${CONFIG.SAFE_ADDRESS}`);
   console.log(`  Sale:     ${CONFIG.SALE_ADDRESS}`);
   console.log("\n  ─────────────────────────────────────────────────────────\n");
