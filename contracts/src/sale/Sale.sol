@@ -95,6 +95,20 @@ contract Sale is Ownable, ReentrancyGuard {
     /// @notice Default vesting total duration in seconds
     uint256 public defaultDuration;
 
+    // ============ ALLOWLIST (Custom Terms per Investor) ============
+
+    struct InvestorTerms {
+        uint256 maxAmount;    // Max USD they can invest (6 decimals). 0 = unlimited
+        uint256 rate;         // Custom price per FVC (6 decimals). 0 = use default
+        uint256 cliff;        // Custom cliff in seconds
+        uint256 duration;     // Custom vesting duration in seconds
+        uint256 spent;        // How much USD they've already spent
+        bool active;          // Whether this allowlist entry is active
+    }
+
+    /// @notice Custom terms per investor wallet
+    mapping(address => InvestorTerms) public investorTerms;
+
     // ============ EVENTS ============
 
     event TokensPurchased(address indexed buyer, address indexed stable, uint256 paymentAmount, uint256 tokenAmount);
@@ -108,6 +122,8 @@ contract Sale is Ownable, ReentrancyGuard {
     event SaleStatusChanged(bool active);
     event AcceptedTokenUpdated(address indexed token, bool allowed);
     event VestingConfigUpdated(address indexed vestingContract, uint256 threshold, uint256 cliff, uint256 duration);
+    event InvestorTermsSet(address indexed investor, uint256 maxAmount, uint256 rate, uint256 cliff, uint256 duration);
+    event InvestorTermsCleared(address indexed investor);
 
     // ============ ERRORS ============
 
@@ -121,6 +137,8 @@ contract Sale is Ownable, ReentrancyGuard {
     error Sale__EthNotEnabled();
     error Sale__EthTransferFailed();
     error Sale__OracleInvalidPrice();
+    error Sale__NotAllowlisted();
+    error Sale__AllowlistCapExceeded();
 
     // ============ CONSTRUCTOR ============
 
@@ -157,7 +175,7 @@ contract Sale is Ownable, ReentrancyGuard {
     // ============ PURCHASE ============
 
     /**
-     * @notice Buy FVC with an accepted stablecoin at the fixed rate.
+     * @notice Buy FVC with an accepted stablecoin at the fixed rate (or custom rate if allowlisted).
      */
     function buy(address stable, uint256 amount) external nonReentrant {
         if (!active) revert Sale__Inactive();
@@ -173,7 +191,15 @@ contract Sale is Ownable, ReentrancyGuard {
 
         if (raised + normalizedAmount > cap) revert Sale__CapExceeded();
 
-        uint256 tokenAmount = (normalizedAmount * 1e18) / rate;
+        // Check allowlist terms
+        InvestorTerms memory terms = investorTerms[msg.sender];
+        if (terms.active && terms.maxAmount > 0) {
+            if (terms.spent + normalizedAmount > terms.maxAmount) revert Sale__AllowlistCapExceeded();
+        }
+
+        // Use custom rate if allowlisted, otherwise default
+        uint256 effectiveRate = (terms.active && terms.rate > 0) ? terms.rate : rate;
+        uint256 tokenAmount = (normalizedAmount * 1e18) / effectiveRate;
 
         raised += normalizedAmount;
 
@@ -181,11 +207,15 @@ contract Sale is Ownable, ReentrancyGuard {
 
         _mintOrVest(msg.sender, tokenAmount, normalizedAmount);
 
+        // Emit with actual terms used
+        uint256 cliff = terms.active ? terms.cliff : defaultCliff;
+        uint256 duration = terms.active ? terms.duration : defaultDuration;
+
         if (
             address(vestingContract) != address(0) &&
-            (vestingThreshold == 0 || normalizedAmount >= vestingThreshold)
+            (vestingThreshold == 0 || normalizedAmount >= vestingThreshold || terms.active)
         ) {
-            emit TokensPurchasedWithVesting(msg.sender, tokenAmount, defaultCliff, defaultDuration);
+            emit TokensPurchasedWithVesting(msg.sender, tokenAmount, cliff, duration);
         } else {
             emit TokensPurchased(msg.sender, stable, amount, tokenAmount);
         }
@@ -207,7 +237,15 @@ contract Sale is Ownable, ReentrancyGuard {
         if (usdEquivalent == 0) revert Sale__ZeroAmount();
         if (raised + usdEquivalent > cap) revert Sale__CapExceeded();
 
-        uint256 tokenAmount = (usdEquivalent * 1e18) / rate;
+        // Check allowlist terms
+        InvestorTerms memory terms = investorTerms[msg.sender];
+        if (terms.active && terms.maxAmount > 0) {
+            if (terms.spent + usdEquivalent > terms.maxAmount) revert Sale__AllowlistCapExceeded();
+        }
+
+        // Use custom rate if allowlisted, otherwise default
+        uint256 effectiveRate = (terms.active && terms.rate > 0) ? terms.rate : rate;
+        uint256 tokenAmount = (usdEquivalent * 1e18) / effectiveRate;
 
         raised += usdEquivalent;
 
@@ -218,11 +256,15 @@ contract Sale is Ownable, ReentrancyGuard {
 
         emit TokensPurchasedWithETH(msg.sender, msg.value, usdEquivalent, tokenAmount);
 
+        // Emit with actual terms used
+        uint256 cliff = terms.active ? terms.cliff : defaultCliff;
+        uint256 duration = terms.active ? terms.duration : defaultDuration;
+
         if (
             address(vestingContract) != address(0) &&
-            (vestingThreshold == 0 || usdEquivalent >= vestingThreshold)
+            (vestingThreshold == 0 || usdEquivalent >= vestingThreshold || terms.active)
         ) {
-            emit TokensPurchasedWithVesting(msg.sender, tokenAmount, defaultCliff, defaultDuration);
+            emit TokensPurchasedWithVesting(msg.sender, tokenAmount, cliff, duration);
         }
     }
 
@@ -303,6 +345,105 @@ contract Sale is Ownable, ReentrancyGuard {
         defaultDuration = _duration;
     }
 
+    // ============ ALLOWLIST MANAGEMENT ============
+
+    /**
+     * @notice Set custom terms for an investor. They can then use the UI to buy at their terms.
+     * @param investor      Wallet address
+     * @param maxAmount     Max USD they can invest (6 decimals). 0 = unlimited
+     * @param customRate    Custom price per FVC (6 decimals). 0 = use default rate
+     * @param cliff         Custom cliff in seconds
+     * @param duration      Custom vesting duration in seconds
+     */
+    function setInvestorTerms(
+        address investor,
+        uint256 maxAmount,
+        uint256 customRate,
+        uint256 cliff,
+        uint256 duration
+    ) external onlyOwner {
+        if (investor == address(0)) revert Sale__ZeroAddress();
+        require(cliff <= duration || duration == 0, "Cliff > duration");
+        
+        investorTerms[investor] = InvestorTerms({
+            maxAmount: maxAmount,
+            rate: customRate,
+            cliff: cliff,
+            duration: duration,
+            spent: 0,
+            active: true
+        });
+        
+        emit InvestorTermsSet(investor, maxAmount, customRate, cliff, duration);
+    }
+
+    /**
+     * @notice Batch set terms for multiple investors
+     */
+    function setInvestorTermsBatch(
+        address[] calldata investors,
+        uint256[] calldata maxAmounts,
+        uint256[] calldata rates,
+        uint256[] calldata cliffs,
+        uint256[] calldata durations
+    ) external onlyOwner {
+        require(
+            investors.length == maxAmounts.length &&
+            investors.length == rates.length &&
+            investors.length == cliffs.length &&
+            investors.length == durations.length,
+            "Array length mismatch"
+        );
+        
+        for (uint256 i = 0; i < investors.length; i++) {
+            if (investors[i] == address(0)) revert Sale__ZeroAddress();
+            require(cliffs[i] <= durations[i] || durations[i] == 0, "Cliff > duration");
+            
+            investorTerms[investors[i]] = InvestorTerms({
+                maxAmount: maxAmounts[i],
+                rate: rates[i],
+                cliff: cliffs[i],
+                duration: durations[i],
+                spent: 0,
+                active: true
+            });
+            
+            emit InvestorTermsSet(investors[i], maxAmounts[i], rates[i], cliffs[i], durations[i]);
+        }
+    }
+
+    /**
+     * @notice Clear an investor's custom terms (they'll use default terms or be blocked)
+     */
+    function clearInvestorTerms(address investor) external onlyOwner {
+        delete investorTerms[investor];
+        emit InvestorTermsCleared(investor);
+    }
+
+    /**
+     * @notice View an investor's terms and remaining allocation
+     */
+    function getInvestorTerms(address investor) external view returns (
+        bool active,
+        uint256 maxAmount,
+        uint256 spent,
+        uint256 remaining,
+        uint256 customRate,
+        uint256 cliff,
+        uint256 duration
+    ) {
+        InvestorTerms memory t = investorTerms[investor];
+        return (
+            t.active,
+            t.maxAmount,
+            t.spent,
+            t.maxAmount > t.spent ? t.maxAmount - t.spent : 0,
+            t.rate,
+            t.cliff,
+            t.duration
+        );
+    }
+
     /**
      * @notice OTC mint: owner mints FVC to any wallet with optional custom vesting.
      *         Payment is off-chain. Does not increment raised.
@@ -346,17 +487,28 @@ contract Sale is Ownable, ReentrancyGuard {
     // ============ INTERNAL ============
 
     function _mintOrVest(address buyer, uint256 tokenAmount, uint256 normalizedUsd) internal {
+        InvestorTerms storage terms = investorTerms[buyer];
+        
+        // Determine vesting params: use custom if allowlisted, otherwise defaults
+        uint256 cliff = terms.active ? terms.cliff : defaultCliff;
+        uint256 duration = terms.active ? terms.duration : defaultDuration;
+        
+        // Update spent amount if allowlisted
+        if (terms.active) {
+            terms.spent += normalizedUsd;
+        }
+        
         if (
             address(vestingContract) != address(0) &&
-            (vestingThreshold == 0 || normalizedUsd >= vestingThreshold)
+            (vestingThreshold == 0 || normalizedUsd >= vestingThreshold || terms.active)
         ) {
             saleToken.mint(address(vestingContract), tokenAmount);
             vestingContract.createVestingSchedule(
                 buyer,
                 tokenAmount,
                 block.timestamp,
-                defaultCliff,
-                defaultDuration
+                cliff,
+                duration
             );
         } else {
             saleToken.mint(buyer, tokenAmount);
