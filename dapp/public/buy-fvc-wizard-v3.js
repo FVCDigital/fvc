@@ -18,6 +18,10 @@ class FVCBuyWizard {
         this._cachedFvcRate = 0.03;
         this._cachedEthUsd = 2000;
         this._ratesReady = false;
+        
+        // Investor allowlist terms
+        this._investorTerms = null;
+        this._isAllowlisted = false;
 
         if (this.container) this.init();
     }
@@ -51,27 +55,37 @@ class FVCBuyWizard {
                 if (accounts && accounts.length > 0) {
                     this._setupProvider(eth, accounts[0]);
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.warn('Wallet init error:', e);
+            }
 
-            eth.on('accountsChanged', (accs) => {
-                if (!accs || accs.length === 0) {
-                    this._clearWallet();
-                } else {
-                    this._setupProvider(eth, accs[0]);
-                }
-                this.render();
-            });
+            try {
+                eth.on('accountsChanged', (accs) => {
+                    if (!accs || accs.length === 0) {
+                        this._clearWallet();
+                    } else {
+                        this._setupProvider(eth, accs[0]);
+                    }
+                    this.render();
+                });
 
-            eth.on('chainChanged', () => {
-                if (this.walletAddress) {
-                    this._setupProvider(eth, this.walletAddress);
-                }
-                this.render();
-            });
+                eth.on('chainChanged', () => {
+                    if (this.walletAddress) {
+                        this._setupProvider(eth, this.walletAddress);
+                    }
+                    this.render();
+                });
+            } catch (e) {
+                console.warn('Wallet event listener error:', e);
+            }
         }
         this.render();
         this._updateStepClickability();
-        this._prefetchRates();
+        try {
+            this._prefetchRates();
+        } catch (e) {
+            console.warn('Rate prefetch error:', e);
+        }
     }
 
     _setupProvider(eth, address) {
@@ -80,6 +94,7 @@ class FVCBuyWizard {
         this.provider = new ethers.providers.Web3Provider(eth, 'any');
         this.signer = this.provider.getSigner();
         this._initSaleContract();
+        this._fetchInvestorTerms();
     }
 
     _clearWallet() {
@@ -97,6 +112,47 @@ class FVCBuyWizard {
                 this.getSaleContractABI(),
                 this.signer
             );
+        }
+    }
+
+    async _fetchInvestorTerms() {
+        if (!this.walletAddress || !this.config.saleContractAddress) return;
+        
+        try {
+            const rpc = this._getRpcProvider();
+            const sale = new ethers.Contract(
+                this.config.saleContractAddress,
+                this.getSaleContractABI(),
+                rpc
+            );
+            
+            const terms = await sale.getInvestorTerms(this.walletAddress);
+            
+            if (terms.active) {
+                this._isAllowlisted = true;
+                this._investorTerms = {
+                    maxAmount: Number(terms.maxAmount) / 1e6,
+                    spent: Number(terms.spent) / 1e6,
+                    remaining: Number(terms.remaining) / 1e6,
+                    customRate: Number(terms.customRate) / 1e6,
+                    cliffDays: Number(terms.cliff) / 86400,
+                    durationDays: Number(terms.duration) / 86400,
+                };
+                
+                // Use custom rate if set
+                if (this._investorTerms.customRate > 0) {
+                    this._cachedFvcRate = this._investorTerms.customRate;
+                }
+                
+                console.log('Investor allowlisted:', this._investorTerms);
+            } else {
+                this._isAllowlisted = false;
+                this._investorTerms = null;
+            }
+        } catch (e) {
+            console.warn('Could not fetch investor terms:', e);
+            this._isAllowlisted = false;
+            this._investorTerms = null;
         }
     }
 
@@ -151,7 +207,11 @@ class FVCBuyWizard {
             this.completeStep(1);
             this.goToStep(2);
         } catch (error) {
-            if (error.code === 4001) alert('Connection rejected.');
+            if (error.code === 4001) {
+                alert('Connection rejected.');
+            } else {
+                this._handleWalletError(error);
+            }
             this.render();
         }
     }
@@ -272,6 +332,7 @@ class FVCBuyWizard {
             'function isAccepted(address) external view returns (bool)',
             'function ethUsdRate() external view returns (uint256)',
             'function getEffectiveEthUsdPrice() external view returns (uint256)',
+            'function getInvestorTerms(address investor) external view returns (bool active, uint256 maxAmount, uint256 spent, uint256 remaining, uint256 customRate, uint256 cliff, uint256 duration)',
             'event TokensPurchased(address indexed buyer, address indexed token, uint256 stableAmount, uint256 fvcAmount)',
             'event TokensPurchasedWithVesting(address indexed buyer, uint256 fvcAmount, uint256 cliff, uint256 duration)',
             'event TokensPurchasedWithETH(address indexed buyer, uint256 ethAmount, uint256 usdEquivalent, uint256 fvcAmount)',
@@ -351,6 +412,7 @@ class FVCBuyWizard {
     async jumpToVesting() {
         // If wallet already connected, go straight to step 5
         if (this.walletAddress) {
+            this._completeAllStepsUpTo(5);
             this.goToStep(5);
             return;
         }
@@ -363,9 +425,34 @@ class FVCBuyWizard {
                 this._setupProvider(eth, accounts[0]);
             }
         } catch (e) {
-            return; // user rejected
+            this._handleWalletError(e);
+            return;
         }
+        this._completeAllStepsUpTo(5);
         this.goToStep(5);
+    }
+
+    _completeAllStepsUpTo(targetStep) {
+        for (let i = 1; i < targetStep; i++) {
+            this.completedSteps.add(i);
+            const el = document.getElementById('step-indicator-' + i);
+            if (el) {
+                const c = el.querySelector('.step-circle');
+                c.classList.remove('active');
+                c.classList.add('completed');
+                c.innerHTML = '<i class="bi bi-check"></i>';
+            }
+        }
+    }
+
+    _handleWalletError(e) {
+        if (e && e.message && (e.message.includes('LOCK') || e.message.includes('Access denied') || e.message.includes('trouble starting'))) {
+            alert('Your wallet extension seems to be having issues. This is a known issue with some browser/wallet combinations.\n\nPlease try:\n1. Restarting your browser\n2. Restarting the wallet extension\n3. Using a different browser (Chrome, Firefox)\n4. Disabling other wallet extensions');
+        } else if (e && e.code === 4001) {
+            // User rejected - silent
+        } else if (e) {
+            console.error('Wallet error:', e);
+        }
     }
 
     goToStep(step) {
@@ -374,22 +461,23 @@ class FVCBuyWizard {
             if (!el) continue;
             const c = el.querySelector('.step-circle');
             if (i === step) {
-                // Un-complete steps we're navigating back to
-                if (this.completedSteps.has(i) && i >= step) {
-                    this.completedSteps.delete(i);
-                }
+                // Current step: make it active
+                this.completedSteps.delete(i);
                 c.classList.remove('completed', 'active');
                 c.innerHTML = String(i);
                 c.classList.add('active');
             } else if (i > step) {
-                // Steps ahead of current: un-complete them too
-                if (this.completedSteps.has(i)) {
-                    this.completedSteps.delete(i);
+                // Steps ahead of current: reset them completely
+                this.completedSteps.delete(i);
+                c.classList.remove('completed', 'active');
+                c.innerHTML = String(i);
+            } else if (i < step) {
+                // Steps behind current: only glow if completed
+                if (!this.completedSteps.has(i)) {
                     c.classList.remove('completed', 'active');
                     c.innerHTML = String(i);
                 }
             }
-            // Steps behind current (i < step): leave their completed/active state alone
         }
         this.currentStep = step;
         this.render();
@@ -431,8 +519,9 @@ class FVCBuyWizard {
             return;
         }
         try {
-            const tokenAddress = this.config.usdcAddress;
-            if (!tokenAddress) { alert('USDC not configured.'); return; }
+            const isUSDT = stableToken === 'USDT';
+            const tokenAddress = isUSDT ? this.config.usdtAddress : this.config.usdcAddress;
+            if (!tokenAddress) { alert(stableToken + ' not configured.'); return; }
 
             const tokenContract = new ethers.Contract(tokenAddress, this.getERC20ABI(), this.signer);
             const decimals = await tokenContract.decimals();
@@ -441,13 +530,13 @@ class FVCBuyWizard {
             this.updateStatus('Checking balance...');
             const balance = await tokenContract.balanceOf(this.walletAddress);
             if (balance.lt(amountParsed)) {
-                alert('Insufficient USDC. You have ' + ethers.utils.formatUnits(balance, decimals));
+                alert('Insufficient ' + stableToken + '. You have ' + ethers.utils.formatUnits(balance, decimals));
                 this.updateStatus(''); return;
             }
 
             const allowance = await tokenContract.allowance(this.walletAddress, this.config.saleContractAddress);
             if (allowance.lt(amountParsed)) {
-                this.updateStatus('Approving USDC...');
+                this.updateStatus('Approving ' + stableToken + '...');
                 const tx = await tokenContract.approve(this.config.saleContractAddress, amountParsed);
                 this.updateStatus('Waiting for approval...');
                 await tx.wait();
@@ -506,6 +595,12 @@ class FVCBuyWizard {
                 balEl.textContent = 'Balance: ' + parseFloat(ethers.utils.formatEther(bal)).toFixed(4) + ' ETH';
                 this._walletBalance = bal;
                 this._balanceDecimals = 18;
+            } else if (this.paymentMethod === 'usdt') {
+                const tc = new ethers.Contract(this.config.usdtAddress, this.getERC20ABI(), rpc);
+                const [dec, bal] = await Promise.all([tc.decimals(), tc.balanceOf(this.walletAddress)]);
+                balEl.textContent = 'Balance: ' + parseFloat(ethers.utils.formatUnits(bal, dec)).toFixed(2) + ' USDT';
+                this._walletBalance = bal;
+                this._balanceDecimals = dec;
             } else {
                 const tc = new ethers.Contract(this.config.usdcAddress, this.getERC20ABI(), rpc);
                 const [dec, bal] = await Promise.all([tc.decimals(), tc.balanceOf(this.walletAddress)]);
@@ -621,6 +716,10 @@ class FVCBuyWizard {
     }
 
     updateUSDCEstimate() {
+        this.updateStablecoinEstimate();
+    }
+
+    updateStablecoinEstimate() {
         const amountEl = document.getElementById('purchase-amount');
         const estimateEl = document.getElementById('fvc-estimate');
         if (!amountEl || !estimateEl) return;
@@ -640,6 +739,12 @@ class FVCBuyWizard {
         const v = document.getElementById('purchase-amount').value;
         if (!v || parseFloat(v) <= 0) { alert('Enter a USDC amount'); return; }
         this.buyWithCrypto('USDC', v);
+    }
+
+    processUSDTPurchase() {
+        const v = document.getElementById('purchase-amount').value;
+        if (!v || parseFloat(v) <= 0) { alert('Enter a USDT amount'); return; }
+        this.buyWithCrypto('USDT', v);
     }
 
     // ========== RENDER ==========
@@ -702,10 +807,10 @@ class FVCBuyWizard {
             <div class="card p-5">
                 <h3 class="text-center mb-4">Choose Payment Method</h3>
                 <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="card h-100 payment-option" onclick="buyWizard.selectPayment('crypto')">
+                    <div class="col-md-3">
+                        <div class="card h-100 payment-option" onclick="buyWizard.selectPayment('usdc')">
                             <div class="card-body text-center p-4">
-                                <img src="/assets/token-logos/usdc.svg" alt="USDC" width="72" height="72" class="mb-3">
+                                <img src="https://assets.coingecko.com/coins/images/6319/large/usdc.png" alt="USDC" width="72" height="72" class="mb-3" style="border-radius:50%">
                                 <h4>USDC</h4>
                                 <p class="text-muted">Stablecoin purchase</p>
                                 <span class="badge bg-success mb-3">Available Now</span>
@@ -717,10 +822,25 @@ class FVCBuyWizard {
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <div class="card h-100 payment-option" onclick="buyWizard.selectPayment('usdt')">
+                            <div class="card-body text-center p-4">
+                                <img src="https://assets.coingecko.com/coins/images/325/large/Tether.png" alt="USDT" width="72" height="72" class="mb-3" style="border-radius:50%">
+                                <h4>USDT</h4>
+                                <p class="text-muted">Tether stablecoin</p>
+                                <span class="badge bg-success mb-3">Available Now</span>
+                                <ul class="text-start">
+                                    <li>Direct to smart contract</li>
+                                    <li>FVC minted instantly</li>
+                                    <li>Requires USDT in wallet</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
                         <div class="card h-100 payment-option" onclick="buyWizard.selectPayment('eth')">
                             <div class="card-body text-center p-4">
-                                <img src="/assets/token-logos/eth.svg" alt="ETH" width="72" height="72" class="mb-3">
+                                <img src="https://assets.coingecko.com/coins/images/279/large/ethereum.png" alt="ETH" width="72" height="72" class="mb-3" style="border-radius:50%">
                                 <h4>ETH</h4>
                                 <p class="text-muted">Pay with Ether</p>
                                 <span class="badge bg-success mb-3">Available Now</span>
@@ -732,7 +852,7 @@ class FVCBuyWizard {
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="card h-100" style="opacity:0.6;cursor:not-allowed">
                             <div class="card-body text-center p-4">
                                 <i class="bi bi-credit-card display-3 text-muted mb-3"></i>
@@ -766,16 +886,53 @@ class FVCBuyWizard {
 
     renderStep3() {
         const isETH = this.paymentMethod === 'eth';
-        const cur = isETH ? 'ETH' : 'USDC';
-        const estFn = isETH ? 'updateETHEstimate' : 'updateUSDCEstimate';
-        const buyFn = isETH ? 'processETHPurchase' : 'processUSDCPurchase';
+        const isUSDT = this.paymentMethod === 'usdt';
+        const isStablecoin = !isETH;
+        const cur = isETH ? 'ETH' : (isUSDT ? 'USDT' : 'USDC');
+        const estFn = isETH ? 'updateETHEstimate' : 'updateStablecoinEstimate';
+        const buyFn = isETH ? 'processETHPurchase' : (isUSDT ? 'processUSDTPurchase' : 'processUSDCPurchase');
         const rateText = isETH
             ? (this._cachedEthUsd ? '1 ETH \u2248 $' + this._cachedEthUsd.toFixed(2) + ' (live) | 1 FVC = $' + this._cachedFvcRate.toFixed(4) : 'Fetching live ETH price...')
-            : '1 FVC = $' + this._cachedFvcRate.toFixed(2) + ' USDC';
+            : '1 FVC = $' + this._cachedFvcRate.toFixed(4) + ' ' + cur;
+
+        // Build allowlist badge if investor has custom terms
+        let allowlistBadge = '';
+        let allocationInfo = '';
+        if (this._isAllowlisted && this._investorTerms) {
+            const t = this._investorTerms;
+            allowlistBadge = `
+                <div class="alert mb-4" style="background:rgba(106,112,228,0.15);border:1px solid rgba(106,112,228,0.3)">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-star-fill me-2" style="color:#6A70E4"></i>
+                        <strong>Seed Investor Terms</strong>
+                    </div>
+                    <div class="row small">
+                        <div class="col-6">
+                            <div class="text-muted">Your Price</div>
+                            <div class="fw-bold">$${t.customRate > 0 ? t.customRate.toFixed(4) : this._cachedFvcRate.toFixed(4)}/FVC</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-muted">Vesting</div>
+                            <div class="fw-bold">${t.cliffDays}d cliff, ${t.durationDays}d total</div>
+                        </div>
+                    </div>
+                    ${t.maxAmount > 0 ? `
+                    <div class="mt-2 small">
+                        <div class="text-muted">Allocation</div>
+                        <div class="d-flex align-items-center">
+                            <div class="progress flex-grow-1 me-2" style="height:8px;background:rgba(255,255,255,0.1)">
+                                <div class="progress-bar" style="width:${(t.spent / t.maxAmount * 100).toFixed(1)}%;background:#6A70E4"></div>
+                            </div>
+                            <span class="fw-bold">$${t.remaining.toLocaleString()} left</span>
+                        </div>
+                    </div>` : ''}
+                </div>`;
+        }
 
         this.container.innerHTML = `
             <div class="card p-5">
                 <h3 class="text-center mb-4">Purchase FVC with ${cur}</h3>
+                ${allowlistBadge}
                 <div class="mb-2">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <label class="form-label fw-bold mb-0">You pay</label>
@@ -817,7 +974,7 @@ class FVCBuyWizard {
 
     renderStep4() {
         const url = this.lastTxHash ? this.getExplorerUrl(this.lastTxHash) : '#';
-        const pay = this.paymentMethod === 'eth' ? 'ETH' : 'USDC';
+        const pay = this.paymentMethod === 'eth' ? 'ETH' : (this.paymentMethod === 'usdt' ? 'USDT' : 'USDC');
         const fvcDisplay = this.lastFvcAmount
             ? parseFloat(ethers.utils.formatEther(this.lastFvcAmount)).toLocaleString(undefined, {maximumFractionDigits: 4}) + ' FVC'
             : null;
