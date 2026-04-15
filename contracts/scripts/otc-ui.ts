@@ -48,18 +48,11 @@ function clear() {
 
 function header() {
   console.log("\n");
-  console.log("  ╔════════════════════════════════════════════════════════════╗");
-  console.log("  ║                                                            ║");
-  console.log("  ║    ███████╗██╗   ██╗ ██████╗     ██████╗ ████████╗ ██████╗  ║");
-  console.log("  ║    ██╔════╝██║   ██║██╔════╝    ██╔═══██╗╚══██╔══╝██╔════╝  ║");
-  console.log("  ║    █████╗  ██║   ██║██║         ██║   ██║   ██║   ██║       ║");
-  console.log("  ║    ██╔══╝  ╚██╗ ██╔╝██║         ██║   ██║   ██║   ██║       ║");
-  console.log("  ║    ██║      ╚████╔╝ ╚██████╗    ╚██████╔╝   ██║   ╚██████╗  ║");
-  console.log("  ║    ╚═╝       ╚═══╝   ╚═════╝     ╚═════╝    ╚═╝    ╚═════╝  ║");
-  console.log("  ║                                                            ║");
-  console.log("  ║               SEED INVESTOR OTC TERMINAL                   ║");
-  console.log("  ║                                                            ║");
-  console.log("  ╚════════════════════════════════════════════════════════════╝");
+  console.log("  ╔══════════════════════════════════════════╗");
+  console.log("  ║                                          ║");
+  console.log("  ║        FVC SEED INVESTOR TERMINAL        ║");
+  console.log("  ║                                          ║");
+  console.log("  ╚══════════════════════════════════════════╝");
   console.log("\n");
 }
 
