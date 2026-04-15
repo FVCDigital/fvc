@@ -50,12 +50,12 @@ function header() {
   console.log("\n");
   console.log("  ╔═══════════════════════════════════════════════════════════╗");
   console.log("  ║                                                           ║");
-  console.log("  ║     ███████╗██╗   ██╗ ██████╗     ██████╗ ████████╗ ██████╗║");
-  console.log("  ║     ██╔════╝██║   ██║██╔════╝    ██╔═══██╗╚══██╔══╝██╔════╝║");
-  console.log("  ║     █████╗  ██║   ██║██║         ██║   ██║   ██║   ██║     ║");
-  console.log("  ║     ██╔══╝  ╚██╗ ██╔╝██║         ██║   ██║   ██║   ██║     ║");
-  console.log("  ║     ██║      ╚████╔╝ ╚██████╗    ╚██████╔╝   ██║   ╚██████╗║");
-  console.log("  ║     ╚═╝       ╚═══╝   ╚═════╝     ╚═════╝    ╚═╝    ╚═════╝║");
+  console.log("  ║    ███████╗██╗   ██╗ ██████╗     ██████╗ ████████╗ ██████╗ ║");
+  console.log("  ║    ██╔════╝██║   ██║██╔════╝    ██╔═══██╗╚══██╔══╝██╔════╝ ║");
+  console.log("  ║    █████╗  ██║   ██║██║         ██║   ██║   ██║   ██║      ║");
+  console.log("  ║    ██╔══╝  ╚██╗ ██╔╝██║         ██║   ██║   ██║   ██║      ║");
+  console.log("  ║    ██║      ╚████╔╝ ╚██████╗    ╚██████╔╝   ██║   ╚██████╗ ║");
+  console.log("  ║    ╚═╝       ╚═══╝   ╚═════╝     ╚═════╝    ╚═╝    ╚═════╝ ║");
   console.log("  ║                                                           ║");
   console.log("  ║              SEED INVESTOR OTC TERMINAL                   ║");
   console.log("  ║                                                           ║");
@@ -81,8 +81,8 @@ async function main() {
 
   // Main menu
   console.log("  What would you like to do?\n");
-  console.log("    [1] Add investor to allowlist (they buy via UI with custom terms)");
-  console.log("    [2] Mint OTC (you received payment, mint tokens directly)");
+  console.log("    [1] Add investor to allowlist - they buy via UI with custom terms");
+  console.log("    [2] Mint OTC - you received payment, mint tokens directly");
   console.log("    [q] Quit\n");
 
   const action = await ask("  Select: ");
