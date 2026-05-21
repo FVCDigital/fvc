@@ -23,7 +23,236 @@ class FVCBuyWizard {
         this._investorTerms = null;
         this._isAllowlisted = false;
 
+        // MoonPay integration
+        this._moonPayWidget = null;
+        this._moonPayLoaded = false;
+        this._moonPayOpen = false;
+
+        // EIP-6963 wallet detection
+        this._detectedWallets = [];
+        this._walletModalOpen = false;
+
         if (this.container) this.init();
+        this._initWalletDetection();
+    }
+
+    // Load MoonPay SDK
+    _loadMoonPaySDK() {
+        if (this._moonPayLoaded || window.MoonPayWebSdk) {
+            this._moonPayLoaded = true;
+            return Promise.resolve();
+        }
+
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://static.moonpay.com/web-sdk/v1/moonpay-web-sdk.min.js';
+            script.async = true;
+            script.defer = true;
+            script.onload = () => {
+                this._moonPayLoaded = true;
+                console.log('MoonPay SDK loaded');
+                resolve();
+            };
+            script.onerror = () => {
+                console.error('Failed to load MoonPay SDK');
+                reject(new Error('MoonPay SDK failed to load'));
+            };
+            document.head.appendChild(script);
+        });
+    }
+
+    // Open MoonPay widget for card payment
+    async openMoonPay(currency = 'USDC') {
+        if (!this.walletAddress) {
+            alert('Please connect your wallet first');
+            return;
+        }
+
+        const apiKey = this.config.moonPayApiKey || window.fvcConfig?.moonPayApiKey;
+        if (!apiKey) {
+            console.error('MoonPay API key not found in config:', this.config);
+            alert('MoonPay is not configured. Please contact support.');
+            return;
+        }
+
+        console.log('Opening MoonPay with API key:', apiKey.substring(0, 10) + '...');
+
+        try {
+            await this._loadMoonPaySDK();
+
+            if (!window.MoonPayWebSdk || !window.MoonPayWebSdk.init) {
+                throw new Error('MoonPay SDK not available after loading');
+            }
+
+            const currencyMap = {
+                'USDC': 'usdc_ethereum',
+                'USDT': 'usdt_ethereum',
+                'ETH': 'eth'
+            };
+
+            const currencyCode = currencyMap[currency] || 'usdc_ethereum';
+            const environment = this.config.moonPayEnvironment || 'sandbox';
+
+            console.log('MoonPay config:', { currencyCode, environment, walletAddress: this.walletAddress });
+
+            const widgetConfig = {
+                flow: 'buy',
+                environment: environment,
+                variant: 'overlay',
+                params: {
+                    apiKey: apiKey,
+                    currencyCode: currencyCode,
+                    walletAddress: this.walletAddress,
+                    baseCurrencyCode: 'usd',
+                    baseCurrencyAmount: '100',
+                    colorCode: '6A70E4',
+                    theme: 'dark',
+                    language: 'en',
+                    lockAmount: 'false',
+                },
+                handlers: {
+                    onTransactionCompleted: (props) => {
+                        console.log('MoonPay transaction completed:', props);
+                        this._moonPayOpen = false;
+                        alert(`Purchase successful! ${currency} will arrive in your wallet in 5-10 minutes. Once it arrives, return here to complete your FVC purchase.`);
+                    },
+                },
+                listeners: {
+                    onCloseOverlay: () => {
+                        console.log('MoonPay widget closed');
+                        this._moonPayOpen = false;
+                    },
+                },
+            };
+
+            console.log('Initializing MoonPay widget with .init()...');
+            this._moonPayWidget = window.MoonPayWebSdk.init(widgetConfig);
+            
+            if (!this._moonPayWidget || typeof this._moonPayWidget.show !== 'function') {
+                throw new Error('MoonPay widget initialization returned invalid object');
+            }
+
+            console.log('Showing MoonPay widget...');
+            this._moonPayWidget.show();
+            this._moonPayOpen = true;
+        } catch (error) {
+            console.error('MoonPay error:', error);
+            console.error('Error stack:', error.stack);
+            alert('Failed to open MoonPay. Check console for details. Please try again or use crypto payment.');
+        }
+    }
+
+    // Show MoonPay currency selection modal
+    showMoonPayCurrencySelect() {
+        const modal = document.createElement('div');
+        modal.id = 'moonpay-currency-modal';
+        modal.innerHTML = `
+            <div style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center">
+                <div style="background:#1a1a2e;border-radius:16px;padding:32px;max-width:400px;width:90%;border:1px solid rgba(106,112,228,0.3)">
+                    <h4 style="color:#fff;margin-bottom:16px;text-align:center">Select Currency to Purchase</h4>
+                    <p style="color:rgba(255,255,255,0.6);text-align:center;margin-bottom:24px;font-size:14px">
+                        Buy crypto with your card, then use it to purchase FVC
+                    </p>
+                    <div style="display:flex;flex-direction:column;gap:12px">
+                        <button onclick="buyWizard.selectMoonPayCurrency('USDC')" style="display:flex;align-items:center;gap:12px;padding:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;cursor:pointer;transition:all 0.2s">
+                            <img src="https://assets.coingecko.com/coins/images/6319/large/usdc.png" width="40" height="40" style="border-radius:50%">
+                            <div style="text-align:left">
+                                <div style="color:#fff;font-weight:600">USDC</div>
+                                <div style="color:rgba(255,255,255,0.5);font-size:12px">USD Coin (Recommended)</div>
+                            </div>
+                        </button>
+                        <button onclick="buyWizard.selectMoonPayCurrency('USDT')" style="display:flex;align-items:center;gap:12px;padding:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;cursor:pointer;transition:all 0.2s">
+                            <img src="https://assets.coingecko.com/coins/images/325/large/Tether.png" width="40" height="40" style="border-radius:50%">
+                            <div style="text-align:left">
+                                <div style="color:#fff;font-weight:600">USDT</div>
+                                <div style="color:rgba(255,255,255,0.5);font-size:12px">Tether USD</div>
+                            </div>
+                        </button>
+                        <button onclick="buyWizard.selectMoonPayCurrency('ETH')" style="display:flex;align-items:center;gap:12px;padding:16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;cursor:pointer;transition:all 0.2s">
+                            <img src="https://assets.coingecko.com/coins/images/279/large/ethereum.png" width="40" height="40" style="border-radius:50%">
+                            <div style="text-align:left">
+                                <div style="color:#fff;font-weight:600">ETH</div>
+                                <div style="color:rgba(255,255,255,0.5);font-size:12px">Ethereum</div>
+                            </div>
+                        </button>
+                    </div>
+                    <button onclick="document.getElementById('moonpay-currency-modal').remove()" style="width:100%;margin-top:16px;padding:12px;background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:rgba(255,255,255,0.7);cursor:pointer">
+                        Cancel
+                    </button>
+                    <p style="color:rgba(255,255,255,0.4);text-align:center;margin-top:16px;font-size:11px">
+                        Powered by MoonPay • KYC required • 5-10 min delivery
+                    </p>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    selectMoonPayCurrency(currency) {
+        document.getElementById('moonpay-currency-modal')?.remove();
+        this.openMoonPay(currency);
+    }
+
+    // EIP-6963 Multi-Wallet Detection
+    _initWalletDetection() {
+        this._detectedWallets = [];
+
+        // Listen for wallet announcements (EIP-6963)
+        window.addEventListener('eip6963:announceProvider', (event) => {
+            const { info, provider } = event.detail;
+            
+            // Avoid duplicates
+            if (!this._detectedWallets.find(w => w.info.uuid === info.uuid)) {
+                this._detectedWallets.push({ info, provider });
+                console.log('Detected wallet:', info.name);
+            }
+        });
+
+        // Request wallets to announce themselves
+        window.dispatchEvent(new Event('eip6963:requestProvider'));
+
+        // Also check legacy window.ethereum after a short delay
+        setTimeout(() => {
+            if (window.ethereum && this._detectedWallets.length === 0) {
+                // Fallback for wallets that don't support EIP-6963
+                const legacyWallet = {
+                    info: {
+                        uuid: 'legacy-ethereum',
+                        name: window.ethereum.isMetaMask ? 'MetaMask' : 
+                              window.ethereum.isTrust ? 'Trust Wallet' :
+                              window.ethereum.isCoinbaseWallet ? 'Coinbase Wallet' :
+                              window.ethereum.isRabby ? 'Rabby' :
+                              'Browser Wallet',
+                        icon: this._getWalletIcon(window.ethereum),
+                        rdns: 'legacy'
+                    },
+                    provider: window.ethereum
+                };
+                this._detectedWallets.push(legacyWallet);
+            }
+        }, 100);
+    }
+
+    _getWalletIcon(provider) {
+        if (provider?.isMetaMask) return 'https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg';
+        if (provider?.isTrust) return 'https://trustwallet.com/assets/images/media/assets/TWT.png';
+        if (provider?.isCoinbaseWallet) return 'https://altcoinsbox.com/wp-content/uploads/2022/12/coinbase-wallet-logo.webp';
+        if (provider?.isRabby) return 'https://rabby.io/assets/images/logo.svg';
+        return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236A70E4"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>';
+    }
+
+    // Known wallets for the "All Wallets" section
+    _getKnownWallets() {
+        return [
+            { name: 'MetaMask', icon: 'https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg', downloadUrl: 'https://metamask.io/download/', rdns: 'io.metamask' },
+            { name: 'Trust Wallet', icon: 'https://trustwallet.com/assets/images/media/assets/TWT.png', downloadUrl: 'https://trustwallet.com/', rdns: 'com.trustwallet.app' },
+            { name: 'Coinbase Wallet', icon: 'https://altcoinsbox.com/wp-content/uploads/2022/12/coinbase-wallet-logo.webp', downloadUrl: 'https://www.coinbase.com/wallet', rdns: 'com.coinbase.wallet' },
+            { name: 'Rabby', icon: 'https://rabby.io/assets/images/logo.svg', downloadUrl: 'https://rabby.io/', rdns: 'io.rabby' },
+            { name: 'OKX Wallet', icon: 'https://static.okx.com/cdn/assets/imgs/221/C5A7E7B6C3A4E9B3.png', downloadUrl: 'https://www.okx.com/web3', rdns: 'com.okex.wallet' },
+            { name: 'Phantom', icon: 'https://phantom.app/img/phantom-logo.svg', downloadUrl: 'https://phantom.app/', rdns: 'app.phantom' },
+            { name: 'Rainbow', icon: 'https://avatars.githubusercontent.com/u/48327834', downloadUrl: 'https://rainbow.me/', rdns: 'me.rainbow' },
+            { name: 'Zerion', icon: 'https://zerion.io/favicon.ico', downloadUrl: 'https://zerion.io/', rdns: 'io.zerion.wallet' },
+        ];
     }
 
     _getRpcProvider() {
@@ -156,39 +385,144 @@ class FVCBuyWizard {
         }
     }
 
-    async connectWallet() {
-        const eth = this.getEthereumProvider();
-        if (!eth) {
-            this.showWalletOptions();
+    // Show wallet selection modal (like Hyperliquid)
+    connectWallet() {
+        this.showWalletModal();
+    }
+
+    showWalletModal() {
+        // Re-request wallet detection
+        window.dispatchEvent(new Event('eip6963:requestProvider'));
+
+        const detected = this._detectedWallets;
+        const known = this._getKnownWallets();
+
+        // Filter out detected wallets from "all wallets" list
+        const detectedRdns = detected.map(w => w.info.rdns).filter(Boolean);
+        const uninstalledWallets = known.filter(w => !detectedRdns.includes(w.rdns));
+
+        // Build detected wallets HTML (shown at top with "Detected" badge)
+        let detectedHtml = '';
+        if (detected.length > 0) {
+            detectedHtml = `
+                <div style="margin-bottom:16px">
+                    <div style="color:rgba(255,255,255,0.5);font-size:12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Detected</div>
+                    ${detected.map((w, i) => `
+                        <button onclick="buyWizard.connectWithProvider(${i})" class="wallet-btn" style="display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;background:rgba(106,112,228,0.1);border:1px solid rgba(106,112,228,0.3);border-radius:12px;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
+                            <img src="${w.info.icon || this._getWalletIcon(w.provider)}" width="36" height="36" style="border-radius:8px" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%236A70E4%22><rect width=%2224%22 height=%2224%22 rx=%224%22/></svg>'">
+                            <div style="flex:1;text-align:left">
+                                <div style="color:#fff;font-weight:600;font-size:15px">${w.info.name}</div>
+                            </div>
+                            <span style="background:#22c55e;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px">Ready</span>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Build WalletConnect option
+        const walletConnectHtml = `
+            <div style="margin-bottom:16px">
+                <div style="color:rgba(255,255,255,0.5);font-size:12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Mobile & QR</div>
+                <button onclick="buyWizard.connectWithWalletConnect()" class="wallet-btn" style="display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;cursor:pointer;margin-bottom:8px;transition:all 0.2s">
+                    <img src="https://avatars.githubusercontent.com/u/37784886" width="36" height="36" style="border-radius:8px">
+                    <div style="flex:1;text-align:left">
+                        <div style="color:#fff;font-weight:600;font-size:15px">WalletConnect</div>
+                        <div style="color:rgba(255,255,255,0.5);font-size:12px">Scan with mobile wallet</div>
+                    </div>
+                </button>
+            </div>
+        `;
+
+        // Build "All Wallets" section (uninstalled wallets)
+        let allWalletsHtml = '';
+        if (uninstalledWallets.length > 0) {
+            allWalletsHtml = `
+                <div>
+                    <div style="color:rgba(255,255,255,0.5);font-size:12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">All Wallets</div>
+                    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+                        ${uninstalledWallets.slice(0, 6).map(w => `
+                            <a href="${w.downloadUrl}" target="_blank" class="wallet-btn" style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;text-decoration:none;transition:all 0.2s">
+                                <img src="${w.icon}" width="28" height="28" style="border-radius:6px" onerror="this.style.display='none'">
+                                <div style="color:rgba(255,255,255,0.8);font-size:13px">${w.name}</div>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'wallet-connect-modal';
+        modal.innerHTML = `
+            <div style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
+                <div style="background:#1a1a2e;border-radius:20px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;border:1px solid rgba(255,255,255,0.1);box-shadow:0 25px 50px rgba(0,0,0,0.5)">
+                    <div style="padding:24px 24px 0;display:flex;justify-content:space-between;align-items:center">
+                        <h3 style="color:#fff;margin:0;font-size:20px">Connect Wallet</h3>
+                        <button onclick="buyWizard.closeWalletModal()" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:24px;cursor:pointer;padding:0;line-height:1">&times;</button>
+                    </div>
+                    <div style="padding:20px 24px 24px">
+                        ${detectedHtml}
+                        ${walletConnectHtml}
+                        ${allWalletsHtml}
+                    </div>
+                    <div style="padding:16px 24px;border-top:1px solid rgba(255,255,255,0.08);text-align:center">
+                        <p style="color:rgba(255,255,255,0.4);font-size:11px;margin:0">
+                            By connecting, you agree to the Terms of Service
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <style>
+                .wallet-btn:hover { background:rgba(106,112,228,0.15) !important; border-color:rgba(106,112,228,0.4) !important; transform:translateY(-1px); }
+            </style>
+        `;
+        document.body.appendChild(modal);
+        this._walletModalOpen = true;
+    }
+
+    closeWalletModal() {
+        document.getElementById('wallet-connect-modal')?.remove();
+        this._walletModalOpen = false;
+    }
+
+    async connectWithProvider(index) {
+        const wallet = this._detectedWallets[index];
+        if (!wallet) {
+            alert('Wallet not found. Please refresh and try again.');
             return;
         }
 
+        this.closeWalletModal();
         this.showConnectingState();
 
         try {
-            const accounts = await eth.request({ method: 'eth_requestAccounts' });
+            const provider = wallet.provider;
+            const accounts = await provider.request({ method: 'eth_requestAccounts' });
+            
             if (!accounts || accounts.length === 0) {
                 alert('No accounts returned. Unlock your wallet and try again.');
                 this.render();
                 return;
             }
 
-            this._setupProvider(eth, accounts[0]);
+            this._setupProvider(provider, accounts[0]);
 
             const network = await this.provider.getNetwork();
             this._connectedChainId = Number(network.chainId);
+            
             if (Number(network.chainId) !== this.config.chainId) {
                 try {
-                    await eth.request({
+                    await provider.request({
                         method: 'wallet_switchEthereumChain',
                         params: [{ chainId: '0x' + this.config.chainId.toString(16) }],
                     });
-                    this._setupProvider(eth, accounts[0]);
+                    this._setupProvider(provider, accounts[0]);
                     this._connectedChainId = this.config.chainId;
                 } catch (switchErr) {
                     if (switchErr.code === 4902) {
                         try {
-                            await eth.request({
+                            await provider.request({
                                 method: 'wallet_addEthereumChain',
                                 params: [{
                                     chainId: '0x' + this.config.chainId.toString(16),
@@ -198,7 +532,7 @@ class FVCBuyWizard {
                                     blockExplorerUrls: [this.config.chainId === 1 ? 'https://etherscan.io/' : 'https://sepolia.etherscan.io/']
                                 }]
                             });
-                            this._setupProvider(eth, accounts[0]);
+                            this._setupProvider(provider, accounts[0]);
                         } catch (addErr) {}
                     }
                 }
@@ -216,6 +550,38 @@ class FVCBuyWizard {
         }
     }
 
+    async connectWithWalletConnect() {
+        // WalletConnect requires additional setup - show info for now
+        this.closeWalletModal();
+        
+        // Check if WalletConnect provider is available
+        if (typeof WalletConnectProvider !== 'undefined') {
+            try {
+                const wcProvider = new WalletConnectProvider({
+                    rpc: { [this.config.chainId]: this.config.rpcUrl },
+                    chainId: this.config.chainId,
+                });
+                
+                await wcProvider.enable();
+                const accounts = wcProvider.accounts;
+                
+                if (accounts && accounts.length > 0) {
+                    this._setupProvider(wcProvider, accounts[0]);
+                    this.completeStep(1);
+                    this.goToStep(2);
+                }
+            } catch (error) {
+                console.error('WalletConnect error:', error);
+                alert('WalletConnect connection failed. Please try again.');
+                this.render();
+            }
+        } else {
+            // Fallback: Show QR code instructions
+            alert('WalletConnect is coming soon. Please use a browser extension wallet for now.');
+            this.showWalletModal();
+        }
+    }
+
     showConnectingState() {
         this.container.innerHTML = `
             <div class="card p-5 text-center">
@@ -227,45 +593,7 @@ class FVCBuyWizard {
     }
 
     showWalletOptions() {
-        this.container.innerHTML = `
-            <div class="card p-5">
-                <h3 class="text-center mb-4">No Web3 Wallet Detected</h3>
-                <p class="text-center text-muted mb-4">Install a Web3 wallet to continue</p>
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <a href="https://metamask.io/download/" target="_blank" class="text-decoration-none">
-                            <div class="card h-100 text-center p-4 wallet-option">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask" style="height:60px;margin:0 auto" class="mb-3">
-                                <h5>MetaMask</h5>
-                                <p class="text-muted small">Most popular</p>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-4">
-                        <a href="https://www.coinbase.com/wallet" target="_blank" class="text-decoration-none">
-                            <div class="card h-100 text-center p-4 wallet-option">
-                                <img src="https://www.coinbase.com/assets/wallet-logo.png" alt="Coinbase" style="height:60px;margin:0 auto" class="mb-3">
-                                <h5>Coinbase Wallet</h5>
-                                <p class="text-muted small">User-friendly</p>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-4">
-                        <a href="https://trustwallet.com/" target="_blank" class="text-decoration-none">
-                            <div class="card h-100 text-center p-4 wallet-option">
-                                <img src="https://trustwallet.com/assets/images/media/assets/TWT.png" alt="Trust" style="height:60px;margin:0 auto" class="mb-3">
-                                <h5>Trust Wallet</h5>
-                                <p class="text-muted small">Mobile & Desktop</p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                <div class="text-center mt-4">
-                    <button class="btn btn-outline-secondary" onclick="buyWizard.render()"><i class="bi bi-arrow-left"></i> Back</button>
-                </div>
-            </div>
-            <style>.wallet-option{transition:all .3s;cursor:pointer}.wallet-option:hover{transform:translateY(-5px);box-shadow:0 4px 12px rgba(0,0,0,.15)}</style>
-        `;
+        this.showWalletModal();
     }
 
     async disconnectWallet() {
@@ -853,16 +1181,16 @@ class FVCBuyWizard {
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="card h-100" style="opacity:0.6;cursor:not-allowed">
+                        <div class="card h-100 payment-option" onclick="buyWizard.showMoonPayCurrencySelect()">
                             <div class="card-body text-center p-4">
-                                <i class="bi bi-credit-card display-3 text-muted mb-3"></i>
+                                <i class="bi bi-credit-card display-3 mb-3" style="color:#6A70E4"></i>
                                 <h4>Credit/Debit Card</h4>
                                 <p class="text-muted">Powered by MoonPay</p>
-                                <span class="badge bg-warning text-dark mb-3">Coming Soon</span>
-                                <ul class="text-start text-muted">
-                                    <li>Instant purchase</li>
+                                <span class="badge bg-success mb-3">Available Now</span>
+                                <ul class="text-start">
+                                    <li>Pay with Visa/Mastercard</li>
                                     <li>KYC handled by MoonPay</li>
-                                    <li>Supports major cards</li>
+                                    <li>Crypto delivered to wallet</li>
                                 </ul>
                             </div>
                         </div>
