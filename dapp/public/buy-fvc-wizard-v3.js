@@ -176,11 +176,17 @@ class FVCBuyWizard {
                             </div>
                         </button>
                     </div>
+                    <div style="background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);border-radius:8px;padding:12px;margin-top:16px">
+                        <p style="color:rgba(255,193,7,0.9);font-size:12px;margin:0;text-align:center">
+                            <strong>Note:</strong> USDC/USDT may not be available in all regions.<br>
+                            If unavailable, select ETH instead.
+                        </p>
+                    </div>
                     <button onclick="document.getElementById('moonpay-currency-modal').remove()" style="width:100%;margin-top:16px;padding:12px;background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:rgba(255,255,255,0.7);cursor:pointer">
                         Cancel
                     </button>
                     <p style="color:rgba(255,255,255,0.4);text-align:center;margin-top:16px;font-size:11px">
-                        Powered by MoonPay • KYC required • 5-10 min delivery
+                        Integrated with MoonPay • KYC required • 5-10 min delivery
                     </p>
                 </div>
             </div>
