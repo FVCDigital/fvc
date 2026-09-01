@@ -133,6 +133,7 @@ contract Sale is Ownable, ReentrancyGuard {
     error Sale__ZeroRate();
     error Sale__ZeroCap();
     error Sale__CapExceeded();
+    error Sale__CapBelowRaised();
     error Sale__TokenNotAccepted();
     error Sale__EthNotEnabled();
     error Sale__EthTransferFailed();
@@ -308,6 +309,7 @@ contract Sale is Ownable, ReentrancyGuard {
 
     function setCap(uint256 newCap) external onlyOwner {
         if (newCap == 0) revert Sale__ZeroCap();
+        if (newCap < raised) revert Sale__CapBelowRaised();
         cap = newCap;
         emit CapUpdated(newCap);
     }

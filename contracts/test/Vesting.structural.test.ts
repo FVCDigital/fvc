@@ -154,21 +154,23 @@ describe("Vesting — structural coverage", function () {
   // ─────────────────────────────────────────────────────────────────────────
 
   describe("revokeVesting — zero refund when fully vested", function () {
-    it("revoke after full vest: refund == 0, totalVesting unchanged", async () => {
+    it("revoke after full vest: refund == 0, vested amount paid to beneficiary", async () => {
       const startTime = await latestTimestamp();
       await vesting.createVestingSchedule(beneficiary.address, AMOUNT, startTime, CLIFF, DURATION);
 
       await increaseTime(DURATION + 1);
 
-      const totalBefore = await vesting.totalVesting();
       const ownerBalBefore = await fvc.balanceOf(deployer.address);
+      const beneficiaryBalBefore = await fvc.balanceOf(beneficiary.address);
 
       await vesting.revokeVesting(beneficiary.address, 0);
 
-      // refund = totalAmount - vestedAmount = AMOUNT - AMOUNT = 0
+      // refund = totalAmount - vestedAmount = AMOUNT - AMOUNT = 0, so owner receives nothing
       expect(await fvc.balanceOf(deployer.address)).to.equal(ownerBalBefore);
-      // totalVesting should not change (refund == 0, so -= 0)
-      expect(await vesting.totalVesting()).to.equal(totalBefore);
+      // the fully-vested, unclaimed balance is settled to the beneficiary rather than stranded
+      expect(await fvc.balanceOf(beneficiary.address)).to.equal(beneficiaryBalBefore + AMOUNT);
+      // obligation is fully discharged, so nothing remains outstanding
+      expect(await vesting.totalVesting()).to.equal(0);
     });
 
     it("emits VestingRevoked with refund == 0", async () => {

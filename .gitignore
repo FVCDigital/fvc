@@ -34,6 +34,11 @@ contracts/artifacts/
 contracts/cache/
 contracts/typechain-types/
 
+# Foundry (fuzzing) artifacts
+contracts/out/
+contracts/cache_forge/
+contracts/lib/
+
 # Dependencies and build files
 package-lock.json
 yarn.lock
