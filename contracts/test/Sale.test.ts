@@ -611,6 +611,15 @@ describe("Ethereum Presale ? Sale Contract", function () {
       expect(await sale.cap()).to.equal(newCap);
     });
 
+    it("reverts when new cap is below raised", async () => {
+      const amount = ethers.parseUnits("1000", 6);
+      await usdc.connect(buyer).approve(await sale.getAddress(), amount);
+      await sale.connect(buyer).buy(await usdc.getAddress(), amount);
+
+      await expect(sale.connect(beneficiary).setCap(amount - 1n))
+        .to.be.revertedWithCustomError(sale, "Sale__CapBelowRaised");
+    });
+
     it("non-owner cannot set rate", async () => {
       await expect(sale.connect(buyer).setRate(50_000)).to.be.reverted;
     });

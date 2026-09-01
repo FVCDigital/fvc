@@ -138,10 +138,14 @@ contract Vesting is Ownable, ReentrancyGuard {
         VestingSchedule storage s = _getSchedule(beneficiary, scheduleId);
         if (s.revoked) revert Vesting__AlreadyRevoked();
         if (s.released > 0) revert Vesting__ReleasedAlready();
+        if (newAmount == 0) revert Vesting__ZeroAmount();
         if (newDuration == 0) revert Vesting__InvalidDuration();
         if (newCliff > newDuration) revert Vesting__InvalidDuration();
 
-        totalVesting = totalVesting - s.totalAmount + newAmount;
+        uint256 newTotalVesting = totalVesting - s.totalAmount + newAmount;
+        if (token.balanceOf(address(this)) < newTotalVesting) revert Vesting__InsufficientBalance();
+
+        totalVesting = newTotalVesting;
         s.totalAmount = newAmount;
         s.cliff = newCliff;
         s.duration = newDuration;
@@ -150,18 +154,29 @@ contract Vesting is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Revoke a schedule; unvested tokens return to owner.
+     * @notice Revoke a schedule; unvested tokens return to owner and any tokens the
+     *         beneficiary has already vested but not yet claimed are paid out to them.
+     * @dev Settles the schedule completely, so the full outstanding obligation
+     *      (totalAmount - released) leaves totalVesting. Leaving the vested-but-unclaimed
+     *      portion behind would strand it: a revoked schedule is never releasable, and
+     *      emergencyWithdraw only sees balance in excess of totalVesting.
      */
     function revokeVesting(address beneficiary, uint256 scheduleId) external onlyOwner nonReentrant {
         VestingSchedule storage s = _getSchedule(beneficiary, scheduleId);
         if (s.revoked) revert Vesting__AlreadyRevoked();
 
         uint256 vested = _vestedAmount(s);
+        uint256 payout = vested - s.released;
         uint256 refund = s.totalAmount - vested;
 
         s.revoked = true;
-        totalVesting -= refund;
+        s.released = vested;
+        totalVesting -= (payout + refund);
 
+        if (payout > 0) {
+            token.safeTransfer(beneficiary, payout);
+            emit TokensReleased(beneficiary, scheduleId, payout);
+        }
         if (refund > 0) {
             token.safeTransfer(owner(), refund);
         }
@@ -274,6 +289,7 @@ contract Vesting is Ownable, ReentrancyGuard {
      */
     function _vestedAmount(VestingSchedule memory s) private view returns (uint256) {
         if (s.totalAmount == 0) return 0;
+        if (block.timestamp < s.startTime) return 0;
 
         uint256 elapsed = block.timestamp - s.startTime;
 

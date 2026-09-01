@@ -1,0 +1,26 @@
+[profile.default]
+src = "src"
+test = "test-fuzz"
+out = "out"
+# Hardhat owns ./cache and ./test — Foundry must not share either
+cache_path = "cache_forge"
+# node_modules deliberately NOT in libs: Foundry would auto-generate its own
+# @openzeppelin remapping that collides with the explicit one below
+libs = ["lib"]
+solc = "0.8.24"
+optimizer = true
+optimizer_runs = 200
+remappings = [
+  "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+  "forge-std/=lib/forge-std/src/",
+]
+
+[profile.default.fuzz]
+runs = 512
+
+[profile.default.invariant]
+runs = 256
+depth = 50
+fail_on_revert = false
+# cache_path does not cover this one; without it Foundry writes into Hardhat's ./cache
+failure_persist_dir = "cache_forge/invariant"

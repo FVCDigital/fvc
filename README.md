@@ -28,7 +28,7 @@ docs/            Whitepaper and token sale terms
 
 ## Development
 
-**Prerequisites:** Node.js 18+, Yarn
+**Prerequisites:** Node.js 18+, Yarn, [Foundry](https://book.getfoundry.sh/getting-started/installation)
 
 ```bash
 # Install dependencies
@@ -37,15 +37,80 @@ yarn install
 # Run the dapp locally
 yarn workspace dapp dev
 
-# Compile contracts
+# Compile contracts (Hardhat)
 cd contracts && npx hardhat compile
 
-# Run contract tests
+# Run contract tests (Hardhat)
 cd contracts && npx hardhat test
+
+# Run invariant / fuzz tests (Foundry)
+cd contracts && forge install foundry-rs/forge-std --no-git  # first time only
+cd contracts && forge test --match-path 'test-fuzz/*'
 
 # Deploy to Ethereum Sepolia
 cd contracts && npx hardhat run scripts/deployment/deploy.ts --network sepolia
 ```
+
+Hardhat and Foundry share `contracts/src/`. See `contracts/INVARIANTS.md` for properties each contract must satisfy.
+
+### Directory map
+
+```
+contracts/
+├── src/                    # contracts under test
+│   ├── core/FVC.sol
+│   ├── sale/Sale.sol
+│   ├── vesting/Vesting.sol
+│   ├── staking/Staking.sol
+│   └── mocks/              # MockStable, MockAggregatorV3, etc.
+├── test/                   # Hardhat — write these FIRST (TDD)
+│   ├── Vesting.test.ts           # happy paths, integration
+│   ├── Vesting.structural.test.ts  # edge cases, mutation killers
+│   ├── Sale.test.ts
+│   ├── Sale.chainlink.test.ts
+│   └── Staking.spec.test.ts
+├── test-fuzz/              # Foundry — write AFTER unit tests pass
+│   ├── VestingInvariants.t.sol
+│   └── SaleInvariants.t.sol
+├── INVARIANTS.md           # plain-English rules (write before tests)
+└── foundry.toml
+```
+
+### New contract (TDD order)
+
+Do this in order. Do not write `src/` until step 2 fails.
+
+| Step | Where | What |
+|---|---|---|
+| 1 | `contracts/INVARIANTS.md` | List what must always be true (solvency, access, accounting) |
+| 2 | `contracts/test/<Name>.test.ts` | Failing Hardhat test for the simplest path (e.g. "user can stake 100 FVC") |
+| 3 | `contracts/src/.../<Name>.sol` | Minimal implementation until step 2 passes |
+| 4 | `contracts/test/<Name>.test.ts` | More cases: reverts, boundaries, access control |
+| 5 | `contracts/test/<Name>.structural.test.ts` | Edge cases unit tests miss (cliff boundary, cap edge, zero amounts) |
+| 6 | `contracts/test-fuzz/<Name>Invariants.t.sol` | Handler + `invariant_*` for properties from step 1 |
+| 7 | `contracts/` | `slither .` — read findings, fix or document |
+
+**What to test first in `test/`:** one happy path, then all revert paths, then accounting identities (`raised <= cap`, `totalVesting <= balance`, `_totalSupply == sum(balances)`).
+
+**Commands per step:**
+
+```bash
+cd contracts
+npx hardhat test test/Vesting.test.ts          # step 2–5
+npx hardhat test test/Vesting.structural.test.ts
+forge test --match-path 'test-fuzz/VestingInvariants.t.sol'  # step 6
+slither .                                      # step 7
+```
+
+Mutation testing (`Staking.spec.test.ts` pattern, Vertigo) and formal verification are optional. Add them before mainnet deploy, not on day one.
+
+### Existing contract (hardening)
+
+For code already on mainnet: read `src/`, update `INVARIANTS.md`, add `test-fuzz/*Invariants.t.sol`, fuzz until red, fix in `src/`, re-run Hardhat + Foundry. That is retroactive TDD.
+
+### Vesting terms
+
+*Not yet vested* = locked. *Vested, not released* = claimable via `release()`. *Released* = in beneficiary wallet.
 
 ## Networks
 
