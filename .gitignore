@@ -34,10 +34,9 @@ contracts/artifacts/
 contracts/cache/
 contracts/typechain-types/
 
-# Foundry (fuzzing) artifacts
+# Foundry (fuzzing) artefacts — lib/forge-std is a git submodule, not ignored
 contracts/out/
 contracts/cache_forge/
-contracts/lib/
 
 # Dependencies and build files
 package-lock.json
