@@ -13,9 +13,9 @@ What must hold for vesting at all times:
 ## Glossary
 |Term|Definition|
 ---
-|`totalVesting`||
+|`totalVesting`|total amount of $FVC to vested to all beneficiaries from all schedules|
 ---
-|`token.balanceOf(vesting)`||
+|`token.balanceOf(vesting)`|total amount of $FVC owned by the vesting contract|
 ---
 |`released`|total amount of $FVC released to a beneficiary from a single vesting schedule|
 ---
