@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import type { Contract } from "ethers";
 
 /**
- * Vesting.sol — structural coverage
+ * Vesting.sol: structural coverage
  *
  * Covers branches not exercised by Vesting.test.ts:
  *   - constructor zero address revert
@@ -19,7 +19,7 @@ import type { Contract } from "ethers";
  *   - getVestingSchedule: releasable field is correct
  *   - getAllSchedules: correct for 0 and N schedules
  */
-describe("Vesting — structural coverage", function () {
+describe("Vesting: structural coverage", function () {
   let deployer: any;
   let beneficiary: any;
   let stranger: any;
@@ -74,10 +74,10 @@ describe("Vesting — structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // createVestingSchedule — remaining reverts
+  // createVestingSchedule: remaining reverts
   // ─────────────────────────────────────────────────────────────────────────
 
-  describe("createVestingSchedule — zero duration revert", function () {
+  describe("createVestingSchedule: zero duration revert", function () {
     it("reverts when duration == 0", async () => {
       await expect(
         vesting.createVestingSchedule(beneficiary.address, AMOUNT, await latestTimestamp(), 0, 0)
@@ -92,7 +92,7 @@ describe("Vesting — structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // modifyVestingSchedule — all revert branches
+  // modifyVestingSchedule: all revert branches
   // ─────────────────────────────────────────────────────────────────────────
 
   describe("modifyVestingSchedule reverts", function () {
@@ -150,10 +150,10 @@ describe("Vesting — structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // revokeVesting — refund == 0 (fully vested)
+  // revokeVesting: refund == 0 (fully vested)
   // ─────────────────────────────────────────────────────────────────────────
 
-  describe("revokeVesting — zero refund when fully vested", function () {
+  describe("revokeVesting: zero refund when fully vested", function () {
     it("revoke after full vest: refund == 0, vested amount paid to beneficiary", async () => {
       const startTime = await latestTimestamp();
       await vesting.createVestingSchedule(beneficiary.address, AMOUNT, startTime, CLIFF, DURATION);
@@ -185,10 +185,10 @@ describe("Vesting — structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // release — revoked schedule
+  // release: revoked schedule
   // ─────────────────────────────────────────────────────────────────────────
 
-  describe("release — revoked schedule revert", function () {
+  describe("release: revoked schedule revert", function () {
     it("reverts when trying to release from a revoked schedule", async () => {
       await vesting.createVestingSchedule(beneficiary.address, AMOUNT, await latestTimestamp(), CLIFF, DURATION);
       await vesting.revokeVesting(beneficiary.address, 0);
@@ -228,10 +228,10 @@ describe("Vesting — structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // getVestingSchedule — releasable field
+  // getVestingSchedule: releasable field
   // ─────────────────────────────────────────────────────────────────────────
 
-  describe("getVestingSchedule — releasable field", function () {
+  describe("getVestingSchedule: releasable field", function () {
     it("returns correct releasable in the tuple after duration", async () => {
       const startTime = await latestTimestamp();
       await vesting.createVestingSchedule(beneficiary.address, AMOUNT, startTime, CLIFF, DURATION);
@@ -262,10 +262,10 @@ describe("Vesting — structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // emergencyWithdraw — zero available
+  // emergencyWithdraw: zero available
   // ─────────────────────────────────────────────────────────────────────────
 
-  describe("emergencyWithdraw — all tokens allocated", function () {
+  describe("emergencyWithdraw: all tokens allocated", function () {
     it("reverts when all tokens are allocated (no surplus)", async () => {
       // Allocate exactly the balance
       const balance = await fvc.balanceOf(await vesting.getAddress());
@@ -285,7 +285,7 @@ describe("Vesting — structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Access control — non-owner reverts
+  // Access control: non-owner reverts
   // ─────────────────────────────────────────────────────────────────────────
 
   describe("access control", function () {
@@ -321,7 +321,7 @@ describe("Vesting — structural coverage", function () {
 
     it("non-beneficiary cannot release another's schedule", async () => {
       await increaseTime(DURATION + 1);
-      // stranger tries to release beneficiary's schedule — _getSchedule uses msg.sender
+      // stranger tries to release beneficiary's schedule; _getSchedule uses msg.sender
       await expect(
         vesting.connect(stranger).release(0)
       ).to.be.revertedWithCustomError(vesting, "Vesting__NoSchedule");
@@ -332,7 +332,7 @@ describe("Vesting — structural coverage", function () {
   // Mutation killers: V01 (cliff < vs <=) and V03 (duration >= vs >)
   // ─────────────────────────────────────────────────────────────────────────
 
-  describe("Exact cliff and duration boundary — kills V01 and V03", function () {
+  describe("Exact cliff and duration boundary (kills V01 and V03)", function () {
     it("V01: 0 releasable at cliff-1, 0 releasable AT cliff, >0 at cliff+1", async () => {
       const now = await latestTimestamp();
       const startTime = now + 100;
@@ -376,7 +376,7 @@ describe("Vesting — structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Vesting curve — zero cliff (immediate linear vest)
+  // Vesting curve: zero cliff (immediate linear vest)
   // ─────────────────────────────────────────────────────────────────────────
 
   describe("zero cliff (immediate linear vesting)", function () {
@@ -390,7 +390,7 @@ describe("Vesting — structural coverage", function () {
       await vesting.createVestingSchedule(beneficiary.address, AMOUNT, startTime, 0, zeroClifDuration);
 
       // Immediately after creation, elapsed is 0 or 1 second → releasable is 0 or dust
-      // With zero cliff, 1 second of elapsed gives a tiny non-zero amount — confirm it's < 0.01% of total
+      // With zero cliff, 1 second of elapsed gives a tiny non-zero amount, confirm it's < 0.01% of total
       const dustReleasable = await vesting.releasableAmount(beneficiary.address, 0);
       expect(dustReleasable).to.be.lt(AMOUNT / 10000n);
 

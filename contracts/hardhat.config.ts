@@ -11,6 +11,10 @@ dotenv.config();
 
 const isCoverage = process.env.COVERAGE === "true";
 
+// Set ETHEREUM_MAINNET_RPC to a provider with archive access before forking or deploying.
+// The public fallback is rate limited and does not serve historical state.
+const mainnetRpc = process.env.ETHEREUM_MAINNET_RPC || "https://ethereum-rpc.publicnode.com";
+
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.24",
@@ -28,7 +32,7 @@ const config: HardhatUserConfig = {
       chainId: 1337,
       forking: process.env.FORK
         ? {
-            url: process.env.ETHEREUM_MAINNET_RPC || "https://eth-mainnet.g.alchemy.com/v2/6tgWso4UXVZmfMyP0ErKJ",
+            url: mainnetRpc,
             enabled: true,
             // Pin to block after all deployer config txs (grantRole DEFAULT_ADMIN, transferOwnership Vesting)
             blockNumber: 24579710,
@@ -75,7 +79,7 @@ const config: HardhatUserConfig = {
       timeout: 600000,
     },
     mainnet: {
-      url: process.env.ETHEREUM_MAINNET_RPC || "https://eth-mainnet.g.alchemy.com/v2/6tgWso4UXVZmfMyP0ErKJ",
+      url: mainnetRpc,
       accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
       chainId: 1,
       timeout: 600000,

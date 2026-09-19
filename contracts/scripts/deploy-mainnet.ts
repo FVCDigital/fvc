@@ -35,16 +35,16 @@ async function main() {
   console.log();
 
   if (balance < ethers.parseEther("0.001")) {
-    throw new Error("Deployer balance too low — need at least 0.001 ETH for gas.");
+    throw new Error("Deployer balance too low: need at least 0.001 ETH for gas.");
   }
 
   const TREASURY = process.env.MAINNET_TREASURY_ADDRESS;
   if (!TREASURY) throw new Error("MAINNET_TREASURY_ADDRESS not set in .env");
 
-  // $0.03 per FVC — 30_000 stable units (6 decimals) per 1e18 FVC
+  // $0.03 per FVC: 30_000 stable units (6 decimals) per 1e18 FVC
   const RATE = 30_000;
 
-  // $100M cap — effectively uncapped for seed round
+  // $100M cap: effectively uncapped for seed round
   const CAP = ethers.parseUnits("100000000", 6);
 
   // Vest all purchases (threshold = 0): 12-month cliff, 24-month total
@@ -75,7 +75,7 @@ async function main() {
   console.log("USDC:             ", USDC_MAINNET);
   console.log("USDT:             ", USDT_MAINNET);
   console.log();
-  console.log("Deploying in 5 seconds — Ctrl+C to abort...");
+  console.log("Deploying in 5 seconds. Ctrl+C to abort...");
   await new Promise(r => setTimeout(r, 5000));
 
   // Helper: deploy and resolve address from receipt (works around ethers v6 deploy receipt bug)
@@ -190,7 +190,7 @@ async function main() {
 
   // ── 7. cPanel .env block ───────────────────────────────────────────────────
   console.log("\n===================================================================");
-  console.log("CPANEL .ENV VALUES — paste into server .env");
+  console.log("CPANEL .ENV VALUES: paste into server .env");
   console.log("===================================================================");
   console.log(`ETH_CHAIN_ID=1`);
   console.log(`ETH_RPC_URL=https://eth-mainnet.g.alchemy.com/v2/6tgWso4UXVZmfMyP0ErKJ`);

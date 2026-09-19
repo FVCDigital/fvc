@@ -2,27 +2,27 @@ import { ethers } from "hardhat";
 import { expect } from "chai";
 
 /**
- * Staking — spec, structural, and mutation test suite
+ * Staking: spec, structural, and mutation test suite
  *
  * Covers every function and branch in Staking.sol:
  *
  * SPEC: observable behaviour from a user/owner perspective
  * STRUCTURAL: every revert path, zero-supply edge cases, boundary conditions
- * MUTATION GUARDS (labelled S01–S14):
- *   S01 — remove "amount > 0" guard in stake(): zero stake must revert
- *   S02 — remove "amount > 0" guard in withdraw(): zero withdraw must revert
- *   S03 — remove "balance >= amount" guard: over-withdraw must revert
- *   S04 — swap _totalSupply +/- in stake/withdraw: balances must be consistent
- *   S05 — remove rewardRate = 0 branch in notifyRewardAmount: rate must update correctly
- *   S06 — remove leftover calculation in notifyRewardAmount mid-period: rollover must work
- *   S07 — remove "rewardRate <= balance / duration" guard: over-funded notify must revert
- *   S08 — remove periodFinish check in setRewardsDuration: change during active period must revert
- *   S09 — remove stakingToken guard in recoverERC20: recovering staking token must revert
- *   S10 — remove rewardsToken guard in recoverERC20: recovering rewards token must revert
- *   S11 — flip < to <= in lastTimeRewardApplicable: boundary must return periodFinish
- *   S12 — remove rewards[account] = 0 in getReward: double-claim must not pay twice
- *   S13 — remove exit() balance check: exit with zero stake must not revert
- *   S14 — remove updateReward(address(0)) from notifyRewardAmount: rewardPerTokenStored must update
+ * MUTATION GUARDS (labelled S01 to S14):
+ *   S01 (remove "amount > 0" guard in stake()): zero stake must revert
+ *   S02 (remove "amount > 0" guard in withdraw()): zero withdraw must revert
+ *   S03 (remove "balance >= amount" guard): over-withdraw must revert
+ *   S04 (swap _totalSupply +/- in stake/withdraw): balances must be consistent
+ *   S05 (remove rewardRate = 0 branch in notifyRewardAmount): rate must update correctly
+ *   S06 (remove leftover calculation in notifyRewardAmount mid-period): rollover must work
+ *   S07 (remove "rewardRate <= balance / duration" guard): over-funded notify must revert
+ *   S08 (remove periodFinish check in setRewardsDuration): change during active period must revert
+ *   S09 (remove stakingToken guard in recoverERC20): recovering staking token must revert
+ *   S10 (remove rewardsToken guard in recoverERC20): recovering rewards token must revert
+ *   S11 (flip < to <= in lastTimeRewardApplicable): boundary must return periodFinish
+ *   S12 (remove rewards[account] = 0 in getReward): double-claim must not pay twice
+ *   S13 (remove exit() balance check): exit with zero stake must not revert
+ *   S14 (remove updateReward(address(0)) from notifyRewardAmount): rewardPerTokenStored must update
  */
 
 async function increaseTime(seconds: number) {
@@ -35,7 +35,7 @@ async function latestTimestamp(): Promise<number> {
   return block!.timestamp;
 }
 
-describe("Staking — spec + structural + mutation coverage", function () {
+describe("Staking: spec, structural, and mutation coverage", function () {
   let staking: any;
   let fvc: any;
   let usdc: any;
@@ -56,7 +56,7 @@ describe("Staking — spec + structural + mutation coverage", function () {
     fvc = await FVC.deploy(owner.address);
     await fvc.waitForDeployment();
 
-    // Deploy mock USDC (rewards token, 6 decimals) — reuse MockStable
+    // Deploy mock USDC (rewards token, 6 decimals), reusing MockStable
     const MockStable = await ethers.getContractFactory("MockStable");
     usdc = await MockStable.deploy("USD Coin", "USDC", 6);
     await usdc.waitForDeployment();
@@ -288,7 +288,7 @@ describe("Staking — spec + structural + mutation coverage", function () {
     it("earned() reaches approximately full reward after full duration (sole staker)", async () => {
       await increaseTime(DURATION + 1);
       const earned = await staking.earned(alice.address);
-      // Within 0.1% of full reward — integer division in rewardRate loses up to rewardsDuration wei
+      // Within 0.1% of full reward: integer division in rewardRate loses up to rewardsDuration wei
       expect(earned).to.be.closeTo(REWARD, REWARD / 1000n);
     });
 
@@ -309,7 +309,7 @@ describe("Staking — spec + structural + mutation coverage", function () {
         .withArgs(alice.address, earned);
     });
 
-    it("getReward() resets rewards[user] to zero — no double-claim (kills S12)", async () => {
+    it("getReward() resets rewards[user] to zero, no double-claim (kills S12)", async () => {
       await increaseTime(DURATION);
       await staking.connect(alice).getReward();
       const balAfterFirst = await usdc.balanceOf(alice.address);
@@ -339,7 +339,7 @@ describe("Staking — spec + structural + mutation coverage", function () {
       const total = aliceEarned + bobEarned;
 
       expect(total).to.be.closeTo(REWARD, REWARD / 1000n);
-      // Each gets ~50% — allow 0.2% tolerance for rounding
+      // Each gets ~50%, allow 0.2% tolerance for rounding
       expect(aliceEarned).to.be.closeTo(REWARD / 2n, REWARD / 500n);
       expect(bobEarned).to.be.closeTo(REWARD / 2n, REWARD / 500n);
     });
@@ -511,7 +511,7 @@ describe("Staking — spec + structural + mutation coverage", function () {
       await staking.connect(alice).stake(STAKE);
       await seedReward();
       await increaseTime(DURATION / 2);
-      // Trigger updateReward by interacting — withdraw zero is not possible, so stake 1 more
+      // Trigger updateReward by interacting: withdraw zero is not possible, so stake 1 more
       await staking.connect(alice).stake(1n);
       const paid = await staking.userRewardPerTokenPaid(alice.address);
       const current = await staking.rewardPerToken();

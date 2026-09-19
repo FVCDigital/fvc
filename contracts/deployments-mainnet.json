@@ -27,7 +27,7 @@
     "saleNoVestingMinterRoleGranted": true,
     "vestingOwnershipTransferred": true,
     "safeConfigPending": true,
-    "note": "saleNoVesting has vestingContract=address(0) — buy() mints directly, no lock-up. Activated via Safe tx 0x102c88e867f96204499676b3d2372b46ed800d55b44453658335dfabccdab270"
+    "note": "saleNoVesting has vestingContract=address(0), so buy() mints directly with no lock-up. Activated via Safe tx 0x102c88e867f96204499676b3d2372b46ed800d55b44453658335dfabccdab270"
   },
   "deployedAt": "2026-03-03T00:00:00.000Z",
   "saleNoVestingDeployedAt": "2026-03-08T00:00:00.000Z",

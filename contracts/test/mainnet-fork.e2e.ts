@@ -20,14 +20,14 @@ const TREASURY        = "0xE20c89da2138951655DbbbE6E6db01fe561EBe82";
 const USDC            = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48";
 const USDT            = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 
-// A known USDC whale on mainnet (Circle's reserve address — always has USDC)
+// A known USDC whale on mainnet (Circle's reserve address, always has USDC)
 const USDC_WHALE = "0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341";
 const USDT_WHALE = "0xF977814e90dA44bFA03b6295A0616a897441aceC";
 
 const CLIFF    = 365 * 24 * 60 * 60;
 const DURATION = 730 * 24 * 60 * 60;
 
-describe("Mainnet Fork — FVC Sale E2E", function () {
+describe("Mainnet fork: FVC Sale E2E", function () {
   this.timeout(120_000);
 
   let sale: any;
@@ -85,10 +85,10 @@ describe("Mainnet Fork — FVC Sale E2E", function () {
 
   it("contracts are deployed with correct ownership", async function () {
     expect(await sale.owner()).to.equal(TREASURY);
-    // Vesting ownership transferred to Sale by deployer — confirmed on-chain
+    // Vesting ownership transferred to Sale by deployer, confirmed on-chain
     expect(await vesting.owner()).to.equal(SALE_ADDRESS);
     expect(await fvc.hasRole(await fvc.MINTER_ROLE(), SALE_ADDRESS)).to.be.true;
-    // DEFAULT_ADMIN_ROLE granted to Treasury by deployer — confirmed on-chain
+    // DEFAULT_ADMIN_ROLE granted to Treasury by deployer, confirmed on-chain
     expect(await fvc.hasRole(await fvc.DEFAULT_ADMIN_ROLE(), TREASURY)).to.be.true;
   });
 
@@ -131,7 +131,7 @@ describe("Mainnet Fork — FVC Sale E2E", function () {
 
   // ── Step 3: USDC purchase ─────────────────────────────────────────────────
 
-  it("buyer can purchase FVC with USDC — vesting schedule created", async function () {
+  it("buyer can purchase FVC with USDC and a vesting schedule is created", async function () {
     const purchaseAmount = ethers.parseUnits("100", 6); // $100 USDC
     const expectedFvc = ethers.parseUnits("100", 18) * 1_000_000n / 30_000n; // $100 / $0.03
 

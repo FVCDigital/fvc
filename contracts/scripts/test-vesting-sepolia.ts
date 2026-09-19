@@ -68,7 +68,7 @@ async function main() {
   console.log("Vesting schedules after: ", schedulesAfter.toString());
 
   if (fvcAfter > fvcBefore) {
-    console.error("\n✗ FVC landed in wallet — vesting did NOT trigger. Check threshold.");
+    console.error("\n✗ FVC landed in wallet: vesting did NOT trigger. Check threshold.");
     process.exit(1);
   }
 
@@ -86,7 +86,7 @@ async function main() {
 
   console.log(`\n✓ Vesting schedule #${scheduleId} created`);
   console.log("  totalAmount: ", ethers.formatEther(schedule.totalAmount), "FVC");
-  console.log("  releasable:  ", ethers.formatEther(releasable), "FVC (should be 0 — before cliff)");
+  console.log("  releasable:  ", ethers.formatEther(releasable), "FVC (should be 0 before cliff)");
   console.log("  cliff ends:  ", cliffEnd);
   console.log("  vesting ends:", vestEnd);
   console.log("  revoked:     ", schedule.revoked);
