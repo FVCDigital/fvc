@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { expect } from "chai";
 
 /**
- * FVC Token — structural + mutation test suite
+ * FVC Token: structural and mutation test suite
  *
  * Covers every branch and boundary in FVC.sol that fvc.test.ts (spec only) leaves open:
  *   - Cap exact boundaries (cap-1, cap, cap+1)
@@ -13,18 +13,18 @@ import { expect } from "chai";
  *   - supportsInterface for ERC20 and ERC165
  *   - Transfer and approval are standard ERC20 (no custom overrides)
  *
- * Mutation guards (labelled F01–F08) kill the following mutations:
- *   F01 — remove cap check: mint beyond 1B must revert
- *   F02 — remove MINTER_ROLE gate: non-minter mint must revert
- *   F03 — remove BURNER_ROLE gate on burn: non-burner burn must revert
- *   F04 — remove BURNER_ROLE gate on burnFrom: non-burner burnFrom must revert
- *   F05 — swap MINTER_ROLE and BURNER_ROLE constants: roles must be distinct
- *   F06 — remove revokeRole effect: revoked minter must not mint
- *   F07 — remove revokeRole effect: revoked burner must not burn
- *   F08 — remove zero-admin guard in constructor: deploy with zero address must revert
+ * Mutation guards (labelled F01 to F08) kill the following mutations:
+ *   F01 (remove cap check): mint beyond 1B must revert
+ *   F02 (remove MINTER_ROLE gate): non-minter mint must revert
+ *   F03 (remove BURNER_ROLE gate on burn): non-burner burn must revert
+ *   F04 (remove BURNER_ROLE gate on burnFrom): non-burner burnFrom must revert
+ *   F05 (swap MINTER_ROLE and BURNER_ROLE constants): roles must be distinct
+ *   F06 (remove revokeRole effect): revoked minter must not mint
+ *   F07 (remove revokeRole effect): revoked burner must not burn
+ *   F08 (remove zero-admin guard in constructor): deploy with zero address must revert
  */
 
-describe("FVC — structural + mutation coverage", function () {
+describe("FVC: structural and mutation coverage", function () {
   let fvc: any;
   let admin: any;
   let minter: any;

@@ -7,7 +7,7 @@ import * as path from "path";
  *
  * This Sale is used exclusively for the /hamidou private allocation page.
  * Because setVestingConfig is never called, vestingContract == address(0),
- * so _mintOrVest() mints directly to the buyer — no vesting, no lock-up.
+ * so _mintOrVest() mints directly to the buyer, with no vesting and no lock-up.
  *
  * After deployment you must execute ONE Gnosis Safe transaction:
  *   FVC.grantRole(MINTER_ROLE, noVestingSaleAddress)
@@ -42,17 +42,17 @@ async function main() {
 
   const balance = await ethers.provider.getBalance(deployer.address);
   console.log("=".repeat(60));
-  console.log("FVC — No-Vesting Sale Deployment");
+  console.log("FVC: No-Vesting Sale Deployment");
   console.log("=".repeat(60));
   console.log("Deployer:", deployer.address);
   console.log("Balance: ", ethers.formatEther(balance), "ETH");
   console.log();
 
   if (balance < ethers.parseEther("0.001")) {
-    throw new Error("Deployer balance too low — need at least 0.001 ETH.");
+    throw new Error("Deployer balance too low: need at least 0.001 ETH.");
   }
 
-  // Deploy Sale — no setVestingConfig call means vestingContract = address(0)
+  // Deploy Sale: no setVestingConfig call means vestingContract = address(0)
   console.log("Deploying no-vesting Sale...");
   const Sale = await ethers.getContractFactory("Sale");
   const sale = await Sale.deploy(
@@ -67,13 +67,13 @@ async function main() {
   console.log("✓ Sale deployed:", saleAddress);
 
   // Accept USDC and USDT (owner = treasury/Safe, so we can't call from deployer)
-  // These must be called from the Safe — included in the Safe tx JSON below.
+  // These must be called from the Safe, included in the Safe tx JSON below.
   console.log();
   console.log("NOTE: The following must be executed from the Gnosis Safe:");
   console.log("  1. FVC.grantRole(MINTER_ROLE, saleAddress)");
   console.log("  2. Sale.setAcceptedToken(USDC, true, 6)");
   console.log("  3. Sale.setAcceptedToken(USDT, true, 6)");
-  console.log("  4. Sale.setEthUsdRate(fallback) — optional, Chainlink is live");
+  console.log("  4. Sale.setEthUsdRate(fallback), optional because Chainlink is live");
   console.log("  5. Sale.setActive(true)");
 
   // Write deployment record
@@ -89,7 +89,7 @@ async function main() {
     usdt: MAINNET.USDT,
     rate: "0.03",
     cap: "10000000",
-    vestingConfig: "NONE — tokens mint directly to buyer",
+    vestingConfig: "NONE: tokens mint directly to buyer",
     deployedAt: new Date().toISOString(),
   };
 

@@ -6,16 +6,16 @@ import type { Contract } from "ethers";
  * Spec, structural and mutation tests for the no-vesting (duration=0) mintOTC path.
  *
  * These tests verify the invariants that the /hamidou page relies on:
- *   1. mintOTC(recipient, amount, 0, 0) mints directly to recipient wallet — no vesting contract involved.
+ *   1. mintOTC(recipient, amount, 0, 0) mints directly to recipient wallet, with no vesting contract involved.
  *   2. The recipient's FVC balance increases by exactly fvcAmount immediately.
  *   3. The vesting contract holds zero tokens.
  *   4. No vesting schedule is created.
  *   5. raised is NOT incremented (OTC is off-chain payment).
  *   6. Only the owner can call mintOTC.
  *   7. Mutation guards: cliff > 0 with duration = 0 still mints directly (duration is the gate).
- *   8. Mutation guard: vestingThreshold=0 on buy() still vests — proving buy() is NOT the right path.
+ *   8. Mutation guard: vestingThreshold=0 on buy() still vests, proving buy() is NOT the right path.
  */
-describe("Sale – no-vesting mintOTC spec (hamidou invariants)", function () {
+describe("Sale: no-vesting mintOTC spec (hamidou invariants)", function () {
   let owner: any;
   let recipient: any;
   let attacker: any;
@@ -107,7 +107,7 @@ describe("Sale – no-vesting mintOTC spec (hamidou invariants)", function () {
     it("tokens are immediately transferable (no lock)", async () => {
       const fvcAmount = ethers.parseEther("100000");
       await sale.connect(owner).mintOTC(recipient.address, fvcAmount, 0, 0);
-      // recipient can transfer immediately — no revert
+      // recipient can transfer immediately, no revert
       const [, , , , other] = await ethers.getSigners();
       await expect(
         fvc.connect(recipient).transfer(other.address, fvcAmount)
@@ -171,13 +171,13 @@ describe("Sale – no-vesting mintOTC spec (hamidou invariants)", function () {
       const fvcAmount = ethers.parseEther("500000");
       await sale.connect(owner).mintOTC(recipient.address, fvcAmount, CLIFF, DURATION);
 
-      // Wallet has zero — tokens are in vesting
+      // Wallet has zero: tokens are in vesting
       expect(await fvc.balanceOf(recipient.address)).to.equal(0n);
       expect(await fvc.balanceOf(await vesting.getAddress())).to.equal(fvcAmount);
       expect(await vesting.scheduleCount(recipient.address)).to.equal(1);
     });
 
-    it("mintOTC(…, cliff>0, duration=0) still mints directly — duration is the sole gate", async () => {
+    it("mintOTC(…, cliff>0, duration=0) still mints directly; duration is the sole gate", async () => {
       // cliff is ignored when duration=0
       const fvcAmount = ethers.parseEther("100000");
       await sale.connect(owner).mintOTC(recipient.address, fvcAmount, CLIFF, 0);

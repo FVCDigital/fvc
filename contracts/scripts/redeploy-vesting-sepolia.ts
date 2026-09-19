@@ -47,7 +47,7 @@ async function main() {
   );
   const tx = await vestingWithAbi.transferOwnership(SALE_ADDRESS);
   await tx.wait();
-  console.log("Done — vesting.owner() =", SALE_ADDRESS);
+  console.log("Done: vesting.owner() =", SALE_ADDRESS);
 
   // Update deployments-sepolia.json
   const deploymentsPath = path.join(__dirname, "../deployments-sepolia.json");

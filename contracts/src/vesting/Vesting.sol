@@ -86,7 +86,7 @@ contract Vesting is Ownable, ReentrancyGuard {
 
     /**
      * @notice Create a new vesting schedule for a beneficiary.
-     *         Multiple schedules per address are supported — each gets an auto-incremented ID.
+     *         Multiple schedules per address are supported; each gets an auto-incremented ID.
      * @param beneficiary  Wallet receiving vested tokens
      * @param amount       Total FVC (18 decimals) to vest
      * @param startTime    Unix timestamp vesting begins (use block.timestamp for immediate)
@@ -224,7 +224,7 @@ contract Vesting is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Full details for a specific schedule — used by investor dashboard.
+     * @notice Full details for a specific schedule, used by the investor dashboard.
      */
     function getVestingSchedule(address beneficiary, uint256 scheduleId)
         external
@@ -252,7 +252,7 @@ contract Vesting is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice All schedules for a beneficiary — used by investor dashboard to enumerate.
+     * @notice All schedules for a beneficiary, used by the investor dashboard to enumerate.
      */
     function getAllSchedules(address beneficiary)
         external

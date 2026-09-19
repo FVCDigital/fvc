@@ -2,7 +2,7 @@
 src = "src"
 test = "test-fuzz"
 out = "out"
-# Hardhat owns ./cache and ./test — Foundry must not share either
+# Hardhat owns ./cache and ./test. Foundry must not share either
 cache_path = "cache_forge"
 # node_modules deliberately NOT in libs: Foundry would auto-generate its own
 # @openzeppelin remapping that collides with the explicit one below

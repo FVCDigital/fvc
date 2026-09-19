@@ -2,7 +2,8 @@
 
 Plain-English rules that must always hold. Use these for fuzzing, audits, and code review.
 
-Status: Day 1–3 of learning plan (Sep 2026).
+Status as of September 2026: Foundry invariant suites are complete for Vesting and Sale. The Staking
+suite is still to be written; its properties are listed below so the tests can be checked against them.
 
 ---
 

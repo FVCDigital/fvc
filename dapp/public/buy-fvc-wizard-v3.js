@@ -303,7 +303,7 @@ class FVCBuyWizard {
             'letter-spacing:0.08em', 'pointer-events:none',
         ].join(';');
         const netName = this._connectedChainId === 11155111 ? 'SEPOLIA' : 'TESTNET (chain ' + this._connectedChainId + ')';
-        banner.textContent = '⚠ ' + netName + ' — THIS IS A TEST NETWORK. DO NOT SEND REAL FUNDS.';
+        banner.textContent = '⚠ ' + netName + ': THIS IS A TEST NETWORK. DO NOT SEND REAL FUNDS.';
         document.body.prepend(banner);
         // Push page content down so banner doesn't overlap
         document.body.style.paddingTop = '54px';
@@ -949,7 +949,7 @@ class FVCBuyWizard {
                             oninput="buyWizard._syncEthFromUsd(parseFloat(this.value)||0)" />
                         <span class="input-group-text fw-bold text-muted">USD</span>
                     </div>
-                    <div class="text-muted small mt-1 text-center">Enter ETH <strong>or</strong> USD — the other updates automatically</div>
+                    <div class="text-muted small mt-1 text-center">Enter ETH <strong>or</strong> USD, and the other updates automatically</div>
                     ` : ''}
                 </div>
                 <div class="d-flex gap-2 mb-3">
@@ -986,7 +986,7 @@ class FVCBuyWizard {
                 <div class="mb-4">
                     <div class="text-muted small mb-1">You purchased</div>
                     <div class="fw-bold" style="font-size:2rem;color:#6A70E4">${fvcDisplay}</div>
-                    <div class="text-muted small mt-1"><i class="bi bi-lock-fill me-1"></i>Locked in vesting — claimable after cliff</div>
+                    <div class="text-muted small mt-1"><i class="bi bi-lock-fill me-1"></i>Locked in vesting, claimable after cliff</div>
                 </div>` : `<p class="text-muted mb-4">Your FVC tokens have been minted and are now vesting</p>`}
                 <div class="alert alert-success text-start">
                     <strong>Transaction Details:</strong>
@@ -1226,7 +1226,7 @@ class FVCBuyWizard {
                 statusEl.innerHTML = `
                     <div class="alert alert-info mt-3 mb-0 py-2 small">
                         <i class="bi bi-clock me-1"></i>
-                        Transaction submitted — waiting for confirmation...
+                        Transaction submitted, waiting for confirmation...
                         <a href="https://etherscan.io/tx/${tx.hash}" target="_blank" class="ms-1">View</a>
                     </div>`;
             }

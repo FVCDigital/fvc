@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 /**
- * Continue mainnet deployment — FVC already deployed at 0xB84eC31C6B520c3aeA6a19483EB8f88cB55A0556
+ * Continue mainnet deployment. FVC already deployed at 0xB84eC31C6B520c3aeA6a19483EB8f88cB55A0556
  * Deploys Vesting + Sale, then configures everything.
  */
 
@@ -19,7 +19,7 @@ async function main() {
 
   const balance = await ethers.provider.getBalance(deployer.address);
   console.log("===================================================================");
-  console.log("FVC MAINNET — CONTINUE DEPLOYMENT");
+  console.log("FVC MAINNET: CONTINUE DEPLOYMENT");
   console.log("===================================================================");
   console.log("Deployer:", deployer.address);
   console.log("Balance: ", ethers.formatEther(balance), "ETH");
@@ -143,7 +143,7 @@ async function main() {
   console.log("\nAddresses saved to:", outputPath);
 
   console.log("\n===================================================================");
-  console.log("CPANEL .ENV VALUES — paste into server .env");
+  console.log("CPANEL .ENV VALUES: paste into server .env");
   console.log("===================================================================");
   console.log(`ETH_CHAIN_ID=1`);
   console.log(`ETH_RPC_URL=https://eth-mainnet.g.alchemy.com/v2/6tgWso4UXVZmfMyP0ErKJ`);

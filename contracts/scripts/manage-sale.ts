@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 /**
  * Sale Contract Management Script
  *
- * All functions are onlyOwner — the owner is the beneficiary (Gnosis Safe)
+ * All functions are onlyOwner. The owner is the beneficiary (Gnosis Safe)
  * set during Sale deployment. The deployer private key must correspond to
  * the Safe address, or this must be run via a Safe transaction proposal.
  *
@@ -15,7 +15,7 @@ import { ethers } from "hardhat";
  *   Or use Safe's Transaction Builder with the function signatures below.
  *
  * Required env vars:
- *   SALE_ADDRESS  — deployed Sale contract address
+ *   SALE_ADDRESS  deployed Sale contract address
  */
 
 async function main() {
@@ -123,10 +123,10 @@ async function main() {
       const saleInterface = sale.interface;
       console.log("Gnosis Safe Transaction Builder calldata:");
       console.log();
-      console.log("setRate(50000)  — $0.05 per FVC:");
+      console.log("setRate(50000) for $0.05 per FVC:");
       console.log(saleInterface.encodeFunctionData("setRate", [50_000]));
       console.log();
-      console.log("setRate(25000)  — $0.025 per FVC:");
+      console.log("setRate(25000) for $0.025 per FVC:");
       console.log(saleInterface.encodeFunctionData("setRate", [25_000]));
       console.log();
       console.log("setActive(true):");
@@ -135,7 +135,7 @@ async function main() {
       console.log("setActive(false):");
       console.log(saleInterface.encodeFunctionData("setActive", [false]));
       console.log();
-      console.log("setCap(20000000000000)  — 20M USDC:");
+      console.log("setCap(20000000000000) for 20M USDC:");
       console.log(saleInterface.encodeFunctionData("setCap", [ethers.parseUnits("20000000", 6)]));
       break;
     }
@@ -147,14 +147,14 @@ async function main() {
       console.log("No ACTION specified. Showing status only.");
       console.log();
       console.log("Available actions (set ACTION env var):");
-      console.log("  ACTION=setRate NEW_RATE=50000          — Set price to $0.05/FVC");
-      console.log("  ACTION=setRate NEW_RATE=25000          — Set price to $0.025/FVC");
-      console.log("  ACTION=setCap NEW_CAP=20000000000000   — Set cap to 20M USDC");
-      console.log("  ACTION=activate                        — Turn sale on");
-      console.log("  ACTION=deactivate                      — Turn sale off");
-      console.log("  ACTION=acceptToken TOKEN_ADDRESS=0x...  — Accept a stablecoin");
-      console.log("  ACTION=setVesting VESTING_ADDRESS=0x... — Configure vesting");
-      console.log("  ACTION=calldata                        — Generate Gnosis Safe calldata");
+      console.log("  ACTION=setRate NEW_RATE=50000           Set price to $0.05/FVC");
+      console.log("  ACTION=setRate NEW_RATE=25000           Set price to $0.025/FVC");
+      console.log("  ACTION=setCap NEW_CAP=20000000000000    Set cap to 20M USDC");
+      console.log("  ACTION=activate                         Turn sale on");
+      console.log("  ACTION=deactivate                       Turn sale off");
+      console.log("  ACTION=acceptToken TOKEN_ADDRESS=0x...   Accept a stablecoin");
+      console.log("  ACTION=setVesting VESTING_ADDRESS=0x...  Configure vesting");
+      console.log("  ACTION=calldata                         Generate Gnosis Safe calldata");
     }
   }
 }

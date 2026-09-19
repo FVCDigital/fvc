@@ -4,7 +4,7 @@
  * Applies one mutation at a time, runs the full test suite, and reports whether
  * the mutation was KILLED (tests caught it) or SURVIVED (tests missed it).
  *
- * A surviving mutant means a test gap — the logic change was undetected.
+ * A surviving mutant means a test gap: the logic change was undetected.
  *
  * Run: npx hardhat run scripts/mutate.ts
  */
@@ -221,7 +221,7 @@ async function main() {
 
     if (!original.includes(m.find)) {
       results.push({ id: m.id, description: m.description, status: "ERROR", detail: "find string not present in source" });
-      console.log(`[${m.id}] ERROR  — find string not found: ${m.description}`);
+      console.log(`[${m.id}] ERROR  find string not found: ${m.description}`);
       continue;
     }
 
@@ -234,7 +234,7 @@ async function main() {
     const status: "KILLED" | "SURVIVED" = survived ? "SURVIVED" : "KILLED";
     results.push({ id: m.id, description: m.description, status });
     const icon = status === "KILLED" ? "✓ KILLED  " : "✗ SURVIVED";
-    console.log(`[${m.id}] ${icon} — ${m.description}`);
+    console.log(`[${m.id}] ${icon} ${m.description}`);
   }
 
   // ── Summary ────────────────────────────────────────────────────────────────

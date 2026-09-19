@@ -1,0 +1,46 @@
+name: contracts
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Compile
+        run: npx hardhat compile
+
+      # mainnet-fork.e2e.ts and Sale.staking.e2e.ts need an archive RPC, so they
+      # are excluded here and run manually before deployments.
+      - name: Unit, structural and mutation tests
+        run: |
+          npx hardhat test \
+            test/FVC.structural.test.ts \
+            test/Vesting.test.ts \
+            test/Vesting.structural.test.ts \
+            test/Sale.test.ts \
+            test/Sale.chainlink.test.ts \
+            test/Sale.otc.test.ts \
+            test/Sale.novesting.spec.ts \
+            test/Staking.spec.test.ts
+
+      - name: Fuzzing and invariants
+        run: forge test

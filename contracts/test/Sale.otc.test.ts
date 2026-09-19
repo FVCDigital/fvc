@@ -9,7 +9,7 @@ import type { Contract } from "ethers";
  * Duration: 24 months (730 days)
  * Vesting curve: 0% at cliff, linear 0→100% over the 12-month window after cliff.
  */
-describe("Sale – OTC minting & vesting curve", function () {
+describe("Sale: OTC minting and vesting curve", function () {
   let deployer: any;
   let owner: any;
   let otcRecipient: any;
@@ -62,10 +62,10 @@ describe("Sale – OTC minting & vesting curve", function () {
   });
 
   // ----------------------------------------------------------------
-  // OTC – direct mint (no vesting)
+  // OTC: direct mint (no vesting)
   // ----------------------------------------------------------------
 
-  describe("mintOTC – direct (duration = 0)", function () {
+  describe("mintOTC: direct (duration = 0)", function () {
     it("mints FVC directly to recipient wallet", async () => {
       const amount = ethers.parseEther("1000000");
       await sale.connect(owner).mintOTC(otcRecipient.address, amount, 0, 0);
@@ -105,10 +105,10 @@ describe("Sale – OTC minting & vesting curve", function () {
   });
 
   // ----------------------------------------------------------------
-  // OTC – vested mint (12-month cliff, 24-month duration)
+  // OTC: vested mint (12-month cliff, 24-month duration)
   // ----------------------------------------------------------------
 
-  describe("mintOTC – vested (cliff=12mo, duration=24mo)", function () {
+  describe("mintOTC: vested (cliff=12mo, duration=24mo)", function () {
     const OTC_AMOUNT = ethers.parseEther("4000000");
 
     beforeEach(async () => {
@@ -177,7 +177,7 @@ describe("Sale – OTC minting & vesting curve", function () {
       // Schedule 0: 12-month cliff still locked
       expect(await vesting.releasableAmount(otcRecipient.address, 0)).to.equal(0);
 
-      // Schedule 1: 6-month cliff — advance past it
+      // Schedule 1: 6-month cliff, advance past it
       await ethers.provider.send("evm_increaseTime", [DURATION2 + 1]);
       await ethers.provider.send("evm_mine", []);
       expect(await vesting.releasableAmount(otcRecipient.address, 1)).to.equal(AMOUNT2);
@@ -185,10 +185,10 @@ describe("Sale – OTC minting & vesting curve", function () {
   });
 
   // ----------------------------------------------------------------
-  // buy() vesting curve — same 12/24 config
+  // buy() vesting curve: same 12/24 config
   // ----------------------------------------------------------------
 
-  describe("buy() vesting curve – 12-month cliff, 24-month linear", function () {
+  describe("buy() vesting curve: 12-month cliff, 24-month linear", function () {
     it("large purchase: 0% at cliff, 100% at duration", async () => {
       const amount = ethers.parseUnits("100000", 6);
       await usdc.mint(buyer.address, amount);

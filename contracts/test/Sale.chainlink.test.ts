@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import type { Contract } from "ethers";
 
 /**
- * Sale.sol — Chainlink oracle paths + structural coverage
+ * Sale.sol: Chainlink oracle paths and structural coverage
  *
  * Covers every branch not exercised by Sale.test.ts / Sale.otc.test.ts:
  *   - Oracle live path (feedDecimals >= 6 and < 6)
@@ -22,7 +22,7 @@ import type { Contract } from "ethers";
  *   - buy() with token whose decimals not configured
  *   - TokensPurchasedWithVesting event on ETH buy when threshold == 0
  */
-describe("Sale — Chainlink oracle & structural coverage", function () {
+describe("Sale: Chainlink oracle and structural coverage", function () {
   let deployer: any;
   let owner: any;
   let buyer: any;
@@ -116,10 +116,10 @@ describe("Sale — Chainlink oracle & structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Chainlink oracle — live path (8 decimals → normalise to 6)
+  // Chainlink oracle: live path (8 decimals → normalise to 6)
   // ─────────────────────────────────────────────────────────────────────────
 
-  describe("Chainlink oracle — live price (8 decimals)", function () {
+  describe("Chainlink oracle: live price (8 decimals)", function () {
     beforeEach(async () => {
       const Oracle = await ethers.getContractFactory("MockAggregatorV3");
       oracle = await Oracle.deploy(8, ETH_PRICE_8DEC);
@@ -155,10 +155,10 @@ describe("Sale — Chainlink oracle & structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Chainlink oracle — feedDecimals < 6 (scale UP)
+  // Chainlink oracle: feedDecimals < 6 (scale UP)
   // ─────────────────────────────────────────────────────────────────────────
 
-  describe("Chainlink oracle — feedDecimals < 6 (scale up)", function () {
+  describe("Chainlink oracle: feedDecimals < 6 (scale up)", function () {
     it("correctly normalises a 4-decimal feed to 6 decimals", async () => {
       // $2500 in 4 decimals = 25_000_000
       const Oracle = await ethers.getContractFactory("MockAggregatorV3");
@@ -173,10 +173,10 @@ describe("Sale — Chainlink oracle & structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Chainlink oracle — stale answer → fallback to ethUsdRate
+  // Chainlink oracle: stale answer → fallback to ethUsdRate
   // ─────────────────────────────────────────────────────────────────────────
 
-  describe("Chainlink oracle — stale answer fallback", function () {
+  describe("Chainlink oracle: stale answer fallback", function () {
     beforeEach(async () => {
       const Oracle = await ethers.getContractFactory("MockAggregatorV3");
       oracle = await Oracle.deploy(8, ETH_PRICE_8DEC);
@@ -187,7 +187,7 @@ describe("Sale — Chainlink oracle & structural coverage", function () {
 
     it("falls back to ethUsdRate when oracle answer is stale", async () => {
       // Make oracle stale: set updatedAt to far in the past
-      const staleTime = 1000; // epoch second — far older than stalenessThreshold
+      const staleTime = 1000; // epoch second, far older than stalenessThreshold
       await oracle.updateAnswerWithTimestamp(ETH_PRICE_8DEC, staleTime);
 
       const [price, fromOracle] = await sale.getEthUsdPrice();
@@ -223,7 +223,7 @@ describe("Sale — Chainlink oracle & structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // Chainlink oracle — no feed, no fallback → ETH disabled
+  // Chainlink oracle: no feed, no fallback → ETH disabled
   // ─────────────────────────────────────────────────────────────────────────
 
   describe("ETH disabled when no oracle and no fallback rate", function () {
@@ -306,7 +306,7 @@ describe("Sale — Chainlink oracle & structural coverage", function () {
   });
 
   // ─────────────────────────────────────────────────────────────────────────
-  // setAcceptedToken — edge cases
+  // setAcceptedToken: edge cases
   // ─────────────────────────────────────────────────────────────────────────
 
   describe("setAcceptedToken edge cases", function () {
@@ -406,13 +406,13 @@ describe("Sale — Chainlink oracle & structural coverage", function () {
 
     it("reverts if token decimals not configured (tokenDecimals == 0)", async () => {
       // Manually set isAccepted without setting decimals by exploiting the
-      // remove-then-re-add path — actually just use a token accepted but with
+      // remove-then-re-add path, actually just use a token accepted but with
       // decimals=0 by bypassing via a direct state manipulation isn't possible.
       // Instead: add a token, remove it (decimals stay), then test the require.
       // The only way to hit dec==0 is if someone adds with allowed=false (no decimals set)
       // then somehow it gets accepted=true. We test the guard via a fresh token
       // that was never properly configured.
-      // We can't do this without a special mock — skip this path as it's unreachable
+      // We can't do this without a special mock, so skip this path as it's unreachable
       // through the public API (setAcceptedToken enforces decimals_ > 0 on add).
     });
   });
@@ -605,15 +605,15 @@ describe("Sale — Chainlink oracle & structural coverage", function () {
       const MINTER_ROLE = await fvcTmp.MINTER_ROLE();
       await fvcTmp.grantRole(MINTER_ROLE, await saleTmp.getAddress());
 
-      // Owner is the rejecter contract — we can't call from it, so transfer ownership
+      // Owner is the rejecter contract; we can't call from it, so transfer ownership
       // Actually the constructor calls transferOwnership(_beneficiary) = rejecter
-      // We need to set active & ethUsdRate — but owner is the rejecter contract.
+      // We need to set active & ethUsdRate, but owner is the rejecter contract.
       // Work around: deploy with a normal owner, then test the ETH rejection.
       // Re-deploy with deployer as beneficiary but override beneficiary via a wrapper:
       // Simplest: deploy Sale with deployer as beneficiary, then manually set
       // a non-receivable address. But beneficiary is immutable.
       // Solution: use a Sale where beneficiary IS the rejecter, and call
-      // setActive/setEthUsdRate from the rejecter — not possible.
+      // setActive/setEthUsdRate from the rejecter is not possible.
       // Instead: deploy with owner as both, set up, then test with a Sale that
       // has a rejecter beneficiary by having deployer retain ownership via a 2-step:
       // Actually the constructor does transferOwnership(_beneficiary).
@@ -625,7 +625,7 @@ describe("Sale — Chainlink oracle & structural coverage", function () {
       // then use a MockRejectETH as the actual ETH recipient by pointing beneficiary
       // to it. Since beneficiary is immutable, we need a fresh deploy.
       // The rejecter IS the beneficiary/owner. We call owner functions via a
-      // helper that impersonates the rejecter contract — not available in hardhat
+      // helper that impersonates the rejecter contract, not available in hardhat
       // without impersonation. Use hardhat_impersonateAccount:
       await ethers.provider.send("hardhat_setBalance", [
         await rejecter.getAddress(),

@@ -121,11 +121,11 @@ describe("Vesting", function () {
       const startTime = await latestTimestamp();
       await vesting.createVestingSchedule(beneficiary.address, AMOUNT, startTime, CLIFF, DURATION);
 
-      // Before cliff — 0 releasable
+      // Before cliff: 0 releasable
       await increaseTime(CLIFF - 10);
       expect(await vesting.releasableAmount(beneficiary.address, 0)).to.equal(0);
 
-      // At exactly cliff — still 0 (curve starts at 0% at cliff)
+      // At exactly cliff: still 0 (curve starts at 0% at cliff)
       await ethers.provider.send("evm_setNextBlockTimestamp", [startTime + CLIFF]);
       await ethers.provider.send("evm_mine", []);
       expect(await vesting.releasableAmount(beneficiary.address, 0)).to.equal(0);
@@ -332,7 +332,7 @@ describe("Vesting", function () {
   });
 
   // ----------------------------------------------------------------
-  // Mutation kill: V06 — totalVesting decrements on release
+  // Mutation kill V06: totalVesting decrements on release
   // ----------------------------------------------------------------
 
   describe("totalVesting accounting (kills V06)", function () {
@@ -350,7 +350,7 @@ describe("Vesting", function () {
   });
 
   // ----------------------------------------------------------------
-  // Mutation kill: V10 — revoke refund = totalAmount - vestedSoFar
+  // Mutation kill V10: revoke refund = totalAmount - vestedSoFar
   // ----------------------------------------------------------------
 
   describe("Revoke refund arithmetic (kills V10)", function () {
@@ -376,7 +376,7 @@ describe("Vesting", function () {
   });
 
   // ----------------------------------------------------------------
-  // Mutation kill: V01/V03 — cliff and duration boundary exactness
+  // Mutation kill V01/V03: cliff and duration boundary exactness
   // ----------------------------------------------------------------
 
   describe("Cliff boundary exactness (kills V01)", function () {

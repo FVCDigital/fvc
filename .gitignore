@@ -5,7 +5,6 @@ node_modules
 .yarn/install-state.gz
 .cursor/
 .yarn/
-.github/
 litepaper-revised.tex
 FVC_ALLOCATION.md
 NEW_WALLET_INFO.md
@@ -33,8 +32,9 @@ dapp/.env.example
 contracts/artifacts/
 contracts/cache/
 contracts/typechain-types/
+packages/shared/types/
 
-# Foundry (fuzzing) artefacts — lib/forge-std is a git submodule, not ignored
+# Foundry (fuzzing) artefacts. lib/forge-std is a git submodule, not ignored
 contracts/out/
 contracts/cache_forge/
 
@@ -143,3 +143,33 @@ announcements/
 # Transak integration files
 scripts/install-transak.sh
 scripts/download-twill-files.*
+
+# Confidential business material. This repository is code only: fundraising,
+# legal, KYC and investor documents live in the private dataroom, not here.
+Business Plan Documents/
+Coinsilium Application/
+KuCoin Listing Application/
+Market Research/
+Ondato/
+FlowReserve/
+analysis/
+dataroom-build/
+dev-notes/
+emails/
+investors-build/
+marketing/
+reports/
+latex-output/
+docs/_archive/
+docs/overleaf-whitepaper/
+docs/*.xlsx
+docs/*Investor*
+docs/fvc-investor.html
+docs/Whitepaper.log
+*-business-plan.md
+cursor-credits-application.txt
+message-to-*.txt
+telegram-*.txt
+website-fix-report.txt
+solana-student-day-ideathon-framework.md
+scripts/fix-github-profile-contributions.sh
