@@ -20,12 +20,36 @@ If you cloned without `--recurse-submodules`, run `git submodule update --init -
 ```bash
 cd contracts
 npx hardhat compile
-npx hardhat test                  # unit, structural and mutation suites
+npx hardhat test test/*[ct].ts    # unit, structural and mutation-guard suites (offline)
 forge test                        # fuzzing and invariants
 FORK=1 npx hardhat test test/mainnet-fork.e2e.ts   # needs an archive RPC
-slither .                         # static analysis
+slither .                         # static analysis, reads slither.config.json
 npx ts-node scripts/mutate.ts     # mutation runner
+
+# Coverage floors, as enforced in CI
+COVERAGE=true npx hardhat coverage --testfiles "test/*[ct].ts"
+npx ts-node scripts/check-coverage.ts
+
+# Nightly and weekly campaigns, locally
+FOUNDRY_PROFILE=deep forge test
+FOUNDRY_DYNAMIC_TEST_LINKING=false medusa fuzz --timeout 600
+FOUNDRY_DYNAMIC_TEST_LINKING=false halmos --match-contract 'Symbolic$'
 ```
+
+Medusa (`medusa.json`) fuzzes the same handlers as Foundry and checks their `prop_*` functions, so a
+property only has to be written once. Halmos needs Foundry's dynamic test linking turned off because
+it cannot execute the `deployCode` cheatcode that linking emits.
+
+## What CI enforces
+
+| Workflow | Trigger | Blocks on |
+|---|---|---|
+| `contracts` | Every push and pull request | Test failure, coverage below a floor in `scripts/check-coverage.ts`, any high Slither finding |
+| `nightly-fuzz` | 02:00 UTC daily | Any invariant broken by the deep Foundry campaign or by Medusa |
+| `weekly-security` | 03:00 UTC Sundays | Mutation score below 80%, a stale mutant, or a failing `check_*` in a `*Symbolic` contract |
+
+Coverage floors only go up. If a change lowers coverage, add tests; do not lower the floor.
+Properties Halmos cannot finish yet go in a `*SymbolicSlow` contract, which runs but never blocks.
 
 Hardhat and Foundry compile the same sources. Hardhat owns `cache/` and `test/`, Foundry owns
 `cache_forge/` and `test-fuzz/`. Do not point either tool at the other's directories.
@@ -42,8 +66,11 @@ in `src/` until step 2 fails for the right reason.
 | 3 | `contracts/src/.../<Name>.sol` | Minimal implementation until step 2 passes |
 | 4 | `contracts/test/<Name>.test.ts` | Revert paths, boundaries, access control |
 | 5 | `contracts/test/<Name>.structural.test.ts` | Edge cases unit tests miss: cliff boundaries, cap edges, zero amounts |
-| 6 | `contracts/test-fuzz/<Name>Invariants.t.sol` | A handler plus `invariant_*` functions for the properties from step 1 |
-| 7 | `contracts/` | Run `slither .`, then fix or document every finding |
+| 6 | `contracts/test-fuzz/<Name>Invariants.t.sol` | A handler with a no-argument constructor and `prop_*` functions for the properties from step 1, plus `invariant_*` wrappers that assert them |
+| 7 | `contracts/medusa.json` | Add the handler to `targetContracts` |
+| 8 | `contracts/scripts/mutate.ts` | Labelled mutants for every guard; each must be killed |
+| 9 | `contracts/scripts/check-coverage.ts` | A coverage floor for the new contract |
+| 10 | `contracts/` | Run `slither .`, then fix or document every finding |
 
 Test ordering within a suite: one happy path, then every revert path, then the accounting identities
 (`raised <= cap`, `totalVesting <= balance`, `totalSupply == sum of balances`).
