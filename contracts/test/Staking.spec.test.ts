@@ -400,6 +400,10 @@ describe("Staking: spec, structural, and mutation coverage", function () {
       await expect(staking.connect(bob).exit()).to.not.be.reverted;
     });
 
+    it("exit() with no stake emits no Withdrawn event (kills S13)", async () => {
+      await expect(staking.connect(bob).exit()).to.not.emit(staking, "Withdrawn");
+    });
+
     it("exit() emits Withdrawn and RewardPaid events", async () => {
       const earned = await staking.earned(alice.address);
       await expect(staking.connect(alice).exit())
