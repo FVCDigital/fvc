@@ -1,0 +1,7 @@
+{
+  "compile_force_framework": "foundry",
+  "foundry_compile_all": false,
+  "filter_paths": "lib/|node_modules/|src/mocks/|src/testnet/|test-fuzz/",
+  "exclude_informational": true,
+  "exclude_low": true
+}
