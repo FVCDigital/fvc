@@ -1,5 +1,9 @@
 # First Venture Capital (FVC)
 
+[![contracts](https://github.com/FVCDigital/fvc/actions/workflows/ci.yml/badge.svg)](https://github.com/FVCDigital/fvc/actions/workflows/ci.yml)
+[![nightly-fuzz](https://github.com/FVCDigital/fvc/actions/workflows/nightly-fuzz.yml/badge.svg)](https://github.com/FVCDigital/fvc/actions/workflows/nightly-fuzz.yml)
+[![weekly-security](https://github.com/FVCDigital/fvc/actions/workflows/weekly-security.yml/badge.svg)](https://github.com/FVCDigital/fvc/actions/workflows/weekly-security.yml)
+
 FVC is a funding protocol for small and medium-sized businesses. Capital is raised on-chain in
 stablecoins, deployed into vetted companies under interest-free revenue-share agreements, and
 repayments come back to the protocol as USDC to be distributed to stakers.
@@ -126,7 +130,7 @@ yarn workspace dapp dev
 # Contracts
 cd contracts
 npx hardhat compile
-npx hardhat test                    # unit, structural and mutation suites
+npx hardhat test test/*[ct].ts      # unit, structural and mutation-guard suites
 forge test                          # fuzzing and invariants
 npx hardhat run scripts/deploy-sepolia.ts --network sepolia
 ```
@@ -136,8 +140,8 @@ Foundry owns `cache_forge/` and `test-fuzz/`, which is why `foundry.toml` overri
 
 ## Tests
 
-297 Hardhat tests and two Foundry invariant suites pass on a clean checkout. The suites are split by
-intent:
+The Hardhat suites and three Foundry invariant suites (Vesting, Sale, Staking) pass on a clean
+checkout. The suites are split by intent:
 
 | Suite | Purpose |
 |---|---|
@@ -145,11 +149,26 @@ intent:
 | `test/*.structural.test.ts` | Edge cases that unit tests miss, such as exact cliff and cap boundaries |
 | `test/*.spec.test.ts` | Mutation guards, each labelled and mapped to the mutation it kills |
 | `test-fuzz/*Invariants.t.sol` | Handler-driven invariants, 256 runs at depth 50 |
+| `test-fuzz/symbolic/*.t.sol` | Halmos proofs (`check_*`), skipped by `forge test` |
 | `test/mainnet-fork.e2e.ts` | End-to-end purchase against forked mainnet state, needs an RPC URL |
 
 Invariant violations found this way are logged in `contracts/INVARIANTS.md` together with whether
 the fix reached mainnet. That table is the honest record of what is fixed in source and what is
 still live in Vesting v1.
+
+### Continuous security checks
+
+There is no final audit report yet, so the contracts are checked continuously instead. Every result
+is public in the Actions tab and summarised on each run page.
+
+| When | Workflow | What runs | Fails the build when |
+|---|---|---|---|
+| Every push and pull request | `contracts` | Hardhat suites, Foundry invariants, coverage floors, Slither | Any test fails, coverage drops below its floor, or Slither reports a high finding |
+| Nightly | `nightly-fuzz` | Foundry at 5,000 runs and depth 200 per suite; Medusa for 30 minutes on the same properties | Any property breaks |
+| Weekly | `weekly-security` | Mutation testing across Sale, Vesting and Staking; Halmos symbolic proofs | Kill score drops below 80%, a mutant goes stale, or a proven property fails |
+
+Medium Slither findings appear in the repository's Security tab without blocking. Halmos properties
+the solver cannot yet finish are run separately and reported, not failed.
 
 ## Contributing
 
