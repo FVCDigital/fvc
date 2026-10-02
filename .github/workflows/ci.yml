@@ -5,12 +5,18 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: contracts
+
 jobs:
   test:
+    name: Unit, structural and invariant tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: contracts
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,19 +34,76 @@ jobs:
       - name: Compile
         run: npx hardhat compile
 
-      # mainnet-fork.e2e.ts and Sale.staking.e2e.ts need an archive RPC, so they
-      # are excluded here and run manually before deployments.
-      - name: Unit, structural and mutation tests
-        run: |
-          npx hardhat test \
-            test/FVC.structural.test.ts \
-            test/Vesting.test.ts \
-            test/Vesting.structural.test.ts \
-            test/Sale.test.ts \
-            test/Sale.chainlink.test.ts \
-            test/Sale.otc.test.ts \
-            test/Sale.novesting.spec.ts \
-            test/Staking.spec.test.ts
+      # test/*[ct].ts matches every *.test.ts and *.spec.ts but not the *.e2e.ts suites,
+      # which need an archive RPC and are run manually before deployments.
+      - name: Hardhat tests
+        run: npx hardhat test test/*[ct].ts
 
-      - name: Fuzzing and invariants
+      - name: Foundry invariants
         run: forge test
+
+  coverage:
+    name: Coverage floors
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Measure coverage
+        run: COVERAGE=true npx hardhat coverage --testfiles "test/*[ct].ts"
+
+      - name: Enforce floors
+        run: npx ts-node scripts/check-coverage.ts
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: contracts/coverage/
+
+  slither:
+    name: Slither static analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: foundry-rs/foundry-toolchain@v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          npm install --no-audit --no-fund
+          pip install slither-analyzer==0.11.6
+
+      # Medium findings are reported to the Security tab; only high severity fails the build.
+      - name: Report medium and high findings
+        run: slither . --sarif slither.sarif || true
+
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: contracts/slither.sarif
+          category: slither
+
+      - name: Fail on high severity
+        run: slither . --exclude-medium --fail-high
