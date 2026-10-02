@@ -1,0 +1,70 @@
+name: weekly-security
+
+on:
+  schedule:
+    - cron: "0 3 * * 0"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: contracts
+
+jobs:
+  mutation:
+    name: Mutation testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Kill score must stay at or above 80 percent
+        run: npx ts-node scripts/mutate.ts
+
+  halmos:
+    name: Halmos symbolic proofs
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      # Halmos cannot execute the deployCode cheatcode that dynamic linking emits for `new`
+      FOUNDRY_DYNAMIC_TEST_LINKING: "false"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: foundry-rs/foundry-toolchain@v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          npm install --no-audit --no-fund
+          pip install halmos==0.3.3
+
+      - name: Proven properties (must pass)
+        run: halmos --match-contract 'Symbolic$'
+
+      # Nonlinear properties the solver cannot finish yet. Reported, never blocking.
+      - name: Slow properties (best effort)
+        continue-on-error: true
+        timeout-minutes: 60
+        run: halmos --match-contract 'SymbolicSlow$' --solver-timeout-assertion 600000
