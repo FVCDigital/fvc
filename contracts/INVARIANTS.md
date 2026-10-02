@@ -138,4 +138,4 @@ that just claimed, 9 is enforced by a `require` rather than checked, and 16 has 
 | Sale #15 | allowlist sale not Vesting owner | N/A (config) | Broken sale only |
 | Staking #7 | unfunded `notifyRewardAmount` makes rewards insolvent | No (decision pending) | Not deployed |
 
-Mainnet v1: release path fine for existing schedules. Use Vesting v2 for new allocations.
+Mainnet v1: release path works correctly for existing schedules. Use Vesting v2 for new allocations.
