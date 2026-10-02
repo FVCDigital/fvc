@@ -14,6 +14,8 @@ contract MockFVC is ERC20 {
 }
 
 /// @dev Owns the Vesting contract and drives it with clamped random input.
+///      Properties live here (prop_*) so Foundry and Medusa check the same rules;
+///      the constructor takes no arguments because Medusa deploys it directly.
 contract VestingHandler is Test {
     Vesting public immutable vesting;
     MockFVC public immutable token;
@@ -24,9 +26,9 @@ contract VestingHandler is Test {
     uint256 public ghostReleased;
     uint256 public ghostRefunded;
 
-    constructor(Vesting _vesting, MockFVC _token) {
-        vesting = _vesting;
-        token = _token;
+    constructor() {
+        token = new MockFVC();
+        vesting = new Vesting(address(token));
         actors[0] = address(0xA11CE);
         actors[1] = address(0xB0B);
         actors[2] = address(0xC0FFEE);
@@ -102,64 +104,69 @@ contract VestingHandler is Test {
     function warp(uint256 secs) external {
         vm.warp(block.timestamp + bound(secs, 1 hours, 120 days));
     }
-}
 
-contract VestingInvariants is Test {
-    MockFVC internal token;
-    Vesting internal vesting;
-    VestingHandler internal handler;
-
-    function setUp() public {
-        token = new MockFVC();
-        vesting = new Vesting(address(token));
-        handler = new VestingHandler(vesting, token);
-        vesting.transferOwnership(address(handler));
-
-        targetContract(address(handler));
-    }
+    // ============ PROPERTIES ============
 
     /// Never owe more than you hold.
-    function invariant_A_neverOwesMoreThanItHolds() public {
-        assertLe(
-            vesting.totalVesting(),
-            token.balanceOf(address(vesting)),
-            "totalVesting exceeds contract balance"
-        );
+    function prop_neverOwesMoreThanItHolds() public view returns (bool) {
+        return vesting.totalVesting() <= token.balanceOf(address(vesting));
     }
 
     /// The aggregate counter must equal the sum of live per-schedule obligations.
-    function invariant_B_totalVestingReconciles() public {
+    function prop_totalVestingReconciles() public view returns (bool) {
         uint256 sum;
         for (uint256 a = 0; a < 3; a++) {
-            address b = handler.actors(a);
+            address b = actors[a];
             uint256 count = vesting.scheduleCount(b);
             for (uint256 i = 0; i < count; i++) {
                 (uint256 totalAmount, uint256 released,,,, bool revoked) = vesting.schedules(b, i);
                 if (!revoked) sum += totalAmount - released;
             }
         }
-        assertEq(sum, vesting.totalVesting(), "totalVesting does not match live obligations");
+        return sum == vesting.totalVesting();
     }
 
     /// Dashboard reads must never revert on a reachable state.
-    function invariant_C_viewsNeverRevert() public {
+    function prop_viewsNeverRevert() public view returns (bool) {
         for (uint256 a = 0; a < 3; a++) {
-            address b = handler.actors(a);
+            address b = actors[a];
             uint256 count = vesting.scheduleCount(b);
             for (uint256 i = 0; i < count; i++) {
                 try vesting.releasableAmount(b, i) {} catch {
-                    revert("releasableAmount reverted on a live schedule");
+                    return false;
                 }
             }
         }
+        return true;
     }
 
     /// Nothing is created or destroyed.
-    function invariant_D_tokensConserved() public {
-        assertEq(
-            token.balanceOf(address(vesting)) + handler.ghostReleased() + handler.ghostRefunded(),
-            handler.ghostMintedIn(),
-            "tokens created or destroyed"
-        );
+    function prop_tokensConserved() public view returns (bool) {
+        return token.balanceOf(address(vesting)) + ghostReleased + ghostRefunded == ghostMintedIn;
+    }
+}
+
+contract VestingInvariants is Test {
+    VestingHandler internal handler;
+
+    function setUp() public {
+        handler = new VestingHandler();
+        targetContract(address(handler));
+    }
+
+    function invariant_A_neverOwesMoreThanItHolds() public view {
+        assertTrue(handler.prop_neverOwesMoreThanItHolds(), "totalVesting exceeds contract balance");
+    }
+
+    function invariant_B_totalVestingReconciles() public view {
+        assertTrue(handler.prop_totalVestingReconciles(), "totalVesting does not match live obligations");
+    }
+
+    function invariant_C_viewsNeverRevert() public view {
+        assertTrue(handler.prop_viewsNeverRevert(), "releasableAmount reverted on a live schedule");
+    }
+
+    function invariant_D_tokensConserved() public view {
+        assertTrue(handler.prop_tokensConserved(), "tokens created or destroyed");
     }
 }
