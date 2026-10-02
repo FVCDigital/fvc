@@ -227,6 +227,9 @@ contract Sale is Ownable, ReentrancyGuard {
      * @dev Price sourced from Chainlink oracle. Falls back to ethUsdRate if oracle is
      *      absent or stale. Reverts if neither source is available.
      */
+    // The ETH recipient is the owner-set beneficiary and every function that touches
+    // investorTerms outside a purchase is onlyOwner, so the call cannot be used to re-enter.
+    // slither-disable-next-line reentrancy-eth
     function buyWithETH() external payable nonReentrant {
         if (!active) revert Sale__Inactive();
         if (msg.value == 0) revert Sale__ZeroAmount();
