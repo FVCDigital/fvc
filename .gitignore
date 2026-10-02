@@ -66,9 +66,7 @@ contracts/src/sale/Custom*.sol
 contracts/scripts_backup_*/
 .env.deploy
 
-# Private investor pages
-dapp/public/private-allocation.html
-dapp/src/pages/private-allocation.tsx
+# Private investor pages are excluded locally in .git/info/exclude
 
 # Backup files
 *.backup
