@@ -80,57 +80,73 @@ contract SaleHandler is Test {
     function setActive(bool on) external {
         try sale.setActive(on) {} catch {}
     }
+
+    // ============ PROPERTIES ============
+
+    /// raised must never exceed cap.
+    function prop_raisedNeverExceedsCap() public view returns (bool) {
+        return sale.raised() <= sale.cap();
+    }
+
+    /// Only buy/buyWithETH increment raised; ghost tracker must match.
+    function prop_raisedMatchesBuyGhost() public view returns (bool) {
+        return sale.raised() == ghostBuyRaised;
+    }
+
+    /// Allowlisted investors must not exceed their per-wallet USD cap.
+    function prop_allowlistSpentWithinMax() public view returns (bool) {
+        for (uint256 i = 0; i < 3; i++) {
+            (uint256 maxAmount,,,, uint256 spent, bool termsActive) = sale.investorTerms(actors[i]);
+            if (termsActive && maxAmount > 0 && spent > maxAmount) return false;
+        }
+        return true;
+    }
+
+    /// Sale must not custody FVC after operations (mints go to vesting or buyer).
+    function prop_saleHoldsNoFvc() public view returns (bool) {
+        return fvc.balanceOf(address(sale)) == 0;
+    }
+
+    /// Sale must not custody USDC (payments forwarded to treasury).
+    function prop_saleHoldsNoUsdc() public view returns (bool) {
+        return usdc.balanceOf(address(sale)) == 0;
+    }
+
+    /// Vesting solvency when sale is owner (production-like wiring).
+    function prop_vestingSolvent() public view returns (bool) {
+        return vesting.totalVesting() <= fvc.balanceOf(address(vesting));
+    }
 }
 
 contract SaleInvariants is Test {
     SaleHandler internal handler;
-    Sale internal sale;
-    FVC internal fvc;
-    MockStable internal usdc;
-    Vesting internal vesting;
 
     function setUp() public {
         handler = new SaleHandler();
-        sale = handler.sale();
-        fvc = handler.fvc();
-        usdc = handler.usdc();
-        vesting = handler.vesting();
         targetContract(address(handler));
     }
 
-    /// raised must never exceed cap.
-    function invariant_A_raisedNeverExceedsCap() public {
-        assertLe(sale.raised(), sale.cap(), "raised exceeds cap");
+    function invariant_A_raisedNeverExceedsCap() public view {
+        assertTrue(handler.prop_raisedNeverExceedsCap(), "raised exceeds cap");
     }
 
-    /// Only buy/buyWithETH increment raised; ghost tracker must match.
-    function invariant_B_raisedMatchesBuyGhost() public {
-        assertEq(sale.raised(), handler.ghostBuyRaised(), "raised does not match buy ghost");
+    function invariant_B_raisedMatchesBuyGhost() public view {
+        assertTrue(handler.prop_raisedMatchesBuyGhost(), "raised does not match buy ghost");
     }
 
-    /// Allowlisted investors must not exceed their per-wallet USD cap.
-    function invariant_C_allowlistSpentWithinMax() public {
-        for (uint256 i = 0; i < 3; i++) {
-            address actor = handler.actors(i);
-            (uint256 maxAmount,,,, uint256 spent, bool active) = sale.investorTerms(actor);
-            if (active && maxAmount > 0) {
-                assertLe(spent, maxAmount, "allowlist spent exceeds max");
-            }
-        }
+    function invariant_C_allowlistSpentWithinMax() public view {
+        assertTrue(handler.prop_allowlistSpentWithinMax(), "allowlist spent exceeds max");
     }
 
-    /// Sale must not custody FVC after operations (mints go to vesting or buyer).
-    function invariant_D_saleHoldsNoFvc() public {
-        assertEq(fvc.balanceOf(address(sale)), 0, "sale holds FVC");
+    function invariant_D_saleHoldsNoFvc() public view {
+        assertTrue(handler.prop_saleHoldsNoFvc(), "sale holds FVC");
     }
 
-    /// Sale must not custody USDC (payments forwarded to treasury).
-    function invariant_E_saleHoldsNoUsdc() public {
-        assertEq(usdc.balanceOf(address(sale)), 0, "sale holds USDC");
+    function invariant_E_saleHoldsNoUsdc() public view {
+        assertTrue(handler.prop_saleHoldsNoUsdc(), "sale holds USDC");
     }
 
-    /// Vesting solvency when sale is owner (production-like wiring).
-    function invariant_F_vestingSolvent() public {
-        assertLe(vesting.totalVesting(), fvc.balanceOf(address(vesting)), "vesting insolvent");
+    function invariant_F_vestingSolvent() public view {
+        assertTrue(handler.prop_vestingSolvent(), "vesting insolvent");
     }
 }
