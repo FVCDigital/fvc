@@ -5,7 +5,7 @@ import * as path from "path";
 /**
  * Deploy a second Sale contract with NO vesting config.
  *
- * This Sale is used exclusively for the /private-allocation private allocation page.
+ * This Sale is used exclusively for the private allocation page.
  * Because setVestingConfig is never called, vestingContract == address(0),
  * so _mintOrVest() mints directly to the buyer, with no vesting and no lock-up.
  *
@@ -80,7 +80,7 @@ async function main() {
   const record = {
     network: "mainnet",
     chainId: 1,
-    purpose: "no-vesting private sale (private-allocation channel)",
+    purpose: "no-vesting private sale",
     deployer: deployer.address,
     noVestingSale: saleAddress,
     fvc: MAINNET.FVC,
@@ -189,7 +189,7 @@ async function main() {
   console.log("1. Import grant-minter-novesting-sale.json into Gnosis Safe Transaction Builder");
   console.log("2. Execute the batch");
   console.log("3. Update NEXT_PUBLIC_NOVESTING_SALE_ADDRESS in dapp/.env.local");
-  console.log("4. private-allocation.html will work automatically once the sale is active");
+  console.log("4. The private allocation page will work automatically once the sale is active");
   console.log("=".repeat(60));
   console.log("\nNo-vesting Sale address:", saleAddress);
 }
