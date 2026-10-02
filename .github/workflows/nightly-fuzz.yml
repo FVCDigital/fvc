@@ -1,0 +1,84 @@
+name: nightly-fuzz
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: contracts
+
+jobs:
+  foundry-deep:
+    name: Foundry deep invariant campaign
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: 5000 runs at depth 200 per suite
+        run: FOUNDRY_PROFILE=deep forge test
+
+  medusa:
+    name: Medusa campaign (same properties, different engine)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # Medusa cannot execute the deployCode cheatcode that dynamic linking emits for `new`
+      FOUNDRY_DYNAMIC_TEST_LINKING: "false"
+      MEDUSA_VERSION: v1.5.1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: foundry-rs/foundry-toolchain@v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          npm install --no-audit --no-fund
+          pip install crytic-compile==0.4.2
+          curl -sSL -o /tmp/medusa.tgz "https://github.com/crytic/medusa/releases/download/${MEDUSA_VERSION}/medusa-linux-x64.tar.gz"
+          mkdir -p "$HOME/bin"
+          tar -xzf /tmp/medusa.tgz -C "$HOME/bin" medusa
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+
+      # The corpus carries over between nights so each run starts from the last one's coverage.
+      - uses: actions/cache@v4
+        with:
+          path: contracts/medusa-corpus
+          key: medusa-corpus-${{ github.run_id }}
+          restore-keys: medusa-corpus-
+
+      - name: Fuzz for 30 minutes
+        run: medusa fuzz --timeout 1800
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: medusa-coverage
+          path: contracts/medusa-corpus/coverage/
