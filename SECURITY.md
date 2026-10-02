@@ -24,11 +24,11 @@ Out of scope: the testnet faucet, the mock contracts under `src/mocks`, anything
 | Area | Status |
 |---|---|
 | External audit | Hashlock engagement in progress. No final report published yet. |
-| Unit and structural tests | 297 Hardhat tests on a clean checkout |
-| Fuzzing and invariants | Foundry suites for Vesting and Sale, 256 invariant runs at depth 50 |
-| Mutation testing | Labelled guards per contract, runner at `contracts/scripts/mutate.ts` |
-| Static analysis | Slither, run manually before deployments |
-| Formal verification | Not done |
+| Unit and structural tests | Hardhat suites on every push, with per-contract coverage floors |
+| Fuzzing and invariants | Foundry suites for Vesting, Sale and Staking on every push (256 runs, depth 50) and nightly (5,000 runs, depth 200); Medusa nightly on the same properties |
+| Mutation testing | Weekly across Sale, Vesting and Staking, minimum 80% kill score, runner at `contracts/scripts/mutate.ts` |
+| Static analysis | Slither on every push; high findings fail the build, medium findings go to the Security tab |
+| Formal verification | Halmos symbolic proofs weekly for vesting release accounting, sale purchase accounting and staking claims. Not a full formal verification |
 | Bug bounty | Not open yet |
 
 Documented properties live in [contracts/INVARIANTS.md](./contracts/INVARIANTS.md), including the
@@ -64,6 +64,13 @@ These are tracked openly rather than left for a reviewer to find.
 - The allowlist sale at `0xdf95824ae269c62427a5925231b970aa43d709d1` cannot create vesting schedules,
   because Vesting is owned by the primary Sale. Its vesting purchases revert. It has raised nothing
   and is not in use.
+- Staking (not yet deployed) can promise more USDC than it holds if `notifyRewardAmount` is called
+  without first transferring the reward. Found while writing the Staking invariant suite. Until the
+  contract pulls the tokens itself, the Safe must always fund before notifying.
+- Slither reports `reentrancy-eth` on `Sale.buyWithETH`, because ETH is forwarded to the beneficiary
+  before the allowlist spend counter is updated. Triaged as not exploitable: the function is
+  `nonReentrant`, the beneficiary is the owner-set treasury, and every function that reads the
+  counter outside a purchase is owner-only. The finding is suppressed inline with that reason.
 
 ## Operational practice
 
