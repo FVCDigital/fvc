@@ -38,6 +38,12 @@ packages/shared/types/
 contracts/out/
 contracts/cache_forge/
 
+# Medusa, Slither and crytic-compile output
+contracts/medusa-corpus/
+contracts/crytic-export/
+contracts/slither.sarif
+contracts/slither_results.json
+
 # Dependencies and build files
 package-lock.json
 yarn.lock
