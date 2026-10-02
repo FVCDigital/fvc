@@ -24,3 +24,15 @@ depth = 50
 fail_on_revert = false
 # cache_path does not cover this one; without it Foundry writes into Hardhat's ./cache
 failure_persist_dir = "cache_forge/invariant"
+
+# Nightly campaign: FOUNDRY_PROFILE=deep forge test. Inherits everything else from default.
+[profile.deep]
+
+[profile.deep.fuzz]
+runs = 50000
+
+[profile.deep.invariant]
+runs = 5000
+depth = 200
+fail_on_revert = false
+failure_persist_dir = "cache_forge/invariant"
