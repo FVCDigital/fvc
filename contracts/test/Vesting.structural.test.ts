@@ -373,6 +373,25 @@ describe("Vesting: structural coverage", function () {
       await ethers.provider.send("evm_mine", []);
       expect(await vesting.releasableAmount(beneficiary.address, 0)).to.equal(AMOUNT);
     });
+
+    // With cliff < duration both mutants are equivalent at the boundary (the linear formula
+    // yields 0 at the cliff and totalAmount at the end), so only a cliff-only schedule tells
+    // them apart: V01 returns 0 at unlock, V03 divides by a zero vesting window.
+    it("V01 and V03: cliff == duration unlocks everything at exactly start + duration", async () => {
+      const now = await latestTimestamp();
+      const startTime = now + 300;
+      await ethers.provider.send("evm_setNextBlockTimestamp", [startTime]);
+      await ethers.provider.send("evm_mine", []);
+      await vesting.createVestingSchedule(beneficiary.address, AMOUNT, startTime, DURATION, DURATION);
+
+      await ethers.provider.send("evm_setNextBlockTimestamp", [startTime + DURATION - 1]);
+      await ethers.provider.send("evm_mine", []);
+      expect(await vesting.releasableAmount(beneficiary.address, 0)).to.equal(0);
+
+      await ethers.provider.send("evm_setNextBlockTimestamp", [startTime + DURATION]);
+      await ethers.provider.send("evm_mine", []);
+      expect(await vesting.releasableAmount(beneficiary.address, 0)).to.equal(AMOUNT);
+    });
   });
 
   // ─────────────────────────────────────────────────────────────────────────
