@@ -5,7 +5,7 @@ import type { Contract } from "ethers";
 /**
  * Spec, structural and mutation tests for the no-vesting (duration=0) mintOTC path.
  *
- * These tests verify the invariants that the /private-allocation page relies on:
+ * These tests verify the invariants that the private allocation page relies on:
  *   1. mintOTC(recipient, amount, 0, 0) mints directly to recipient wallet, with no vesting contract involved.
  *   2. The recipient's FVC balance increases by exactly fvcAmount immediately.
  *   3. The vesting contract holds zero tokens.
@@ -15,7 +15,7 @@ import type { Contract } from "ethers";
  *   7. Mutation guards: cliff > 0 with duration = 0 still mints directly (duration is the gate).
  *   8. Mutation guard: vestingThreshold=0 on buy() still vests, proving buy() is NOT the right path.
  */
-describe("Sale: no-vesting mintOTC spec (private-allocation invariants)", function () {
+describe("Sale: no-vesting mintOTC spec (private allocation invariants)", function () {
   let owner: any;
   let recipient: any;
   let attacker: any;
