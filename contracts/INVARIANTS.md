@@ -2,8 +2,13 @@
 
 Plain-English rules that must always hold. Use these for fuzzing, audits, and code review.
 
-Status as of September 2026: Foundry invariant suites are complete for Vesting and Sale. The Staking
-suite is still to be written; its properties are listed below so the tests can be checked against them.
+Status as of October 2026: invariant suites are complete for Vesting, Sale and Staking. Each handler
+exposes its properties as `prop_*` functions, so Foundry (every push, and a deep campaign nightly) and
+Medusa (nightly) check exactly the same rules. Halmos proves a subset symbolically every week. The
+properties for the planned LoanRegistry are in [LOAN_REGISTRY.md](./LOAN_REGISTRY.md).
+
+Staking properties 6, 9 and 16 are only partly covered: 6 is checked for every account except the one
+that just claimed, 9 is enforced by a `require` rather than checked, and 16 has no dedicated check.
 
 ---
 
@@ -91,6 +96,14 @@ suite is still to be written; its properties are listed below so the tests can b
 8. After `getReward` or `exit`: `rewards[user] == 0` and user received that amount in `rewardsToken`
 9. `rewardRate <= rewardsToken.balance / rewardsDuration` after every `notifyRewardAmount`
 
+### Funding (watch)
+- Property 7 only holds if every `notifyRewardAmount(reward)` is preceded by a transfer of `reward`
+  USDC. The balance check in `notifyRewardAmount` counts rewards already earned but not yet claimed,
+  so a second unfunded call passes it. Reproduced: 7,000 USDC funded, `notifyRewardAmount(7000e6)`
+  called twice, about 14,000 USDC owed against 7,000 held, and the staker's `getReward` reverts. The
+  Foundry handler always funds first, which encodes the operational rule. Staking is not deployed, so
+  the fix (pull the tokens inside `notifyRewardAmount`) can land before mainnet.
+
 ### Time
 10. `lastTimeRewardApplicable() <= block.timestamp`
 11. `lastTimeRewardApplicable() <= periodFinish`
@@ -115,7 +128,7 @@ suite is still to be written; its properties are listed below so the tests can b
 
 ---
 
-## Bugs found via invariants (Vesting v1 on mainnet)
+## Bugs found via invariants
 
 | Invariant | Violation | Fixed in source? | On mainnet? |
 |---|---|---|---|
@@ -123,5 +136,6 @@ suite is still to be written; its properties are listed below so the tests can b
 | #2 revoke accounting | partial revoke stranded vested tokens | Yes (local) | No |
 | #9 startTime views | underflow before start | Yes (local) | No |
 | Sale #15 | allowlist sale not Vesting owner | N/A (config) | Broken sale only |
+| Staking #7 | unfunded `notifyRewardAmount` makes rewards insolvent | No (decision pending) | Not deployed |
 
 Mainnet v1: release path fine for existing schedules. Use Vesting v2 for new allocations.
