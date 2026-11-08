@@ -15,8 +15,8 @@ that comes back. It connects three things that today live in separate places:
 3. The **stablecoin settlement**, which lands in FVC's treasury and eventually reaches stakers.
 
 The SME never touches crypto. It signs a normal agreement and repays by direct debit or bank transfer
-in GBP or CHF. The ramp partner converts the payment to a GBP or CHF stablecoin and settles it to the
-treasury with a payment reference. LoanRegistry records that settlement against the right loan, so
+in GBP. The ramp partner converts the payment to USDC or USDT and settles it to the treasury with
+a payment reference and the GBP amount collected. LoanRegistry records that settlement against the right loan, so
 anyone can check what was lent, what was repaid, and what is outstanding, without seeing who the SME is.
 
 ## What it is not
@@ -38,7 +38,7 @@ SME signs agreement (off-chain, Legal Bison template)
 Safe calls createLoan(agreementHash, smeRef, token, principal, repaymentCap)
         |
         v
-Safe disburses: stablecoin -> ramp partner -> GBP/CHF to the SME's bank   (off-ramp)
+Safe disburses: USDC -> ramp partner -> GBP to the SME's bank   (off-ramp)
         |
         v
 SME repays in fiat with its unique reference (direct debit, transfer, card as fallback)
@@ -72,22 +72,29 @@ into an invariant the fuzzer can check.
 enum Status { Active, Repaid, Defaulted, WrittenOff }
 
 struct Loan {
-    bytes32 agreementHash;  // keccak256 of the signed agreement PDF
-    bytes32 smeRef;         // keccak256(internal SME id, salt); never the raw id
-    address token;          // GBP or CHF stablecoin the loan is denominated in
-    uint256 principal;      // amount disbursed
-    uint256 repaymentCap;   // total the SME owes under the revenue-share agreement
-    uint256 repaid;         // total recorded so far
+    bytes32 agreementHash;    // keccak256 of the signed agreement PDF
+    bytes32 smeRef;           // keccak256(internal SME id, salt); never the raw id
+    uint256 facilityGbp;      // most FVC has agreed to pay out, in pence
+    uint256 disbursedGbp;     // paid out so far across all tranches, in pence
+    uint256 repaymentCapGbp;  // total the SME owes under the agreement, in pence
+    uint256 repaidGbp;        // GBP counted against the cap so far, in pence
     uint64  createdAt;
     Status  status;
 }
 
 mapping(uint256 => Loan) public loans;
+mapping(uint256 => mapping(address => uint256)) public loanReceived; // per loan, per token
 mapping(bytes32 => bool) public settlementUsed;   // ramp partner's payment reference, hashed
-mapping(address => bool) public allowedToken;
-mapping(address => uint256) public totalRepaid;   // per token, across all loans
+mapping(address => bool) public allowedToken;     // USDC and USDT, as accepted by the Sale
+mapping(address => uint256) public totalReceived; // per token, across all loans
 mapping(address => uint256) public totalForwarded; // per token, sent on for distribution
+uint256 public totalRepaidGbp;
 ```
+
+Agreements are in pounds (UK SMEs); money arrives as USDC or USDT on Ethereum. Each repayment
+records both: the GBP amount Clicked collected, which counts against the cap, and the token amount
+the registry pulled in, which backs it. See the currency model in
+[`docs/specs/system.md`](../docs/specs/system.md).
 
 FVC's agreements are interest-free revenue-share, so the amount due each month varies with the SME's
 revenue. The contract does not model a fixed instalment schedule. It tracks the **repayment cap** (the
@@ -111,8 +118,9 @@ off-chain reconciliation report make detectable.
 
 | Function | Who | Effect |
 |---|---|---|
-| `createLoan(agreementHash, smeRef, token, principal, repaymentCap)` | Originator | New loan in `Active` |
-| `recordRepayment(loanId, amount, settlementRef)` | Recorder | Pulls `amount` of the loan's token, credits the loan, marks the reference used, moves to `Repaid` when the cap is met |
+| `createLoan(agreementHash, smeRef, facilityGbp, repaymentCapGbp)` | Originator | New loan in `Active`, nothing paid out yet |
+| `recordDisbursement(loanId, gbpAmount, token, tokenAmount, payoutRef, to)` | Originator | One tranche: moves `tokenAmount` from the caller to the ramp partner's address `to`, adds `gbpAmount` to `disbursedGbp`, never past `facilityGbp` |
+| `recordRepayment(loanId, gbpAmount, token, tokenAmount, settlementRef)` | Recorder | Pulls `tokenAmount` of an allowed token, credits `gbpAmount` to the loan, marks the reference used, moves to `Repaid` when the GBP cap is met |
 | `markDefault(loanId)` / `cure(loanId)` | Admin | `Active` to `Defaulted` and back |
 | `writeOff(loanId)` | Admin | `Defaulted` to `WrittenOff` (terminal) |
 | `forward(token, amount, to)` | Distributor | Sends repaid tokens to the distribution contract |
@@ -130,24 +138,25 @@ Medusa and Halmos will check once the contract exists.
 
 1. **Exactly-once crediting.** A `settlementRef` can be used at most once. Recording the same
    settlement twice reverts.
-2. **Never over-repaid.** `loan.repaid <= loan.repaymentCap` for every loan. A repayment that would
-   exceed the cap reverts; overpayments are refunded off-chain.
-3. **Outstanding reconciles.** `outstanding(loan) == repaymentCap - repaid` and never underflows.
-4. **Repaid only grows.** `loan.repaid` never decreases.
-5. **Per-token totals reconcile.** For every token, `totalRepaid[token] == sum of loan.repaid` over all
-   loans in that token.
+2. **Never over-repaid.** `loan.repaidGbp <= loan.repaymentCapGbp` for every loan. A repayment that
+   would exceed the cap reverts; overpayments are refunded off-chain.
+3. **Outstanding reconciles.** `outstandingGbp(loan) == repaymentCapGbp - repaidGbp` and never
+   underflows.
+4. **Repaid only grows.** `loan.repaidGbp` and `loanReceived[loan][token]` never decrease.
+5. **Totals reconcile.** `totalRepaidGbp == sum of loan.repaidGbp`, and for every token
+   `totalReceived[token] == sum of loanReceived[loan][token]` over all loans.
 6. **Every recorded repayment is backed.** For every token,
-   `token.balanceOf(registry) >= totalRepaid[token] - totalForwarded[token]`.
+   `token.balanceOf(registry) >= totalReceived[token] - totalForwarded[token]`.
 7. **Nothing created or destroyed.** Tokens pulled in == tokens forwarded + tokens held (ghost
    accounting in the handler, as in the Vesting suite).
-8. **Forwarding is bounded.** `totalForwarded[token] <= totalRepaid[token]`.
+8. **Forwarding is bounded.** `totalForwarded[token] <= totalReceived[token]`.
 
 ### Currency
 
-9. A repayment is only accepted in the loan's own `token`.
-10. `createLoan` only accepts tokens where `allowedToken[token]` is true. Disallowing a token later
-    does not block repayments on existing loans in that token.
-11. No conversion happens on-chain. A GBP loan is repaid in GBP stablecoin and reported in GBP.
+9. A repayment records a positive `gbpAmount` and a positive `tokenAmount`. Neither may be zero.
+10. `recordRepayment` only accepts tokens where `allowedToken[token]` is true (USDC and USDT).
+11. No conversion happens on-chain. The GBP figure comes from the ramp partner's settlement message;
+    the contract stores it but cannot verify it. Only the token amount is checked on-chain.
 
 ### Lifecycle
 
@@ -155,8 +164,10 @@ Medusa and Halmos will check once the contract exists.
     `Active -> Defaulted`, `Defaulted -> Active` (cure), `Defaulted -> WrittenOff`.
     `Repaid` and `WrittenOff` are terminal.
 13. Repayments are accepted on `Active` and `Defaulted` loans and rejected on `Repaid` and `WrittenOff`.
-14. A loan reaches `Repaid` if and only if `repaid == repaymentCap`.
-15. `agreementHash`, `smeRef`, `token`, `principal` and `repaymentCap` never change after creation.
+14. A loan reaches `Repaid` if and only if `repaidGbp == repaymentCapGbp`.
+15. `agreementHash`, `smeRef`, `facilityGbp` and `repaymentCapGbp` never change after creation.
+15a. `disbursedGbp <= facilityGbp`, `disbursedGbp` never decreases, and tranches are only paid on
+    `Active` loans. A `payoutRef` is used at most once.
     Amending an agreement means creating a new loan that references the old one in an event.
 
 ### Access and safety
@@ -194,13 +205,13 @@ The contract will be built inside the CI security system rather than checked aft
 These need answers before implementation. None of them blocks writing the tests for the parts that
 are already clear.
 
-1. **Which stablecoins and which chain?** Depends on what the ramp partner supports for GBP and CHF.
-   The contract is token-agnostic, but gas costs and liquidity differ by chain.
+1. **Which stablecoins and which chain?** Decided 8 Nov 2026: Ethereum mainnet, USDC and USDT, the
+   same tokens the Sale accepts. Agreements and caps are in GBP.
 2. **Settlement reference format.** Will the ramp partner send a unique ID per settlement that we can
    hash on-chain, or do we generate references ourselves and give one to each SME?
-3. **Distribution currency.** Staking pays rewards in USDC. Repayments will arrive in GBP or CHF
-   stablecoins. Either repayments are swapped to USDC before `notifyRewardAmount`, or a Staking
-   instance is deployed per currency. This is a product decision with tax and FX consequences.
+3. **Distribution currency.** Mostly settled: Staking pays USDC and USDC repayments go straight
+   through. Still open: whether the ramp partner also settles in USDT, which the Safe would swap to
+   USDC before `notifyRewardAmount`.
 4. **Staking funding rule.** The fuzzer showed that Staking can promise more USDC than it holds if
    `notifyRewardAmount` is called without new funds (see INVARIANTS.md). If the registry forwards into
    Staking, `notifyRewardAmount` should pull the tokens itself so it cannot be called unfunded.
