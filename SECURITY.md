@@ -64,9 +64,11 @@ These are tracked openly rather than left for a reviewer to find.
 - The allowlist sale at `0xdf95824ae269c62427a5925231b970aa43d709d1` cannot create vesting schedules,
   because Vesting is owned by the primary Sale. Its vesting purchases revert. It has raised nothing
   and is not in use.
-- Staking (not yet deployed) can promise more USDC than it holds if `notifyRewardAmount` is called
-  without first transferring the reward. Found while writing the Staking invariant suite. Until the
-  contract pulls the tokens itself, the Safe must always fund before notifying.
+- Staking (not yet deployed) had three reward accounting issues, all fixed in source before
+  deployment: `notifyRewardAmount` could be called without funds (found by our invariant suite),
+  rewards scheduled while nobody was staked were stranded (reported by KupiaSec), and coarse
+  rounding could zero out small accruals when a large amount was staked. Details and regression
+  tests are in INVARIANTS.md.
 - Slither reports `reentrancy-eth` on `Sale.buyWithETH`, because ETH is forwarded to the beneficiary
   before the allowlist spend counter is updated. Triaged as not exploitable: the function is
   `nonReentrant`, the beneficiary is the owner-set treasury, and every function that reads the

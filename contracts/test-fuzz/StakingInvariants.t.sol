@@ -6,8 +6,7 @@ import {Staking} from "../src/staking/Staking.sol";
 import {MockStable} from "../src/mocks/MockStable.sol";
 
 /// @dev Owns Staking (reward distributor role) and drives stakers with clamped random input.
-///      Reward top-ups are always funded before notifyRewardAmount, which is the operational
-///      rule the Safe must follow; see INVARIANTS.md for what happens when it is not.
+///      notifyRewardAmount pulls the reward from this handler, as it will from the Safe.
 contract StakingHandler is Test {
     Staking public immutable staking;
     MockStable public immutable fvc;
@@ -19,6 +18,8 @@ contract StakingHandler is Test {
     uint256 public ghostWithdrawn;
     uint256 public ghostRewardsFunded;
     uint256 public ghostRewardsPaid;
+    uint256 public ghostNotifies;
+    uint256 public ghostCalls;
 
     uint256 public ghostLastRewardPerToken;
     bool public ghostRewardPerTokenDecreased;
@@ -47,6 +48,7 @@ contract StakingHandler is Test {
 
     /// Records monotonicity breaks. `claimer` is the only account allowed to see earned drop.
     function _afterCall(uint256[3] memory earnedBefore, address claimer) internal {
+        ghostCalls++;
         for (uint256 i = 0; i < 3; i++) {
             if (actors[i] != claimer && staking.earned(actors[i]) < earnedBefore[i]) {
                 ghostEarnedDecreased = true;
@@ -128,9 +130,13 @@ contract StakingHandler is Test {
         reward = bound(reward, 0, 1_000_000e6);
         uint256[3] memory before = _earnedSnapshot();
 
-        usdc.mint(address(staking), reward);
-        ghostRewardsFunded += reward;
-        try staking.notifyRewardAmount(reward) {} catch {}
+        usdc.mint(address(this), reward);
+        usdc.approve(address(staking), reward);
+        try staking.notifyRewardAmount(reward) {
+            ghostRewardsFunded += reward;
+            ghostNotifies++;
+        } catch {}
+        usdc.approve(address(staking), 0);
 
         _afterCall(before, address(0));
     }
@@ -189,6 +195,31 @@ contract StakingHandler is Test {
         return owed <= usdc.balanceOf(address(staking));
     }
 
+    /// Owed rewards plus the part of the period still to stream. While nothing is staked the
+    /// stream is paused, so everything after lastUpdateTime is still to come.
+    function _committed() internal view returns (uint256 committed) {
+        for (uint256 i = 0; i < 3; i++) {
+            committed += staking.earned(actors[i]);
+        }
+        uint256 from = staking.totalSupply() == 0 ? staking.lastUpdateTime() : staking.lastTimeRewardApplicable();
+        uint256 finish = staking.periodFinish();
+        if (finish > from) committed += staking.rewardRate() * (finish - from);
+    }
+
+    /// Every unpaid reward and every reward still scheduled can be paid from the balance.
+    function prop_streamFunded() public view returns (bool) {
+        return _committed() <= usdc.balanceOf(address(staking));
+    }
+
+    /// USDC is never stranded beyond rounding: under rewardsDuration (max 60 days) per notify
+    /// from the rate division, plus a unit per account per call from the earned() floors.
+    function prop_noRewardsStranded() public view returns (bool) {
+        uint256 held = usdc.balanceOf(address(staking));
+        uint256 committed = _committed();
+        if (committed > held) return false;
+        return held - committed <= ghostNotifies * 60 days + (ghostCalls + 1) * 4;
+    }
+
     function prop_rewardPerTokenNeverDecreases() public view returns (bool) {
         return !ghostRewardPerTokenDecreased && staking.rewardPerToken() >= ghostLastRewardPerToken;
     }
@@ -235,6 +266,14 @@ contract StakingInvariants is Test {
 
     function invariant_D_rewardsSolvent() public view {
         assertTrue(handler.prop_rewardsSolvent(), "unpaid rewards exceed USDC balance");
+    }
+
+    function invariant_D2_streamFunded() public view {
+        assertTrue(handler.prop_streamFunded(), "scheduled rewards exceed USDC balance");
+    }
+
+    function invariant_D3_noRewardsStranded() public view {
+        assertTrue(handler.prop_noRewardsStranded(), "USDC stranded beyond rounding dust");
     }
 
     function invariant_E_rewardPerTokenNeverDecreases() public view {

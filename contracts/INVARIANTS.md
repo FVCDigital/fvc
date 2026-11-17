@@ -8,7 +8,8 @@ Medusa (nightly) check exactly the same rules. Halmos proves a subset symbolical
 properties for the planned LoanRegistry are in [LOAN_REGISTRY.md](./LOAN_REGISTRY.md).
 
 Staking properties 6, 9 and 16 are only partly covered: 6 is checked for every account except the one
-that just claimed, 9 is enforced by a `require` rather than checked, and 16 has no dedicated check.
+that just claimed, 9 holds by construction because `notifyRewardAmount` pulls the reward (9a is the
+fuzzed form), and 16 has no dedicated check.
 
 ---
 
@@ -95,14 +96,25 @@ that just claimed, 9 is enforced by a `require` rather than checked, and 16 has 
 7. Sum of all unpaid `earned(user)` <= `rewardsToken.balanceOf(staking)` (solvency)
 8. After `getReward` or `exit`: `rewards[user] == 0` and user received that amount in `rewardsToken`
 9. `rewardRate <= rewardsToken.balance / rewardsDuration` after every `notifyRewardAmount`
+9a. Owed rewards plus the unstreamed rest of the period never exceed the USDC balance
+9b. No USDC is stranded beyond rounding dust (under `rewardsDuration` units per notify, plus a unit
+    per account per update)
 
-### Funding (watch)
-- Property 7 only holds if every `notifyRewardAmount(reward)` is preceded by a transfer of `reward`
-  USDC. The balance check in `notifyRewardAmount` counts rewards already earned but not yet claimed,
-  so a second unfunded call passes it. Reproduced: 7,000 USDC funded, `notifyRewardAmount(7000e6)`
-  called twice, about 14,000 USDC owed against 7,000 held, and the staker's `getReward` reverts. The
-  Foundry handler always funds first, which encodes the operational rule. Staking is not deployed, so
-  the fix (pull the tokens inside `notifyRewardAmount`) can land before mainnet.
+### Funding (fixed in source, November 2026)
+- Unfunded notify: the old balance check counted rewards already earned but not yet claimed, so a
+  second unfunded `notifyRewardAmount` passed it (7,000 USDC funded, notified twice, about 14,000
+  owed, `getReward` reverts). `notifyRewardAmount` now pulls `reward` from the caller, so the Safe
+  must approve USDC to Staking first.
+- Nobody staked: `rewardPerToken` did not move while `_totalSupply` was zero but `lastUpdateTime`
+  did, so USDC scheduled for that time was owed to no one and, with `recoverERC20` refusing the
+  rewards token, stuck for good. The stream now pauses while nothing is staked and resumes with the
+  first stake. Raised externally by KupiaSec.
+- Precision: `rewardPerToken` was scaled by 1e18. With USDC at 6 decimals and 10M FVC staked, any
+  accrual under 10 USDC between two updates rounded to zero, so frequent interactions could wipe out
+  a whole period. Scaling is now 1e30.
+- Regression tests: `test-fuzz/StakingRegression.t.sol`. Properties 9a and 9b are fuzzed as
+  `prop_streamFunded` and `prop_noRewardsStranded`.
+- Still open: USDC sent to Staking directly, outside `notifyRewardAmount`, cannot be recovered.
 
 ### Time
 10. `lastTimeRewardApplicable() <= block.timestamp`
@@ -136,6 +148,8 @@ that just claimed, 9 is enforced by a `require` rather than checked, and 16 has 
 | #2 revoke accounting | partial revoke stranded vested tokens | Yes (local) | No |
 | #9 startTime views | underflow before start | Yes (local) | No |
 | Sale #15 | allowlist sale not Vesting owner | N/A (config) | Broken sale only |
-| Staking #7 | unfunded `notifyRewardAmount` makes rewards insolvent | No (decision pending) | Not deployed |
+| Staking #7 | unfunded `notifyRewardAmount` makes rewards insolvent | Yes (pulls tokens) | Not deployed |
+| Staking #9b | rewards streamed while nobody is staked are stranded | Yes (stream pauses) | Not deployed |
+| Staking #9b | 1e18 scaling rounds small accruals to zero with large stakes | Yes (1e30) | Not deployed |
 
 Mainnet v1: release path works correctly for existing schedules. Use Vesting v2 for new allocations.

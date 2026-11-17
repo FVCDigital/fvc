@@ -26,6 +26,11 @@ contract Staking is ReentrancyGuard, Ownable {
 
     // ============ STATE VARIABLES ============
 
+    /// @dev Scale for rewardPerToken. 1e18 is too coarse for a 6-decimal reward token against an
+    ///      18-decimal stake: with 10M FVC staked, any accrual under 10 USDC between two updates
+    ///      would round to zero and be lost.
+    uint256 private constant PRECISION = 1e30;
+
     /// @notice Token users stake (FVC)
     IERC20 public immutable stakingToken;
     
@@ -118,7 +123,7 @@ contract Staking is ReentrancyGuard, Ownable {
         }
         return
             rewardPerTokenStored +
-            (((lastTimeRewardApplicable() - lastUpdateTime) * rewardRate * 1e18) / _totalSupply);
+            (((lastTimeRewardApplicable() - lastUpdateTime) * rewardRate * PRECISION) / _totalSupply);
     }
 
     /**
@@ -127,7 +132,7 @@ contract Staking is ReentrancyGuard, Ownable {
      */
     function earned(address account) public view returns (uint256) {
         return
-            ((_balances[account] * (rewardPerToken() - userRewardPerTokenPaid[account])) / 1e18) +
+            ((_balances[account] * (rewardPerToken() - userRewardPerTokenPaid[account])) / PRECISION) +
             rewards[account];
     }
 
@@ -219,14 +224,16 @@ contract Staking is ReentrancyGuard, Ownable {
 
     /**
      * @notice Notify contract of reward amount
-     * @param reward Amount of rewards to distribute
-     * @dev Called by reward distributor (MockYieldDistributor on testnet)
+     * @param reward Amount of rewards to distribute, pulled from the caller (approve first)
+     * @dev Pulling the reward here means a period can never be promised without being funded.
      */
     function notifyRewardAmount(uint256 reward) 
         external 
         onlyOwner 
         updateReward(address(0)) 
     {
+        rewardsToken.safeTransferFrom(msg.sender, address(this), reward);
+
         if (block.timestamp >= periodFinish) {
             rewardRate = reward / rewardsDuration;
         } else {
@@ -234,13 +241,6 @@ contract Staking is ReentrancyGuard, Ownable {
             uint256 leftover = remaining * rewardRate;
             rewardRate = (reward + leftover) / rewardsDuration;
         }
-
-        // Ensure the provided reward amount is not more than the balance in the contract.
-        // This keeps the reward rate in the right range, preventing overflows due to
-        // very high values of rewardRate in the earned and rewardsPerToken functions;
-        // Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
-        uint256 balance = rewardsToken.balanceOf(address(this));
-        require(rewardRate <= balance / rewardsDuration, "Provided reward too high");
 
         lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp + rewardsDuration;
@@ -276,9 +276,17 @@ contract Staking is ReentrancyGuard, Ownable {
 
     /**
      * @notice Update reward for account
+     * @dev While nothing is staked the stream is paused rather than streamed to no one:
+     *      the unstreamed part of the period is pushed back to start now. Otherwise that
+     *      USDC would be owed to nobody and, since recoverERC20 refuses the rewards token,
+     *      stuck for good.
      * @param account Account to update
      */
     modifier updateReward(address account) {
+        if (_totalSupply == 0 && periodFinish > lastUpdateTime) {
+            periodFinish = block.timestamp + (periodFinish - lastUpdateTime);
+            lastUpdateTime = block.timestamp;
+        }
         rewardPerTokenStored = rewardPerToken();
         lastUpdateTime = lastTimeRewardApplicable();
         

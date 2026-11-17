@@ -239,9 +239,9 @@ const mutations: Mutation[] = [
   {
     id: "K07",
     file: STAKING,
-    description: "Reward balance guard removed",
-    find: '        require(rewardRate <= balance / rewardsDuration, "Provided reward too high");',
-    replace: "        // MUTANT: reward balance guard removed",
+    description: "notifyRewardAmount does not pull the reward (unfunded periods possible)",
+    find: "        rewardsToken.safeTransferFrom(msg.sender, address(this), reward);",
+    replace: "        // MUTANT: reward not pulled",
   },
   {
     id: "K08",

@@ -15,7 +15,7 @@ import { expect } from "chai";
  *   S04 (swap _totalSupply +/- in stake/withdraw): balances must be consistent
  *   S05 (remove rewardRate = 0 branch in notifyRewardAmount): rate must update correctly
  *   S06 (remove leftover calculation in notifyRewardAmount mid-period): rollover must work
- *   S07 (remove "rewardRate <= balance / duration" guard): over-funded notify must revert
+ *   S07 (remove reward pull in notifyRewardAmount): reward must move from caller to contract
  *   S08 (remove periodFinish check in setRewardsDuration): change during active period must revert
  *   S09 (remove stakingToken guard in recoverERC20): recovering staking token must revert
  *   S10 (remove rewardsToken guard in recoverERC20): recovering rewards token must revert
@@ -78,9 +78,9 @@ describe("Staking: spec, structural, and mutation coverage", function () {
     await fvc.connect(alice).approve(await staking.getAddress(), ethers.MaxUint256);
     await fvc.connect(bob).approve(await staking.getAddress(), ethers.MaxUint256);
 
-    // Fund staking contract with USDC rewards
-    const [deployer] = await ethers.getSigners();
-    await usdc.mint(await staking.getAddress(), REWARD * 100n);
+    // Fund the owner with USDC rewards; notifyRewardAmount pulls from the caller
+    await usdc.mint(owner.address, REWARD * 100n);
+    await usdc.approve(await staking.getAddress(), ethers.MaxUint256);
   });
 
   async function seedReward(amount = REWARD) {
@@ -244,16 +244,31 @@ describe("Staking: spec, structural, and mutation coverage", function () {
       await seedReward(REWARD);
       await increaseTime(DURATION / 2);
       const rateBefore = await staking.rewardRate();
-      await usdc.mint(await staking.getAddress(), REWARD);
       await staking.notifyRewardAmount(REWARD);
       const rateAfter = await staking.rewardRate();
       // New rate must be higher than original rate due to leftover
       expect(rateAfter).to.be.gt(rateBefore);
     });
 
-    it("reverts when reward exceeds contract balance (kills S07)", async () => {
-      const tooMuch = REWARD * 1000n;
-      await expect(staking.notifyRewardAmount(tooMuch)).to.be.revertedWith("Provided reward too high");
+    it("pulls the reward from the caller (kills S07)", async () => {
+      const stakingAddr = await staking.getAddress();
+      const ownerBefore = await usdc.balanceOf(owner.address);
+      await seedReward();
+      expect(await usdc.balanceOf(stakingAddr)).to.equal(REWARD);
+      expect(await usdc.balanceOf(owner.address)).to.equal(ownerBefore - REWARD);
+    });
+
+    it("reverts when the caller has not funded the reward", async () => {
+      await usdc.approve(await staking.getAddress(), 0n);
+      await expect(staking.notifyRewardAmount(REWARD)).to.be.reverted;
+    });
+
+    it("rewards notified before anyone stakes are paid once staking starts", async () => {
+      await seedReward();
+      await increaseTime(DURATION / 2);
+      await staking.connect(alice).stake(STAKE);
+      await increaseTime(DURATION + 1);
+      expect(await staking.earned(alice.address)).to.be.closeTo(REWARD, REWARD / 1000n);
     });
 
     it("updates rewardPerTokenStored via updateReward(address(0)) (kills S14)", async () => {

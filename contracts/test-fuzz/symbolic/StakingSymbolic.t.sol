@@ -28,7 +28,8 @@ abstract contract StakingSymbolicBase is Test {
     }
 
     function _fundAndNotify(uint256 reward) internal {
-        usdc.mint(address(staking), reward);
+        usdc.mint(address(this), reward);
+        usdc.approve(address(staking), reward);
         staking.notifyRewardAmount(reward);
     }
 }

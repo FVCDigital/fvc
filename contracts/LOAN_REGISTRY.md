@@ -212,9 +212,10 @@ are already clear.
 3. **Distribution currency.** Mostly settled: Staking pays USDC and USDC repayments go straight
    through. Still open: whether the ramp partner also settles in USDT, which the Safe would swap to
    USDC before `notifyRewardAmount`.
-4. **Staking funding rule.** The fuzzer showed that Staking can promise more USDC than it holds if
-   `notifyRewardAmount` is called without new funds (see INVARIANTS.md). If the registry forwards into
-   Staking, `notifyRewardAmount` should pull the tokens itself so it cannot be called unfunded.
+4. **Staking funding rule.** `notifyRewardAmount` now pulls the reward from the caller (see
+   INVARIANTS.md), so whatever forwards repayments into Staking must hold the USDC and approve
+   Staking first. Staking is `Ownable`, so either the registry owns Staking or the Safe calls
+   `notifyRewardAmount` after the registry releases funds to it.
 5. **Chargebacks.** If the ramp partner reverses a card payment after settlement, does it claw back
    stablecoin from FVC, or absorb the loss? This decides whether a repayment can ever be reversed
    on-chain. The current design assumes not: once recorded, a repayment is final, which is what
