@@ -105,6 +105,10 @@ security testing.
 
 ## 4. Phase 0: spec freeze for v1
 
+**Done in Loan Registry phase S1 (19 Nov 2026).** The frozen spec is
+[`contracts/LOAN_REGISTRY.md`](../../contracts/LOAN_REGISTRY.md); where it and this section differ,
+the frozen spec wins. The tasks below are kept for history.
+
 Update the specs so they describe exactly what will be built. No code.
 
 **v1 loan model** (from the whitepaper and Igli's decisions of 8 Nov):
