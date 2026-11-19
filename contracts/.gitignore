@@ -2,3 +2,5 @@ cleanup-old-scripts.sh
 deployments-correct-treasury-bonding.json
 deployments-fixed-bonding.json
 deployments-fresh-bonding.json
+.mutate.lock
+*.mutate-backup

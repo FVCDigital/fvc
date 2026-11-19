@@ -43,6 +43,7 @@ import { LoanModel } from "./helpers/loanModel";
  *   L18 release status              L19 claim status              L20 claim bounded by held
  *   L21 claim bounded by outstanding L22 collateral excluded from forward
  *   L23 forward bound               L24 distributor check         L38 fee limit
+ *   L40 no repayment before the first tranche
  * L25 to L37 are in LoanRegistry.security.test.ts.
  */
 
@@ -508,6 +509,18 @@ describe("LoanRegistry", function () {
       expect((await fx.registry.loans(id)).status).to.equal(Status.Active);
       await repay(fx, id, gbp(500n), "2");
       expect((await fx.registry.loans(id)).status).to.equal(Status.Repaid);
+    });
+
+    it("reverts before the first tranche is paid out, even when a fee is owed (kills L40)", async () => {
+      await setup();
+      const id = await createLoan(fx, gbp(10_000n), gbp(500n));
+      await expect(repay(fx, id, gbp(100n), "early")).to.be.revertedWithCustomError(
+        fx.registry,
+        "LoanRegistry__NothingDisbursed"
+      );
+      await disburse(fx, id, gbp(1_000n), "1");
+      await repay(fx, id, gbp(1_500n), "1");
+      expect(await fx.registry.outstandingGbp(id)).to.equal(0n);
     });
 
     it("reverts one penny over what is owed (kills L09)", async () => {

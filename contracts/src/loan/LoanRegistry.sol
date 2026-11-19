@@ -155,28 +155,55 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
         _settleIfRepaid(loanId);
     }
 
-    // ---------------------------------------------------------------- recorder (repayment S5, collateral S6)
+    // ---------------------------------------------------------------- recorder (collateral in phase S6)
 
-    function recordRepayment(uint256, uint256, address, uint256, bytes32) external pure {
-        _notImplemented();
+    /// @dev `gbpAmount` is the pound value of the stablecoin that arrived, not what the business
+    ///      paid before conversion costs (decided 19 Nov, to confirm with the partner).
+    function recordRepayment(
+        uint256 loanId,
+        uint256 gbpAmount,
+        address token,
+        uint256 tokenAmount,
+        bytes32 settlementRef
+    ) external nonReentrant onlyRole(RECORDER_ROLE) whenNotPaused {
+        Loan storage loan = _existingLoan(loanId);
+        if (loan.status != Status.Active && loan.status != Status.Defaulted) {
+            revert LoanRegistry__InvalidStatus(loan.status);
+        }
+        if (loan.disbursedGbp == 0) revert LoanRegistry__NothingDisbursed();
+        if (!tokenConfig[token].allowed) revert LoanRegistry__TokenNotAllowed();
+        if (gbpAmount == 0 || tokenAmount == 0) revert LoanRegistry__ZeroAmount();
+        _useRef(settlementRef);
+        uint256 repaid = loan.repaidGbp + gbpAmount;
+        if (repaid > loan.disbursedGbp + loan.feeGbp) revert LoanRegistry__OwedExceeded();
+        _checkRate(token, gbpAmount, tokenAmount);
+
+        loan.repaidGbp = repaid;
+        loanReceived[loanId][token] += tokenAmount;
+        totalReceived[token] += tokenAmount;
+        totalRepaidGbp += gbpAmount;
+        emit RepaymentRecorded(loanId, gbpAmount, token, tokenAmount, settlementRef);
+
+        _pullExact(token, tokenAmount);
+        _settleIfRepaid(loanId);
     }
 
     function depositCollateral(uint256, address, uint256, uint256, bytes32) external pure {
         _notImplemented();
     }
 
-    // ---------------------------------------------------------------- risk (lifecycle S5, collateral S6)
+    // ---------------------------------------------------------------- risk (collateral in phase S6)
 
-    function markDefault(uint256) external pure {
-        _notImplemented();
+    function markDefault(uint256 loanId) external onlyRole(RISK_ROLE) whenNotPaused {
+        _transition(loanId, Status.Active, Status.Defaulted);
     }
 
-    function cure(uint256) external pure {
-        _notImplemented();
+    function cure(uint256 loanId) external onlyRole(RISK_ROLE) whenNotPaused {
+        _transition(loanId, Status.Defaulted, Status.Active);
     }
 
-    function writeOff(uint256) external pure {
-        _notImplemented();
+    function writeOff(uint256 loanId) external onlyRole(RISK_ROLE) whenNotPaused {
+        _transition(loanId, Status.Defaulted, Status.WrittenOff);
     }
 
     function claimCollateral(uint256, address, uint256, uint256, bytes32) external pure {
@@ -388,10 +415,23 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
         refUsed[ref] = true;
     }
 
-    function _activeLoan(uint256 loanId) private view returns (Loan storage loan) {
+    function _existingLoan(uint256 loanId) private view returns (Loan storage loan) {
         if (loanId == 0 || loanId > loanCount) revert LoanRegistry__LoanNotFound();
         loan = loans[loanId];
+    }
+
+    function _activeLoan(uint256 loanId) private view returns (Loan storage loan) {
+        loan = _existingLoan(loanId);
         if (loan.status != Status.Active) revert LoanRegistry__InvalidStatus(loan.status);
+    }
+
+    /// @dev The only manual status changes (invariant 12); `Repaid` is reached only through
+    ///      `_settleIfRepaid`.
+    function _transition(uint256 loanId, Status from, Status to) private {
+        Loan storage loan = _existingLoan(loanId);
+        if (loan.status != from) revert LoanRegistry__InvalidStatus(loan.status);
+        loan.status = to;
+        emit LoanStatusChanged(loanId, from, to);
     }
 
     /// @dev Moves `Active` or `Defaulted` to `Repaid` once drawing is closed and everything owed is

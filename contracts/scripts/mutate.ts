@@ -37,6 +37,9 @@ const REGISTRY = path.resolve(__dirname, "../src/loan/LoanRegistry.sol");
 // The mainnet-fork suites (*.e2e.ts) need an archive RPC. Without one they fail on
 // every run, which would make every mutant look KILLED.
 const TEST_COMMAND = "npx hardhat test test/*[ct].ts";
+// One run at a time: overlapping runs restore each other's mutants and leave them in the source.
+const LOCK = path.resolve(__dirname, ".mutate.lock");
+const backupOf = (file: string) => `${file}.mutate-backup`;
 const REGISTRY_TESTS = "test/LoanRegistry.test.ts test/LoanRegistry.security.test.ts";
 
 const mutations: Mutation[] = [
@@ -360,6 +363,86 @@ const mutations: Mutation[] = [
     grep: "kills L07",
   },
   {
+    id: "L08",
+    file: REGISTRY,
+    description: "settlement ref can be reused",
+    find: "_useRef(settlementRef);",
+    replace: "if (settlementRef == bytes32(0)) revert LoanRegistry__ZeroRef();",
+    grep: "kills L08",
+  },
+  {
+    id: "L09",
+    file: REGISTRY,
+    description: "repayment can exceed what is owed",
+    find: "if (repaid > loan.disbursedGbp + loan.feeGbp) revert LoanRegistry__OwedExceeded();",
+    replace: "// MUTANT: owed bound removed",
+    grep: "kills L09",
+  },
+  {
+    id: "L10",
+    file: REGISTRY,
+    description: "repayment in a disallowed token",
+    find: "if (!tokenConfig[token].allowed) revert LoanRegistry__TokenNotAllowed();\n        if (gbpAmount == 0 || tokenAmount == 0) revert LoanRegistry__ZeroAmount();\n        _useRef(settlementRef);",
+    replace: "if (gbpAmount == 0 || tokenAmount == 0) revert LoanRegistry__ZeroAmount();\n        _useRef(settlementRef);",
+    grep: "kills L10",
+  },
+  {
+    id: "L11",
+    file: REGISTRY,
+    description: "repayment credited without pulling the tokens",
+    find: "_pullExact(token, tokenAmount);\n        _settleIfRepaid(loanId);",
+    replace: "_settleIfRepaid(loanId);",
+    grep: "kills L11",
+  },
+  {
+    id: "L12",
+    file: REGISTRY,
+    description: "final repayment does not mark the loan Repaid",
+    find: "        _pullExact(token, tokenAmount);\n        _settleIfRepaid(loanId);\n    }",
+    replace: "        _pullExact(token, tokenAmount);\n    }",
+    grep: "kills L12",
+  },
+  {
+    id: "L13",
+    file: REGISTRY,
+    description: "recordRepayment without the recorder role check",
+    find: "external nonReentrant onlyRole(RECORDER_ROLE) whenNotPaused {\n        Loan storage loan = _existingLoan(loanId);\n        if (loan.status != Status.Active && loan.status != Status.Defaulted)",
+    replace: "external nonReentrant whenNotPaused {\n        Loan storage loan = _existingLoan(loanId);\n        if (loan.status != Status.Active && loan.status != Status.Defaulted)",
+    grep: "kills L13",
+  },
+  {
+    id: "L14",
+    file: REGISTRY,
+    description: "markDefault from any status",
+    find: "_transition(loanId, Status.Active, Status.Defaulted);",
+    replace: "_transition(loanId, loans[loanId].status, Status.Defaulted);",
+    grep: "every disallowed transition",
+  },
+  {
+    id: "L15",
+    file: REGISTRY,
+    description: "cure from any status",
+    find: "_transition(loanId, Status.Defaulted, Status.Active);",
+    replace: "_transition(loanId, loans[loanId].status, Status.Active);",
+    grep: "every disallowed transition",
+  },
+  {
+    id: "L16",
+    file: REGISTRY,
+    description: "writeOff from any status",
+    find: "_transition(loanId, Status.Defaulted, Status.WrittenOff);",
+    replace: "_transition(loanId, loans[loanId].status, Status.WrittenOff);",
+    grep: "every disallowed transition",
+  },
+  {
+    id: "L17",
+    file: REGISTRY,
+    description: "markDefault without the risk role check",
+    find: "function markDefault(uint256 loanId) external onlyRole(RISK_ROLE) whenNotPaused",
+    replace: "function markDefault(uint256 loanId) external whenNotPaused",
+    grep: "kills L17",
+  },
+  {
     id: "L25",
     file: REGISTRY,
     description: "outflow to an unapproved destination",
@@ -439,6 +522,38 @@ const mutations: Mutation[] = [
     replace: "// MUTANT: Safe destination check removed",
     grep: "kills L39",
   },
+  {
+    id: "L31",
+    file: REGISTRY,
+    description: "rate band lower bound removed",
+    find: "if (scaledToken < config.minRateBps * scaledGbp || scaledToken > config.maxRateBps * scaledGbp)",
+    replace: "if (scaledToken > config.maxRateBps * scaledGbp)",
+    grep: "kills L31",
+  },
+  {
+    id: "L32",
+    file: REGISTRY,
+    description: "rate band upper bound removed",
+    find: "if (scaledToken < config.minRateBps * scaledGbp || scaledToken > config.maxRateBps * scaledGbp)",
+    replace: "if (scaledToken < config.minRateBps * scaledGbp)",
+    grep: "kills L32",
+  },
+  {
+    id: "L36",
+    file: REGISTRY,
+    description: "rate band assumes 6 decimals instead of the stored decimals",
+    find: "uint256 scaledGbp = gbpAmount * 10 ** config.decimals;",
+    replace: "uint256 scaledGbp = gbpAmount * 10 ** 6;",
+    grep: "kills L36",
+  },
+  {
+    id: "L40",
+    file: REGISTRY,
+    description: "repayment before the first tranche",
+    find: "if (loan.disbursedGbp == 0) revert LoanRegistry__NothingDisbursed();",
+    replace: "// MUTANT: first-tranche check removed",
+    grep: "kills L40",
+  },
 ];
 
 // ── Runner ────────────────────────────────────────────────────────────────────
@@ -475,6 +590,20 @@ function writeStepSummary(results: Result[], score: number) {
 }
 
 async function main() {
+  if (fs.existsSync(LOCK)) {
+    console.error(`${LOCK} exists: another run is active, or one was killed. Check the sources, then delete it.`);
+    process.exit(1);
+  }
+  fs.writeFileSync(LOCK, String(process.pid));
+  process.on("exit", () => fs.rmSync(LOCK, { force: true }));
+
+  for (const file of new Set(mutations.map((m) => m.file))) {
+    if (fs.existsSync(backupOf(file))) {
+      fs.writeFileSync(file, fs.readFileSync(backupOf(file), "utf8"), "utf8");
+      fs.rmSync(backupOf(file));
+      console.log(`Restored ${path.basename(file)} from the backup a killed run left behind.`);
+    }
+  }
   const ids = process.argv.slice(2);
   const selected = ids.length ? mutations.filter((m) => ids.includes(m.id)) : mutations;
   const unknown = ids.filter((id) => !mutations.some((m) => m.id === id));
@@ -497,9 +626,13 @@ async function main() {
 
   let pending: { file: string; original: string } | null = null;
   const restore = () => {
-    if (pending) fs.writeFileSync(pending.file, pending.original, "utf8");
+    if (pending) {
+      fs.writeFileSync(pending.file, pending.original, "utf8");
+      fs.rmSync(backupOf(pending.file), { force: true });
+    }
     pending = null;
   };
+  process.on("exit", restore);
   process.on("SIGINT", () => {
     restore();
     process.exit(130);
@@ -531,6 +664,7 @@ async function main() {
     }
 
     pending = { file: m.file, original };
+    fs.writeFileSync(backupOf(m.file), original, "utf8");
     let survived: boolean;
     try {
       fs.writeFileSync(m.file, original.replace(m.find, m.replace), "utf8");

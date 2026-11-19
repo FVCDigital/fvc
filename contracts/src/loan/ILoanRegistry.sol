@@ -29,6 +29,7 @@ interface ILoanRegistry {
     error LoanRegistry__MaxFacilityExceeded();
     error LoanRegistry__FeeExceeded();
     error LoanRegistry__OwedExceeded();
+    error LoanRegistry__NothingDisbursed();
     error LoanRegistry__CollateralExceeded();
     error LoanRegistry__OutstandingExceeded();
     error LoanRegistry__ForwardExceeded();
