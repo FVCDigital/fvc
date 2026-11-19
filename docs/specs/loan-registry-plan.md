@@ -272,6 +272,19 @@ Deferred labels, by the phase whose function their killing test needs last:
 `createLoan`, `recordDisbursement`, `closeFacility`. Invariants 15, 15a, 15b, 16, S3. Labels L01 to L07,
 plus L25, L28, L29, L30 from S3.
 
+- [x] The three functions, `_activeLoan` and `_settleIfRepaid`.
+- [x] Fee limit (decided 19 Nov): `feeGbp` at most `maxFeeBps` of the facility, starting at 50
+      percent; the guardian lowers it at once, the timelock raises it up to 100 percent. Invariant
+      S13, labels L35c and L38.
+- [x] No tranche to the Safe (decided 19 Nov): it would record a payout the business never got.
+      Invariant S14, label L39.
+- [x] One S2 test corrected, with Igli's approval: "closeFacility reverts when drawing is already
+      closed" closed a loan with nothing owed, which invariant 14 says becomes `Repaid`. It now pays
+      out a tranche first; a new test checks the empty loan becomes `Repaid`.
+
+Result (19 Nov): 71 Loan Registry tests passing, 71 failing, all 71 on a stub. Mutants L01 to L07,
+L25, L28 to L30, L34, L35, L35b, L35c, L38 and L39 killed. Slither: only the stub findings remain.
+
 ### S5: repayments and lifecycle
 
 `recordRepayment`, `owedGbp`, `outstandingGbp`, `markDefault`, `cure`, `writeOff`.

@@ -24,6 +24,7 @@ export const TIMELOCK_DELAY = 48 * 60 * 60;
 export const MIN_RATE_BPS = 11_000n;
 export const MAX_RATE_BPS = 15_000n;
 export const RATE_BPS = 12_700n; // 1.27 USDC per £1
+export const MAX_FEE_BPS = 5_000n; // fee at most half the facility (decided 19 Nov)
 
 /** 10^n as a bigint; `**` on bigints breaks under the default TypeScript target. */
 export const pow10 = (n: bigint) => BigInt(`1${"0".repeat(Number(n))}`);

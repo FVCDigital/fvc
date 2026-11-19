@@ -11,6 +11,7 @@ import {
   MAX_FACILITY_GBP,
   MAX_PAYOUT,
   DAILY_LIMIT,
+  MAX_FEE_BPS,
   USDC,
   pow10,
   gbp,
@@ -43,6 +44,7 @@ import {
  *   L31 band lower bound               L32 band upper bound  L33 measured balance equals amount
  *   L34 guardian cannot unpause        L35 raising limits is admin only
  *   L36 stored decimals used in band   L37 recoverSurplus bounded by surplus
+ *   L35b, L35c guardian cannot raise the per-loan or fee limit   L39 no tranche to the Safe
  */
 
 describe("LoanRegistry security", function () {
@@ -226,6 +228,21 @@ describe("LoanRegistry security", function () {
       );
     });
 
+    it("lowers the fee limit, and cannot raise it (kills L35c)", async () => {
+      await setup();
+      await expect(fx.registry.connect(fx.safe).lowerMaxFeeBps(2_000n)).to.emit(fx.registry, "MaxFeeSet").withArgs(2_000n);
+      await expect(fx.registry.connect(fx.safe).lowerMaxFeeBps(2_001n)).to.be.revertedWithCustomError(
+        fx.registry,
+        "LoanRegistry__NotALowering"
+      );
+      await expect(fx.registry.connect(fx.safe).setMaxFeeBps(MAX_FEE_BPS)).to.be.revertedWith(
+        missingRole(fx.safe.address, fx.roles.admin)
+      );
+      await expect(fx.registry.connect(fx.outsider).lowerMaxFeeBps(0n)).to.be.revertedWith(
+        missingRole(fx.outsider.address, fx.roles.guardian)
+      );
+    });
+
     it("cannot add destinations, allow tokens, change bands or recover surplus", async () => {
       await setup();
       const deny = missingRole(fx.safe.address, fx.roles.admin);
@@ -328,6 +345,15 @@ describe("LoanRegistry security", function () {
         .withArgs(usdcAddr, 12_000n, 14_000n);
     });
 
+    it("setMaxFeeBps allows up to 100 percent and rejects more", async () => {
+      await setup();
+      await expect(fx.registry.connect(fx.admin).setMaxFeeBps(10_000n)).to.emit(fx.registry, "MaxFeeSet").withArgs(10_000n);
+      await expect(fx.registry.connect(fx.admin).setMaxFeeBps(10_001n)).to.be.revertedWithCustomError(
+        fx.registry,
+        "LoanRegistry__InvalidLimits"
+      );
+    });
+
     it("addDestination rejects zero and duplicates; setMaxFacility rejects zero", async () => {
       await setup();
       await expect(fx.registry.connect(fx.admin).addDestination(ethers.ZeroAddress)).to.be.revertedWithCustomError(
@@ -358,6 +384,16 @@ describe("LoanRegistry security", function () {
         fx.registry
           .connect(fx.safe)
           .recordDisbursement(id, gbp(1_000n), usdcAddr, tokenFor(gbp(1_000n)), ref("p"), fx.outsider.address)
+      ).to.be.revertedWithCustomError(fx.registry, "LoanRegistry__DestinationNotApproved");
+    });
+
+    it("a tranche to the Safe reverts, because the business would receive nothing (kills L39)", async () => {
+      await setup();
+      const id = await createLoan(fx);
+      await expect(
+        fx.registry
+          .connect(fx.safe)
+          .recordDisbursement(id, gbp(1_000n), usdcAddr, tokenFor(gbp(1_000n)), ref("p"), fx.safe.address)
       ).to.be.revertedWithCustomError(fx.registry, "LoanRegistry__DestinationNotApproved");
     });
 

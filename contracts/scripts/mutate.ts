@@ -304,6 +304,94 @@ const mutations: Mutation[] = [
   // ── LoanRegistry.sol (labels from LOAN_REGISTRY.md section 10) ────────────
 
   {
+    id: "L01",
+    file: REGISTRY,
+    description: "createLoan without the originator role check",
+    find: "        onlyRole(ORIGINATOR_ROLE)\n        whenNotPaused\n        returns (uint256 loanId)",
+    replace: "        whenNotPaused\n        returns (uint256 loanId)",
+    grep: "kills L01",
+  },
+  {
+    id: "L02",
+    file: REGISTRY,
+    description: "createLoan accepts a zero facility",
+    find: "if (facilityGbp == 0) revert LoanRegistry__ZeroAmount();",
+    replace: "// MUTANT: zero facility check removed",
+    grep: "kills L02",
+  },
+  {
+    id: "L03",
+    file: REGISTRY,
+    description: "createLoan works while paused",
+    find: "        whenNotPaused\n        returns (uint256 loanId)",
+    replace: "        returns (uint256 loanId)",
+    grep: "kills L03",
+  },
+  {
+    id: "L04",
+    file: REGISTRY,
+    description: "tranche can exceed the facility",
+    find: "if (disbursed > loan.facilityGbp) revert LoanRegistry__FacilityExceeded();",
+    replace: "// MUTANT: facility bound removed",
+    grep: "kills L04",
+  },
+  {
+    id: "L05",
+    file: REGISTRY,
+    description: "payout ref can be reused",
+    find: "_useRef(payoutRef);",
+    replace: "if (payoutRef == bytes32(0)) revert LoanRegistry__ZeroRef();",
+    grep: "kills L05",
+  },
+  {
+    id: "L06",
+    file: REGISTRY,
+    description: "tranche after drawing closed",
+    find: "if (loan.drawingClosed) revert LoanRegistry__DrawingClosed();\n        if (!tokenConfig[token].allowed)",
+    replace: "if (!tokenConfig[token].allowed)",
+    grep: "kills L06",
+  },
+  {
+    id: "L07",
+    file: REGISTRY,
+    description: "tranche in a disallowed token",
+    find: "if (!tokenConfig[token].allowed) revert LoanRegistry__TokenNotAllowed();\n        if (gbpAmount == 0 || tokenAmount == 0) revert LoanRegistry__ZeroAmount();\n        _useRef(payoutRef);",
+    replace: "if (gbpAmount == 0 || tokenAmount == 0) revert LoanRegistry__ZeroAmount();\n        _useRef(payoutRef);",
+    grep: "kills L07",
+  },
+  {
+    id: "L25",
+    file: REGISTRY,
+    description: "outflow to an unapproved destination",
+    find: "if (!approvedDestination[to]) revert LoanRegistry__DestinationNotApproved();\n        TokenConfig storage config = tokenConfig[token];\n        if (amount > config.maxPayout)",
+    replace: "TokenConfig storage config = tokenConfig[token];\n        if (amount > config.maxPayout)",
+    grep: "kills L25",
+  },
+  {
+    id: "L28",
+    file: REGISTRY,
+    description: "createLoan above the per-loan limit",
+    find: "if (facilityGbp > maxFacilityGbp) revert LoanRegistry__MaxFacilityExceeded();",
+    replace: "// MUTANT: per-loan limit removed",
+    grep: "kills L28",
+  },
+  {
+    id: "L29",
+    file: REGISTRY,
+    description: "transfer above the per-payout limit",
+    find: "if (amount > config.maxPayout) revert LoanRegistry__PayoutLimitExceeded();",
+    replace: "// MUTANT: per-payout limit removed",
+    grep: "kills L29",
+  },
+  {
+    id: "L30",
+    file: REGISTRY,
+    description: "outflow past the daily limit",
+    find: "if (used + amount > config.dailyLimit) revert LoanRegistry__DailyLimitExceeded();",
+    replace: "// MUTANT: daily limit removed",
+    grep: "kills L30",
+  },
+  {
     id: "L34",
     file: REGISTRY,
     description: "unpause callable by the guardian, not only the timelock",
@@ -326,6 +414,30 @@ const mutations: Mutation[] = [
     find: "if (newMax > maxFacilityGbp) revert LoanRegistry__NotALowering();",
     replace: "// MUTANT: lowering check removed",
     grep: "lowers the per-loan limit, and cannot raise it",
+  },
+  {
+    id: "L35c",
+    file: REGISTRY,
+    description: "lowerMaxFeeBps can raise the fee limit",
+    find: "if (newBps > maxFeeBps) revert LoanRegistry__NotALowering();",
+    replace: "// MUTANT: lowering check removed",
+    grep: "kills L35c",
+  },
+  {
+    id: "L38",
+    file: REGISTRY,
+    description: "fee above the fee limit",
+    find: "if (feeGbp * BPS > maxFeeBps * facilityGbp) revert LoanRegistry__FeeExceeded();",
+    replace: "// MUTANT: fee limit removed",
+    grep: "kills L38",
+  },
+  {
+    id: "L39",
+    file: REGISTRY,
+    description: "tranche to the Safe",
+    find: "if (to == safe) revert LoanRegistry__DestinationNotApproved();",
+    replace: "// MUTANT: Safe destination check removed",
+    grep: "kills L39",
   },
 ];
 
@@ -399,6 +511,12 @@ async function main() {
 
   for (const m of selected) {
     const original = fs.readFileSync(m.file, "utf8");
+
+    if (original.split(m.find).length > 2) {
+      results.push({ id: m.id, description: m.description, status: "ERROR", detail: "find string matches more than once" });
+      console.log(`[${m.id}] ERROR  find string matches more than once: ${m.description}`);
+      continue;
+    }
 
     if (!original.includes(m.find)) {
       results.push({ id: m.id, description: m.description, status: "ERROR", detail: "find string not present in source" });

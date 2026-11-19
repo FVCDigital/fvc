@@ -140,6 +140,7 @@ struct TokenConfig {
 
 address public immutable safe;                // the one Safe (BD1); always a destination
 uint256 public maxFacilityGbp;                // per-loan cap, pence
+uint256 public maxFeeBps;                     // fee cap as bps of the facility; starts at 5_000
 uint256 public loanCount;                     // ids start at 1
 
 mapping(uint256 => Loan) public loans;
@@ -219,8 +220,8 @@ non-zero inputs, reference, bounds, rate band, then effects, then token transfer
 
 | Function | Checks (in order) | Effects | Emits | Invariants |
 |---|---|---|---|---|
-| `createLoan(bytes32 agreementHash, bytes32 smeRef, uint256 facilityGbp, uint256 feeGbp) returns (uint256 loanId)` | role; not paused; `agreementHash != 0`, `smeRef != 0`; `facilityGbp != 0`; `facilityGbp <= maxFacilityGbp` | new loan `++loanCount`, `Active`, `createdAt = block.timestamp` | `LoanCreated(loanId, agreementHash, smeRef, facilityGbp, feeGbp)` | 15, 16, 20, S3 |
-| `recordDisbursement(uint256 loanId, uint256 gbpAmount, address token, uint256 tokenAmount, bytes32 payoutRef, address to)` | role; not paused; loan exists, `Active`, drawing open; token allowed; both amounts `!= 0`; `_useRef(payoutRef)`; `disbursedGbp + gbpAmount <= facilityGbp`; rate band | `disbursedGbp += gbpAmount`; if it now equals `facilityGbp`, `drawingClosed = true`; `_pullExact`, then `_pushTo(token, tokenAmount, to)` | `TrancheDisbursed(loanId, gbpAmount, token, tokenAmount, payoutRef, to)`, and `FacilityClosed(loanId, disbursedGbp)` if it closed | 1, 15a, 15b, S1 to S6 |
+| `createLoan(bytes32 agreementHash, bytes32 smeRef, uint256 facilityGbp, uint256 feeGbp) returns (uint256 loanId)` | role; not paused; `agreementHash != 0`, `smeRef != 0`; `facilityGbp != 0`; `facilityGbp <= maxFacilityGbp`; `feeGbp * 10_000 <= maxFeeBps * facilityGbp` | new loan `++loanCount`, `Active`, `createdAt = block.timestamp` | `LoanCreated(loanId, agreementHash, smeRef, facilityGbp, feeGbp)` | 15, 16, 20, S3 |
+| `recordDisbursement(uint256 loanId, uint256 gbpAmount, address token, uint256 tokenAmount, bytes32 payoutRef, address to)` | role; not paused; loan exists, `Active`, drawing open; token allowed; both amounts `!= 0`; `_useRef(payoutRef)`; `disbursedGbp + gbpAmount <= facilityGbp`; rate band; `to != safe` | `disbursedGbp += gbpAmount`; if it now equals `facilityGbp`, `drawingClosed = true`; `_pullExact`, then `_pushTo(token, tokenAmount, to)` | `TrancheDisbursed(loanId, gbpAmount, token, tokenAmount, payoutRef, to)`, and `FacilityClosed(loanId, disbursedGbp)` if it closed | 1, 15a, 15b, S1 to S6 |
 | `closeFacility(uint256 loanId)` | role; not paused; loan `Active`; drawing open | `drawingClosed = true`; `_settleIfRepaid` | `FacilityClosed(loanId, disbursedGbp)` | 14, 15b |
 
 ### 6.3 Repayments and collateral in (`RECORDER_ROLE`, no delay)
@@ -262,6 +263,7 @@ These can only make the contract more restrictive (S8). The Safe holds the role 
 | `disallowToken(address token)` | role; currently allowed | `allowed = false` (`known` stays) | `TokenDisallowed(token)` |
 | `lowerTokenLimits(address token, uint256 maxPayout, uint256 dailyLimit)` | role; `known`; each value `<=` its current value | set | `TokenLimitsSet(token, maxPayout, dailyLimit)` |
 | `lowerMaxFacility(uint256 newMax)` | role; `newMax <= maxFacilityGbp` | set | `MaxFacilitySet(newMax)` |
+| `lowerMaxFeeBps(uint256 newBps)` | role; `newBps <= maxFeeBps` | set | `MaxFeeSet(newBps)` |
 
 The Safe cannot be removed as a destination, so repayments and collateral can always go home.
 
@@ -275,6 +277,7 @@ The Safe cannot be removed as a destination, so repayments and collateral can al
 | `setRateBand(address token, uint32 minRateBps, uint32 maxRateBps)` | role; `known`; `0 < min <= max` | set | `RateBandSet(token, minRateBps, maxRateBps)` |
 | `setTokenLimits(address token, uint256 maxPayout, uint256 dailyLimit)` | role; `known`; `maxPayout <= dailyLimit` | set (may raise) | `TokenLimitsSet(token, maxPayout, dailyLimit)` |
 | `setMaxFacility(uint256 newMax)` | role; `newMax != 0` | set (may raise) | `MaxFacilitySet(newMax)` |
+| `setMaxFeeBps(uint256 newBps)` | role; `newBps <= 10_000` | set (may raise) | `MaxFeeSet(newBps)` |
 | `recoverSurplus(address token)` | role; surplus `!= 0` | sends `balanceOf(this) - (totalReceived - totalForwarded) - totalCollateralHeld` to `safe` | `SurplusRecovered(token, amount)` |
 | `grantRole` / `revokeRole` | OpenZeppelin `AccessControl` | | `RoleGranted`, `RoleRevoked` |
 
@@ -334,6 +337,7 @@ event TokenDisallowed(address indexed token);
 event RateBandSet(address indexed token, uint32 minRateBps, uint32 maxRateBps);
 event TokenLimitsSet(address indexed token, uint256 maxPayout, uint256 dailyLimit);
 event MaxFacilitySet(uint256 maxFacilityGbp);
+event MaxFeeSet(uint256 maxFeeBps);
 event SurplusRecovered(address indexed token, uint256 amount);
 ```
 
@@ -344,7 +348,7 @@ event SurplusRecovered(address indexed token, uint256 amount);
 All named `LoanRegistry__<Reason>`:
 
 `ZeroAddress`, `ZeroAmount`, `ZeroHash`, `ZeroRef`, `RefAlreadyUsed`, `LoanNotFound`,
-`InvalidStatus(Status current)`, `DrawingClosed`, `FacilityExceeded`, `MaxFacilityExceeded`,
+`InvalidStatus(Status current)`, `DrawingClosed`, `FacilityExceeded`, `MaxFacilityExceeded`, `FeeExceeded`,
 `OwedExceeded`, `CollateralExceeded`, `OutstandingExceeded`, `ForwardExceeded`,
 `TokenNotAllowed`, `TokenUnknown`, `InvalidRateBand`, `RateOutOfBand`, `BalanceMismatch`,
 `DestinationNotApproved`, `DestinationAlreadyApproved`, `CannotRemoveSafe`,
@@ -365,6 +369,7 @@ Which check raises which error:
 | Tranche or `closeFacility` after drawing closed | `DrawingClosed` |
 | Tranche past `facilityGbp` | `FacilityExceeded` |
 | `createLoan` above `maxFacilityGbp` | `MaxFacilityExceeded` |
+| `createLoan` with a fee above `maxFeeBps` of the facility | `FeeExceeded` |
 | Repayment past `owedGbp` | `OwedExceeded` |
 | Claim or release above `collateralHeld` | `CollateralExceeded` |
 | Claim crediting more than `outstandingGbp` | `OutstandingExceeded` |
@@ -374,12 +379,12 @@ Which check raises which error:
 | `minRateBps == 0` or `minRateBps > maxRateBps` | `InvalidRateBand` |
 | Recorded pair outside the band | `RateOutOfBand` |
 | Measured balance increase differs from the amount | `BalanceMismatch` |
-| Push to an address not approved; `removeDestination` on one not approved | `DestinationNotApproved` |
+| Push to an address not approved; a tranche to the Safe; `removeDestination` on one not approved | `DestinationNotApproved` |
 | `addDestination` on one already approved | `DestinationAlreadyApproved` |
 | `removeDestination(safe)` | `CannotRemoveSafe` |
 | Single transfer above `maxPayout` | `PayoutLimitExceeded` |
 | Today's outflow would pass `dailyLimit` | `DailyLimitExceeded` |
-| `maxPayout > dailyLimit` in `allowToken` or `setTokenLimits` | `InvalidLimits` |
+| `maxPayout > dailyLimit` in `allowToken` or `setTokenLimits`; `setMaxFeeBps` above 10_000 | `InvalidLimits` |
 | A guardian "lower" call that raises any value | `NotALowering` |
 | `recoverSurplus` with nothing to recover | `NoSurplus` |
 
@@ -451,6 +456,10 @@ test names below are the ones phase S2 writes.
 | L35 | raising limits is admin only | S7, S8 | security / guardian cannot raise a limit |
 | L36 | stored decimals used in the band | S11 | security / 18-decimal token checked with its own decimals |
 | L37 | `recoverSurplus` bounded by surplus | S10 | security / recoverSurplus leaves repayments and collateral |
+| L35b | `lowerMaxFacility` cannot raise | S8 | security / lowers the per-loan limit, and cannot raise it |
+| L35c | `lowerMaxFeeBps` cannot raise | S8 | security / lowers the fee limit, and cannot raise it |
+| L38 | `feeGbp` within `maxFeeBps` of the facility | S13 | createLoan / reverts one penny over the fee limit |
+| L39 | no tranche to the Safe | S14 | security / a tranche to the Safe reverts |
 
 L22 and L23 are the same line in the minimal design (`forward` is bounded by received minus
 forwarded, which excludes collateral by construction). Both labels stay so each has a named test.
@@ -468,7 +477,7 @@ forwarded, which excludes collateral by construction). Both labels stay so each 
 | Foundry invariants | One `prop_*` per invariant, three actors including a compromised Safe | `test-fuzz/LoanRegistryInvariants.t.sol` | S7 |
 | Medusa | Same `prop_*` | `medusa.json` | S7 |
 | Halmos | Exactly-once, owed bound, status machine, collateral timing, daily limit | `test-fuzz/symbolic/LoanRegistrySymbolic.t.sol` | S7 |
-| Mutation | L01 to L37 | `scripts/mutate.ts` | S3 to S7 |
+| Mutation | L01 to L39 (with L35b, L35c) | `scripts/mutate.ts` | S3 to S7 |
 | Static | Slither and Aderyn, no high findings | CI | every phase |
 | Coverage | 100 percent lines, statements, functions; 95 percent branches | `scripts/check-coverage.ts` | S7 |
 | Fork e2e | Real USDC, USDT, Safe, Staking | `test/LoanRegistry.e2e.ts` | S9 |
@@ -489,3 +498,8 @@ through `allowToken`.
 6. **Rejected GBP payout** (system.md D10). No reversal function in v1 (SD11): the returned
    stablecoin is recorded as a repayment with its own reference, so what is owed nets out, and the
    Safe keeps it out of Staking. To confirm with the partner how and with which reference it returns.
+7. **Shariah review of the fee** (19 Nov). The whitepaper promises returns "based on actual business
+   performance rather than predetermined returns". The advisor rules on whether a fixed `feeGbp` is
+   allowed, whether `claimCollateral` may cover the fee or only what was paid out (affects S6), and
+   whether a fee is owed on a facility closed before anything was paid out. `maxFeeBps` only stops
+   typos; a zero fee always passes.
