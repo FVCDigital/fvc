@@ -217,6 +217,47 @@ sequenceDiagram
     end
 ```
 
+### 7.5 Edge cases
+
+Every stablecoin payment from the partner lands in the Treasury Safe first, whether or not it
+matches a loan. Nothing moves into the Loan Registry until the Safe signers approve it. The
+reconciler never guesses: anything it cannot match exactly goes into its daily report for a person
+to resolve.
+
+**Repayments**
+
+| Case | What happens |
+|---|---|
+| Reference matches no loan | Stays in the Safe as unmatched. The signers ask the partner which SME sent it. If it belongs to a loan, it is recorded there; if not, the stablecoin goes back to the partner, who refunds the payer in GBP (D9). |
+| Wrong but valid reference (another SME's loan) | The reconciler checks the amount against what that loan expects and flags anything unusual; the signers check before signing. Once recorded, v1 cannot undo it on-chain (SD11), so this check matters most. |
+| SME pays less than due | Recorded as a partial repayment. Any amount, any time, is accepted. |
+| SME pays more than it owes | The contract rejects the full amount (BD8). The signers record exactly the outstanding balance; the excess stays in the Safe and goes back to the partner for a GBP refund to the SME. |
+| Same settlement message twice | The second is ignored: each reference can be recorded once only (R2). |
+| Stablecoin arrives with no message, or the reverse | Nothing is recorded until both exist and agree. |
+| Message and on-chain amount disagree | Flagged; the signers ask the partner. Only the amount that actually arrived can be recorded (R1). |
+| Payment to a loan already repaid or written off | The contract rejects it. Refunded through the partner. |
+| Stablecoin the registry does not accept | Stays in the Safe. The Safe swaps it or returns it to the partner. |
+| Card chargeback after recording | A recorded repayment is final in v1 (R8, D4). |
+| Implied rate far from the market (for example pence typed as pounds) | The contract rejects it (SD8). The figures are corrected and resubmitted. |
+
+**Payouts**
+
+| Case | What happens |
+|---|---|
+| Payout larger than the per-payout limit | Rejected; split into tranches. |
+| Daily limit reached | Further payouts that day are rejected and go through after 00:00 UTC. |
+| SME's bank rejects the GBP payout | The partner returns the stablecoin to the Safe. The tranche stays recorded on-chain, so the signers record the returned amount as a repayment against the same loan, under its own reference. What the SME owes then nets to the correct figure. The Safe keeps that money out of Staking, because it is returned principal, not income (D10). |
+| Partner's deposit address changes | The new address waits 48 hours before it can receive payouts; the old one can be removed at once. |
+
+**Loan problems and emergencies**
+
+| Case | What happens |
+|---|---|
+| SME stops paying | The loan is marked as defaulted. Repayments are still accepted. Collateral can be claimed against what is owed, and any excess goes back to the SME through the partner. |
+| Defaulted SME later repays in full | The loan closes as repaid automatically. |
+| Registry paused (suspected compromise) | The partner is unaffected: payments keep landing in the Safe and are recorded after the pause ends, which takes 48 hours. |
+| Issuer freezes stablecoin held by the registry | An accepted risk. The registry only holds funds briefly between recording and forwarding. |
+
 ---
 
 ## 8. Requirements
@@ -261,6 +302,8 @@ sequenceDiagram
 | D5 | Publishing the agreement hash; consumer credit rules for sole traders | Legal review | Legal Bison |
 | D6 | The partner's legal entity, company number and licence (or licensed partner) | Partner | Partner |
 | D8 | Is the repayment cap fixed in the agreement, or a multiple of what was actually paid out (for example 1.2 times the tranches drawn) | Agreement terms | Jaz |
+| D9 | Payment whose reference matches no SME: the partner holds it, returns it to the payer, or settles it to the Safe | The partner's product | Igli with the partner |
+| D10 | Rejected GBP payout: does the partner return the stablecoin to the Safe, and with which reference | The partner's product | Igli with the partner |
 | D7 | Accounting detail: how repayments split into principal and revenue-share income, per transaction or monthly summary, Xero column layout | Dan's firm | Igli with Dan |
 
 ## 10. Decision log
@@ -274,3 +317,4 @@ sequenceDiagram
 | 18 Nov 2026 | Security decisions SD1 to SD12: approved destinations, outflow limits, audit before mainnet, Safe holds every role, not upgradeable, Safe alone pauses, 48 hour unpause, rate band per token, OpenZeppelin timelock, `recoverSurplus`, no on-chain correction, GBP and CHF stablecoins allowed | Caps the damage of stolen keys or typos; details in [`loan-registry-plan.md`](./loan-registry-plan.md) section 2 | Igli |
 | 18 Nov 2026 | Build decisions BD1 to BD14, including owed = drawn plus a fixed fee (answers D8 for the contract: any agreed amount is set as `feeGbp`), overpayments revert, one Safe moving to 3-of-5 | Smallest audit surface; see the plan | Igli |
 | 19 Nov 2026 | Loan Registry v1 spec frozen ([`LOAN_REGISTRY.md`](../../contracts/LOAN_REGISTRY.md)); `Defaulted -> Repaid` added as an automatic transition | A defaulted loan that is then repaid in full must close | Igli (S1 PR) |
+| 19 Nov 2026 | A rejected payout returned by the partner is recorded as a repayment with its own reference; the Safe keeps it out of Staking. No contract change in v1 | Nets what the SME owes without a reversal function (SD11); returned principal is not staker income | Igli (S2 PR) |
