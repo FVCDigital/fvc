@@ -1,11 +1,17 @@
 # Development plan: from Loan Registry to a working product
 
 Status: draft, 8 Nov 2026. Goal: a UK SME can receive funding in tranches, repay in GBP through
-Clicked, and have every repayment recorded on-chain, reported to Xero, and paid out to stakers.
+the payments partner, and have every repayment recorded on-chain, reported to Xero, and paid out to stakers.
+
+The contract work (sections 4 to 6, and the contract parts of 8) is now planned security first in
+[`loan-registry-plan.md`](./loan-registry-plan.md), phases S0 to S12 and H1 to H5. Where the two
+disagree, that plan wins. Mainnet comes after the external audit.
 
 Read with:
 
+- [`docs/specs/loan-registry-plan.md`](./loan-registry-plan.md): security-first contract plan
 - [`docs/specs/system.md`](./system.md): actors, flows, requirements, open decisions
+- [`docs/specs/ui-plan.md`](./ui-plan.md): Portfolio tab, risk view, demo video (exact dapp styles)
 - [`contracts/LOAN_REGISTRY.md`](../../contracts/LOAN_REGISTRY.md): contract design
 - [`contracts/INVARIANTS.md`](../../contracts/INVARIANTS.md): numbered properties
 - [`contracts/SOL_DEVELOPMENT.md`](../../contracts/SOL_DEVELOPMENT.md): the TDD and security workflow every phase follows
@@ -59,10 +65,10 @@ flowchart LR
     P3 --> P10["P10 Reconciler"]
     P9 --> P11["P11 Subgraph and views"]
     P10 --> P12["P12 Xero export"]
-    P9 --> P13["P13 Deploy"]
+    P9 --> P13["P13 Sepolia deploy"]
     P10 --> P13
-    P13 --> P14["P14 Pilot with Clicked"]
-    P14 --> P15["P15 Audit"]
+    P13 --> P15["P15 Audit"]
+    P15 --> P14["P14 Mainnet and pilot with the partner"]
 ```
 
 | Phase | Deliverable | Target |
@@ -70,13 +76,14 @@ flowchart LR
 | P0 | Spec, invariants and mutation labels final for v1 | 10 Nov |
 | P1 to P6 | `LoanRegistry.sol` with full Hardhat suite | 17 Nov |
 | P7 to P9 | Structural tests, mutants, Foundry, Medusa, Halmos, CI | 21 Nov |
-| P10, P12 | Reconciler with Clicked mock feed, Xero export | 24 Nov |
+| P10, P12 | Reconciler with mock partner feed, Xero export | 24 Nov |
+| U0 to U4 | Portfolio UI in the dapp + partner demo video (see ui-plan.md) | U0 now; U4 after P5 on Sepolia |
 | P11 | Subgraph entities, risk view | 26 Nov |
-| P13 | Sepolia deploy, fork rehearsal, mainnet deploy | 28 Nov |
-| P14 | First SME end to end through Clicked | When Clicked is live |
-| P15 | Hashlock scope add-on | After P14 |
+| P13 | Fork rehearsal, Sepolia deploy and pilot | After P9 |
+| P15 | Hashlock audit of the Loan Registry | After the Sepolia pilot |
+| P14 | Mainnet deploy, first SME end to end through the partner | After P15 and when the partner is live |
 
-The late November target covers what was promised to Clicked: Loan Registry, reconciler and CI
+The late November target covers what was promised to the partner: Loan Registry, reconciler and CI
 security testing.
 
 ---
@@ -87,11 +94,11 @@ security testing.
 |---|---|---|---|
 | Fee on top of 1:1 repayment | Jaz | Nothing; it is a loan parameter | `feeGbp = 0` |
 | Collateral trigger (three missed payments, or fraud only) | Jaz | Nothing; the Safe decides off-chain | Admin-only `claimCollateral` on `Defaulted` loans |
-| D2 Payment reference format | Saeed | P10 parsing only | 32-byte hash of whatever string Clicked sends |
-| D3 USDC only, or USDT too | Saeed | P6 swap step | Both allowed in the registry; USDT swapped by the Safe before Staking |
-| D4 Chargebacks | Saeed | P14 | Clicked settles only final payments (R8) |
+| D2 Payment reference format | Partner | P10 parsing only | 32-byte hash of whatever string the partner sends |
+| D3 USDC only, or USDT too | Partner | P6 swap step | Both allowed in the registry; USDT swapped by the Safe before Staking |
+| D4 Chargebacks | Partner | P14 | The partner settles only final payments (R8) |
 | D5 Agreement hash, consumer credit | Legal Bison | P13 mainnet | Hash on-chain; no sole traders in the pilot |
-| D6 Clicked entity and licence | Saeed | P14 | None; pilot does not start without it |
+| D6 Partner entity and licence | Partner | P14 | None; pilot does not start without it |
 | D7 Principal and income split, Xero layout | Dan | P12 final columns | One line per transaction, Xero default columns |
 
 ---
@@ -105,7 +112,7 @@ Update the specs so they describe exactly what will be built. No code.
 - A loan is a **facility** in GBP. FVC pays it out in any number of **tranches** up to `facilityGbp`.
 - The business owes **1:1 what it drew**, plus an optional fixed `feeGbp`:
   `owedGbp = disbursedGbp + feeGbp`.
-- Repayments are any amount, any time, in USDC or USDT, each carrying the GBP amount Clicked
+- Repayments are any amount, any time, in USDC or USDT, each carrying the GBP amount the partner
   collected. A repayment may never take `repaidGbp` past `owedGbp`.
 - A loan becomes `Repaid` when drawing is closed (all of the facility drawn, or `closeFacility`
   called) and `repaidGbp == owedGbp`.
@@ -160,7 +167,7 @@ All code in `contracts/src/loan/LoanRegistry.sol`, Solidity 0.8.24, OpenZeppelin
 | Item | Detail |
 |---|---|
 | Functions | `recordDisbursement(loanId, gbpAmount, token, tokenAmount, payoutRef, to)`, `closeFacility(loanId)` |
-| Behaviour | Pulls `tokenAmount` from the caller and sends it to `to` (Clicked) in the same call; adds `gbpAmount` to `disbursedGbp`; closes drawing automatically when `disbursedGbp == facilityGbp` |
+| Behaviour | Pulls `tokenAmount` from the caller and sends it to `to` (the partner) in the same call; adds `gbpAmount` to `disbursedGbp`; closes drawing automatically when `disbursedGbp == facilityGbp` |
 | Tests | Several tranches add up; exactly the facility succeeds, one penny over reverts; reused `payoutRef` reverts; disallowed token reverts; zero amounts revert; not `Active` reverts; after `closeFacility` further tranches revert; balances of caller and `to` move by `tokenAmount` |
 | Invariants | 15a, 15b, 16 |
 | Mutation labels | L04 facility bound, L05 payoutRef once, L06 drawing closed check, L07 token allowlist on tranche |
@@ -189,7 +196,7 @@ All code in `contracts/src/loan/LoanRegistry.sol`, Solidity 0.8.24, OpenZeppelin
 | Item | Detail |
 |---|---|
 | Functions | `depositCollateral(loanId, token, tokenAmount, gbpAmount, ref)`, `releaseCollateral(loanId, token, tokenAmount, to)`, `claimCollateral(loanId, token, tokenAmount, gbpAmount, ref)`, view `collateralHeld(loanId, token)` |
-| Behaviour | Deposit pulls tokens in and records GBP value. Release sends to `to` (Clicked, for the refund to the business) only on `Repaid` or `WrittenOff`. Claim moves collateral into repayment accounting on a `Defaulted` loan, crediting `gbpAmount` against the outstanding balance |
+| Behaviour | Deposit pulls tokens in and records GBP value. Release sends to `to` (the partner, for the refund to the business) only on `Repaid` or `WrittenOff`. Claim moves collateral into repayment accounting on a `Defaulted` loan, crediting `gbpAmount` against the outstanding balance |
 | Tests | Deposit and release round trip; release before `Repaid` reverts; claim on `Active` reverts; claim more than held reverts; claim crediting more GBP than outstanding reverts; claim that clears the balance followed by release of the excess; `forward` cannot touch collateral; duplicate reference reverts |
 | Invariants | C1 to C6 |
 | Mutation labels | L18 release status check, L19 claim status check, L20 claim bounded by held, L21 claim bounded by outstanding, L22 collateral excluded from forward |
@@ -266,7 +273,7 @@ Spec: write `docs/specs/reconciler.md` first, including an activity diagram.
 
 | Part | Job |
 |---|---|
-| Clicked adapter | Reads settlement messages (webhook or poll). Starts with a mock feed that follows the format proposed in `docs/specs/clicked-integration.md` |
+| Partner adapter | Reads settlement messages (webhook or poll). Starts with a mock feed that follows the format proposed in `docs/specs/partner-integration.md` |
 | Chain watcher | Reads USDC and USDT transfers into the Safe and Loan Registry events |
 | Matcher | Reference to `loanId` through the private mapping; checks amount, duplicates, owed bound and implied GBP to USD rate |
 | Proposer | Builds the Safe batch (`approve` then `recordRepayment`) and proposes it to the Safe Transaction Service. Never signs |
@@ -275,7 +282,7 @@ Spec: write `docs/specs/reconciler.md` first, including an activity diagram.
 
 Tests: unknown reference is reported, never guessed; the same transfer is never proposed twice
 (including after a restart); partial and over-payments flagged; rate outliers flagged; a forked
-chain test with the mock Clicked feed driving the deployed registry end to end.
+chain test with the mock partner feed driving the deployed registry end to end.
 
 CI: new `reconciler` job in `ci.yml` (lint, typecheck, `vitest`).
 
@@ -310,10 +317,10 @@ CI: new `reconciler` job in `ci.yml` (lint, typecheck, `vitest`).
       `README.md` and `deployments-mainnet.json`.
 - [ ] Deploy Staking (already written) when the first repayment is near.
 
-### P14: pilot with Clicked
+### P14: pilot with the partner
 
-- [ ] Clicked entity and licence confirmed (D6).
-- [ ] Clicked sandbox replaces the mock feed; one test settlement end to end.
+- [ ] Partner entity and licence confirmed (D6).
+- [ ] Partner sandbox replaces the mock feed; one test settlement end to end.
 - [ ] First SME: agreement signed, loan created, first tranche paid, first repayment recorded,
       forwarded, paid to stakers. Each step checked in the risk view and the Xero export.
 

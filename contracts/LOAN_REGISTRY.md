@@ -92,7 +92,7 @@ uint256 public totalRepaidGbp;
 ```
 
 Agreements are in pounds (UK SMEs); money arrives as USDC or USDT on Ethereum. Each repayment
-records both: the GBP amount Clicked collected, which counts against the cap, and the token amount
+records both: the GBP amount the partner collected, which counts against the cap, and the token amount
 the registry pulled in, which backs it. See the currency model in
 [`docs/specs/system.md`](../docs/specs/system.md).
 
