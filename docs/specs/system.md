@@ -271,3 +271,6 @@ sequenceDiagram
 | 8 Nov 2026 | Agreements and caps in GBP; each repayment records GBP and token amounts | SMEs are UK businesses; agreements are in pounds | Igli |
 | 8 Nov 2026 | Accounting package: Xero | Dan's recommendation | Dan, Igli |
 | 8 Nov 2026 | Loans are facilities paid out in tranches; repayments any amount, any time, until the GBP cap | Paying a whole loan at once is unrealistic | Igli |
+| 18 Nov 2026 | Security decisions SD1 to SD12: approved destinations, outflow limits, audit before mainnet, Safe holds every role, not upgradeable, Safe alone pauses, 48 hour unpause, rate band per token, OpenZeppelin timelock, `recoverSurplus`, no on-chain correction, GBP and CHF stablecoins allowed | Caps the damage of stolen keys or typos; details in [`loan-registry-plan.md`](./loan-registry-plan.md) section 2 | Igli |
+| 18 Nov 2026 | Build decisions BD1 to BD14, including owed = drawn plus a fixed fee (answers D8 for the contract: any agreed amount is set as `feeGbp`), overpayments revert, one Safe moving to 3-of-5 | Smallest audit surface; see the plan | Igli |
+| 19 Nov 2026 | Loan Registry v1 spec frozen ([`LOAN_REGISTRY.md`](../../contracts/LOAN_REGISTRY.md)); `Defaulted -> Repaid` added as an automatic transition | A defaulted loan that is then repaid in full must close | Igli (S1 PR) |

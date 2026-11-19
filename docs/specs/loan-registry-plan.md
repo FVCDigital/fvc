@@ -11,8 +11,8 @@ Read with:
 - [`contracts/SOL_DEVELOPMENT.md`](../../contracts/SOL_DEVELOPMENT.md): the TDD workflow every phase follows
 - [`docs/specs/system.md`](./system.md): actors, flows, open decisions
 
-Nothing in `contracts/src/loan/` exists yet. The only Loan Registry code is one failing test in
-`contracts/test/LoanRegistry.test.ts`.
+Nothing in `contracts/src/loan/` exists yet. The v1 spec is frozen in
+[`contracts/LOAN_REGISTRY.md`](../../contracts/LOAN_REGISTRY.md) (S1); tests start in S2.
 
 ---
 
@@ -142,8 +142,8 @@ Every function that moves tokens is also bound by SD1, SD2 and SD8, whoever call
 Added to `INVARIANTS.md` in S1, next to rules 1 to 20 and C1 to C6.
 
 - **S1.** Every token transfer out of the registry goes to an approved destination.
-- **S2.** For each token, total outflow in one UTC day never exceeds the daily limit in force.
-- **S3.** No facility above the per-loan limit; no tranche above the per-payout limit.
+- **S2.** For each token, tranche, release and forward outflow in one UTC day never exceeds the daily limit in force.
+- **S3.** No facility above the per-loan limit; no single transfer out above the per-payout limit.
 - **S4.** Every recorded GBP and token pair is inside the rate band in force.
 - **S5.** The token amount credited equals the registry's measured balance increase.
 - **S6.** Tokens are only ever pulled from `msg.sender`.
@@ -151,7 +151,7 @@ Added to `INVARIANTS.md` in S1, next to rules 1 to 20 and C1 to C6.
   roles, unpause or recover surplus.
 - **S8.** `GUARDIAN_ROLE` actions only reduce what is possible: they cannot unpause, raise a limit,
   add a destination or move tokens.
-- **S9.** While paused, every state change reverts except `GUARDIAN_ROLE` reductions; every view works.
+- **S9.** While paused, every function that moves tokens or changes a loan reverts; guardian and timelock configuration still works; every view works.
 - **S10.** Solvency: for every token, balance is at least repayments held plus collateral held
   (combines invariant 6 and C1). `recoverSurplus` can only move the excess.
 - **S11.** The only external calls are `transfer`, `transferFrom`, `balanceOf` and `decimals` on
@@ -204,12 +204,12 @@ This document. **Gate:** Igli approves it. Section 2 decisions are all made.
 
 ### S1: spec freeze
 
-- [ ] `LOAN_REGISTRY.md`: replace `repaymentCapGbp` with `feeGbp` and `owedGbp`; add `closeFacility`,
+- [x] `LOAN_REGISTRY.md`: replace `repaymentCapGbp` with `feeGbp` and `owedGbp`; add `closeFacility`,
       collateral, destinations, limits, rate band, guardian role, timelock, `recoverSurplus`; this
       threat model; the role table from section 4; every event.
-- [ ] `INVARIANTS.md`: rewrite rules 2, 3 and 14 for `owedGbp`; add 15b, C1 to C6 and S1 to S12.
-- [ ] Full list of mutation labels `L01` to `L37`, each pointing at the invariant it protects.
-- [ ] `system.md`: decision log rows SD1 to SD10.
+- [x] `INVARIANTS.md`: rewrite rules 2, 3 and 14 for `owedGbp`; add 15b, C1 to C6 and S1 to S12.
+- [x] Full list of mutation labels `L01` to `L37`, each pointing at the invariant it protects.
+- [x] `system.md`: decision log rows for SD1 to SD12 and BD1 to BD14.
 
 **Gate:** a reviewer can list every function, its role, its delay and the invariants it touches from
 the specs alone.
@@ -342,3 +342,91 @@ correction in v1 (SD11), SD7 to SD10 accepted, build decisions BD1 to BD14.
 
 Open with the partner: overpayment refunds (BD8), settlement reference format, which stablecoins
 it settles, and chargebacks (`system.md` D2 to D4).
+
+---
+
+## 10. Phase prompts
+
+Each phase from S2 on is handed to a coding agent with the prompt below. It follows Anthropic's
+[Claude prompting best practices](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/claude-4-best-practices):
+documents first and the task last, each part in its own XML tag, numbered steps where order
+matters, a reason next to every constraint so the agent can generalise from it, and a verifiable
+definition of done.
+
+Fill in the three `{...}` fields from section 6 and send it as is.
+
+```xml
+<role>
+You are a senior Solidity security engineer building FVC's Loan Registry, a contract that
+records SME loans and moves real stablecoins. Correctness and security come before speed.
+</role>
+
+<documents>
+Read these files in full before writing anything. Do not rely on memory of them.
+- contracts/LOAN_REGISTRY.md: the frozen v1 spec. It is the source of truth for every
+  function, check order, event and error name.
+- contracts/INVARIANTS.md, section "LoanRegistry.sol": properties 1 to 20, C1 to C6, S1 to S12.
+- docs/specs/loan-registry-plan.md: decisions, threat model, and this phase's checklist and gate.
+- contracts/SOL_DEVELOPMENT.md: the TDD workflow and the pre-PR command set.
+- The existing suites for Staking and Sale under contracts/test and contracts/test-fuzz, as the
+  style reference for tests, mocks and handlers.
+</documents>
+
+<context>
+Phase: {phase id and name, for example "S2: every test written first, all red"}.
+Previous phases are merged on main. The Safe holds every operating role and a 48 hour
+TimelockController is the admin. Money paths are bound by approved destinations, per-payout
+and daily limits, and a per-token rate band, because stolen keys or a pence-for-pounds typo are
+the most likely ways to lose money.
+</context>
+
+<task>
+{the phase checklist from section 6, pasted verbatim}
+</task>
+
+<steps>
+1. Read every file in <documents>. List any place where the spec is ambiguous or contradicts
+   itself, and stop to ask rather than guessing.
+2. Work on branch loan-registry/{sN-slug}, created from the latest main.
+3. Write the tests first. Name each `it` after the behaviour it proves, and use the test names
+   in LOAN_REGISTRY.md section 10 for mutation labels.
+4. Then write the smallest code that makes them pass. Run the tests after every change.
+5. Run the full pre-PR command set from SOL_DEVELOPMENT.md and record each result.
+6. Open one PR for this phase and stop. Igli approves each phase before the next starts.
+</steps>
+
+<constraints>
+- Follow the spec exactly: names, argument order, check order, events and custom errors
+  `LoanRegistry__<Reason>`. Auditors and the reconciler depend on these being stable.
+- Never edit, skip or weaken a test to make it pass. If a test looks wrong, say why in the PR
+  and leave it failing. Tests encode the invariants; changing them hides bugs.
+- Write general logic. Do not hard-code values or special-case test inputs; the fuzzers will
+  find code that only works for the examples.
+- Use OpenZeppelin 4.9 (AccessControl, Pausable, ReentrancyGuard, SafeERC20,
+  TimelockController) rather than hand-written versions. They are audited.
+- Never deploy to mainnet, never sign or propose Safe transactions, never use real private
+  keys. A human does all of that.
+- No personal data in code, tests, fixtures or events. Use made-up hashes.
+- Do not name the payments partner in any file; the repository is public.
+- No em dashes or en dashes in any text you write.
+- Keep the change to this phase. Do not refactor other contracts or add features the spec
+  does not list.
+</constraints>
+
+<done_when>
+- Every checklist item in <task> is ticked in loan-registry-plan.md.
+- The phase gate in section 6 passes, shown by command output in the PR.
+- Slither and Aderyn report no high findings, or each is explained in the PR.
+- Every mutation label in scope has a test that fails when the guard is removed.
+</done_when>
+
+<report>
+In the PR description, in this order: what changed and which invariants it touches; each
+command run and its result; any open Slither or Aderyn finding with the reason; any question
+for Igli; "Mainnet behaviour changes: no" unless a deploy is part of the phase.
+</report>
+```
+
+After each phase the independent security review agent (BD12) reviews the PR diff with the same
+`<documents>` block and this instruction: "Find ways to break the invariants or move tokens
+outside the controls. Report each finding with the invariant it breaks and a failing test."

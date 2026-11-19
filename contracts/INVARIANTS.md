@@ -4,8 +4,8 @@ Plain-English rules that must always hold. Use these for fuzzing, audits, and co
 
 Status as of October 2026: invariant suites are complete for Vesting, Sale and Staking. Each handler
 exposes its properties as `prop_*` functions, so Foundry (every push, and a deep campaign nightly) and
-Medusa (nightly) check exactly the same rules. Halmos proves a subset symbolically every week. The
-properties for the planned LoanRegistry are in [LOAN_REGISTRY.md](./LOAN_REGISTRY.md).
+Medusa (nightly) check exactly the same rules. Halmos proves a subset symbolically every week.
+LoanRegistry is specified, not built: properties below, design in [LOAN_REGISTRY.md](./LOAN_REGISTRY.md).
 
 Staking properties 6, 9 and 16 are only partly covered: 6 is checked for every account except the one
 that just claimed, 9 holds by construction because `notifyRewardAmount` pulls the reward (9a is the
@@ -137,6 +137,71 @@ fuzzed form), and 16 has no dedicated check.
 2. Sale + OTC mint paths are the only production minters
 3. FVC in Vesting == obligations tracked by `totalVesting` (per Vesting invariants)
 4. Investor claimable FVC on dashboard == sum of `releasableAmount` across their schedules
+
+---
+
+## LoanRegistry.sol (frozen spec, not implemented)
+
+Full design: [LOAN_REGISTRY.md](./LOAN_REGISTRY.md), frozen in phase S1 on 19 Nov 2026. Build
+order and gates: [`loan-registry-plan.md`](../docs/specs/loan-registry-plan.md). Do not claim any
+of this is live until it is deployed.
+
+Terms: `owedGbp = disbursedGbp + feeGbp`; `outstandingGbp = owedGbp - repaidGbp`. "Refs" are the
+payout, settlement and collateral references, which share one set (`refUsed`).
+
+### Repayment accounting
+1. Every ref (payout, settlement, collateral) is used at most once
+2. `loan.repaidGbp <= owedGbp(loan)` for every loan
+3. `outstandingGbp(loan) == owedGbp(loan) - repaidGbp` and never underflows
+4. `loan.repaidGbp` and `loanReceived[loan][token]` never decrease
+5. `totalRepaidGbp == sum of loan.repaidGbp`; for every token, `totalReceived[token] == sum of loanReceived[loan][token]`
+6. For every token, `token.balanceOf(registry) >= totalReceived[token] - totalForwarded[token]` (strengthened by S10)
+7. Tokens pulled in == tokens pushed out + tokens held (ghost accounting in the handler; a tranche counts once each way)
+8. `totalForwarded[token] <= totalReceived[token]`
+
+### Currency
+9. Every recorded GBP amount and token amount is positive
+10. Repayments, tranches and collateral deposits only accept `tokenConfig[token].allowed`
+11. No on-chain FX; the GBP figure comes from the partner and is stored, checked only against the rate band (S4)
+
+### Lifecycle
+12. Status changes are exactly: `Active -> Defaulted`, `Defaulted -> Active`, `Defaulted -> WrittenOff`, and the automatic `Active -> Repaid` and `Defaulted -> Repaid`. `Repaid` and `WrittenOff` are terminal
+13. Repayments accepted on `Active` and `Defaulted`; rejected on `Repaid` and `WrittenOff`
+14. A loan is `Repaid` if and only if `drawingClosed` and `repaidGbp == owedGbp`
+15. `agreementHash`, `smeRef`, `facilityGbp` and `feeGbp` never change after creation
+15a. `disbursedGbp <= facilityGbp`, never decreases, and tranches are only paid on `Active` loans with drawing open
+15b. `drawingClosed` never goes back to false; it is set when `disbursedGbp == facilityGbp` or by `closeFacility`; no tranche succeeds after it
+
+### Access and safety
+16. Only Originator creates loans and pays tranches, only Recorder records repayments and deposits, only Risk changes status and moves collateral out, only Distributor forwards
+17. Recorder cannot change loan terms or status, except the automatic move to `Repaid`
+18. While paused, every function that moves tokens or changes a loan reverts (see S9)
+19. Views never revert on any reachable state, including unknown loan ids
+
+### Privacy
+20. No personal data on-chain; `smeRef` is a salted hash with a new salt per loan, so two loans to the same SME cannot be linked
+
+### Collateral
+C1. Collateral is backed: for every token, `balanceOf(registry) >= (totalReceived - totalForwarded) + totalCollateralHeld`
+C2. `forward` can never move collateral: it is bounded by `totalReceived - totalForwarded`
+C3. Collateral is released only on `Repaid` or `WrittenOff` loans
+C4. Collateral is claimed only on `Defaulted` loans, never more than is held for that loan and token, and never crediting more GBP than is outstanding
+C5. `collateralHeld[loan][token]` changes only through deposit, claim and release; `totalCollateralHeld[token]` is its sum over loans
+C6. Each collateral ref is used at most once (shared set, invariant 1)
+
+### Security controls
+S1. Every token transfer out of the registry goes to an approved destination; the Safe is always one
+S2. For each token, tranche, release and forward outflow in one UTC day never exceeds the daily limit in force
+S3. No loan above the per-loan facility limit; no single transfer out above the per-payout limit
+S4. Every recorded GBP and token pair is inside that token's rate band
+S5. The token amount credited equals the registry's measured balance increase
+S6. Tokens are only ever pulled from `msg.sender`
+S7. Only the timelock can add destinations, raise limits, change a band, allow tokens, grant roles, unpause or recover surplus
+S8. `GUARDIAN_ROLE` actions only reduce what is possible: they cannot unpause, raise a limit, add a destination, allow a token or move tokens
+S9. While paused, every function that moves tokens or changes a loan reverts; guardian and timelock configuration still works; every view works
+S10. Solvency: for every token, balance >= repayments held + collateral held; `recoverSurplus` moves only the excess, always to the Safe
+S11. The only external calls are `transfer`, `transferFrom`, `balanceOf` and `decimals` on tokens; decimals are read once, when a token is first allowed
+S12. No function loops over loans, tranches or repayments
 
 ---
 
