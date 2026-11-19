@@ -18,7 +18,7 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
       onClick={onClick}
       className={cn(
         "relative cursor-pointer transition-all duration-300 min-h-[140px] border w-full overflow-hidden group hover:-translate-y-1",
-        isCurrent && "bg-sky-500/10 border-sky-500 text-sky-100 shadow-[0_8px_25px_-5px_rgba(56,189,248,0.3)] animate-subtle-pulse",
+        isCurrent && "bg-brand/10 border-brand text-brand-soft shadow-[0_8px_25px_-5px_rgba(106,112,228,0.3)] animate-subtle-pulse",
         isCompleted && "bg-emerald-500/5 border-emerald-900/50 text-emerald-100 shadow-md hover:shadow-lg hover:shadow-emerald-900/20",
         isFuture && "bg-muted/40 border-border text-muted-foreground opacity-70 grayscale-[0.3] hover:opacity-100 hover:grayscale-0",
         "flex flex-col justify-between"
@@ -28,7 +28,7 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
         {/* Status Badge */}
         <div className={cn(
           "absolute top-3 right-3 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border",
-          isCurrent && "bg-sky-500 text-white border-sky-500 shadow-sm",
+          isCurrent && "bg-brand text-white border-brand shadow-sm",
           isCompleted && "bg-emerald-500 text-white border-emerald-500 shadow-sm",
           isFuture && "bg-muted text-muted-foreground border-border"
         )}>
@@ -54,7 +54,7 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
         {/* Subtitle */}
         <h4 className={cn(
           "text-xs font-medium mb-3",
-          isCurrent ? "text-sky-100" : "text-muted-foreground"
+          isCurrent ? "text-brand-soft" : "text-muted-foreground"
         )}>
           {stage.subtitle}
         </h4>
@@ -62,7 +62,7 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
         {/* Description Preview */}
         <p className={cn(
           "text-[10px] leading-relaxed line-clamp-2",
-          isCurrent ? "text-sky-200/80" : "text-muted-foreground/80"
+          isCurrent ? "text-brand-soft/80" : "text-muted-foreground/80"
         )}>
           {stage.description}
         </p>
@@ -70,7 +70,7 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({ stage, onClick }) => {
         {/* Click indicator */}
         <div className={cn(
           "mt-3 text-[9px] font-medium uppercase tracking-widest opacity-0 transform translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0",
-          isCurrent ? "text-sky-300" : "text-muted-foreground"
+          isCurrent ? "text-brand-soft" : "text-muted-foreground"
         )}>
           View Details
         </div>

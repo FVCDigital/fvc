@@ -27,9 +27,9 @@ const StakingView: React.FC = () => {
           transition: 'all 0.2s ease',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = '#0EA5E9';
+          e.currentTarget.style.background = '#7A80F0';
           e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(56, 189, 248, 0.3)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(106, 112, 228, 0.3)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.background = theme.generalButton;

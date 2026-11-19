@@ -1,7 +1,7 @@
 import React from 'react';
 
 const BondingTerms: React.FC = () => (
-  <div className="bg-sky-500/10 p-4 rounded-xl mt-5 w-full text-sm text-muted-foreground leading-relaxed">
+  <div className="bg-brand/10 p-4 rounded-xl mt-5 w-full text-sm text-muted-foreground leading-relaxed">
     <div className="font-semibold mb-2 text-foreground">
       Bonding Terms & Conditions
     </div>

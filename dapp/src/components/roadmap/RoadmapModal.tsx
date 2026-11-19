@@ -25,7 +25,7 @@ const RoadmapModal: React.FC<RoadmapModalProps> = ({ stage, isOpen, onClose }) =
       <div 
         className={cn(
           "relative w-full max-w-lg max-h-[85vh] overflow-y-auto rounded-xl border shadow-2xl animate-in zoom-in-95 duration-200",
-          isCurrent && "bg-card border-sky-500/50 shadow-sky-500/20",
+          isCurrent && "bg-card border-brand/50 shadow-brand/20",
           isCompleted && "bg-card border-emerald-500/50 shadow-emerald-500/20",
           !isCurrent && !isCompleted && "bg-card border-border shadow-black/40"
         )}
@@ -66,7 +66,7 @@ const RoadmapModal: React.FC<RoadmapModalProps> = ({ stage, isOpen, onClose }) =
                 <li key={index} className="flex items-start gap-3 text-sm text-muted-foreground">
                   <span className={cn(
                     "mt-1.5 h-1.5 w-1.5 rounded-full shrink-0",
-                    isCurrent ? "bg-sky-500" : isCompleted ? "bg-emerald-500" : "bg-muted-foreground"
+                    isCurrent ? "bg-brand" : isCompleted ? "bg-emerald-500" : "bg-muted-foreground"
                   )} />
                   <span className="leading-relaxed">{detail}</span>
                 </li>
@@ -76,7 +76,7 @@ const RoadmapModal: React.FC<RoadmapModalProps> = ({ stage, isOpen, onClose }) =
 
           <div className={cn(
             "mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold border",
-            isCurrent && "bg-sky-500/10 text-sky-500 border-sky-500/20",
+            isCurrent && "bg-brand/10 text-brand-soft border-brand/20",
             isCompleted && "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
             !isCurrent && !isCompleted && "bg-muted text-muted-foreground border-border"
           )}>

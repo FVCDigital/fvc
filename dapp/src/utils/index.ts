@@ -89,7 +89,7 @@ export const useResponsiveFlexDirection = () => {
  * @returns CSS properties for the tab button
  */
 export const getTabButtonStyle = (active: boolean): React.CSSProperties => ({
-  background: active ? 'rgba(56,189,248,0.1)' : 'transparent',
+  background: active ? 'rgba(106,112,228,0.12)' : 'transparent',
   color: active ? theme.primaryText : theme.secondaryText,
   border: 'none',
   borderRadius: 8,

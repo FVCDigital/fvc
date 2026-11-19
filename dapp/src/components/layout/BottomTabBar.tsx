@@ -41,7 +41,7 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onTabChange, tab
             gap: 4,
             padding: '8px 12px',
             borderRadius: 8,
-            background: activeTab === tab.id ? 'rgba(56,189,248,0.1)' : 'transparent',
+            background: activeTab === tab.id ? 'rgba(106,112,228,0.12)' : 'transparent',
             color: activeTab === tab.id ? theme.primaryText : theme.secondaryText,
             border: 'none',
             cursor: 'pointer',

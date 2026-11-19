@@ -13,7 +13,7 @@ const cardStyle: React.CSSProperties = {
   maxWidth: 520,
   width: '100%',
   borderRadius: 24,
-  boxShadow: '0 20px 60px rgba(0,0,0,0.4), 0 0 100px rgba(56,189,248,0.15)',
+  boxShadow: '0 20px 60px rgba(0,0,0,0.4), 0 0 100px rgba(106,112,228,0.15)',
   background: theme.modalBackground,
   padding: 48,
   margin: '0 16px',
@@ -75,7 +75,7 @@ const buttonStyle: React.CSSProperties = {
   textAlign: 'center',
   textDecoration: 'none',
   marginTop: 12,
-  boxShadow: '0 4px 20px rgba(56,189,248,0.3)',
+  boxShadow: '0 4px 20px rgba(106,112,228,0.3)',
   transition: 'all 0.3s ease',
   fontFamily: 'Inter, sans-serif',
   border: 'none',
@@ -127,11 +127,11 @@ const LandingModal: React.FC = () => {
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = '0 6px 30px rgba(56,189,248,0.4)';
+            e.currentTarget.style.boxShadow = '0 6px 30px rgba(106,112,228,0.4)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 20px rgba(56,189,248,0.3)';
+            e.currentTarget.style.boxShadow = '0 4px 20px rgba(106,112,228,0.3)';
           }}
         >
           Enter Protocol

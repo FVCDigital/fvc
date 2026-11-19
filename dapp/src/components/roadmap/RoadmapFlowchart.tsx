@@ -153,7 +153,7 @@ const RoadmapFlowchart: React.FC = () => {
             <span className="text-xs font-bold text-foreground">DONE</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-sky-500 shadow-sm shadow-sky-500/50" />
+            <div className="w-2.5 h-2.5 rounded-full bg-brand shadow-sm shadow-brand/50" />
             <span className="text-xs font-bold text-foreground">CURRENT</span>
           </div>
           <div className="flex items-center gap-2">

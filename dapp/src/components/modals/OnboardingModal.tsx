@@ -61,7 +61,7 @@ const buttonStyle: React.CSSProperties = {
   textAlign: 'center',
   textDecoration: 'none',
   marginTop: 8,
-  boxShadow: '0 2px 8px rgba(56,189,248,0.08)',
+  boxShadow: '0 2px 8px rgba(106,112,228,0.08)',
   transition: 'background 0.2s',
   border: 'none',
   cursor: 'pointer',

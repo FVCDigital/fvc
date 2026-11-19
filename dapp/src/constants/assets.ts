@@ -29,7 +29,7 @@ export const FVC_ASSET: Asset = {
   address: (process.env.NEXT_PUBLIC_FVC_ADDRESS || '') as `0x${string}`,
   decimals: 18,
   logo: '/assets/fvc.svg',
-  color: '#38BDF8',
+  color: '#6A70E4',
 };
 
 export const ASSETS: Asset[] = [

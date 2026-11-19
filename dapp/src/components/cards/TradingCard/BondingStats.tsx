@@ -32,7 +32,7 @@ const BondingStats: React.FC<BondingStatsProps> = ({
   const fvcAllocatedFormatted = fvcAllocated && typeof fvcAllocated === 'bigint' ? parseFloat(formatUnits(fvcAllocated, 18)).toLocaleString() : '10,000,000';
 
   return (
-    <div className="w-full bg-sky-500/5 border border-sky-500/20 rounded-xl p-4 mb-4">
+    <div className="w-full bg-brand/5 border border-brand/20 rounded-xl p-4 mb-4">
       <h3 className="text-sm font-semibold text-foreground mb-3 text-center">
         Round Statistics
       </h3>

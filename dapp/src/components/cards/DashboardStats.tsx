@@ -82,7 +82,7 @@ const DashboardStats: React.FC = () => {
       label: 'Aave Yield (Adapter)',
       value: `${Number(formatUnits(yieldUsdc, 6)).toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`,
       icon: '🏦',
-      color: '#22D3EE',
+      color: '#C7CAFF',
     },
   ];
 

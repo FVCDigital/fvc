@@ -167,7 +167,7 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
             
             {/* Current Round Info */}
             {round && (
-              <div className="bg-sky-500/10 text-sky-600 dark:text-sky-400 px-4 py-3 rounded-xl mb-4 text-sm font-medium w-full text-center border border-sky-500/20">
+              <div className="bg-brand/10 text-brand-dark dark:text-brand-soft px-4 py-3 rounded-xl mb-4 text-sm font-medium w-full text-center border border-brand/20">
                 Round {Number(round.roundId)} • {Number(round.initialDiscount)}% → {Number(round.finalDiscount)}% discount
               </div>
             )}
@@ -195,7 +195,7 @@ const TradingCard: React.FC<{ mode?: 'crypto' }> = ({ mode }) => {
 
             {/* Price Display */}
             {currentPrices && !isLoadingPrices && (
-              <div className="bg-sky-500/10 rounded-xl p-3 mb-4 w-full text-center border border-sky-500/20">
+              <div className="bg-brand/10 rounded-xl p-3 mb-4 w-full text-center border border-brand/20">
                 <div className="text-xs text-muted-foreground mb-1 font-medium">
                   Current FVC Price
                 </div>

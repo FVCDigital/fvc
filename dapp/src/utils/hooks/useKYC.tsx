@@ -65,7 +65,7 @@ const useKYC = (): UseKycReturn => {
                 fontWeight: 600,
                 fontSize: 14,
                 cursor: 'pointer',
-                boxShadow: '0 1px 4px rgba(56,189,248,0.04)',
+                boxShadow: '0 1px 4px rgba(106,112,228,0.04)',
                 fontFamily: 'Inter, sans-serif',
                 marginBottom: 12
               }}
@@ -87,7 +87,7 @@ const useKYC = (): UseKycReturn => {
               fontSize: 18,
               cursor: 'pointer',
               border: 'none',
-              boxShadow: '0 2px 8px rgba(56,189,248,0.08)',
+              boxShadow: '0 2px 8px rgba(106,112,228,0.08)',
               fontFamily: 'Inter, sans-serif'
             }}
             onClick={() => {
