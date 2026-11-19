@@ -271,6 +271,10 @@ describe("Staking: spec, structural, and mutation coverage", function () {
       expect(await staking.earned(alice.address)).to.be.closeTo(REWARD, REWARD / 1000n);
     });
 
+    it("reverts when the reward period is set to zero", async () => {
+      await expect(staking.setRewardsDuration(0)).to.be.revertedWith("Zero duration");
+    });
+
     it("updates rewardPerTokenStored via updateReward(address(0)) (kills S14)", async () => {
       await staking.connect(alice).stake(STAKE);
       await seedReward();

@@ -227,10 +227,10 @@ contract Staking is ReentrancyGuard, Ownable {
      * @param reward Amount of rewards to distribute, pulled from the caller (approve first)
      * @dev Pulling the reward here means a period can never be promised without being funded.
      */
-    function notifyRewardAmount(uint256 reward) 
-        external 
-        onlyOwner 
-        updateReward(address(0)) 
+    function notifyRewardAmount(uint256 reward)
+        external
+        onlyOwner
+        updateReward(address(0))
     {
         rewardsToken.safeTransferFrom(msg.sender, address(this), reward);
 
@@ -253,6 +253,7 @@ contract Staking is ReentrancyGuard, Ownable {
      * @param _rewardsDuration New duration in seconds
      */
     function setRewardsDuration(uint256 _rewardsDuration) external onlyOwner {
+        require(_rewardsDuration > 0, "Zero duration");
         require(
             block.timestamp > periodFinish,
             "Previous rewards period must be complete before changing the duration"
