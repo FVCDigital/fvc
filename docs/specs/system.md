@@ -6,8 +6,8 @@ businesses it funds. Build order: [`development-plan.md`](./development-plan.md)
 | Component | Spec | State |
 |---|---|---|
 | Loan Registry | [`contracts/LOAN_REGISTRY.md`](../../contracts/LOAN_REGISTRY.md) | Specified; contract not written |
-| Partner integration | `docs/specs/partner-integration.md` | Not written |
-| Reconciler | `docs/specs/reconciler.md` | Not written |
+| Partner integration | [`docs/specs/partner-integration.md`](./partner-integration.md) | Draft, 19 Nov; partner format not yet confirmed |
+| Reconciler | [`docs/specs/reconciler.md`](./reconciler.md) | Draft, 20 Nov; code in [`reconciler/`](../../reconciler), tested against a mock partner feed; not reviewed independently |
 | Staking | [`contracts/src/staking/Staking.sol`](../../contracts/src/staking/Staking.sol) | Written and tested; not deployed |
 
 ---
@@ -205,15 +205,15 @@ sequenceDiagram
 
     Partner->>Rec: Settlement message
     alt Unknown reference
-        Rec->>Signers: Report: unmatched. Nothing proposed.
+        Rec->>Signers: Report: unmatched. Nothing in the batch.
         Signers->>Partner: Ask which SME it belongs to
     else Reference already used
-        Rec->>Signers: Report: duplicate. Nothing proposed.
+        Rec->>Signers: Report: duplicate. Nothing in the batch.
     else Would exceed the GBP repayment cap
-        Rec->>Signers: Report: overpayment. Propose up to the cap only.
-        Signers->>Partner: Refund the excess to the SME in GBP
+        Rec->>Signers: Report: overpayment. Nothing in the batch; the reconciler does not split it.
+        Signers->>Partner: Refund the excess to the SME in GBP; record the rest by hand
     else Implied exchange rate far from market
-        Rec->>Signers: Report: rate outlier. Proposed, flagged for review.
+        Rec->>Signers: Report: disputed (rate off market). Nothing in the batch.
     end
 ```
 
@@ -229,7 +229,7 @@ to resolve.
 | Case | What happens |
 |---|---|
 | Reference matches no loan | Stays in the Safe as unmatched. The signers ask the partner which SME sent it. If it belongs to a loan, it is recorded there; if not, the stablecoin goes back to the partner, who refunds the payer in GBP (D9). |
-| Wrong but valid reference (another SME's loan) | The reconciler checks the amount against what that loan expects and flags anything unusual; the signers check before signing. Once recorded, v1 cannot undo it on-chain (SD11), so this check matters most. |
+| Wrong but valid reference (another SME's loan) | The reconciler cannot detect this from the data: it only checks that the credit fits that loan's outstanding balance. The batch summary shows each reference and loan, and the signers check them against the partner dashboard before signing. Once recorded, v1 cannot undo it on-chain (SD11), so this check matters most. |
 | SME pays less than due | Recorded as a partial repayment. Any amount, any time, is accepted. |
 | SME pays more than it owes | The contract rejects the full amount (BD8). The signers record exactly the outstanding balance; the excess stays in the Safe and goes back to the partner for a GBP refund to the SME. |
 | Same settlement message twice | The second is ignored: each reference can be recorded once only (R2). |
@@ -269,7 +269,8 @@ to resolve.
 - R3. No loan is ever repaid past its GBP repayment cap.
 - R4. No personal data on-chain. SMEs appear only as a salted hash.
 - R5. Every state change goes through the Safe (2 of 4) until a spend-limited recorder role is agreed.
-- R6. The reconciler never signs. It only proposes Safe transactions and reports.
+- R6. The reconciler never signs, never proposes and holds no key. It writes batch files and
+  reports; a signer proposes the batch in the Safe app.
 - R7. Anyone can read loans, repayments and totals without an account.
 - R8. The partner only settles payments that can no longer be reversed, so a recorded repayment is final.
 - R9. The private loan-to-SME mapping is stored off-chain, with access limited to FVC risk and
