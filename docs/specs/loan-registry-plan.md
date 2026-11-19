@@ -233,29 +233,60 @@ the existing 318 tests still pass.
 
 Built before any money feature, so every money path is written behind the controls.
 
-- [ ] Roles, `TimelockController` wiring in the deploy fixture, guardian role, pause with delayed unpause.
-- [ ] Approved destinations, per-token limits with daily buckets, per-token rate bands, allowed
+- [x] Roles, `TimelockController` wiring in the deploy fixture, guardian role, pause with delayed unpause.
+- [x] Approved destinations, per-token limits with daily buckets, per-token rate bands, allowed
       tokens with stored decimals, `_pullExact` (measured balance increase) and `_pushTo` (destination, limit and
       bucket checks in one place).
+- [x] The loan and money functions exist as stubs that revert `LoanRegistry: not implemented`
+      (decided 19 Nov), so every later phase only fills in function bodies.
 
-**Gate:** all security tests green; Slither clean; labels L25 to L37 each killed by a test.
+Most security tests also call a loan function, so they can only pass once that function exists.
+The S3 gate therefore covers the tests that need no stub; every other test and label moves to the
+phase that builds the last function it calls.
+
+**Gate:** these tests green, test files untouched:
+
+- `LoanRegistry` / constructor (6 tests) and views: unknown loans return zeros; token configuration.
+- `LoanRegistry security` / timelock: every test except "a full loan runs end to end".
+- `LoanRegistry security` / guardian and admin configuration: all.
+- `LoanRegistry security` / recoverSurplus: "recovers the whole balance of a token that was never
+  allowed" and "is not counted against the outflow limits".
+- `LoanRegistry security` / pause: "unpause reverts when not paused".
+
+Every other failure is the stub revert and nothing else. Slither: no high or medium findings except
+`uninitialized-state` and `constable-states`, which come from the stubs never writing loan
+storage. Labels L34 and L35 (plus L35b for `lowerMaxFacility`) killed by `scripts/mutate.ts L34 L35 L35b`.
+
+Result (19 Nov): 30 passing, 105 failing, all 105 on the stub; mutants L34, L35, L35b killed.
+
+Deferred labels, by the phase whose function their killing test needs last:
+
+| Phase | Labels |
+|---|---|
+| S4 | L25, L28, L29, L30 |
+| S5 | L31, L32, L36 |
+| S6 | L26, L27, L33, L37 |
 
 ### S4: loans and tranches
 
-`createLoan`, `recordDisbursement`, `closeFacility`. Invariants 15, 15a, 15b, 16, S3. Labels L01 to L07.
+`createLoan`, `recordDisbursement`, `closeFacility`. Invariants 15, 15a, 15b, 16, S3. Labels L01 to L07,
+plus L25, L28, L29, L30 from S3.
 
 ### S5: repayments and lifecycle
 
 `recordRepayment`, `owedGbp`, `outstandingGbp`, `markDefault`, `cure`, `writeOff`.
-Invariants 1 to 14, 17. Labels L08 to L17.
+Invariants 1 to 14, 17. Labels L08 to L17, plus L31, L32, L36 from S3.
 
 ### S6: collateral and forward
 
 `depositCollateral`, `releaseCollateral`, `claimCollateral`, `forward`, `recoverSurplus`.
-Invariants C1 to C6, 6 to 8, S10. Labels L18 to L24. End-to-end test with the real `Staking.sol`:
+Invariants C1 to C6, 6 to 8, S10. Labels L18 to L24, plus L26, L27, L33, L37 from S3. No call to
+`_notImplemented` is left, and the stub-only Slither findings are gone. End-to-end test with the real `Staking.sol`:
 repay, forward to the Safe, `notifyRewardAmount`, a staker earns over 7 days.
 
-**Gate for S4 to S6:** pre-PR command set green; each phase's labels killed.
+**Gate for S4 to S6:** each phase's tests green and its labels killed with `scripts/mutate.ts <ids>`
+(each mutant runs only its killing test, which must pass on the unmutated source first). The full
+pre-PR command set goes green at S6, when the stacked S2 to S6 PRs merge together (decided 19 Nov).
 
 ### S7: adversarial testing
 

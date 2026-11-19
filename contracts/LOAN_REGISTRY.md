@@ -189,6 +189,8 @@ Every token movement goes through one of two helpers, so each control lives in e
 | `_settleIfRepaid(loanId)` | moves `Active` or `Defaulted` to `Repaid` when drawing is closed and `repaidGbp == owedGbp`; emits `LoanRepaid` | none |
 
 Tokens are only ever pulled from `msg.sender` (S6), never from an address passed as an argument.
+`_pullExact` and `_pushTo` assert that they run inside a `nonReentrant` call, so a money function
+that forgets the modifier fails every test instead of opening a reentrancy path.
 
 ---
 

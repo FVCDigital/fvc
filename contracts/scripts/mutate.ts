@@ -1,5 +1,5 @@
 /**
- * Mutation testing script for Sale.sol, Vesting.sol and Staking.sol.
+ * Mutation testing script for Sale.sol, Vesting.sol, Staking.sol and LoanRegistry.sol.
  *
  * Applies one mutation at a time, runs the offline test suite, and reports whether
  * the mutation was KILLED (tests caught it) or SURVIVED (tests missed it).
@@ -8,7 +8,11 @@
  * A mutant whose find string is missing is an ERROR and fails the run, so the list
  * cannot silently rot when a contract changes.
  *
- * Run: npx ts-node scripts/mutate.ts
+ * A mutant with `grep` runs only its killing test, which must pass on the unmutated source
+ * first, so a test that is still red cannot count as a kill.
+ *
+ * Run: npx ts-node scripts/mutate.ts            (every mutant)
+ *      npx ts-node scripts/mutate.ts L34 L35    (only these ids)
  */
 
 import { execSync } from "child_process";
@@ -21,15 +25,19 @@ interface Mutation {
   description: string;
   find: string;
   replace: string;
+  /** Mocha `--grep` for the killing test; the run is then limited to the Loan Registry suites. */
+  grep?: string;
 }
 
 const SALE = path.resolve(__dirname, "../src/sale/Sale.sol");
 const VESTING = path.resolve(__dirname, "../src/vesting/Vesting.sol");
 const STAKING = path.resolve(__dirname, "../src/staking/Staking.sol");
+const REGISTRY = path.resolve(__dirname, "../src/loan/LoanRegistry.sol");
 
 // The mainnet-fork suites (*.e2e.ts) need an archive RPC. Without one they fail on
 // every run, which would make every mutant look KILLED.
 const TEST_COMMAND = "npx hardhat test test/*[ct].ts";
+const REGISTRY_TESTS = "test/LoanRegistry.test.ts test/LoanRegistry.security.test.ts";
 
 const mutations: Mutation[] = [
   // ── Sale.sol ──────────────────────────────────────────────────────────────
@@ -292,6 +300,33 @@ const mutations: Mutation[] = [
     find: "updateReward(address(0))",
     replace: "",
   },
+
+  // ── LoanRegistry.sol (labels from LOAN_REGISTRY.md section 10) ────────────
+
+  {
+    id: "L34",
+    file: REGISTRY,
+    description: "unpause callable by the guardian, not only the timelock",
+    find: "function unpause() external onlyRole(DEFAULT_ADMIN_ROLE)",
+    replace: "function unpause() external onlyRole(GUARDIAN_ROLE)",
+    grep: "kills L34",
+  },
+  {
+    id: "L35",
+    file: REGISTRY,
+    description: "lowerTokenLimits can raise a limit",
+    find: "if (maxPayout > config.maxPayout || dailyLimit > config.dailyLimit) revert LoanRegistry__NotALowering();",
+    replace: "// MUTANT: lowering check removed",
+    grep: "kills L35",
+  },
+  {
+    id: "L35b",
+    file: REGISTRY,
+    description: "lowerMaxFacility can raise the per-loan limit",
+    find: "if (newMax > maxFacilityGbp) revert LoanRegistry__NotALowering();",
+    replace: "// MUTANT: lowering check removed",
+    grep: "lowers the per-loan limit, and cannot raise it",
+  },
 ];
 
 // ── Runner ────────────────────────────────────────────────────────────────────
@@ -303,9 +338,10 @@ interface Result {
   detail?: string;
 }
 
-function runTests(): boolean {
+function runTests(grep?: string): boolean {
+  const command = grep ? `npx hardhat test ${REGISTRY_TESTS} --grep "${grep}"` : TEST_COMMAND;
   try {
-    execSync(TEST_COMMAND, {
+    execSync(command, {
       cwd: path.resolve(__dirname, ".."),
       stdio: "pipe",
       timeout: 600_000,
@@ -327,14 +363,22 @@ function writeStepSummary(results: Result[], score: number) {
 }
 
 async function main() {
-  if (!runTests()) {
+  const ids = process.argv.slice(2);
+  const selected = ids.length ? mutations.filter((m) => ids.includes(m.id)) : mutations;
+  const unknown = ids.filter((id) => !mutations.some((m) => m.id === id));
+  if (unknown.length) {
+    console.error(`Unknown mutant id(s): ${unknown.join(", ")}`);
+    process.exit(1);
+  }
+
+  if (selected.some((m) => !m.grep) && !runTests()) {
     console.error("Baseline test suite fails on unmutated source. Fix that before mutation testing.");
     process.exit(1);
   }
 
   console.log("\n══════════════════════════════════════════════════");
   console.log("  FVC Mutation Testing");
-  console.log(`  ${mutations.length} mutants across Sale.sol, Vesting.sol and Staking.sol`);
+  console.log(`  ${selected.length} mutants across Sale.sol, Vesting.sol, Staking.sol and LoanRegistry.sol`);
   console.log("══════════════════════════════════════════════════\n");
 
   const results: Result[] = [];
@@ -348,8 +392,12 @@ async function main() {
     restore();
     process.exit(130);
   });
+  process.on("SIGTERM", () => {
+    restore();
+    process.exit(143);
+  });
 
-  for (const m of mutations) {
+  for (const m of selected) {
     const original = fs.readFileSync(m.file, "utf8");
 
     if (!original.includes(m.find)) {
@@ -358,11 +406,17 @@ async function main() {
       continue;
     }
 
+    if (m.grep && !runTests(m.grep)) {
+      results.push({ id: m.id, description: m.description, status: "ERROR", detail: "killing test fails on unmutated source" });
+      console.log(`[${m.id}] ERROR  killing test fails on unmutated source: ${m.description}`);
+      continue;
+    }
+
     pending = { file: m.file, original };
     let survived: boolean;
     try {
       fs.writeFileSync(m.file, original.replace(m.find, m.replace), "utf8");
-      survived = runTests();
+      survived = runTests(m.grep);
     } finally {
       restore();
     }
@@ -382,7 +436,7 @@ async function main() {
   console.log("\n══════════════════════════════════════════════════");
   console.log("  MUTATION SCORE SUMMARY");
   console.log("══════════════════════════════════════════════════");
-  console.log(`  Total mutants : ${mutations.length}`);
+  console.log(`  Total mutants : ${selected.length}`);
   console.log(`  Killed        : ${killed}`);
   console.log(`  Survived      : ${survived}`);
   console.log(`  Errors        : ${errors}`);
