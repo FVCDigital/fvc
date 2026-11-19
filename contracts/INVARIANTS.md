@@ -140,7 +140,7 @@ fuzzed form), and 16 has no dedicated check.
 
 ---
 
-## LoanRegistry.sol (frozen spec, not implemented)
+## LoanRegistry.sol (v1 implemented, not audited)
 
 Full design: [LOAN_REGISTRY.md](./LOAN_REGISTRY.md), frozen in phase S1 on 19 Nov 2026. Build
 order and gates: [`loan-registry-plan.md`](../docs/specs/loan-registry-plan.md). Do not claim any
@@ -204,6 +204,8 @@ S11. The only external calls are `transfer`, `transferFrom`, `balanceOf` and `de
 S12. No function loops over loans, tranches or repayments
 S13. Every loan's `feeGbp * 10_000 <= maxFeeBps * facilityGbp` at creation; the guardian can only lower `maxFeeBps`, and the timelock cannot set it above 10_000
 S14. No tranche is ever paid to the Safe
+S15. No repayment is recorded and no collateral claimed on a loan with `disbursedGbp == 0`
+S16. Every tranche is at least `minTranche[token]`; the timelock keeps it at or below `maxPayout`. The guardian may lower `maxPayout` under it, which deliberately stops payouts in that token
 
 ---
 

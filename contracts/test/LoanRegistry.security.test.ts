@@ -45,6 +45,7 @@ import {
  *   L34 guardian cannot unpause        L35 raising limits is admin only
  *   L36 stored decimals used in band   L37 recoverSurplus bounded by surplus
  *   L35b, L35c guardian cannot raise the per-loan or fee limit   L39 no tranche to the Safe
+ *   L41 minimum tranche
  */
 
 describe("LoanRegistry security", function () {
@@ -492,6 +493,44 @@ describe("LoanRegistry security", function () {
       await toNextUtcDay();
       expect(await fx.registry.outflowUsedToday(usdcAddr)).to.equal(0n);
       await disburse(fx, b, gbp(2_000n), "b1");
+    });
+
+    it("a tranche below the token's minimum reverts; the minimum is set only through the timelock (kills L41)", async () => {
+      await setup();
+      const id = await createLoan(fx);
+      await expect(fx.registry.connect(fx.safe).setMinTranche(usdcAddr, USDC(100n))).to.be.revertedWith(
+        missingRole(fx.safe.address, fx.roles.admin)
+      );
+      await expect(fx.registry.connect(fx.admin).setMinTranche(usdcAddr, USDC(100n)))
+        .to.emit(fx.registry, "MinTrancheSet")
+        .withArgs(usdcAddr, USDC(100n));
+      const pence = gbp(70n);
+      await expect(
+        fx.registry.connect(fx.safe).recordDisbursement(id, pence, usdcAddr, USDC(100n) - 1n, ref("small"), fx.partner.address)
+      ).to.be.revertedWithCustomError(fx.registry, "LoanRegistry__BelowMinTranche");
+      await fx.registry.connect(fx.safe).recordDisbursement(id, pence, usdcAddr, USDC(100n), ref("ok"), fx.partner.address);
+    });
+
+    it("setMinTranche needs a known token and cannot exceed the per-payout limit", async () => {
+      await setup();
+      const stranger = ethers.Wallet.createRandom().address;
+      await expect(fx.registry.connect(fx.admin).setMinTranche(stranger, 1n)).to.be.revertedWithCustomError(
+        fx.registry,
+        "LoanRegistry__TokenUnknown"
+      );
+      await expect(fx.registry.connect(fx.admin).setMinTranche(usdcAddr, MAX_PAYOUT + 1n)).to.be.revertedWithCustomError(
+        fx.registry,
+        "LoanRegistry__InvalidLimits"
+      );
+    });
+
+    it("setTokenLimits cannot put the per-payout limit under the minimum tranche (kills L43)", async () => {
+      await setup();
+      await fx.registry.connect(fx.admin).setMinTranche(usdcAddr, USDC(100n));
+      await expect(
+        fx.registry.connect(fx.admin).setTokenLimits(usdcAddr, USDC(100n) - 1n, DAILY_LIMIT)
+      ).to.be.revertedWithCustomError(fx.registry, "LoanRegistry__InvalidLimits");
+      await fx.registry.connect(fx.admin).setTokenLimits(usdcAddr, USDC(100n), DAILY_LIMIT);
     });
 
     it("limits are tracked per token", async () => {

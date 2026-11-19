@@ -17,6 +17,7 @@ type Floors = Record<Metric, number>;
 
 const FLOORS: Record<string, Floors> = {
   "core/FVC.sol": { lines: 100, statements: 100, functions: 100, branches: 100 },
+  "loan/LoanRegistry.sol": { lines: 100, statements: 99, functions: 100, branches: 95 },
   "sale/Sale.sol": { lines: 85, statements: 85, functions: 80, branches: 70 },
   "staking/Staking.sol": { lines: 100, statements: 100, functions: 100, branches: 83 },
   "vesting/Vesting.sol": { lines: 100, statements: 95, functions: 100, branches: 90 },
