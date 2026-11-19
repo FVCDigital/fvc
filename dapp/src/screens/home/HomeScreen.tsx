@@ -64,7 +64,11 @@ export default function HomeScreen(): React.JSX.Element {
       )}
       
       {/* Main Content */}
-      <MainLayout isMobile={isMobile} isClient={isClient} fullWidth={activeTab === 'roadmap'}>
+      <MainLayout
+        isMobile={isMobile}
+        isClient={isClient}
+        fullWidth={activeTab === 'roadmap' || activeTab === 'portfolio'}
+      >
         <TabContent 
           activeTab={activeTab} 
           isConnected={isConnected}

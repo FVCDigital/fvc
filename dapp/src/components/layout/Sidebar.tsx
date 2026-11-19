@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaDiscord, FaTelegram, FaXTwitter, FaXmark } from 'react-icons/fa6';
+import { BriefcaseBusiness, LayoutDashboard, Lock, Map as MapIcon } from 'lucide-react';
 import { TabId } from '@/constants/tabs';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -20,9 +21,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   onClose 
 }) => {
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'staking', label: 'Staking', icon: '🔒' },
-    { id: 'roadmap', label: 'Roadmap', icon: '🗺️' },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'staking', label: 'Staking', icon: Lock },
+    { id: 'portfolio', label: 'Portfolio', icon: BriefcaseBusiness },
+    { id: 'roadmap', label: 'Roadmap', icon: MapIcon },
   ];
 
   const socialLinks = [
@@ -48,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="p-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-full"></div>
+            <div className="absolute inset-0 bg-brand/20 blur-xl rounded-full"></div>
             <img 
               src="/logo.png" 
               alt="Logo" 
@@ -56,7 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             />
           </div>
           {!isMobile && (
-            <div className="bg-gradient-to-r from-cyan-400/20 to-blue-500/20 text-cyan-400 border border-cyan-400/30 px-2 py-0.5 rounded text-[10px] font-bold font-mono tracking-wider">
+            <div className="bg-brand/10 text-brand-soft border border-brand/45 px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-[0.14em]">
               MAINNET
             </div>
           )}
@@ -82,25 +84,19 @@ const Sidebar: React.FC<SidebarProps> = ({
             className={cn(
               "w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
               activeTab === tab.id 
-                ? "text-white bg-white/10 border border-white/5 shadow-lg shadow-cyan-500/5" 
-                : "text-gray-400 hover:text-white hover:bg-white/5"
+                ? "text-white bg-brand/[0.12] border border-brand/30 shadow-[inset_3px_0_0_#6A70E4]"
+                : "text-[#8B8B93] border border-transparent hover:text-white hover:bg-white/[0.04]"
             )}
           >
-            {/* Active Glow Indicator */}
-            {activeTab === tab.id && (
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-50" />
-            )}
-            
-            <span className={cn(
-              "text-xl transition-transform duration-300",
-              activeTab === tab.id ? "scale-110" : "group-hover:scale-110"
-            )}>{tab.icon}</span>
+            <tab.icon
+              size={18}
+              strokeWidth={1.75}
+              className={cn(
+                "relative z-10 transition-colors",
+                activeTab === tab.id ? "text-brand-soft" : "text-[#8B8B93] group-hover:text-white"
+              )}
+            />
             <span className="relative z-10 font-space tracking-wide">{tab.label}</span>
-            
-            {/* Right Arrow on Active */}
-            {activeTab === tab.id && (
-              <div className="ml-auto w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-            )}
           </button>
         ))}
       </div>
@@ -117,7 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-cyan-500/10"
+              className="p-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-brand/10"
             >
               {link.icon}
             </a>

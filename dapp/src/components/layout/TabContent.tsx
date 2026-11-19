@@ -11,6 +11,7 @@ import { RoadmapFlowchart } from '@/components/roadmap';
 import { TabId } from '@/constants/tabs';
 import StakingView from '@/screen-view/StakingView';
 import DashboardView from '@/screen-view/DashboardView';
+import PortfolioView from '@/screen-view/PortfolioView';
 
 /**
  * Props for TabContent component
@@ -38,6 +39,8 @@ export default function TabContent({ activeTab, isConnected, address }: TabConte
     //   return <PrivateSaleCard />;
     case 'staking':
       return <StakingView />;
+    case 'portfolio':
+      return <PortfolioView />;
     // case 'governance':
     //   return (
     //     <FVCFeatureCard
