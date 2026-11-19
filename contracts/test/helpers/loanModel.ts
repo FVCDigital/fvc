@@ -38,6 +38,7 @@ export class LoanModel {
   totalCollateralHeld = new Map<string, bigint>();
   totalRepaidGbp = 0n;
   loanCount = 0n;
+  maxFeeBps = 5_000n;
 
   constructor(public maxFacilityGbp: bigint) {}
 
@@ -85,6 +86,7 @@ export class LoanModel {
   createLoan(facilityGbp: bigint, feeGbp: bigint): bigint {
     if (facilityGbp === 0n) throw new ModelRevert("LoanRegistry__ZeroAmount");
     if (facilityGbp > this.maxFacilityGbp) throw new ModelRevert("LoanRegistry__MaxFacilityExceeded");
+    if (feeGbp * 10_000n > this.maxFeeBps * facilityGbp) throw new ModelRevert("LoanRegistry__FeeExceeded");
     this.loanCount += 1n;
     this.loans.set(this.loanCount, {
       facilityGbp,
@@ -122,6 +124,7 @@ export class LoanModel {
     if (loan.status !== Status.Active && loan.status !== Status.Defaulted) {
       throw new ModelRevert("LoanRegistry__InvalidStatus");
     }
+    if (loan.disbursedGbp === 0n) throw new ModelRevert("LoanRegistry__NothingDisbursed");
     if (gbpAmount === 0n || tokenAmount === 0n) throw new ModelRevert("LoanRegistry__ZeroAmount");
     if (this.refs.has(ref)) throw new ModelRevert("LoanRegistry__RefAlreadyUsed");
     if (loan.repaidGbp + gbpAmount > this.owedGbp(loanId)) throw new ModelRevert("LoanRegistry__OwedExceeded");
