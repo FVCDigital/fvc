@@ -484,3 +484,6 @@ through `allowToken`.
 3. **Chargebacks** (D4). The design assumes a recorded repayment is final (invariant 4).
 4. **Overpayment refunds** (BD8). The contract reverts; the partner must refund the excess in GBP.
 5. **Agreement hash and consumer credit** (D5). Legal Bison to confirm publishing the hash is fine.
+6. **Rejected GBP payout** (system.md D10). No reversal function in v1 (SD11): the returned
+   stablecoin is recorded as a repayment with its own reference, so what is owed nets out, and the
+   Safe keeps it out of Staking. To confirm with the partner how and with which reference it returns.

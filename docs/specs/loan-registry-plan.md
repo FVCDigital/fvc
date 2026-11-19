@@ -216,16 +216,18 @@ the specs alone.
 
 ### S2: every test written first, all red
 
-- [ ] `test/LoanRegistry.test.ts`: one `describe` per function. For each: happy path, wrong role,
+- [x] `test/LoanRegistry.test.ts`: one `describe` per function. For each: happy path, wrong role,
       paused, zero amounts, wrong token, wrong destination, each limit at exactly the limit and one
       unit over, rate band edges, duplicate references.
-- [ ] `test/LoanRegistry.security.test.ts`: timelock flows (queue, wait, execute; execute early
+- [x] `test/LoanRegistry.security.test.ts`: timelock flows (queue, wait, execute; execute early
       reverts; Safe cancels), guardian role powers and non-powers, unpause delay, daily limit across
       midnight, lowering a limit mid-day, `recoverSurplus` bounds.
-- [ ] `test/helpers/loanModel.ts`: a plain TypeScript model of the ledger, used by structural tests.
-- [ ] Malicious token mocks: reentrant callback, returns `false`, fee on transfer, blacklist.
+- [x] `test/helpers/loanModel.ts`: a plain TypeScript model of the ledger, used by structural tests.
+- [x] Malicious token mocks: reentrant callback, returns `false`, fee on transfer, blacklist.
 
 **Gate:** the suite compiles against an interface and fails only because the contract is missing.
+Result (19 Nov): 135 tests, all failing with `HH700: Artifact for contract "LoanRegistry" not found`;
+the existing 318 tests still pass.
 
 ### S3: security skeleton green
 
