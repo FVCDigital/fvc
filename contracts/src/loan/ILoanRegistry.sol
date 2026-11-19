@@ -27,6 +27,7 @@ interface ILoanRegistry {
     error LoanRegistry__DrawingClosed();
     error LoanRegistry__FacilityExceeded();
     error LoanRegistry__MaxFacilityExceeded();
+    error LoanRegistry__FeeExceeded();
     error LoanRegistry__OwedExceeded();
     error LoanRegistry__CollateralExceeded();
     error LoanRegistry__OutstandingExceeded();
@@ -96,6 +97,7 @@ interface ILoanRegistry {
     event RateBandSet(address indexed token, uint32 minRateBps, uint32 maxRateBps);
     event TokenLimitsSet(address indexed token, uint256 maxPayout, uint256 dailyLimit);
     event MaxFacilitySet(uint256 maxFacilityGbp);
+    event MaxFeeSet(uint256 maxFeeBps);
     event SurplusRecovered(address indexed token, uint256 amount);
 
     // ---------------------------------------------------------------- roles
@@ -158,6 +160,7 @@ interface ILoanRegistry {
     function disallowToken(address token) external;
     function lowerTokenLimits(address token, uint256 maxPayout, uint256 dailyLimit) external;
     function lowerMaxFacility(uint256 newMax) external;
+    function lowerMaxFeeBps(uint256 newBps) external;
 
     // ---------------------------------------------------------------- admin (timelock)
 
@@ -175,12 +178,14 @@ interface ILoanRegistry {
     function setRateBand(address token, uint32 minRateBps, uint32 maxRateBps) external;
     function setTokenLimits(address token, uint256 maxPayout, uint256 dailyLimit) external;
     function setMaxFacility(uint256 newMax) external;
+    function setMaxFeeBps(uint256 newBps) external;
     function recoverSurplus(address token) external;
 
     // ---------------------------------------------------------------- views
 
     function safe() external view returns (address);
     function maxFacilityGbp() external view returns (uint256);
+    function maxFeeBps() external view returns (uint256);
     function loanCount() external view returns (uint256);
 
     function loans(uint256 loanId)

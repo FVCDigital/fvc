@@ -202,6 +202,8 @@ S9. While paused, every function that moves tokens or changes a loan reverts; gu
 S10. Solvency: for every token, balance >= repayments held + collateral held; `recoverSurplus` moves only the excess, always to the Safe
 S11. The only external calls are `transfer`, `transferFrom`, `balanceOf` and `decimals` on tokens; decimals are read once, when a token is first allowed
 S12. No function loops over loans, tranches or repayments
+S13. Every loan's `feeGbp * 10_000 <= maxFeeBps * facilityGbp` at creation; the guardian can only lower `maxFeeBps`, and the timelock cannot set it above 10_000
+S14. No tranche is ever paid to the Safe
 
 ---
 

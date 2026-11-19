@@ -9,6 +9,7 @@ import {
   MAX_PAYOUT,
   DAILY_LIMIT,
   RATE_BPS,
+  MAX_FEE_BPS,
   USDC,
   gbp,
   tokenFor,
@@ -41,7 +42,7 @@ import { LoanModel } from "./helpers/loanModel";
  *   L13 recorder check              L14 to L16 lifecycle sources  L17 risk check on lifecycle
  *   L18 release status              L19 claim status              L20 claim bounded by held
  *   L21 claim bounded by outstanding L22 collateral excluded from forward
- *   L23 forward bound               L24 distributor check
+ *   L23 forward bound               L24 distributor check         L38 fee limit
  * L25 to L37 are in LoanRegistry.security.test.ts.
  */
 
@@ -88,6 +89,11 @@ describe("LoanRegistry", function () {
       await setup();
       expect(await fx.registry.maxFacilityGbp()).to.equal(MAX_FACILITY_GBP);
       expect(await fx.registry.loanCount()).to.equal(0n);
+    });
+
+    it("starts with the fee limit at half the facility", async () => {
+      await setup();
+      expect(await fx.registry.maxFeeBps()).to.equal(MAX_FEE_BPS);
     });
 
     it("allows no token until allowToken is called", async () => {
@@ -162,6 +168,22 @@ describe("LoanRegistry", function () {
       await expect(
         fx.registry.connect(fx.safe).createLoan(agreement(), smeRef(), MAX_FACILITY_GBP + 1n, 0n)
       ).to.be.revertedWithCustomError(fx.registry, "LoanRegistry__MaxFacilityExceeded");
+    });
+
+    it("accepts a fee exactly at the fee limit", async () => {
+      await setup();
+      const facility = gbp(40_000n);
+      await expect(
+        fx.registry.connect(fx.safe).createLoan(agreement(), smeRef(), facility, (facility * MAX_FEE_BPS) / 10_000n)
+      ).to.emit(fx.registry, "LoanCreated");
+    });
+
+    it("reverts one penny over the fee limit (kills L38)", async () => {
+      await setup();
+      const facility = gbp(40_000n);
+      await expect(
+        fx.registry.connect(fx.safe).createLoan(agreement(), smeRef(), facility, (facility * MAX_FEE_BPS) / 10_000n + 1n)
+      ).to.be.revertedWithCustomError(fx.registry, "LoanRegistry__FeeExceeded");
     });
 
     it("reverts on a zero facility (kills L02)", async () => {
@@ -385,11 +407,21 @@ describe("LoanRegistry", function () {
     it("reverts when drawing is already closed", async () => {
       await setup();
       const id = await createLoan(fx);
+      await disburse(fx, id, gbp(1_000n), "1");
       await fx.registry.connect(fx.safe).closeFacility(id);
       await expect(fx.registry.connect(fx.safe).closeFacility(id)).to.be.revertedWithCustomError(
         fx.registry,
         "LoanRegistry__DrawingClosed"
       );
+    });
+
+    it("marks a loan with nothing paid out and no fee Repaid (invariant 14)", async () => {
+      await setup();
+      const id = await createLoan(fx);
+      await expect(fx.registry.connect(fx.safe).closeFacility(id))
+        .to.emit(fx.registry, "LoanStatusChanged")
+        .withArgs(id, Status.Active, Status.Repaid);
+      expect((await fx.registry.loans(id)).status).to.equal(Status.Repaid);
     });
 
     it("reverts on a loan that is not Active", async () => {

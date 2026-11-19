@@ -29,6 +29,9 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
 
     /// @dev 10_000 bps times 100 pence, the scale of the cross-multiplied rate band (section 5.1).
     uint256 private constant RATE_SCALE = 1e6;
+    uint256 private constant BPS = 10_000;
+    /// @dev The fee may be at most half the facility, a 1.5 times repayment cap (decided 19 Nov).
+    uint256 private constant DEFAULT_MAX_FEE_BPS = 5_000;
 
     struct Loan {
         bytes32 agreementHash;
@@ -54,6 +57,7 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
 
     address public immutable safe;
     uint256 public maxFacilityGbp;
+    uint256 public maxFeeBps;
     uint256 public loanCount;
 
     mapping(uint256 => Loan) public loans;
@@ -77,6 +81,7 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
 
         safe = safe_;
         maxFacilityGbp = maxFacilityGbp_;
+        maxFeeBps = DEFAULT_MAX_FEE_BPS;
         approvedDestination[safe_] = true;
 
         _grantRole(DEFAULT_ADMIN_ROLE, timelock);
@@ -87,18 +92,67 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
         _grantRole(GUARDIAN_ROLE, safe_);
     }
 
-    // ---------------------------------------------------------------- originator (phase S4)
+    // ---------------------------------------------------------------- originator
 
-    function createLoan(bytes32, bytes32, uint256, uint256) external pure returns (uint256) {
-        _notImplemented();
+    function createLoan(bytes32 agreementHash, bytes32 smeRef, uint256 facilityGbp, uint256 feeGbp)
+        external
+        onlyRole(ORIGINATOR_ROLE)
+        whenNotPaused
+        returns (uint256 loanId)
+    {
+        if (agreementHash == bytes32(0) || smeRef == bytes32(0)) revert LoanRegistry__ZeroHash();
+        if (facilityGbp == 0) revert LoanRegistry__ZeroAmount();
+        if (facilityGbp > maxFacilityGbp) revert LoanRegistry__MaxFacilityExceeded();
+        if (feeGbp * BPS > maxFeeBps * facilityGbp) revert LoanRegistry__FeeExceeded();
+
+        loanId = ++loanCount;
+        Loan storage loan = loans[loanId];
+        loan.agreementHash = agreementHash;
+        loan.smeRef = smeRef;
+        loan.facilityGbp = facilityGbp;
+        loan.feeGbp = feeGbp;
+        loan.createdAt = uint64(block.timestamp);
+        emit LoanCreated(loanId, agreementHash, smeRef, facilityGbp, feeGbp);
     }
 
-    function recordDisbursement(uint256, uint256, address, uint256, bytes32, address) external pure {
-        _notImplemented();
+    /// @dev Pulls the tranche from the Safe and pushes it to the destination in one call, so the
+    ///      registry never holds disbursement funds. A tranche to the Safe would record a payout the
+    ///      business never received, so the Safe is not a valid destination here (decided 19 Nov).
+    function recordDisbursement(
+        uint256 loanId,
+        uint256 gbpAmount,
+        address token,
+        uint256 tokenAmount,
+        bytes32 payoutRef,
+        address to
+    ) external nonReentrant onlyRole(ORIGINATOR_ROLE) whenNotPaused {
+        Loan storage loan = _activeLoan(loanId);
+        if (loan.drawingClosed) revert LoanRegistry__DrawingClosed();
+        if (!tokenConfig[token].allowed) revert LoanRegistry__TokenNotAllowed();
+        if (gbpAmount == 0 || tokenAmount == 0) revert LoanRegistry__ZeroAmount();
+        _useRef(payoutRef);
+        uint256 disbursed = loan.disbursedGbp + gbpAmount;
+        if (disbursed > loan.facilityGbp) revert LoanRegistry__FacilityExceeded();
+        _checkRate(token, gbpAmount, tokenAmount);
+        if (to == safe) revert LoanRegistry__DestinationNotApproved();
+
+        loan.disbursedGbp = disbursed;
+        bool closes = disbursed == loan.facilityGbp;
+        if (closes) loan.drawingClosed = true;
+
+        emit TrancheDisbursed(loanId, gbpAmount, token, tokenAmount, payoutRef, to);
+        if (closes) emit FacilityClosed(loanId, disbursed);
+
+        _pullExact(token, tokenAmount);
+        _pushTo(token, tokenAmount, to);
     }
 
-    function closeFacility(uint256) external pure {
-        _notImplemented();
+    function closeFacility(uint256 loanId) external onlyRole(ORIGINATOR_ROLE) whenNotPaused {
+        Loan storage loan = _activeLoan(loanId);
+        if (loan.drawingClosed) revert LoanRegistry__DrawingClosed();
+        loan.drawingClosed = true;
+        emit FacilityClosed(loanId, loan.disbursedGbp);
+        _settleIfRepaid(loanId);
     }
 
     // ---------------------------------------------------------------- recorder (repayment S5, collateral S6)
@@ -174,6 +228,12 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
         emit MaxFacilitySet(newMax);
     }
 
+    function lowerMaxFeeBps(uint256 newBps) external onlyRole(GUARDIAN_ROLE) {
+        if (newBps > maxFeeBps) revert LoanRegistry__NotALowering();
+        maxFeeBps = newBps;
+        emit MaxFeeSet(newBps);
+    }
+
     // ---------------------------------------------------------------- admin (timelock, work while paused)
 
     function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -233,6 +293,12 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
         if (newMax == 0) revert LoanRegistry__ZeroAmount();
         maxFacilityGbp = newMax;
         emit MaxFacilitySet(newMax);
+    }
+
+    function setMaxFeeBps(uint256 newBps) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (newBps > BPS) revert LoanRegistry__InvalidLimits();
+        maxFeeBps = newBps;
+        emit MaxFeeSet(newBps);
     }
 
     /// @dev Always pays the Safe and skips the outflow limits: it sits behind the 48 hour delay and
@@ -320,6 +386,24 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
         if (ref == bytes32(0)) revert LoanRegistry__ZeroRef();
         if (refUsed[ref]) revert LoanRegistry__RefAlreadyUsed();
         refUsed[ref] = true;
+    }
+
+    function _activeLoan(uint256 loanId) private view returns (Loan storage loan) {
+        if (loanId == 0 || loanId > loanCount) revert LoanRegistry__LoanNotFound();
+        loan = loans[loanId];
+        if (loan.status != Status.Active) revert LoanRegistry__InvalidStatus(loan.status);
+    }
+
+    /// @dev Moves `Active` or `Defaulted` to `Repaid` once drawing is closed and everything owed is
+    ///      repaid (invariant 14).
+    function _settleIfRepaid(uint256 loanId) internal {
+        Loan storage loan = loans[loanId];
+        Status from = loan.status;
+        if (from != Status.Active && from != Status.Defaulted) return;
+        if (!loan.drawingClosed || loan.repaidGbp != loan.disbursedGbp + loan.feeGbp) return;
+        loan.status = Status.Repaid;
+        emit LoanStatusChanged(loanId, from, Status.Repaid);
+        emit LoanRepaid(loanId, loan.repaidGbp);
     }
 
     function _checkBand(uint32 minRateBps, uint32 maxRateBps) private pure {
