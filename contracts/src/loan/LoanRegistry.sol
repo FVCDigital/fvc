@@ -63,6 +63,7 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
     mapping(uint256 => Loan) public loans;
     mapping(address => TokenConfig) public tokenConfig;
     mapping(address => bool) public approvedDestination;
+    mapping(address => uint256) public minTranche;
     mapping(bytes32 => bool) public refUsed;
 
     mapping(uint256 => mapping(address => uint256)) public loanReceived;
@@ -130,6 +131,7 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
         if (loan.drawingClosed) revert LoanRegistry__DrawingClosed();
         if (!tokenConfig[token].allowed) revert LoanRegistry__TokenNotAllowed();
         if (gbpAmount == 0 || tokenAmount == 0) revert LoanRegistry__ZeroAmount();
+        if (tokenAmount < minTranche[token]) revert LoanRegistry__BelowMinTranche();
         _useRef(payoutRef);
         uint256 disbursed = loan.disbursedGbp + gbpAmount;
         if (disbursed > loan.facilityGbp) revert LoanRegistry__FacilityExceeded();
@@ -155,7 +157,7 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
         _settleIfRepaid(loanId);
     }
 
-    // ---------------------------------------------------------------- recorder (collateral in phase S6)
+    // ---------------------------------------------------------------- recorder
 
     /// @dev `gbpAmount` is the pound value of the stablecoin that arrived, not what the business
     ///      paid before conversion costs (decided 19 Nov, to confirm with the partner).
@@ -183,16 +185,31 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
         totalReceived[token] += tokenAmount;
         totalRepaidGbp += gbpAmount;
         emit RepaymentRecorded(loanId, gbpAmount, token, tokenAmount, settlementRef);
+        _settleIfRepaid(loanId);
 
         _pullExact(token, tokenAmount);
-        _settleIfRepaid(loanId);
     }
 
-    function depositCollateral(uint256, address, uint256, uint256, bytes32) external pure {
-        _notImplemented();
+    function depositCollateral(uint256 loanId, address token, uint256 tokenAmount, uint256 gbpAmount, bytes32 ref)
+        external
+        nonReentrant
+        onlyRole(RECORDER_ROLE)
+        whenNotPaused
+    {
+        _activeLoan(loanId);
+        if (!tokenConfig[token].allowed) revert LoanRegistry__TokenNotAllowed();
+        if (tokenAmount == 0 || gbpAmount == 0) revert LoanRegistry__ZeroAmount();
+        _useRef(ref);
+        _checkRate(token, gbpAmount, tokenAmount);
+
+        collateralHeld[loanId][token] += tokenAmount;
+        totalCollateralHeld[token] += tokenAmount;
+        emit CollateralDeposited(loanId, token, tokenAmount, gbpAmount, ref);
+
+        _pullExact(token, tokenAmount);
     }
 
-    // ---------------------------------------------------------------- risk (collateral in phase S6)
+    // ---------------------------------------------------------------- risk
 
     function markDefault(uint256 loanId) external onlyRole(RISK_ROLE) whenNotPaused {
         _transition(loanId, Status.Active, Status.Defaulted);
@@ -206,18 +223,74 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
         _transition(loanId, Status.Defaulted, Status.WrittenOff);
     }
 
-    function claimCollateral(uint256, address, uint256, uint256, bytes32) external pure {
-        _notImplemented();
+    /// @dev Moves collateral the registry already holds into repayment accounting; no tokens move.
+    ///      Works for a token disallowed since the deposit (`known`), so collateral is never stuck.
+    function claimCollateral(uint256 loanId, address token, uint256 tokenAmount, uint256 gbpAmount, bytes32 ref)
+        external
+        onlyRole(RISK_ROLE)
+        whenNotPaused
+    {
+        Loan storage loan = _existingLoan(loanId);
+        if (loan.status != Status.Defaulted) revert LoanRegistry__InvalidStatus(loan.status);
+        if (loan.disbursedGbp == 0) revert LoanRegistry__NothingDisbursed();
+        if (!tokenConfig[token].known) revert LoanRegistry__TokenUnknown();
+        if (tokenAmount == 0 || gbpAmount == 0) revert LoanRegistry__ZeroAmount();
+        uint256 held = collateralHeld[loanId][token];
+        if (tokenAmount > held) revert LoanRegistry__CollateralExceeded();
+        _useRef(ref);
+        if (gbpAmount > outstandingGbp(loanId)) revert LoanRegistry__OutstandingExceeded();
+        _checkRate(token, gbpAmount, tokenAmount);
+
+        collateralHeld[loanId][token] = held - tokenAmount;
+        totalCollateralHeld[token] -= tokenAmount;
+        loanReceived[loanId][token] += tokenAmount;
+        totalReceived[token] += tokenAmount;
+        loan.repaidGbp += gbpAmount;
+        totalRepaidGbp += gbpAmount;
+        emit CollateralClaimed(loanId, token, tokenAmount, gbpAmount, ref);
+
+        _settleIfRepaid(loanId);
     }
 
-    function releaseCollateral(uint256, address, uint256, address) external pure {
-        _notImplemented();
+    function releaseCollateral(uint256 loanId, address token, uint256 tokenAmount, address to)
+        external
+        nonReentrant
+        onlyRole(RISK_ROLE)
+        whenNotPaused
+    {
+        Loan storage loan = _existingLoan(loanId);
+        if (loan.status != Status.Repaid && loan.status != Status.WrittenOff) {
+            revert LoanRegistry__InvalidStatus(loan.status);
+        }
+        if (tokenAmount == 0) revert LoanRegistry__ZeroAmount();
+        uint256 held = collateralHeld[loanId][token];
+        if (tokenAmount > held) revert LoanRegistry__CollateralExceeded();
+
+        collateralHeld[loanId][token] = held - tokenAmount;
+        totalCollateralHeld[token] -= tokenAmount;
+        emit CollateralReleased(loanId, token, tokenAmount, to);
+
+        _pushTo(token, tokenAmount, to);
     }
 
-    // ---------------------------------------------------------------- distributor (phase S6)
+    // ---------------------------------------------------------------- distributor
 
-    function forward(address, uint256, address) external pure {
-        _notImplemented();
+    /// @dev Bounded by repayments received minus forwarded, which excludes collateral by
+    ///      construction (invariants 8 and C2).
+    function forward(address token, uint256 amount, address to)
+        external
+        nonReentrant
+        onlyRole(DISTRIBUTOR_ROLE)
+        whenNotPaused
+    {
+        if (amount == 0) revert LoanRegistry__ZeroAmount();
+        uint256 forwarded = totalForwarded[token] + amount;
+        if (forwarded > totalReceived[token]) revert LoanRegistry__ForwardExceeded();
+
+        totalForwarded[token] = forwarded;
+        emit Forwarded(token, amount, to);
+
+        _pushTo(token, amount, to);
     }
 
     // ---------------------------------------------------------------- guardian (reduce only, work while paused)
@@ -310,7 +383,7 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
     function setTokenLimits(address token, uint256 maxPayout, uint256 dailyLimit) external onlyRole(DEFAULT_ADMIN_ROLE) {
         TokenConfig storage config = tokenConfig[token];
         if (!config.known) revert LoanRegistry__TokenUnknown();
-        if (maxPayout > dailyLimit) revert LoanRegistry__InvalidLimits();
+        if (maxPayout > dailyLimit || maxPayout < minTranche[token]) revert LoanRegistry__InvalidLimits();
         config.maxPayout = maxPayout;
         config.dailyLimit = dailyLimit;
         emit TokenLimitsSet(token, maxPayout, dailyLimit);
@@ -320,6 +393,15 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
         if (newMax == 0) revert LoanRegistry__ZeroAmount();
         maxFacilityGbp = newMax;
         emit MaxFacilitySet(newMax);
+    }
+
+    /// @dev Matches the partner's smallest payout, so a tranche it would reject never leaves the Safe.
+    function setMinTranche(address token, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        TokenConfig storage config = tokenConfig[token];
+        if (!config.known) revert LoanRegistry__TokenUnknown();
+        if (amount > config.maxPayout) revert LoanRegistry__InvalidLimits();
+        minTranche[token] = amount;
+        emit MinTrancheSet(token, amount);
     }
 
     function setMaxFeeBps(uint256 newBps) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -452,10 +534,5 @@ contract LoanRegistry is ILoanRegistry, AccessControl, Pausable, ReentrancyGuard
 
     function _today() private view returns (uint256) {
         return block.timestamp / 1 days;
-    }
-
-    /// @dev Removed phase by phase (S4 to S6); S6 checks that no call to it is left.
-    function _notImplemented() private pure {
-        revert("LoanRegistry: not implemented");
     }
 }

@@ -1,14 +1,15 @@
 # LoanRegistry v1: frozen specification
 
-Status: **frozen for v1 on 19 Nov 2026 (phase S1)**. Not implemented; nothing exists in
-`src/loan/` yet. Any change to this file after the freeze needs Igli's approval in a PR that also
+Status: **frozen for v1 on 19 Nov 2026 (phase S1)**, amended the same day with Igli's approval
+(fee limit, no tranche to the Safe, nothing repaid before a payout, minimum tranche). Implemented in
+`src/loan/LoanRegistry.sol` (phases S2 to S6). Not audited. Any change to this file after the freeze needs Igli's approval in a PR that also
 updates [INVARIANTS.md](./INVARIANTS.md) and the tests.
 
 Read with:
 
 - [`docs/specs/loan-registry-plan.md`](../docs/specs/loan-registry-plan.md): why each security
   and build decision was made (SD1 to SD12, BD1 to BD14), the threat model and the phases.
-- [`INVARIANTS.md`](./INVARIANTS.md): the numbered properties (1 to 20, C1 to C6, S1 to S12)
+- [`INVARIANTS.md`](./INVARIANTS.md): the numbered properties (1 to 20, C1 to C6, S1 to S16)
   that every test and fuzzer checks.
 - [`SOL_DEVELOPMENT.md`](./SOL_DEVELOPMENT.md): the TDD workflow.
 
@@ -221,14 +222,14 @@ non-zero inputs, reference, bounds, rate band, then effects, then token transfer
 | Function | Checks (in order) | Effects | Emits | Invariants |
 |---|---|---|---|---|
 | `createLoan(bytes32 agreementHash, bytes32 smeRef, uint256 facilityGbp, uint256 feeGbp) returns (uint256 loanId)` | role; not paused; `agreementHash != 0`, `smeRef != 0`; `facilityGbp != 0`; `facilityGbp <= maxFacilityGbp`; `feeGbp * 10_000 <= maxFeeBps * facilityGbp` | new loan `++loanCount`, `Active`, `createdAt = block.timestamp` | `LoanCreated(loanId, agreementHash, smeRef, facilityGbp, feeGbp)` | 15, 16, 20, S3 |
-| `recordDisbursement(uint256 loanId, uint256 gbpAmount, address token, uint256 tokenAmount, bytes32 payoutRef, address to)` | role; not paused; loan exists, `Active`, drawing open; token allowed; both amounts `!= 0`; `_useRef(payoutRef)`; `disbursedGbp + gbpAmount <= facilityGbp`; rate band; `to != safe` | `disbursedGbp += gbpAmount`; if it now equals `facilityGbp`, `drawingClosed = true`; `_pullExact`, then `_pushTo(token, tokenAmount, to)` | `TrancheDisbursed(loanId, gbpAmount, token, tokenAmount, payoutRef, to)`, and `FacilityClosed(loanId, disbursedGbp)` if it closed | 1, 15a, 15b, S1 to S6 |
+| `recordDisbursement(uint256 loanId, uint256 gbpAmount, address token, uint256 tokenAmount, bytes32 payoutRef, address to)` | role; not paused; loan exists, `Active`, drawing open; token allowed; both amounts `!= 0`; `tokenAmount >= minTranche[token]`; `_useRef(payoutRef)`; `disbursedGbp + gbpAmount <= facilityGbp`; rate band; `to != safe` | `disbursedGbp += gbpAmount`; if it now equals `facilityGbp`, `drawingClosed = true`; `_pullExact`, then `_pushTo(token, tokenAmount, to)` | `TrancheDisbursed(loanId, gbpAmount, token, tokenAmount, payoutRef, to)`, and `FacilityClosed(loanId, disbursedGbp)` if it closed | 1, 15a, 15b, S1 to S6 |
 | `closeFacility(uint256 loanId)` | role; not paused; loan `Active`; drawing open | `drawingClosed = true`; `_settleIfRepaid` | `FacilityClosed(loanId, disbursedGbp)` | 14, 15b |
 
 ### 6.3 Repayments and collateral in (`RECORDER_ROLE`, no delay)
 
 | Function | Checks (in order) | Effects | Emits | Invariants |
 |---|---|---|---|---|
-| `recordRepayment(uint256 loanId, uint256 gbpAmount, address token, uint256 tokenAmount, bytes32 settlementRef)` | role; not paused; loan `Active` or `Defaulted`; token allowed; amounts `!= 0`; `_useRef`; `repaidGbp + gbpAmount <= owedGbp`; rate band | `repaidGbp`, `loanReceived`, `totalReceived`, `totalRepaidGbp` increase; `_pullExact`; `_settleIfRepaid` | `RepaymentRecorded(loanId, gbpAmount, token, tokenAmount, settlementRef)` | 1 to 9, 13, 14, S4 to S6 |
+| `recordRepayment(uint256 loanId, uint256 gbpAmount, address token, uint256 tokenAmount, bytes32 settlementRef)` | role; not paused; loan `Active` or `Defaulted`; `disbursedGbp != 0`; token allowed; amounts `!= 0`; `_useRef`; `repaidGbp + gbpAmount <= owedGbp`; rate band | `repaidGbp`, `loanReceived`, `totalReceived`, `totalRepaidGbp` increase; `_settleIfRepaid`; then `_pullExact` (every state write before the external call) | `RepaymentRecorded(loanId, gbpAmount, token, tokenAmount, settlementRef)` | 1 to 9, 13, 14, S4 to S6 |
 | `depositCollateral(uint256 loanId, address token, uint256 tokenAmount, uint256 gbpAmount, bytes32 ref)` | role; not paused; loan `Active`; token allowed; amounts `!= 0`; `_useRef`; rate band | `collateralHeld`, `totalCollateralHeld` increase; `_pullExact` | `CollateralDeposited(loanId, token, tokenAmount, gbpAmount, ref)` | C1, C5, C6, S4 to S6 |
 
 ### 6.4 Lifecycle and collateral out (`RISK_ROLE`, no delay)
@@ -238,8 +239,13 @@ non-zero inputs, reference, bounds, rate band, then effects, then token transfer
 | `markDefault(uint256 loanId)` | role; not paused; `Active` | `Defaulted` | `LoanStatusChanged(loanId, Active, Defaulted)` | 12 |
 | `cure(uint256 loanId)` | role; not paused; `Defaulted` | `Active` | `LoanStatusChanged(loanId, Defaulted, Active)` | 12 |
 | `writeOff(uint256 loanId)` | role; not paused; `Defaulted` | `WrittenOff` (terminal) | `LoanStatusChanged(loanId, Defaulted, WrittenOff)` | 12 |
-| `claimCollateral(uint256 loanId, address token, uint256 tokenAmount, uint256 gbpAmount, bytes32 ref)` | role; not paused; `Defaulted`; `tokenConfig.known`; amounts `!= 0`; `tokenAmount <= collateralHeld`; `_useRef`; `gbpAmount <= outstandingGbp`; rate band | collateral moves into repayment accounting: `collateralHeld`, `totalCollateralHeld` decrease; `loanReceived`, `totalReceived`, `repaidGbp`, `totalRepaidGbp` increase; no tokens move; `_settleIfRepaid` | `CollateralClaimed(loanId, token, tokenAmount, gbpAmount, ref)` | C1, C4, C5, 2, S10 |
+| `claimCollateral(uint256 loanId, address token, uint256 tokenAmount, uint256 gbpAmount, bytes32 ref)` | role; not paused; `Defaulted`; `disbursedGbp != 0`; `tokenConfig.known`; amounts `!= 0`; `tokenAmount <= collateralHeld`; `_useRef`; `gbpAmount <= outstandingGbp`; rate band | collateral moves into repayment accounting: `collateralHeld`, `totalCollateralHeld` decrease; `loanReceived`, `totalReceived`, `repaidGbp`, `totalRepaidGbp` increase; no tokens move; `_settleIfRepaid` | `CollateralClaimed(loanId, token, tokenAmount, gbpAmount, ref)` | C1, C4, C5, 2, S10 |
 | `releaseCollateral(uint256 loanId, address token, uint256 tokenAmount, address to)` | role; not paused; `Repaid` or `WrittenOff`; amount `!= 0`; `tokenAmount <= collateralHeld` | `collateralHeld`, `totalCollateralHeld` decrease; `_pushTo` | `CollateralReleased(loanId, token, tokenAmount, to)` | C1, C3, C5, S1, S2 |
+
+Nothing can be repaid or claimed before the first tranche is paid out (decided 19 Nov): a fee is
+owed only on a loan that paid out. The GBP figure on a repayment is the pound value of the
+stablecoin that actually arrived, after the partner's conversion fee, so the business bears the
+conversion cost (decided 19 Nov, to confirm with the partner). `cure` is allowed after a claim.
 
 `releaseCollateral` and `claimCollateral` work for a token that has since been disallowed
 (`known` but not `allowed`), so a disallowed token's collateral is never stuck.
@@ -250,7 +256,7 @@ non-zero inputs, reference, bounds, rate band, then effects, then token transfer
 |---|---|---|---|---|
 | `forward(address token, uint256 amount, address to)` | role; not paused; amount `!= 0`; `totalForwarded + amount <= totalReceived` | `totalForwarded += amount`; `_pushTo` | `Forwarded(token, amount, to)` | 6, 7, 8, C2, S1, S2 |
 
-In v1 `to` is the Safe, which swaps to USDC if needed and funds Staking (BD9).
+In v1 `to` is the Safe, which swaps to USDC if needed and funds Staking (BD9). The contract accepts any approved destination, so the limit on where repaid money can go is the destination list, not this function.
 
 ### 6.6 Reduce-only controls (`GUARDIAN_ROLE`, no delay, work while paused)
 
@@ -275,9 +281,10 @@ The Safe cannot be removed as a destination, so repayments and collateral can al
 | `addDestination(address to)` | role; `to != 0`; not approved | approved | `DestinationAdded(to)` |
 | `allowToken(address token, uint32 minRateBps, uint32 maxRateBps, uint256 maxPayout, uint256 dailyLimit)` | role; `token != 0`; `0 < minRateBps <= maxRateBps`; `maxPayout <= dailyLimit` | first time: reads and stores `decimals()`, sets `known`; sets `allowed`, band and limits | `TokenAllowed(token, decimals, minRateBps, maxRateBps, maxPayout, dailyLimit)` |
 | `setRateBand(address token, uint32 minRateBps, uint32 maxRateBps)` | role; `known`; `0 < min <= max` | set | `RateBandSet(token, minRateBps, maxRateBps)` |
-| `setTokenLimits(address token, uint256 maxPayout, uint256 dailyLimit)` | role; `known`; `maxPayout <= dailyLimit` | set (may raise) | `TokenLimitsSet(token, maxPayout, dailyLimit)` |
+| `setTokenLimits(address token, uint256 maxPayout, uint256 dailyLimit)` | role; `known`; `minTranche[token] <= maxPayout <= dailyLimit` | set (may raise) | `TokenLimitsSet(token, maxPayout, dailyLimit)` |
 | `setMaxFacility(uint256 newMax)` | role; `newMax != 0` | set (may raise) | `MaxFacilitySet(newMax)` |
 | `setMaxFeeBps(uint256 newBps)` | role; `newBps <= 10_000` | set (may raise) | `MaxFeeSet(newBps)` |
+| `setMinTranche(address token, uint256 amount)` | role; `known`; `amount <= maxPayout` | set | `MinTrancheSet(token, amount)` |
 | `recoverSurplus(address token)` | role; surplus `!= 0` | sends `balanceOf(this) - (totalReceived - totalForwarded) - totalCollateralHeld` to `safe` | `SurplusRecovered(token, amount)` |
 | `grantRole` / `revokeRole` | OpenZeppelin `AccessControl` | | `RoleGranted`, `RoleRevoked` |
 
@@ -294,6 +301,7 @@ works for tokens that were never allowed (surplus is then the whole balance).
 | `outstandingGbp(id)` | `owedGbp - repaidGbp`; 0 for an unknown id |
 | `outflowUsedToday(token)` | today's counted outflow; 0 if the last outflow was on an earlier day |
 | `surplus(token)` | what `recoverSurplus` would send |
+| `maxFeeBps()`, `minTranche(token)` | as stored; `minTranche` is 0 until set |
 | all public mappings above | as stored |
 
 ---
@@ -338,6 +346,7 @@ event RateBandSet(address indexed token, uint32 minRateBps, uint32 maxRateBps);
 event TokenLimitsSet(address indexed token, uint256 maxPayout, uint256 dailyLimit);
 event MaxFacilitySet(uint256 maxFacilityGbp);
 event MaxFeeSet(uint256 maxFeeBps);
+event MinTrancheSet(address indexed token, uint256 minTranche);
 event SurplusRecovered(address indexed token, uint256 amount);
 ```
 
@@ -349,7 +358,7 @@ All named `LoanRegistry__<Reason>`:
 
 `ZeroAddress`, `ZeroAmount`, `ZeroHash`, `ZeroRef`, `RefAlreadyUsed`, `LoanNotFound`,
 `InvalidStatus(Status current)`, `DrawingClosed`, `FacilityExceeded`, `MaxFacilityExceeded`, `FeeExceeded`,
-`OwedExceeded`, `CollateralExceeded`, `OutstandingExceeded`, `ForwardExceeded`,
+`OwedExceeded`, `NothingDisbursed`, `BelowMinTranche`, `CollateralExceeded`, `OutstandingExceeded`, `ForwardExceeded`,
 `TokenNotAllowed`, `TokenUnknown`, `InvalidRateBand`, `RateOutOfBand`, `BalanceMismatch`,
 `DestinationNotApproved`, `DestinationAlreadyApproved`, `CannotRemoveSafe`,
 `PayoutLimitExceeded`, `DailyLimitExceeded`, `InvalidLimits`, `NotALowering`, `NoSurplus`.
@@ -371,6 +380,8 @@ Which check raises which error:
 | `createLoan` above `maxFacilityGbp` | `MaxFacilityExceeded` |
 | `createLoan` with a fee above `maxFeeBps` of the facility | `FeeExceeded` |
 | Repayment past `owedGbp` | `OwedExceeded` |
+| Repayment or claim before the first tranche | `NothingDisbursed` |
+| Tranche below `minTranche[token]` | `BelowMinTranche` |
 | Claim or release above `collateralHeld` | `CollateralExceeded` |
 | Claim crediting more than `outstandingGbp` | `OutstandingExceeded` |
 | `forward` past `totalReceived - totalForwarded` | `ForwardExceeded` |
@@ -384,7 +395,7 @@ Which check raises which error:
 | `removeDestination(safe)` | `CannotRemoveSafe` |
 | Single transfer above `maxPayout` | `PayoutLimitExceeded` |
 | Today's outflow would pass `dailyLimit` | `DailyLimitExceeded` |
-| `maxPayout > dailyLimit` in `allowToken` or `setTokenLimits`; `setMaxFeeBps` above 10_000 | `InvalidLimits` |
+| `maxPayout > dailyLimit` in `allowToken` or `setTokenLimits`; `setMaxFeeBps` above 10_000; `setMinTranche` above `maxPayout`; `setTokenLimits` with `maxPayout` under `minTranche` | `InvalidLimits` |
 | A guardian "lower" call that raises any value | `NotALowering` |
 | `recoverSurplus` with nothing to recover | `NoSurplus` |
 
@@ -460,6 +471,10 @@ test names below are the ones phase S2 writes.
 | L35c | `lowerMaxFeeBps` cannot raise | S8 | security / lowers the fee limit, and cannot raise it |
 | L38 | `feeGbp` within `maxFeeBps` of the facility | S13 | createLoan / reverts one penny over the fee limit |
 | L39 | no tranche to the Safe | S14 | security / a tranche to the Safe reverts |
+| L40 | no repayment before the first tranche | S15 | recordRepayment / reverts before the first tranche is paid out |
+| L41 | tranche at least `minTranche` | S16 | recordDisbursement / reverts below the minimum tranche |
+| L42 | no collateral claim before the first tranche | S15 | claimCollateral / reverts before the first tranche is paid out |
+| L43 | `setTokenLimits` keeps `maxPayout >= minTranche` | S16 | security / setTokenLimits cannot put the per-payout limit under the minimum tranche |
 
 L22 and L23 are the same line in the minimal design (`forward` is bounded by received minus
 forwarded, which excludes collateral by construction). Both labels stay so each has a named test.
@@ -477,7 +492,7 @@ forwarded, which excludes collateral by construction). Both labels stay so each 
 | Foundry invariants | One `prop_*` per invariant, three actors including a compromised Safe | `test-fuzz/LoanRegistryInvariants.t.sol` | S7 |
 | Medusa | Same `prop_*` | `medusa.json` | S7 |
 | Halmos | Exactly-once, owed bound, status machine, collateral timing, daily limit | `test-fuzz/symbolic/LoanRegistrySymbolic.t.sol` | S7 |
-| Mutation | L01 to L39 (with L35b, L35c) | `scripts/mutate.ts` | S3 to S7 |
+| Mutation | L01 to L43 (with L35b, L35c) | `scripts/mutate.ts` | S3 to S7 |
 | Static | Slither and Aderyn, no high findings | CI | every phase |
 | Coverage | 100 percent lines, statements, functions; 95 percent branches | `scripts/check-coverage.ts` | S7 |
 | Fork e2e | Real USDC, USDT, Safe, Staking | `test/LoanRegistry.e2e.ts` | S9 |
@@ -503,3 +518,8 @@ through `allowToken`.
    allowed, whether `claimCollateral` may cover the fee or only what was paid out (affects S6), and
    whether a fee is owed on a facility closed before anything was paid out. `maxFeeBps` only stops
    typos; a zero fee always passes.
+8. **The partner's limits.** `minTranche` and `maxPayout` per token are set to the partner's
+   minimum and maximum single payout, and `dailyLimit` to at most its daily limit. Values to confirm
+   with the partner before the deploy batch is queued.
+9. **Net of conversion** (19 Nov). A repayment's `gbpAmount` is the pound value of the stablecoin
+   that arrived, after the partner's fee. To confirm the partner reports that figure per payment.

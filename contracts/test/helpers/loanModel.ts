@@ -154,6 +154,7 @@ export class LoanModel {
   claimCollateral(loanId: bigint, token: string, tokenAmount: bigint, gbpAmount: bigint, ref: string): void {
     const loan = this.loan(loanId);
     if (loan.status !== Status.Defaulted) throw new ModelRevert("LoanRegistry__InvalidStatus");
+    if (loan.disbursedGbp === 0n) throw new ModelRevert("LoanRegistry__NothingDisbursed");
     if (tokenAmount === 0n || gbpAmount === 0n) throw new ModelRevert("LoanRegistry__ZeroAmount");
     const k = key(loanId, token);
     if (tokenAmount > this.get(this.collateralHeld, k)) throw new ModelRevert("LoanRegistry__CollateralExceeded");

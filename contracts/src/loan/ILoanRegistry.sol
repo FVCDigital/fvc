@@ -30,6 +30,7 @@ interface ILoanRegistry {
     error LoanRegistry__FeeExceeded();
     error LoanRegistry__OwedExceeded();
     error LoanRegistry__NothingDisbursed();
+    error LoanRegistry__BelowMinTranche();
     error LoanRegistry__CollateralExceeded();
     error LoanRegistry__OutstandingExceeded();
     error LoanRegistry__ForwardExceeded();
@@ -99,6 +100,7 @@ interface ILoanRegistry {
     event TokenLimitsSet(address indexed token, uint256 maxPayout, uint256 dailyLimit);
     event MaxFacilitySet(uint256 maxFacilityGbp);
     event MaxFeeSet(uint256 maxFeeBps);
+    event MinTrancheSet(address indexed token, uint256 minTranche);
     event SurplusRecovered(address indexed token, uint256 amount);
 
     // ---------------------------------------------------------------- roles
@@ -180,6 +182,7 @@ interface ILoanRegistry {
     function setTokenLimits(address token, uint256 maxPayout, uint256 dailyLimit) external;
     function setMaxFacility(uint256 newMax) external;
     function setMaxFeeBps(uint256 newBps) external;
+    function setMinTranche(address token, uint256 minTranche) external;
     function recoverSurplus(address token) external;
 
     // ---------------------------------------------------------------- views
@@ -218,6 +221,7 @@ interface ILoanRegistry {
         );
 
     function approvedDestination(address to) external view returns (bool);
+    function minTranche(address token) external view returns (uint256);
     function refUsed(bytes32 ref) external view returns (bool);
     function loanReceived(uint256 loanId, address token) external view returns (uint256);
     function collateralHeld(uint256 loanId, address token) external view returns (uint256);

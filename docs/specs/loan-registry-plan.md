@@ -290,12 +290,27 @@ L25, L28 to L30, L34, L35, L35b, L35c, L38 and L39 killed. Slither: only the stu
 `recordRepayment`, `owedGbp`, `outstandingGbp`, `markDefault`, `cure`, `writeOff`.
 Invariants 1 to 14, 17. Labels L08 to L17, plus L31, L32, L36 from S3.
 
+- [x] The six functions; `_existingLoan` and `_transition`.
+- [x] No repayment before the first tranche (decided 19 Nov): invariant S15, label L40.
+- [x] The GBP figure is net of the partner's conversion fee (decided 19 Nov, partner to confirm).
+- [x] `cure` allowed after a claim (decided 19 Nov).
+
 ### S6: collateral and forward
 
 `depositCollateral`, `releaseCollateral`, `claimCollateral`, `forward`, `recoverSurplus`.
 Invariants C1 to C6, 6 to 8, S10. Labels L18 to L24, plus L26, L27, L33, L37 from S3. No call to
 `_notImplemented` is left, and the stub-only Slither findings are gone. End-to-end test with the real `Staking.sol`:
 repay, forward to the Safe, `notifyRewardAmount`, a staker earns over 7 days.
+
+- [x] The five functions; no stub left.
+- [x] No collateral claim before the first tranche: invariant S15, label L42.
+- [x] Minimum tranche per token (`setMinTranche`, timelock), for the partner's minimum payout:
+      invariant S16, label L41.
+- [x] End-to-end test with the real `Staking.sol`.
+- [x] Foundry invariants and property fuzzing (`test-fuzz/LoanRegistryInvariants.t.sol`), brought
+      forward from S7.
+- [x] Partner integration guide (`docs/specs/partner-integration.md`) and deploy script
+      (`scripts/deploy-loan-registry.ts`), rehearsed on the hardhat network only.
 
 **Gate for S4 to S6:** each phase's tests green and its labels killed with `scripts/mutate.ts <ids>`
 (each mutant runs only its killing test, which must pass on the unmutated source first). The full
