@@ -193,7 +193,7 @@ async function main() {
   console.log("CPANEL .ENV VALUES: paste into server .env");
   console.log("===================================================================");
   console.log(`ETH_CHAIN_ID=1`);
-  console.log(`ETH_RPC_URL=https://eth-mainnet.g.alchemy.com/v2/6tgWso4UXVZmfMyP0ErKJ`);
+  console.log(`ETH_RPC_URL=<your Ethereum mainnet RPC URL>`);
   console.log(`ETH_FVC_ADDRESS=${fvcAddress}`);
   console.log(`ETH_SALE_ADDRESS=${saleAddress}`);
   console.log(`ETH_VESTING_ADDRESS=${vestingAddress}`);
