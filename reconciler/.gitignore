@@ -1,0 +1,9 @@
+# The root ignores lockfiles; this package is installed with `npm ci`, so its lockfile is pinned.
+!package-lock.json
+node_modules/
+data/
+inbox/
+out/
+loans.json
+config.local.json
+.env

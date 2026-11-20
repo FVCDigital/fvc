@@ -123,6 +123,7 @@ async function main() {
   const registry = await LoanRegistry.deploy(timelockAddress, safe, MAX_FACILITY_GBP);
   await registry.waitForDeployment();
   const registryAddress = await registry.getAddress();
+  const deployBlock = (await registry.deploymentTransaction()!.wait())!.blockNumber;
   console.log("  LoanRegistry      ", registryAddress);
   console.log();
 
@@ -240,7 +241,7 @@ async function main() {
     fs.writeFileSync(
       path.join(outDir, "deployment.json"),
       JSON.stringify(
-        { network: network.name, chainId: chainId.toString(), timelock: timelockAddress, registry: registryAddress, safe, partner: partner ?? null, operationId, salt },
+        { network: network.name, chainId: chainId.toString(), timelock: timelockAddress, registry: registryAddress, deployBlock, safe, partner: partner ?? null, operationId, salt },
         null,
         2,
       ),

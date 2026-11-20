@@ -1,0 +1,24 @@
+{
+  "name": "@fvc/reconciler",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Matches partner settlements to stablecoin deposits at the Treasury Safe and writes Loan Registry repayment batches for the signers. Never signs or proposes.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --test-reporter=spec test/*.test.ts",
+    "test:e2e": "node --test --test-reporter=spec test/e2e/*.e2e.ts",
+    "reconcile": "node src/cli.ts"
+  },
+  "dependencies": {
+    "ethers": "^6.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "fast-check": "^4.10.3",
+    "typescript": "^5.8.3"
+  }
+}
