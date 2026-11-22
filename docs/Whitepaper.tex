@@ -1336,9 +1336,9 @@ Of five comparables, four lost 90--99\% from their all-time high. Only Ondo reta
 \toprule
 \textbf{Lesson} & \textbf{Evidence} & \textbf{FVC Response} \\
 \midrule
-Long lockups outperform & Ondo: 18mo lockup, 5yr team vest $\rightarrow$ best performer & 40-month team vest, 18mo cliff \\
+Long lockups outperform & Ondo: 18mo lockup, 5yr team vest $\rightarrow$ best performer & Team to M48 (18mo cliff + 30mo linear) \\
 Narrative alone is insufficient & All 4 declining tokens lost narrative within 12--18mo & Revenue model creates fundamental backing \\
-Insider concentration $\rightarrow$ decline & Goldfinch/Centrifuge: $\sim$50\% insider $\rightarrow$ >90\% decline & FVC combined insiders = 35\% \\
+Insider concentration $\rightarrow$ decline & Goldfinch/Centrifuge: $\sim$50\% insider $\rightarrow$ >90\% decline & FVC combined insiders = 35\% (Team 25\% + Seed 10\%) \\
 Tier-1 listings drive step-changes & Each tier-1 listing produced 50--200\% price jumps & \$900K reserved for tier-1 within 18mo \\
 \bottomrule
 \end{tabularx}
@@ -1348,7 +1348,7 @@ Tier-1 listings drive step-changes & Each tier-1 listing produced 50--200\% pric
 
 Tokenomics stress-tested across three scenarios. Prices are derived from the revenue model, not asserted. Each scenario specifies revenue, which feeds buy-and-burn, which determines implied price against effective float.
 
-\textbf{Starting price:} \$0.0500 per FVC, corresponding to a \$50M fully diluted valuation and an approximate \$3M circulating market cap at TGE (60M tokens in float). All scenario trajectories begin from this anchor.
+\textbf{Starting price:} \$0.0500 per FVC, corresponding to a \$50M fully diluted valuation and an approximate \$1.41M circulating market cap at TGE (28,212,800 tokens, 2.82\% float). All scenario trajectories begin from this anchor. Vested unlocks alone reach about 376M tokens by M24 and 623M by M48; governed Ecosystem and Treasury releases and staking change the sellable float around those schedule baselines.
 
 \subsection{8.1 Macroeconomic Regime Mapping}\label{macro-regime}
 
@@ -1378,8 +1378,8 @@ Revenue M24 & \$50K/mo & \$200K/mo & \$600K/mo \\
 Revenue M48 & \$150K/mo & \$500K/mo & \$2M/mo \\
 Quarterly burn M24 & $\sim$\$37K & $\sim$\$150K & $\sim$\$450K \\
 Quarterly burn M48 & $\sim$\$112K & $\sim$\$375K & $\sim$\$1.5M \\
-Programmatic minting & $\sim$5\% of allocation & $\sim$20\% of allocation & $\sim$35\% of allocation \\
-Effective float M24 & $\sim$290M & $\sim$340M & $\sim$380M \\
+Governed release (Ecosystem + Treasury) & Near-zero (cap held) & $\sim$20M cumulative & $\sim$40M cumulative \\
+Effective float M24 & $\sim$360M & $\sim$380M & $\sim$415M \\
 CEX progression & Tier-2 only & Tier-1 by M18 & Tier-1 by M9 \\
 Partnerships (24mo) & 0 & 2 & 4+ \\
 Staking participation M36 & 10\% & 20\% & 35\% \\
@@ -1413,18 +1413,18 @@ Bull & 30\% & \$0.350 & 7.00x & 2.100x \\
 
 \textbf{Probability-Weighted Return: 2.77x vs Listing Price}
 
-Seed investors at \$0.029 avg see a weighted expected 4.8x. Presale Tier 1 at \$0.030 see 4.6x. These weights are subjective; investors should stress-test against their own macro outlook. The 20/50/30 split reflects a moderately constructive view on the 2026--2030 crypto cycle.
+Seed investors at \$0.029 avg see a weighted expected 4.8x. Presale Tier 1 at \$0.037 see about 3.7x. These weights are subjective; investors should stress-test against their own macro outlook. The 20/50/30 split reflects a moderately constructive view on the 2026--2030 crypto cycle.
 
 \subsection{8.4 Price Derivation Methodology}\label{price-derivation}
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Bear M48 (\$0.006):} \$150K/mo revenue generating $\sim$\$112K quarterly burn against $\sim$310M circulating tokens, insufficient buy pressure to offset sell pressure from unlocked vesting in a risk-off market.
+  \textbf{Bear M48 (\$0.006):} \$150K/mo revenue generating $\sim$\$112K quarterly burn against $\sim$600M+ vested circulating tokens (unlock schedule reaches 623M by M48), insufficient buy pressure to offset sell pressure from unlocked vesting in a risk-off market.
 \item
-  \textbf{Base M48 (\$0.065):} \$500K/mo revenue, \$375K quarterly burn, growing treasury NAV of $\sim$\$8M against 360M float. Market prices at $\sim$1.3x NAV with tier-1 exchange liquidity.
+  \textbf{Base M48 (\$0.065):} \$500K/mo revenue, \$375K quarterly burn, growing treasury NAV of $\sim$\$8M against $\sim$550M effective float after staking. Market prices at $\sim$1.3x NAV with tier-1 exchange liquidity.
 \item
-  \textbf{Bull M48 (\$0.350):} \$2M/mo revenue, \$1.5M quarterly burn creating significant supply contraction, treasury NAV >\$25M, and narrative premium from RWA/DeFi-VC leadership.
+  \textbf{Bull M48 (\$0.350):} \$2M/mo revenue, \$1.5M quarterly burn creating significant supply contraction, treasury NAV >\$25M, and narrative premium from RWA/DeFi-VC leadership, with higher staking cutting sellable float despite measured governed releases.
 \end{itemize}
 
 \section{9. Revenue Model \& Price Transmission}\label{revenue-model}
@@ -1477,17 +1477,17 @@ Tokenomics does not survive execution failures. Six controllable factors separat
 \toprule
 \textbf{Factor} & \textbf{Target \& Mechanism} & \textbf{Token Price Impact} \\
 \midrule
-1. Revenue execution & Target \$200K/mo by M15 (Base), \$500K+ by M24 (Bull). Each \$100K/mo $\rightarrow$ $\sim$\$75K quarterly burn. If lagging at M12: freeze programmatic minting, pivot to higher-yield SMEs. & At Base M24 (\$0.045, $\sim$340M float), \$150K burn removes $\sim$3.3M tokens/quarter, a 1\% compounding supply reduction. \\
+1. Revenue execution & Target \$200K/mo by M15 (Base), \$500K+ by M24 (Bull). Each \$100K/mo $\rightarrow$ $\sim$\$75K quarterly burn. If lagging at M12: freeze non-essential governed releases, pivot to higher-yield SMEs. & At Base M24 (\$0.045, $\sim$380M float), \$150K burn removes $\sim$3.3M tokens/quarter, about 0.9\% of float per quarter. \\
 \addlinespace
 2. Tier-1 CEX listing & \$900K reserved. Target: M18 (Base) or M9 (Bull). Adds \$5--20M daily volume for mid-cap tokens. & 50--200\% step-change per tier-1 listing. Institutional order flow sustains volume. \\
 \addlinespace
 3. Strategic partnerships & DeFi, TradFi, RWA, Shariah-compliant networks. Target: 2 in 24mo (Base), 4+ (Bull). & 30--100\% sustained appreciation per partnership. Each adding \$50K/mo fees shifts trajectory. \\
 \addlinespace
-4. Community \& staking & 20K+ holders, 5K+ voters within 12mo. Staking 20\% M36 (Base), 35\% (Bull). & 20\% staking on $\sim$340M float locks $\sim$68M tokens, amplifying burn price impact. \\
+4. Community \& staking & 20K+ holders, 5K+ voters within 12mo. Staking 20\% M36 (Base), 35\% (Bull). & 20\% staking on $\sim$380M float locks $\sim$76M tokens, amplifying burn price impact. \\
 \addlinespace
 5. Narrative capture & DeFi-VC, RWA tokenisation, Shariah-compliant DeFi. \$1.5M budget targeted at narrative leadership. & Capturing one narrative creates outsized capital inflows vs cost. \\
 \addlinespace
-6. Tokenomics discipline & Honour vesting, execute burn on schedule, governance-gate every mint. & Any deviation $\rightarrow$ >80\% drawdown. Discipline is non-negotiable. \\
+6. Tokenomics discipline & Honour vesting, execute income-funded burn on schedule, governance-gate every Ecosystem/Treasury release. & Any deviation $\rightarrow$ >80\% drawdown. Discipline is non-negotiable. \\
 \bottomrule
 \end{tabularx}
 \end{center}
@@ -1500,7 +1500,7 @@ Tokenomics does not survive execution failures. Six controllable factors separat
 \toprule
 \textbf{Trigger} & \textbf{Defensive Action} & \textbf{Token Effect} \\
 \midrule
-Revenue < \$100K/mo at M12 & Freeze non-essential programmatic minting & Float growth $\rightarrow$ near zero \\
+Revenue < \$100K/mo at M12 & Freeze non-essential governed Ecosystem/Treasury releases & Float growth limited to vested unlocks \\
 Price < \$0.02 & Accelerate burn to 40\% of revenue & Increases direct buy pressure \\
 Staking < 10\% at M18 & Boosted staking incentives from Ecosystem bucket & Locks supply, reduces selling \\
 No tier-1 by M18 & Redirect \$200K to tier-2 market-making & Deepens liquidity, cuts volatility \\
@@ -1525,7 +1525,7 @@ The Token Generation Event is the most consequential operational moment in the F
 \midrule
 Smart contracts deployed \& audited & T-30 $\rightarrow$ T-14 & Audit clean \\
 Token contract verified on Etherscan & T-14 $\rightarrow$ T-7 & Public verification \\
-Liquidity pool seeded (\$800K + 50M FVC) & T-7 $\rightarrow$ T-1 & USDC + FVC paired \\
+Liquidity pool seeded ($\sim$\$1.16M + 23.2M FVC) & T-7 $\rightarrow$ T-1 & USDC + FVC paired \\
 Tier-2 CEX listing agreements & T-21 $\rightarrow$ T-3 & Min. 3 CEXs confirmed \\
 Marketing campaign live & T-30 onwards & KOL roster activated \\
 Vesting contracts deployed & T-14 $\rightarrow$ T-3 & Verified on-chain \\
@@ -1544,7 +1544,7 @@ Six-hour staggered sequence to avoid liquidity shocks. All times UTC.
 \textbf{Time} & \textbf{Action} \\
 \midrule
 T+0:00 & Token contract live; vesting contracts begin counting \\
-T+0:30 & DEX pool opened (\$800K USDC + 50M FVC at \$0.05) \\
+T+0:30 & DEX pool opened ($\sim$\$1.16M USDC + 23.2M FVC at \$0.05) \\
 T+1:00 & Tier-2 CEX deposits enabled (Gate, KuCoin, MEXC) \\
 T+2:00 & CEX trading live \\
 T+3:00 & Live trading announcement \\
@@ -1588,7 +1588,7 @@ Day-1 presale dump & 6-month cliff, zero presale tokens at TGE \\
 DEX liquidity shock & Pre-seeded pool + market-maker standby \\
 CEX listing delays & 3 tier-2 confirmed; 4th as backup \\
 Smart contract exploit & 2 independent audits; bug bounty from T+0 \\
-Insider selling & No insider unlock until M12 (Seed) / M18 (Team) \\
+Insider selling & Seed claimable from M4 (hybrid clock); Team from M19 \\
 \bottomrule
 \end{tabularx}
 \end{center}
@@ -2035,7 +2035,7 @@ Infrastructure}\label{distribution-infrastructure}
 \item
   \textbf{DEX Pools:} Uniswap V3 (FVC/USDC), Uniswap V3 (FVC/WETH)
 \item
-  \textbf{Initial Liquidity:} \$800K USDC + 50,000,000 FVC at \$0.05
+  \textbf{Initial Liquidity:} $\sim$\$1.16M USDC + 23,212,800 FVC at \$0.05 (remainder of the 50M liquidity allocation held as market-maker inventory)
 \item
   \textbf{Range Management:} Concentrated liquidity for capital
   efficiency
