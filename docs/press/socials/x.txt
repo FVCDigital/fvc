@@ -1,0 +1,18 @@
+X POST (261 characters including the link; limit 280)
+No image needed: the link previews with the "How FVC works" flowchart.
+
+FVC is building open infrastructure for interest-free SME funding:
+
+- A public loan registry
+- Automated repayment reconciliation
+- Security testing on every code change
+
+Businesses repay in ordinary money. Every repayment is on record.
+
+https://fvcdigital.com/announcements/fvc-company-press-release
+
+
+OPTIONAL REPLY TO YOUR OWN POST
+Attach: docs/press/assets/fvc-company-flow-detail.png
+
+How it works, step by step: choose who is funded, fund the business, and record every repayment after the treasury signers approve it.

@@ -1,10 +1,11 @@
 # Ramp partner integration: Loan Registry v1
 
-Status: draft, 19 Nov 2026. Written for the first call with the on/off-ramp partner. Values marked
+Status: draft, 20 Nov 2026. Written for the first call with the on/off-ramp partner. Values marked
 **to confirm** come from the partner and must be filled in before the deploy batch is queued.
 
-Read with [`contracts/LOAN_REGISTRY.md`](../../contracts/LOAN_REGISTRY.md) (the contract) and
-[`system.md`](./system.md) sections 6 and 7 (currency model and flows).
+Read with [`contracts/LOAN_REGISTRY.md`](../../contracts/LOAN_REGISTRY.md) (the contract),
+[`system.md`](./system.md) sections 6 and 7 (currency model and flows) and
+[`reconciler.md`](./reconciler.md) (how settlement messages are matched to deposits and loans).
 
 ---
 
@@ -46,7 +47,7 @@ design: the integration surface is (a) the partner's deposit address, which the 
 | `DISTRIBUTOR_ROLE` | Safe | `forward` repaid money to the Safe for Staking |
 | `GUARDIAN_ROLE` | Safe | Pause, remove the partner's address, lower limits, at once |
 | Partner | none | none |
-| Reconciler | none | Reads the partner API and chain; proposes Safe transactions; never signs |
+| Reconciler | none | Reads partner messages and the chain; writes batch files a signer proposes; never signs, never proposes, holds no key |
 
 The operator roles (originator, recorder, risk, distributor, guardian) are separate from the admin
 role. Anything that widens what the operators can do waits 48 hours in the timelock.
@@ -103,8 +104,9 @@ the second attempt reverts and changes nothing.
 1. The SME pays GBP to the partner with its payment reference.
 2. The partner sends stablecoin to the Safe and a settlement message.
 3. The reconciler waits for finality (section 8), matches the reference to a loan, checks the
-   amounts and the implied rate, derives `settlementRef`, and proposes
-   `approve(registry, tokenAmount)` plus `recordRepayment(loanId, gbpAmount, token, tokenAmount, settlementRef)`.
+   amounts and the implied rate, derives `settlementRef`, and writes a batch of
+   `approve(registry, tokenAmount)` plus `recordRepayment(loanId, gbpAmount, token, tokenAmount, settlementRef)`
+   for the signers to verify and propose.
 4. The registry rejects a repayment on a loan that has paid out nothing (`NothingDisbursed`), past
    what is owed (`OwedExceeded`), or outside the rate band.
 
@@ -135,8 +137,10 @@ treat partner messages as untrusted input:
    reconciler's secret store (never in the repository). Reject on a bad signature, or a timestamp
    more than 5 minutes off.
 3. Store each webhook's event ID and ignore repeats.
-4. Never act on the webhook alone: fetch the same transaction from the partner's API, and for
-   repayments confirm the stablecoin transfer on-chain at finality, before proposing anything.
+4. Never act on the webhook alone: a repayment is batched only for a stablecoin transfer the
+   message names and the reconciler has seen on-chain at finality, and the signers compare each
+   row with the partner's dashboard before signing. Fetching the transaction back from the
+   partner's API is not built yet; it needs the partner's API (**to confirm**).
 
 ## 8. Reconciliation
 
@@ -183,3 +187,8 @@ minimum, maximum and daily payout limits (4); which IDs exist before and after a
 whether the GBP figure is net of its fee, per payment (6.2); how a bounced payout returns (6.3,
 D10); unmatched payments (D9); chargebacks and when a payment is final (D4); webhook signing and
 replay protection (7); Ethereum mainnet and which stablecoins (D3).
+
+For the reconciler ([`reconciler.md`](./reconciler.md) section 15): the settlement and reversal
+message format, including the on-chain transaction hash of each transfer; the addresses the
+partner sends stablecoin from; how long direct-debit returns and card chargebacks can arrive
+after settlement; and the exchange-rate source to check each settlement's rate against.

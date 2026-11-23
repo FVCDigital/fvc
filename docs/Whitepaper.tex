@@ -37,7 +37,7 @@
 % Use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \IfFileExists{microtype.sty}{% use microtype if available
-  \usepackage[]{microtype}
+  \usepackage[expansion=false]{microtype}
   \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
 % Use setspace anyway because we change the default line spacing.
@@ -88,9 +88,15 @@
 \definecolor{default-urlcolor}{HTML}{4077C0}
 
 \hypersetup{
-  hidelinks,
+  colorlinks=true,
+  linkcolor=[HTML]{2B2153},
+  filecolor=[HTML]{6E1F9E},
+  citecolor=[HTML]{6E1F9E},
+  urlcolor=[HTML]{6E1F9E},
   breaklinks=true,
-  pdfcreator={LaTeX via pandoc with the Eisvogel template}}
+  pdftitle={DeFi's First Venture Capital Token - \$FVC},
+  pdfauthor={FVC Asset Group Ltd},
+  pdfcreator={LaTeX}}
 \author{}
 \date{}
 
@@ -167,9 +173,31 @@
   \fi
 
 %
+% FVC brand palette (from FirstVentureCapita logo gradient #43CBFF -> #9708CC)
+%
+\definecolor{FVCCyan}{HTML}{43CBFF}
+\definecolor{FVCPurple}{HTML}{9708CC}
+\definecolor{FVCPurpleDeep}{HTML}{6E1F9E}
+\definecolor{FVCInk}{HTML}{2B2153}
+\definecolor{FVCGrey}{HTML}{6E6E73}
+\definecolor{FVCRule}{HTML}{D8D8DC}
+
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\renewcommand{\arraystretch}{1.25}
+
+% Horizontal brand-gradient rule: \fvcgradientrule{<width>}{<height>}
+\newcommand{\fvcgradientrule}[2]{%
+  \begin{tikzpicture}
+    \shade[left color=FVCCyan, right color=FVCPurple] (0,0) rectangle (#1,#2);
+  \end{tikzpicture}}
+
+%
 % heading color
 %
-\definecolor{heading-color}{RGB}{40,40,40}
+\definecolor{heading-color}{HTML}{2B2153}
 % By default, the KOMA-Script classes will typeset sectioning headings in
 % sans-serif. Use the normal body font for headings.
 \addtokomafont{disposition}{\normalfont\color{heading-color}\bfseries}
@@ -320,15 +348,21 @@
 
 \newpairofpagestyles{eisvogel-header-footer}{
   \clearpairofpagestyles
-  \ihead*{}
+  \ihead*{\smash{\raisebox{-0.18em}{\includegraphics[height=1.05em]{images/fvc-logo-grey.pdf}}}\hspace{0.55em}First Venture Capital}
   \chead*{}
-  \ohead*{}
-  \ifoot*{}
+  \ohead*{Whitepaper}
+  \ifoot*{fvcdigital.com}
   \cfoot*{}
   \ofoot*{\thepage}
-  \addtokomafont{pageheadfoot}{\upshape}
+  \addtokomafont{pageheadfoot}{\upshape\footnotesize\color{FVCGrey}}
 }
 \pagestyle{eisvogel-header-footer}
+
+%
+% faint brand watermark on content pages (activated after the cover)
+%
+\usepackage[pages=all]{background}
+\backgroundsetup{scale=1, angle=0, opacity=1, contents={}}
 
 
 
@@ -339,20 +373,51 @@
 \begin{document}
 
 \title{DeFi's First Venture Capital Token - \$FVC}
-\author{AKH DIGITAL Team\thanks{info@akh-digital.com}}
-\maketitle
+\author{FVC Asset Group Team}
+
+% ── Cover ────────────────────────────────────────────────────────────────────
+\begin{titlepage}
+  % oversized greyscale mark bleeding off the lower-right corner
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[opacity=0.05, anchor=south east, xshift=5.5cm, yshift=-4.5cm]
+      at (current page.south east)
+      {\includegraphics[width=17cm]{images/fvc-logo-grey.pdf}};
+  \end{tikzpicture}%
+  \centering
+  \vspace*{2.4cm}
+  \includegraphics[width=3.9cm]{images/fvc-logo.pdf}\par
+  \vspace{1.7cm}
+  {\color{FVCInk}\huge\bfseries DeFi's First Venture Capital Token\par}
+  \vspace{0.55em}
+  {\color{FVCPurpleDeep}\LARGE\bfseries \$FVC\par}
+  \vspace{1.35cm}
+  \fvcgradientrule{0.38\textwidth}{1.4pt}\par
+  \vspace{1.35cm}
+  {\color{FVCInk}\large FVC Asset Group Ltd\par}
+  \vspace{0.45em}
+  {\color{FVCGrey}\normalsize Whitepaper\, \textperiodcentered\, September 2026\par}
+  \vfill
+  {\color{FVCGrey}\normalsize \href{https://fvcdigital.com}{fvcdigital.com}\, \textperiodcentered\, \href{mailto:info@fvcdigital.com}{info@fvcdigital.com}\par}
+  \vspace*{1.6cm}
+\end{titlepage}
+
+% ── Contents ─────────────────────────────────────────────────────────────────
+\setcounter{tocdepth}{2}
+{\setstretch{1.08}\small\tableofcontents}
+\clearpage
+
+% faint watermark on all pages after the cover and contents
+\backgroundsetup{
+  scale=1, angle=0, opacity=0.05,
+  contents={\includegraphics[width=10.5cm]{images/fvc-logo-grey.pdf}}
+}
 
 \begin{abstract}
 \section*{Executive Summary}
 The First Venture Capital (\$FVC) token represents a paradigm shift in
 decentralised finance: the world's first interest-free,
-community-governed token for venture capital and business grants. We're
-providing the solution small businesses have been waiting for:
-access to capital. Instead of giving away 30\% equity for \$200k,
-receive funding through community governance. The community that funds
-you becomes your biggest supporters. With a focus on sensible funding
-and maintaining complete decentralisation, we aim to provide liquidity
-to those that need it, and perpetual profitability.
+community-governed token for venture capital and business grants. FVC is a decentralised credit and grant protocol providing interest-free, community-governed funding to small and medium-sized enterprises. The protocol operates from a BVI legal entity with a documented pathway to UK and MiCA compliance.
+
 \end{abstract}
 
 \section{1. Market Problem}\label{market-problem}
@@ -378,7 +443,7 @@ processes that hinder innovation.
 This capital bottleneck restricts innovation, diminishes the
 competitiveness of the UK technology sector, and leaves promising
 ventures without access to the resources they need to scale. The market
-demands a new approach---one that leverages blockchain technology for
+demands a new approach, one that leverages blockchain technology for
 transparency and automation, employs tokenisation to make capital
 raising more efficient and accessible, and provides decentralised
 governance whilst maintaining regulatory compliance. Those who fail to
@@ -420,7 +485,7 @@ Token holders ARE the venture capitalists:
 
 \subsection{2.3 Single-Token System}\label{single-token-system}
 
-AKH DIGITAL introduces a single-token system comprising:
+FVC Asset Group introduces a single-token system comprising:
 
 \begin{itemize}
 \tightlist
@@ -435,7 +500,7 @@ AKH DIGITAL introduces a single-token system comprising:
   \textbf{Quadratic Governance:} Vote power equals square root of staked
   \$FVC to limit concentration.
 \item
-  \textbf{Compliance Layer:} On-chain KYC via Sumsub verified process;
+  \textbf{Compliance Layer:} On-chain KYC via Ondato verified process;
   whitelist registry enforcing AML and sector eligibility.
 \end{itemize}
 
@@ -461,12 +526,14 @@ r_i = \frac{s_i}{S} \cdot R \cdot t
 
 $r_i$ represents individual rewards, $s_i$ the user's staked balance, $S$ total staked supply, $R$ the per-second reward rate, and $t$ elapsed time. This system eschews tiered lockups in favour of continuous accrual, maintaining capital efficiency whilst eliminating lock-in friction for participants. Rewards derive from SME revenue-sharing agreements and Real World Asset (RWA) returns, creating sustainable yield backed by productive economic activity.
 
+\begin{samepage}
 \begin{enumerate}
     \item{\textbf{Staking Rewards}} - A competitive APY from SME revenue repayments
     \item{\textbf{Priority Access}} - First rights to investment opportunities
     \item{\textbf{Governance Rights}} - Vote on protocol decisions with quadratic weighting
 \end{enumerate}
-\newpage
+\end{samepage}
+
 \section{4. Tokenomics}\label{token-distribution-mechanics}
 
 \subsection{4.1 Overview}\label{overview-1}
@@ -475,34 +542,177 @@ The FVC Ecosystem Token Distribution Mechanics ensure fair, transparent,
 and controlled distribution of the \$FVC token supply while maintaining
 price stability and preventing market manipulation.
 
-\textbf{Presale (23.0\%)}
+\textbf{Key Terms:}
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Allocation:} 230,000,000 FVC tokens
-  (includes seed round, private presale, and all sales before public launch)
+  \textbf{Token:} FVC (ERC-20, capped supply)
 \item
-  \textbf{Schedule:} Vesting terms subject to negotiation based on
-  market conditions
+  \textbf{Total Supply:} 1,000,000,000 FVC
 \item
-  \textbf{Target:} Raise amount to be determined based on market demand
+  \textbf{Listing FDV / Price:} \$50,000,000 / \$0.0500 per FVC
 \item
-  \textbf{Note:} Tokens are minted on-demand through bonding contracts.
-  Unallocated tokens remain unminted, with the allocation adjusting
-  based on actual market demand rather than predetermined distribution.
+  \textbf{Pre-Listing Capital Target:} \$8.93M (25\% dilution)
+\item
+  \textbf{Listing Target:} Q3 2026
 \end{itemize}
 
-\textbf{Founders, Team \& Partners (25.0\%)}
+Total supply is capped at 1 billion FVC across nine buckets. Three follow vesting schedules, five are programmatic mint-on-demand, one is permanently locked in DEX liquidity.
+
+\begin{center}
+\begin{tabular}{lccl}
+\toprule
+\textbf{Bucket} & \textbf{\%} & \textbf{Tokens} & \textbf{Type} \\
+\midrule
+Public Presale & 15.0\% & 150M & Vested \\
+Team \& Partners & 25.0\% & 250M & Vested \\
+Seed Round & 10.0\% & 100M & Vested \\
+Ecosystem & 18.0\% & 180M & Programmatic \\
+Marketing & 10.0\% & 100M & Programmatic \\
+Liquidity & 5.0\% & 50M & Pool-locked \\
+Protocol Reserve & 10.5\% & 105M & Programmatic \\
+Security Reserve & 3.5\% & 35M & Programmatic \\
+Buy \& Burn & 3.0\% & 30M & Programmatic \\
+\midrule
+\textbf{Total} & \textbf{100\%} & \textbf{1,000M} & -- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{4.2 Vested vs. Programmatic Allocations}\label{vested-vs-programmatic}
+
+\textbf{Vested allocations} have predetermined release schedules locked at TGE. \textbf{Programmatic allocations} function as managed treasuries; tokens only enter circulation when minted for approved use cases, gated by governance and policy.
+
+Programmatic $\neq$ overhang. 50\% of total supply enters circulation only via governance triggers. Scenarios model this dynamically (Bear $\sim$5\% minting, Base $\sim$20\%, Bull $\sim$35\%). This supply elasticity is a price management lever, not a dilution risk.
+
+\begin{samepage}
+\textbf{Programmatic Deployment Policies:}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Bucket} & \textbf{Trigger} & \textbf{Authority} \\
+\midrule
+Ecosystem & Partnership / integration approved & Multi-sig + governance vote \\
+Marketing & Campaign budget approved & Multi-sig signoff \\
+Protocol Reserve & Governance proposal passes & Token vote, 7-day timelock \\
+Security Reserve & Audit / bounty / emergency & Pre-defined trigger conditions \\
+Buy \& Burn & Treasury revenue accumulates & Quarterly automated batches \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{samepage}
+
+\subsection{4.3 Vesting Schedule}\label{vesting-schedule}
+
+Vesting follows a staggered cliff structure to prevent concentrated unlock events. Major cliffs at M6 (Presale), M12 (Seed), and M18 (Team) avoid the cascade pattern observed in earlier-generation protocols.
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Bucket} & \textbf{TGE Unlock} & \textbf{Cliff} & \textbf{Linear Vesting} & \textbf{Fully Vested} \\
+\midrule
+Public Presale & 0\% & 6 months & 6 months & Month 12 \\
+Team \& Partners & 0\% & 18 months & 22 months & Month 40 \\
+Seed Round* & 0\% & 12 months & 24 months & Month 36 \\
+Liquidity & 100\% & -- & -- & TGE (locked in DEX) \\
+Marketing & 10\% & -- & 24 months & Month 24 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textit{* Seed round vesting terms are subject to negotiation on a case-by-case basis depending on commitment size and strategic value.}
+
+\textbf{TGE Circulating Supply: Only 6\%}
+
+At TGE, only 60M tokens enter circulation (50M locked in DEX liquidity and 10M from Marketing). No presale, seed, or team tokens are unlocked. This constrained 6\% float concentrates demand during price discovery, while staggered unlocks gradually increase supply as protocol revenue matures.
+
+\textbf{Design Rationale:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Team at 40 months}: 18-month cliff (longer than Seed's 12-month) signals long-term commitment; 22-month linear vesting staggers Team full unlock (M40) away from Seed full unlock (M36) to prevent concentrated sell pressure.
+\item
+  \textbf{Seed at 36 months}: Industry standard; 12-month cliff matches Maple, Centrifuge, Clearpool.
+\item
+  \textbf{Presale at 12 months}: 6-month cliff balances retail tolerance with price stability.
+\item
+  \textbf{Liquidity locked permanently}: 50M FVC paired with USDC, never re-enters supply.
+\end{itemize}
+
+\subsection{4.4 Allocation Details}\label{allocation-details}
+
+\begin{samepage}
+
+\textbf{Team \& Partners (25.0\%)}
 
 \begin{itemize}
 \tightlist
 \item
   \textbf{Allocation:} 250,000,000 FVC tokens
 \item
-  \textbf{Schedule:} Vesting terms subject to negotiation with institutional investors
+  \textbf{Schedule:} 0\% TGE, 18-month cliff, 22-month linear vesting (fully vested Month 40)
 \item
   \textbf{Performance Ties:} Milestone-based unlocks with clawbacks
+\end{itemize}
+
+\textbf{Ecosystem Development (18.0\%)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Allocation:} 180,000,000 FVC tokens
+\item
+  \textbf{Purpose:} Exchange listings, FVC developer grants, protocol integrations, and strategic partnerships
+\item
+  \textbf{Control:} Multi-signature safe wallet with governance oversight
+\item
+  \textbf{Trigger:} Partnership / integration approved via multi-sig + governance vote
+\end{itemize}
+
+\textbf{Public Presale (15.0\%)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Allocation:} 150,000,000 FVC tokens
+\item
+  \textbf{Schedule:} 0\% TGE, 6-month cliff, 6-month linear vesting (fully vested Month 12)
+\item
+  \textbf{Target Raise:} \$6.03M at \$0.0405 average price (19\% avg discount vs listing)
+\item
+  \textbf{Note:} Six-tier backloaded pricing rewards early participants
+\end{itemize}
+\end{samepage}
+
+\textbf{Protocol Reserve (10.5\%)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Allocation:} 105,000,000 FVC tokens
+\item
+  \textbf{Purpose:} Long-term operational flexibility and future initiatives
+\item
+  \textbf{Control:} Governance-controlled deployment requiring community approval
+\item
+  \textbf{Trigger:} Governance proposal passes via token vote with 7-day timelock
+\end{itemize}
+
+\textbf{Seed Round (10.0\%)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Allocation:} 100,000,000 FVC tokens
+\item
+  \textbf{Schedule:} 0\% TGE, 12-month cliff, 24-month linear vesting (fully vested Month 36)
+\item
+  \textbf{Target Raise:} \$2.9M at \$0.029 average price (42\% avg discount vs listing)
+\item
+  \textbf{Note:} Three-tranche structure (Lead, Standard, Late) for institutional investors
 \end{itemize}
 
 \textbf{Marketing \& Community (10.0\%)}
@@ -510,69 +720,13 @@ price stability and preventing market manipulation.
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Allocation:} 100,000,000 FVC tokens (provisional)
+  \textbf{Allocation:} 100,000,000 FVC tokens
+\item
+  \textbf{Schedule:} 10\% TGE unlock, 24-month linear vesting
 \item
   \textbf{Governance:} Professional delegates, reviewers, tooling
 \item
   \textbf{Airdrops:} Sybil-resistant programmes with retention metrics
-\item
-  \textbf{Staged Releases:} Milestone-based unlocks with KPIs
-\end{itemize}
-
-\textbf{Ecosystem Development (20.0\%)}
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Allocation:} 200,000,000 FVC tokens
-\item
-  \textbf{Purpose:} Exchange listings, FVC developer grants, protocol integrations, and strategic partnerships
-\item
-  \textbf{Control:} Multi-signature safe wallet with governance oversight
-\item
-  \textbf{Note:} Dedicated to ecosystem expansion and developer incentive programmes
-\end{itemize}
-
-\textbf{Protocol Reserve (7.0\%)}
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Allocation:} 70,000,000 FVC tokens
-\item
-  \textbf{Purpose:} Long-term operational flexibility and future initiatives
-\item
-  \textbf{Control:} Governance-controlled deployment requiring community approval
-\item
-  \textbf{Note:} Strategic reserve for unforeseen opportunities and operational needs
-\end{itemize}
-
-\textbf{Security Reserve (7.0\%)}
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Allocation:} 70,000,000 FVC tokens
-\item
-  \textbf{Purpose:} Emergency security fund, bug bounties, audits, and incident response
-\item
-  \textbf{Governance:} Subject to community governance approval for deployment
-\item
-  \textbf{Note:} Enhanced reserve for protocol protection and security operations
-\end{itemize}
-
-\textbf{Buy \& Burn Reserve (3.0\%)}
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{Allocation:} 30,000,000 FVC tokens
-\item
-  \textbf{Purpose:} Market support mechanism through token burns
-\item
-  \textbf{Control:} Executed via multi-signature safe using treasury revenues
-\item
-  \textbf{Note:} Dedicated allocation for price support without minting new supply
 \end{itemize}
 
 \textbf{Liquidity Provision (5.0\%)}
@@ -584,9 +738,37 @@ price stability and preventing market manipulation.
 \item
   \textbf{Initial Pools:} Uniswap V3 (FVC/USDC, FVC/WETH)
 \item
+  \textbf{Launch Seeding:} \$800K USDC + 50M FVC at \$0.05
+\item
   \textbf{Range Management:} Concentrated liquidity for efficiency
 \item
-  \textbf{Market Quality:} Reduced slippage and better price discovery
+  \textbf{Status:} 100\% unlocked at TGE, permanently locked in DEX
+\end{itemize}
+
+\textbf{Security Reserve (3.5\%)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Allocation:} 35,000,000 FVC tokens
+\item
+  \textbf{Purpose:} Emergency security fund, bug bounties, audits, and incident response
+\item
+  \textbf{Trigger:} Pre-defined trigger conditions for audit / bounty / emergency
+\end{itemize}
+
+\textbf{Buy \& Burn Reserve (3.0\%)}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Allocation:} 30,000,000 FVC tokens
+\item
+  \textbf{Purpose:} Market support mechanism through token burns
+\item
+  \textbf{Control:} Quarterly automated batches when treasury revenue accumulates
+\item
+  \textbf{Note:} A fixed percentage of quarterly net revenue purchases FVC on the open market and permanently burns it, automated via smart contract
 \end{itemize}
 
 \textbf{Treasury Operations (USDC)}
@@ -609,7 +791,7 @@ price stability and preventing market manipulation.
 \section{5. Technical Architecture}\label{technical-architecture}
 
 FVC is a \textbf{Capital Deployment Operating System}. It is a modular, upgradeable Web3 infrastructure stack focused
-on compliant venture funding. It operates on Binance Smart Chain and other Ethereum-compatible
+on compliant venture funding. It operates on Ethereum and other EVM-compatible
 networks and integrates modern tooling for secure, maintainable
 development across contracts, frontend, and infrastructure layers.
 
@@ -620,7 +802,7 @@ development across contracts, frontend, and infrastructure layers.
 \begin{itemize}
 \tightlist
 \item
-  \passthrough{\lstinline!FVC.sol!} --- ERC20 token with 1 billion token cap, role-based minting and burning
+  \passthrough{\lstinline!FVC.sol!}: ERC20 token with 1 billion token cap, role-based minting and burning
   \begin{itemize}
   \tightlist
   \item
@@ -637,7 +819,7 @@ development across contracts, frontend, and infrastructure layers.
 \begin{itemize}
 \tightlist
 \item
-  \passthrough{\lstinline!Sale.sol!} --- Fixed-price sale accepting USDC/USDT
+  \passthrough{\lstinline!Sale.sol!}: Fixed-price sale accepting USDC/USDT
   \begin{itemize}
   \tightlist
   \item
@@ -656,7 +838,7 @@ development across contracts, frontend, and infrastructure layers.
 \begin{itemize}
 \tightlist
 \item
-  \passthrough{\lstinline!Vesting.sol!} --- Time-based vesting logic
+  \passthrough{\lstinline!Vesting.sol!}: Time-based vesting logic
   \begin{itemize}
   \tightlist
   \item
@@ -681,7 +863,7 @@ development across contracts, frontend, and infrastructure layers.
 \begin{itemize}
 \tightlist
 \item
-  \passthrough{\lstinline!Staking.sol!} --- Synthetix proportional staking pattern
+  \passthrough{\lstinline!Staking.sol!}: Synthetix proportional staking pattern
   \begin{itemize}
   \tightlist
   \item
@@ -700,9 +882,9 @@ development across contracts, frontend, and infrastructure layers.
 \begin{itemize}
 \tightlist
 \item
-  \passthrough{\lstinline!FVCFaucet.sol!} --- Testnet-only token distribution
+  \passthrough{\lstinline!FVCFaucet.sol!}: Testnet-only token distribution
 \item
-  \passthrough{\lstinline!MockStable.sol!} --- Test USDC for development
+  \passthrough{\lstinline!MockStable.sol!}: Test USDC for development
 \end{itemize}
 
 \subsection{5.2 Treasury Management (Active Treasury Engine)}\label{treasury-management}
@@ -925,7 +1107,7 @@ Where $r_i$ is the risk-adjusted return rate of adapter $i$. Unlike static treas
   \end{itemize}
 \end{itemize}
 
-\subsection{5.3 Upgrade Mechanisms}\label{upgrade-mechanisms}
+\subsection{5.6 Upgrade Mechanisms}\label{upgrade-mechanisms}
 
 \begin{itemize}
 \tightlist
@@ -942,7 +1124,7 @@ users interact with, the actual logic is delegated to another
 implementation which is upgradeable, changing nothing from the user's
 perspective.
 
-\subsection{5.4 Integration Architecture: How You Connect with Borrower
+\subsection{5.7 Integration Architecture: How You Connect with Borrower
 Systems}\label{integration-architecture-how-you-connect-with-borrower-systems}
 
 \begin{itemize}
@@ -952,7 +1134,7 @@ Systems}\label{integration-architecture-how-you-connect-with-borrower-systems}
 \end{itemize}
 
 The system connects with established financial and legal infrastructure
-through secure API integrations. Sumsub provides KYC/AML verification
+through secure API integrations. Ondato provides KYC/AML verification
 services with real-time status updates. DocuSign enables automated legal
 document management and digital signature collection. Banking APIs
 facilitate traditional payment processing and account verification for
@@ -999,7 +1181,7 @@ Plaid/Yodlee APIs, and manual payment processing for complex
 arrangements. All payments are tracked on-chain with immutable records
 for audit and compliance purposes.
 
-\subsection{Data Architecture: On-Chain vs Off-Chain Data
+\subsection{5.8 Data Architecture: On-Chain vs Off-Chain Data
 Strategy}\label{data-architecture-on-chain-vs-off-chain-data-strategy}
 
 \begin{itemize}
@@ -1038,7 +1220,7 @@ management. Access controls ensure that sensitive documents are only
 available to authorised parties while maintaining transparency for
 public information.
 
-\subsection{5.6 Tooling Stack}\label{tooling-stack}
+\subsection{5.9 Tooling Stack}\label{tooling-stack}
 
 \begin{itemize}
 \tightlist
@@ -1059,27 +1241,390 @@ public information.
   connections and contract interactions in React-based dApps.
 \end{itemize}
 
-\section{6. Dual-Channel Presale Architecture}\label{dual-channel-presale-architecture}
+\section{6. Pricing Strategy \& Presale Architecture}\label{dual-channel-presale-architecture}
 
 \subsection{6.1 Presale Overview}\label{presale-overview}
 
-\textbf{Total Allocation:} 230,000,000 tokens (23.0\% of total supply) distributed through seed round, private presale, and all sales before public launch.
+Pre-listing capital is raised across two structured rounds: a tranched Seed Round for institutional investors and a six-tier backloaded Public Presale for the community. All prices denominated against the locked \$50M listing FDV (\$0.0500/token).
 
-\textbf{Vesting Terms:} Subject to negotiation with institutional investors based on market conditions and investor requirements.
+\begin{center}
+\textbf{\$8.93M} Total Raise \quad | \quad \textbf{\$0.0290} Seed Avg \quad | \quad \textbf{\$0.0405} Presale Avg \quad | \quad \textbf{25\%} Pre-List Dilution
+\end{center}
 
-\subsection{Community Channel (Bonding Mechanism)}\label{community-channel-bonding-mechanism}
+\subsection{6.2 Seed Round (Tranched)}\label{seed-round-tranched}
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Tranche} & \textbf{Tokens} & \textbf{Price} & \textbf{Discount vs Listing} & \textbf{Capital Raised} \\
+\midrule
+Lead & 30M & \$0.0250 & 50\% & \$750K \\
+Standard & 50M & \$0.0300 & 40\% & \$1,500K \\
+Late & 20M & \$0.0325 & 35\% & \$650K \\
+\midrule
+\textbf{Seed Total} & \textbf{100M} & \textbf{\$0.0290 avg} & \textbf{42\% avg} & \textbf{\$2,900K} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Vesting:} 0\% TGE, 12-month cliff, 24-month linear vesting (fully vested Month 36)
+
+\subsection{6.3 Public Presale (Six-Tier Backloaded)}\label{public-presale-six-tier}
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Tier} & \textbf{Tokens} & \textbf{Price} & \textbf{Discount vs Listing} & \textbf{Capital Raised} \\
+\midrule
+Tier 1 & 10M & \$0.0300 & 40\% & \$300K \\
+Tier 2 & 18M & \$0.0325 & 35\% & \$585K \\
+Tier 3 & 25M & \$0.0350 & 30\% & \$875K \\
+Tier 4 & 32M & \$0.0400 & 20\% & \$1,280K \\
+Tier 5 & 33M & \$0.0440 & 12\% & \$1,452K \\
+Tier 6 & 32M & \$0.0480 & 4\% & \$1,536K \\
+\midrule
+\textbf{Presale Total} & \textbf{150M} & \textbf{\$0.0405 avg} & \textbf{19\% avg} & \textbf{\$6,028K} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Vesting:} 0\% TGE, 6-month cliff, 6-month linear vesting (fully vested Month 12)
+
+Average presale discount of 19\% sits in the 18--25\% industry-healthy band. Combined raise of \$8.93M provides a four-year operating runway.
+
+\subsection{6.4 Use of Funds}\label{use-of-funds}
+
+\begin{center}
+\begin{tabular}{lccl}
+\toprule
+\textbf{Category} & \textbf{Amount} & \textbf{\% of Raise} & \textbf{Rationale} \\
+\midrule
+Engineering \& Audits & \$1,800K & 20\% & Smart contracts, security audits, platform build \\
+Operations \& Team & \$1,500K & 17\% & Core team runway for 4 years \\
+Marketing \& KOLs & \$1,500K & 17\% & Community acquisition, narrative capture \\
+Reserve / Contingency & \$1,220K & 14\% & Runway buffer against downside scenarios \\
+Tier-1 CEX Listings & \$900K & 10\% & Listing fees + market-making deposits \\
+DEX Liquidity & \$800K & 9\% & Launch pool seeding (USDC side) \\
+Legal \& Compliance & \$700K & 8\% & BVI operations, UK / MiCA compliance pathway \\
+Strategic Partnerships & \$500K & 6\% & Integration costs, co-marketing \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{6.5 Community Channel (Bonding Mechanism)}\label{community-channel-bonding-mechanism}
 
 The pre-sale phase incorporates a bonding mechanism with milestone-based pricing and controlled token distribution. This approach ensures controlled access whilst maintaining transparent price discovery.
 
-The pricing is programmed as a reverse Dutch auction where the price starts low and gets higher to reward early clients. The only caveat is the prices have milestones rather than a gradual increase.
+The pricing is programmed as a reverse Dutch auction where the price starts low and gets higher to reward early participants. The only caveat is the prices have milestones rather than a gradual increase.
 
-\subsection{6.3 Private Channel (OTC Swap)}\label{private-channel-otc-swap}
+\subsection{6.6 Private Channel (OTC Swap)}\label{private-channel-otc-swap}
 
 Parallel private channel for accredited investors featuring fixed pricing, allowlist verification, and custom allocation limits. Provides negotiated terms for institutional participants.
 
-\section{7. Grants System}\label{grants-system}
+\section{7. Comparable Analysis}\label{comparable-analysis}
 
-\subsection{7.1 Dual Grant System}\label{dual-grant-system}
+FVC's tokenomics is calibrated against five DeFi credit comparables. All data verified through CoinGecko, CoinMarketCap, and project documentation.
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Project} & \textbf{Supply} & \textbf{Team} & \textbf{Investors} & \textbf{Public Sale} & \textbf{Listed} \\
+\midrule
+Maple Finance & 10M & 25\% & 26\% & 5\% & Apr 2021 \\
+Goldfinch & 114M & 28.4\% & 21.6\% & 0\% & Jan 2022 \\
+Centrifuge & 400M & 29.2\% & 18.5\% & 10.3\% & Jul 2021 \\
+Ondo Finance & 10B & 33\% & 12.9\% & 2\% & Jan 2024 \\
+Clearpool & 1B & 15\% & 12.3\% & 0.4\% & Oct 2021 \\
+\midrule
+\textbf{FVC (target)} & \textbf{1B} & \textbf{25\%} & \textbf{10\%} & \textbf{15\%} & \textbf{Q3 2026} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{7.1 Where FVC Sits in the Competitive Landscape}\label{competitive-landscape}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Team (25\%)}: Mid-range; matches Maple, below Centrifuge and Ondo, above Clearpool.
+\item
+  \textbf{Investors (10\%)}: Lowest in set, signalling founder discipline.
+\item
+  \textbf{Public sale (15\%)}: highest in set, a deliberate community-first choice (closest comparable: Centrifuge at 10.3\%).
+\end{itemize}
+
+\textbf{Strategic Positioning:} Low investor allocation, high public sale, staggered cliffs, and programmatic governance differentiate FVC from earlier-generation DeFi credit protocols where insider concentration drove subsequent token underperformance.
+
+\subsection{7.2 Performance Benchmark \& Lessons}\label{performance-benchmark}
+
+Of five comparables, four lost 90--99\% from their all-time high. Only Ondo retained meaningful value, supported by the RWA narrative and an 18-month global lockup at launch.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{Y Y Y}
+\toprule
+\textbf{Lesson} & \textbf{Evidence} & \textbf{FVC Response} \\
+\midrule
+Long lockups outperform & Ondo: 18mo lockup, 5yr team vest $\rightarrow$ best performer & 40-month team vest, 18mo cliff \\
+Narrative alone is insufficient & All 4 declining tokens lost narrative within 12--18mo & Revenue model creates fundamental backing \\
+Insider concentration $\rightarrow$ decline & Goldfinch/Centrifuge: $\sim$50\% insider $\rightarrow$ >90\% decline & FVC combined insiders = 35\% \\
+Tier-1 listings drive step-changes & Each tier-1 listing produced 50--200\% price jumps & \$900K reserved for tier-1 within 18mo \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{8. Scenario Analysis}\label{scenario-analysis}
+
+Tokenomics stress-tested across three scenarios. Prices are derived from the revenue model, not asserted. Each scenario specifies revenue, which feeds buy-and-burn, which determines implied price against effective float.
+
+\textbf{Starting price:} \$0.0500 per FVC, corresponding to a \$50M fully diluted valuation and an approximate \$3M circulating market cap at TGE (60M tokens in float). All scenario trajectories begin from this anchor.
+
+\subsection{8.1 Macroeconomic Regime Mapping}\label{macro-regime}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{p{3.2cm} Y Y Y}
+\toprule
+\textbf{Factor} & \textbf{Bear} & \textbf{Base} & \textbf{Bull} \\
+\midrule
+BTC / crypto trend & Sustained decline, crypto winter & Sideways / modest growth & BTC breakout, risk-on macro \\
+Altcoin sentiment & Risk-off, flight to stables & Selective rotation & Broad rally, new ATHs \\
+DeFi / RWA narrative & Low interest, TVL declining & Steady institutional adoption & RWA wave, regulatory tailwinds \\
+Liquidity & Tight, VC dry powder scarce & Normalising & Abundant, FOMO-driven inflows \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{8.2 Scenario Parameters \& Derived Pricing}\label{scenario-parameters}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Indicator} & \textbf{Bear} & \textbf{Base} & \textbf{Bull} \\
+\midrule
+Starting price & \$0.050 & \$0.050 & \$0.050 \\
+Revenue M24 & \$50K/mo & \$200K/mo & \$600K/mo \\
+Revenue M48 & \$150K/mo & \$500K/mo & \$2M/mo \\
+Quarterly burn M24 & $\sim$\$37K & $\sim$\$150K & $\sim$\$450K \\
+Quarterly burn M48 & $\sim$\$112K & $\sim$\$375K & $\sim$\$1.5M \\
+Programmatic minting & $\sim$5\% of allocation & $\sim$20\% of allocation & $\sim$35\% of allocation \\
+Effective float M24 & $\sim$290M & $\sim$340M & $\sim$380M \\
+CEX progression & Tier-2 only & Tier-1 by M18 & Tier-1 by M9 \\
+Partnerships (24mo) & 0 & 2 & 4+ \\
+Staking participation M36 & 10\% & 20\% & 35\% \\
+\midrule
+Price M12 & \$0.025 & \$0.040 & \$0.085 \\
+Price M24 & \$0.012 & \$0.045 & \$0.140 \\
+Price M48 & \$0.006 & \$0.065 & \$0.350 \\
+\midrule
+\textbf{Multiple vs listing} & \textbf{0.12x} & \textbf{1.30x} & \textbf{7.0x} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{8.3 Probability-Weighted Expected Return}\label{expected-return}
+
+Assigning indicative probabilities allows computation of a weighted expected return. These weights reflect current macro positioning, team execution capacity, and RWA sector tailwinds.
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Scenario} & \textbf{Probability} & \textbf{M48 Price} & \textbf{Multiple} & \textbf{Weighted Return} \\
+\midrule
+Bear & 20\% & \$0.006 & 0.12x & 0.024x \\
+Base & 50\% & \$0.065 & 1.30x & 0.650x \\
+Bull & 30\% & \$0.350 & 7.00x & 2.100x \\
+\midrule
+\textbf{Expected outcome} & \textbf{100\%} & & & \textbf{2.77x} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Probability-Weighted Return: 2.77x vs Listing Price}
+
+Seed investors at \$0.029 avg see a weighted expected 4.8x. Presale Tier 1 at \$0.030 see 4.6x. These weights are subjective; investors should stress-test against their own macro outlook. The 20/50/30 split reflects a moderately constructive view on the 2026--2030 crypto cycle.
+
+\subsection{8.4 Price Derivation Methodology}\label{price-derivation}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Bear M48 (\$0.006):} \$150K/mo revenue generating $\sim$\$112K quarterly burn against $\sim$310M circulating tokens, insufficient buy pressure to offset sell pressure from unlocked vesting in a risk-off market.
+\item
+  \textbf{Base M48 (\$0.065):} \$500K/mo revenue, \$375K quarterly burn, growing treasury NAV of $\sim$\$8M against 360M float. Market prices at $\sim$1.3x NAV with tier-1 exchange liquidity.
+\item
+  \textbf{Bull M48 (\$0.350):} \$2M/mo revenue, \$1.5M quarterly burn creating significant supply contraction, treasury NAV >\$25M, and narrative premium from RWA/DeFi-VC leadership.
+\end{itemize}
+
+\section{9. Revenue Model \& Price Transmission}\label{revenue-model}
+
+Token price is a function of protocol revenue, treasury flows, and supply dynamics, not speculation. This section establishes the causal chain from business activity to token value.
+
+\subsection{9.1 Revenue Sources}\label{revenue-sources}
+
+\textbf{SME Funding Revenue:} FVC deploys capital to vetted SMEs as interest-free loans and grants. Revenue is generated through origination fees, success fees, and revenue-sharing arrangements with portfolio SMEs. As active grants grow, recurring revenue scales linearly.
+
+\textbf{Strategic Treasury Returns:} Idle treasury capital is deployed into yield-generating positions (stablecoin lending, RWA instruments, and strategic co-investments), creating a baseline revenue floor independent of new SME deal flow.
+
+\textbf{Fiat Repayment Rails:} FVC is integrating a fiat payments partner to facilitate SME repayments in fiat. Repayments collected in fiat are converted to stablecoins and settled to the protocol's multi-signature treasury safe, from which distributions are deployed to stakers. This gives funded businesses a conventional payment experience while keeping settlement, custody, and distribution transparent and on-chain.
+
+\subsection{9.2 Price Transmission: How Revenue Becomes Token Value}\label{price-transmission}
+
+Protocol revenue reaches the token through two primary channels:
+
+\textbf{Channel 1 (Buy-and-Burn):} A fixed percentage of quarterly net revenue purchases FVC on the open market and permanently burns it. This creates recurring buy pressure proportional to revenue and reduces total supply. The mechanism is automated via smart contract.
+
+\textbf{Channel 2 (Treasury Accumulation):} SME repayments flow directly into the FVC treasury. As the treasury grows, the ratio of treasury assets to circulating supply creates an implicit NAV floor that the market prices against.
+
+\subsection{9.3 The Causal Chain}\label{causal-chain}
+
+More SMEs funded $\rightarrow$ more fees collected $\rightarrow$ larger quarterly burn $\rightarrow$ fewer tokens in supply $\rightarrow$ higher NAV/token $\rightarrow$ higher market price $\rightarrow$ staking becomes attractive $\rightarrow$ float shrinks further $\rightarrow$ each dollar of new demand moves price more. This is mechanical, not speculative.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Stage} & \textbf{Mechanism} & \textbf{Token Impact} \\
+\midrule
+SMEs funded & Origination / success fees collected & Treasury grows \\
+Revenue accumulates & Quarterly buy-and-burn executes & Buy pressure + supply reduction \\
+Treasury grows & NAV per circulating token rises & Price floor rises \\
+Price rises & Staking yields become attractive & Tokens locked, float shrinks \\
+Float shrinks & Demand against constrained supply & Price appreciation compounds \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Programmatic Supply as Active Price Lever:} 50\% of total supply is governance-gated. In bear conditions, governance restricts minting to reduce sell pressure. In bull conditions, strategic minting funds growth while demand absorbs additional supply. Scenarios model this dynamically: Bear $\sim$5\%, Base $\sim$20\%, Bull $\sim$35\% of programmatic allocation.
+
+\section{10. Execution Strategy \& Bear-Case Mitigation}\label{execution-strategy}
+
+Tokenomics does not survive execution failures. Six controllable factors separate Bear from Base and Base from Bull. Each factor is linked to its specific token-price impact.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{p{3cm} Y Y}
+\toprule
+\textbf{Factor} & \textbf{Target \& Mechanism} & \textbf{Token Price Impact} \\
+\midrule
+1. Revenue execution & Target \$200K/mo by M15 (Base), \$500K+ by M24 (Bull). Each \$100K/mo $\rightarrow$ $\sim$\$75K quarterly burn. If lagging at M12: freeze programmatic minting, pivot to higher-yield SMEs. & At Base M24 (\$0.045, $\sim$340M float), \$150K burn removes $\sim$3.3M tokens/quarter, a 1\% compounding supply reduction. \\
+\addlinespace
+2. Tier-1 CEX listing & \$900K reserved. Target: M18 (Base) or M9 (Bull). Adds \$5--20M daily volume for mid-cap tokens. & 50--200\% step-change per tier-1 listing. Institutional order flow sustains volume. \\
+\addlinespace
+3. Strategic partnerships & DeFi, TradFi, RWA, Shariah-compliant networks. Target: 2 in 24mo (Base), 4+ (Bull). & 30--100\% sustained appreciation per partnership. Each adding \$50K/mo fees shifts trajectory. \\
+\addlinespace
+4. Community \& staking & 20K+ holders, 5K+ voters within 12mo. Staking 20\% M36 (Base), 35\% (Bull). & 20\% staking on $\sim$340M float locks $\sim$68M tokens, amplifying burn price impact. \\
+\addlinespace
+5. Narrative capture & DeFi-VC, RWA tokenisation, Shariah-compliant DeFi. \$1.5M budget targeted at narrative leadership. & Capturing one narrative creates outsized capital inflows vs cost. \\
+\addlinespace
+6. Tokenomics discipline & Honour vesting, execute burn on schedule, governance-gate every mint. & Any deviation $\rightarrow$ >80\% drawdown. Discipline is non-negotiable. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{10.1 Bear-Case Mitigation Playbook}\label{bear-case-mitigation}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{p{4.4cm} Y Y}
+\toprule
+\textbf{Trigger} & \textbf{Defensive Action} & \textbf{Token Effect} \\
+\midrule
+Revenue < \$100K/mo at M12 & Freeze non-essential programmatic minting & Float growth $\rightarrow$ near zero \\
+Price < \$0.02 & Accelerate burn to 40\% of revenue & Increases direct buy pressure \\
+Staking < 10\% at M18 & Boosted staking incentives from Ecosystem bucket & Locks supply, reduces selling \\
+No tier-1 by M18 & Redirect \$200K to tier-2 market-making & Deepens liquidity, cuts volatility \\
+Partnership pipeline stalled & Pivot to protocol-to-protocol integrations & Faster revenue via DeFi composability \\
+Community growth stalling & Redirect grants to community builder incentives & Organic holder growth \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The goal is survival, not prevention. In a genuine crypto winter, all assets decline. The objective is to preserve operational capacity, community trust, and treasury reserves to emerge positioned for the next cycle. Projects surviving bear markets with intact tokenomics historically see 5--20x recovery multiples.
+
+\section{11. TGE Planning}\label{tge-planning}
+
+The Token Generation Event is the most consequential operational moment in the FVC roadmap. Planning covers four phases.
+
+\subsection{11.1 Phase 1: Pre-Launch (T-30 $\rightarrow$ T-0)}\label{tge-phase-1}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Workstream} & \textbf{Timeline} & \textbf{Gate} \\
+\midrule
+Smart contracts deployed \& audited & T-30 $\rightarrow$ T-14 & Audit clean \\
+Token contract verified on Etherscan & T-14 $\rightarrow$ T-7 & Public verification \\
+Liquidity pool seeded (\$800K + 50M FVC) & T-7 $\rightarrow$ T-1 & USDC + FVC paired \\
+Tier-2 CEX listing agreements & T-21 $\rightarrow$ T-3 & Min. 3 CEXs confirmed \\
+Marketing campaign live & T-30 onwards & KOL roster activated \\
+Vesting contracts deployed & T-14 $\rightarrow$ T-3 & Verified on-chain \\
+Compliance \& legal sign-off & T-7 $\rightarrow$ T-1 & Final letter received \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{11.2 Phase 2: Launch Day (T-0)}\label{tge-phase-2}
+
+Six-hour staggered sequence to avoid liquidity shocks. All times UTC.
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Time} & \textbf{Action} \\
+\midrule
+T+0:00 & Token contract live; vesting contracts begin counting \\
+T+0:30 & DEX pool opened (\$800K USDC + 50M FVC at \$0.05) \\
+T+1:00 & Tier-2 CEX deposits enabled (Gate, KuCoin, MEXC) \\
+T+2:00 & CEX trading live \\
+T+3:00 & Live trading announcement \\
+T+4:00 & Liquidity monitoring; market-making if needed \\
+T+24:00 & Day-1 dashboard: holders, TVL, volume \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{11.3 Phase 3: Stabilisation (T+1 $\rightarrow$ T+30)}\label{tge-phase-3}
+
+DEX pool above \$1M TVL with market-maker on standby. Target 5,000+ holders by T+30. Staking opens at T+7 (15\% participation target). First grants deployed at T+14 with 1--2 pilot SMEs, initiating the revenue flywheel. Tier-1 CEX outreach begins T+14.
+
+\subsection{11.4 Phase 4: Post-Launch Milestones}\label{tge-phase-4}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Milestone} & \textbf{Target} & \textbf{Revenue / Token Impact} \\
+\midrule
+First grant repaid & M3 & Proves model; treasury begins accumulating \\
+10 active grants & M6 & \$50K+/mo $\rightarrow$ first meaningful burn \\
+First partnership & M9 & Pipeline expansion; 30--100\% step-change \\
+Tier-1 CEX listing & M12--18 & 50--200\% step-change; institutional flow \\
+\$200K/mo revenue & M15 & Sustains Base; \$150K quarterly burn \\
+Second partnership & M18 & Compounds momentum \\
+\$500K/mo revenue & M24 & Unlocks Bull; \$375K quarterly burn \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{11.5 Launch Risk Management}\label{launch-risk-management}
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{p{4.4cm} Y}
+\toprule
+\textbf{Risk} & \textbf{Mitigation} \\
+\midrule
+Day-1 presale dump & 6-month cliff, zero presale tokens at TGE \\
+DEX liquidity shock & Pre-seeded pool + market-maker standby \\
+CEX listing delays & 3 tier-2 confirmed; 4th as backup \\
+Smart contract exploit & 2 independent audits; bug bounty from T+0 \\
+Insider selling & No insider unlock until M12 (Seed) / M18 (Team) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{12. Grants System}\label{grants-system}
+
+\subsection{12.1 Dual Grant System}\label{dual-grant-system}
 
 FVC offers two grant categories designed to serve different
 SME and startup stages and capital needs.
@@ -1091,7 +1636,7 @@ the ecosystem and funded projects.
 Small grants provide fast, accessible funding for early-stage projects
 through a founder-friendly structure. Borrowers deposit minimal
 collateral in yield-bearing assets. Projects share a small percentage of
-revenue over a fixed period---no interest, no predetermined returns,
+revenue over a fixed period, no interest, no predetermined returns,
 just aligned incentives. Fast-track vetting ensures quick deployment for
 hackathon winners, MVP development, and bridge funding. Collateral only
 serves as fraud protection, never liquidated for revenue shortfalls.
@@ -1106,8 +1651,10 @@ interest.
 \item
   \textbf{Amount:} \$25,000 - \$100,000
 \item
-  \textbf{Collateral Requirement:} 10-30\% put down in stable assets:
-  BTC, ETH, USDC et cetera, helping to protect staked funds.
+  \textbf{Collateral Requirement:} 10-30\% cash collateral, paid in GBP
+  or CHF and converted to stablecoins by our payments partner, held in the
+  treasury Safe and returned on full repayment. Web3 projects may post
+  stablecoins directly.
 \item
   \textbf{Revenue Share:} A percentage of gross revenue for 18-24 months
 \item
@@ -1117,7 +1664,7 @@ interest.
   project abandonment
 \end{itemize}
 
-\subsubsection{7.1.2 Large Strategic Grants}\label{large-strategic-grants}
+\subsubsection{12.1.2 Large Strategic Grants}\label{large-strategic-grants}
 
 Large grants fund established firms through two models: revenue share
 agreements that preserve founder equity, or direct token/equity
@@ -1171,7 +1718,7 @@ allocations.
 
 SMEs and funded firms remit an agreed share of revenues at fixed time periods. Treasury allocates these revenues to: staking yields, FVC reserves and to buy and burn FVC.
 
-\subsubsection{7.1.3 The Vetting Advantage}\label{the-vetting-advantage}
+\subsubsection{12.1.3 The Vetting Advantage}\label{the-vetting-advantage}
 
 Unlike pure DAOs where anyone can propose anything, FVC employs a
 specialised team that filters applications first:
@@ -1230,7 +1777,7 @@ selects from curated excellence. Every funded project has passed both
 institutional-grade diligence AND community approval. Higher success
 rates, better returns, happier token holders.
 
-\subsection{Compliance and
+\subsection{12.2 Compliance and
 Verification}\label{compliance-and-verification}
 
 FVC implements a comprehensive revenue verification system that
@@ -1242,7 +1789,7 @@ enables verification of both crypto-native and traditional revenue
 streams, creating a robust framework for sustainable revenue sharing.
 
 Whitelist mechanism ties wallet address to a zero-knowledge proof
-generated via Sumsub KYC process, the approved KYC and identity
+generated via Ondato KYC process, the approved KYC and identity
 attestation provider. Periodic identity verification ensures AML
 compliance and sector-specific eligibility. No alternative providers
 accepted without governance proposal and approval. Quarterly legal
@@ -1257,7 +1804,7 @@ revenue sharing captures genuine business performance, with any attempts
 to game the system triggering immediate investigation and potential
 default proceedings.
 
-\subsubsection{7.2.1 Enforcement and
+\subsubsection{12.2.1 Enforcement and
 Punishments}\label{enforcement-and-punishments}
 
 FVC enforces revenue reporting through progressive penalties
@@ -1273,12 +1820,12 @@ enforcement actions are transparent, with status updates published to
 maintain accountability while giving struggling projects opportunity to
 remedy before severe consequences.
 
-\subsection{Vetting Process}\label{vetting-process}
+\subsection{12.3 Vetting Process}\label{vetting-process}
 
 Grant applications undergo two-stage evaluation to ensure quality while
 preserving decentralised governance. FVC's specialised due diligence
-team---comprising chartered accountants, technical analysts, and
-industry veterans---assesses each project's financial health, revenue
+team, comprising chartered accountants, technical analysts, and
+industry veterans, assesses each project's financial health, revenue
 authenticity, technical feasibility, and market viability. Only projects
 meeting strict operational and financial criteria advance to community
 voting, accompanied by comprehensive vetting reports. This combination
@@ -1286,9 +1833,9 @@ of professional diligence and community governance ensures informed
 capital allocation decisions while significantly reducing default risk
 across the portfolio.
 
-\section{8. Governance}\label{governance-section}
+\section{13. Governance}\label{governance-section}
 
-\subsection{8.1 Overview}\label{overview}
+\subsection{13.1 Overview}\label{overview}
 
 The FVC ecosystem contains a sophisticated, multi-layered governance
 system designed to balance community participation with operational
@@ -1296,7 +1843,7 @@ efficiency. Our governance framework draws inspiration from successful
 DeFi protocols while introducing innovative mechanisms specifically
 tailored for SME funding operations.
 
-\subsection{8.2 Core Governance
+\subsection{13.2 Core Governance
 Architecture}\label{core-governance-architecture}
 
 \textbf{Governance Token}: \$FVC serves as the primary governance token
@@ -1316,11 +1863,11 @@ C_I = (W_v)^2
 
 Therefore, to double influence ($2W_v$), an entity must stake four times the capital ($4C_I$), making governance capture economically inefficient.
 
-\begin{center}
+\[
 \text{Voting Power} = \sqrt{\text{Staked Tokens}}
-\end{center}
+\]
 
-{Voting Mechanisms: Quorum Requirements, Vote
+\textbf{Voting Mechanisms: Quorum Requirements, Vote
 Delegation}\label{voting-mechanisms-quorum-requirements-vote-delegation}
 
 \begin{itemize}
@@ -1362,7 +1909,7 @@ Delegation}\label{voting-mechanisms-quorum-requirements-vote-delegation}
   \end{itemize}
 \end{itemize}
 
-\subsection{8.3 Emergency Procedures: Circuit Breakers, Emergency
+\subsection{13.3 Emergency Procedures: Circuit Breakers, Emergency
 Pause}\label{emergency-procedures-circuit-breakers-emergency-pause}
 
 \begin{itemize}
@@ -1419,7 +1966,7 @@ Pause}\label{emergency-procedures-circuit-breakers-emergency-pause}
   \end{itemize}
 \end{itemize}
 
-\subsection{8.4 Governance Attack Prevention: Anti-Manipulation
+\subsection{13.4 Governance Attack Prevention: Anti-Manipulation
 Measures}\label{governance-attack-prevention-anti-manipulation-measures}
 
 \begin{itemize}
@@ -1446,7 +1993,7 @@ Measures}\label{governance-attack-prevention-anti-manipulation-measures}
   \begin{itemize}
   \tightlist
   \item
-    \textbf{KYC Integration:} Sumsub implementation for regulatory
+    \textbf{KYC Integration:} Ondato implementation for regulatory
     compliance
   \item
     \textbf{Whitelist Management:} Controlled access to bonding and
@@ -1478,7 +2025,7 @@ Measures}\label{governance-attack-prevention-anti-manipulation-measures}
   \end{itemize}
 \end{itemize}
 
-\section{9. Distribution
+\section{14. Distribution
 Infrastructure}\label{distribution-infrastructure}
 
 \textbf{Smart Contract System}
@@ -1510,7 +2057,7 @@ Infrastructure}\label{distribution-infrastructure}
   \textbf{Transaction Requirements:} Minimum 3 signatures
 \end{itemize}
 
-\section{10. Market Making Strategy}\label{market-making-strategy}
+\section{15. Market Making Strategy}\label{market-making-strategy}
 
 \textbf{Initial Liquidity Provision}
 
@@ -1519,10 +2066,12 @@ Infrastructure}\label{distribution-infrastructure}
 \item
   \textbf{DEX Pools:} Uniswap V3 (FVC/USDC), Uniswap V3 (FVC/WETH)
 \item
-  \textbf{Initial Liquidity:} 50,000,000 FVC + equivalent USDC/ETH
+  \textbf{Initial Liquidity:} \$800K USDC + 50,000,000 FVC at \$0.05
 \item
   \textbf{Range Management:} Concentrated liquidity for capital
   efficiency
+\item
+  \textbf{CEX Budget:} \$900K reserved for Tier-1 CEX listings within 18 months
 \end{itemize}
 
 \textbf{Liquidity Mining Incentives}
@@ -1534,22 +2083,21 @@ Infrastructure}\label{distribution-infrastructure}
 \item
   \textbf{Tiered Structure:} Higher rewards for longer-term provision
 \item
-  \textbf{Performance Metrics:} Volume and retention-based bonuses \#
-  14. Risk Management \& Exit Strategy
+  \textbf{Performance Metrics:} Volume and retention-based bonuses
 \end{itemize}
 
-\section{11. Risks and Mitigations}\label{risks-and-mitigations}
+\section{16. Risks and Mitigations}\label{risks-and-mitigations}
 
-\subsection{11.1 Purpose}\label{purpose}
+\subsection{16.1 Purpose}\label{purpose}
 
 The purpose of this Risk Management Policy is to establish a structured
 framework for identifying, assessing, mitigating, and monitoring risks
 associated with FVC providing funding to SMEs and startups in the cryptocurrency and blockchain
-industry. This policy ensures that AKH Digital Ltd.~operates in line
+industry. This policy ensures that FVC Asset Group Ltd.~operates in line
 with industry best practices, regulatory expectations, and
 Shariah-compliant financing principles.
 
-\subsection{11.2 Due Diligence}\label{due-diligence}
+\subsection{16.2 Due Diligence}\label{due-diligence}
 
 The FVC Team evaluates grant applicants across multiple risk dimensions
 before advancing projects to community vote. Our systematic approach
@@ -1583,11 +2131,12 @@ maintaining high quality standards.
 Projects failing any single criterion are rejected without exception,
 ensuring consistent standards across the portfolio.
 
-\subsection{11.3 Collateral and Security}\label{collateral-and-security}
+\subsection{16.3 Collateral and Security}\label{collateral-and-security}
 
 FVC mitigates default risk through a robust collateral framework for
-small grants, requiring borrowers to secure funding with digital assets
-held in ecosystem-controlled smart contracts. This system provides
+small grants. Businesses pay collateral in their own currency; our
+payments partner converts it to stablecoins, so borrowers never need to
+hold or manage crypto. This system provides
 capital protection while maintaining transparent, automated enforcement
 mechanisms that eliminate subjective decision-making in default
 scenarios.
@@ -1597,27 +2146,25 @@ scenarios.
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Accepted Assets:} BTC, ETH, and stablecoins (USDC, USDT) held
-  in multi-signature escrow contracts
+  \textbf{Accepted Assets:} Cash in GBP or CHF, converted to stablecoins
+  by our payments partner and held in the multi-signature treasury Safe.
+  Web3 projects may post stablecoins (USDC, USDT) directly
 \item
   \textbf{Collateralisation Ratio:} Tiered system depending on grant
   size and risk level. 10-30\% of grant value, with borrowers retaining
   staking yields
 \item
-  \textbf{Monitoring System:} Real-time mark-to-market valuation with
-  automated alerts
+  \textbf{Stable Value:} Collateral is held in stablecoins, so its value
+  does not move with crypto prices and no margin calls are needed
 \item
-  \textbf{Margin Calls:} Triggered when collateral value falls below
-  25\%, requiring top-up within 48 hours
+  \textbf{Liquidation Protocol:} Collateral is claimed upon three missed
+  payments
 \item
-  \textbf{Liquidation Protocol:} Automatic liquidation upon three missed
-  payments or collateral dropping below threshold
-\item
-  \textbf{Recovery Process:} Collateral sold to recover grant principal,
-  excess returned to borrower
+  \textbf{Recovery Process:} Collateral applied to the outstanding
+  balance, excess returned to borrower
 \end{itemize}
 
-\subsection{11.4 Revenue}\label{revenue}
+\subsection{16.4 Revenue}\label{revenue}
 
 FVC structures repayments through revenue-sharing agreements rather than
 interest-bearing loans, aligning ecosystem success with borrower growth
@@ -1650,7 +2197,7 @@ consistent revenue capture without relying on borrower goodwill.
 This approach ensures sustainable repayment aligned with actual business
 performance rather than arbitrary payment schedules.
 
-\subsection{11.5 Treasury Concentration}\label{treasury-concentration}
+\subsection{16.5 Treasury Concentration}\label{treasury-concentration}
 
 FVC maintains strict concentration limits to ensure sustainable revenue
 generation and minimise single-point-of-failure risks across the grant
@@ -1684,7 +2231,7 @@ This disciplined approach to capital deployment ensures the ecosystem
 maintains diverse revenue streams while protecting treasury resources
 from concentrated default risk.
 
-\subsection{11.6 Default and Insolvency}\label{default-and-insolvency}
+\subsection{16.6 Default and Insolvency}\label{default-and-insolvency}
 
 When funded projects become insolvent or cease operations, FVC employs
 multiple recovery mechanisms to minimise losses and protect treasury
@@ -1714,7 +2261,7 @@ Default proceedings prioritise speed of recovery and capital
 preservation, with recovered funds redistributed to active grants rather
 than individual compensation.
 
-\subsection{11.7 Counterparty and Compliance
+\subsection{16.7 Counterparty and Compliance
 Risk}\label{counterparty-and-compliance-risk}
 
 FVC maintains strict compliance standards through comprehensive
@@ -1747,7 +2294,7 @@ international compliance standards.
   maintained and updated monthly
 \end{itemize}
 
-\subsection{11.8 Regulation, Jurisdiction and Shariah
+\subsection{16.8 Regulation, Jurisdiction and Shariah
 Compliancy}\label{regulation-and-shariah-compliancy}
 
 FVC operates within established regulatory frameworks while
@@ -1797,7 +2344,7 @@ appetite for crypto-asset innovation and job creation.
 This dual approach ensures broad accessibility while maintaining
 regulatory compliance across jurisdictions.
 
-\section{12. Exit \& Recovery Strategy}\label{exit-recovery-strategy}
+\section{17. Exit \& Recovery Strategy}\label{exit-recovery-strategy}
 
 \begin{itemize}
 \tightlist
@@ -1814,6 +2361,22 @@ regulatory compliance across jurisdictions.
   \textbf{Token Exit:} Token allocations received as part of agreements
   either liquidated or held as long-term treasury assets
 \end{itemize}
+
+% ── Back page ────────────────────────────────────────────────────────────────
+\clearpage
+\backgroundsetup{scale=1, angle=0, opacity=1, contents={}}
+\thispagestyle{empty}
+\begin{center}
+  \vspace*{\fill}
+  \includegraphics[width=2.6cm]{images/fvc-logo.pdf}\par
+  \vspace{1.1cm}
+  \fvcgradientrule{0.28\textwidth}{1.2pt}\par
+  \vspace{1.1cm}
+  {\color{FVCInk}\large\bfseries FVC Asset Group Ltd\par}
+  \vspace{0.4em}
+  {\color{FVCGrey}\normalsize \href{https://fvcdigital.com}{fvcdigital.com}\, \textperiodcentered\, \href{mailto:info@fvcdigital.com}{info@fvcdigital.com}\par}
+  \vspace*{\fill}
+\end{center}
 
 \end{document}
 

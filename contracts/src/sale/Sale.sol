@@ -72,6 +72,9 @@ contract Sale is Ownable, ReentrancyGuard {
     /// @notice Whether sale is active
     bool public active;
 
+    /// @notice When true, only wallets with active investor terms can buy.
+    bool public allowlistOnly;
+
     /// @notice Accepted stablecoins mapping
     mapping(address => bool) public isAccepted;
 
@@ -120,6 +123,7 @@ contract Sale is Ownable, ReentrancyGuard {
     event PriceFeedUpdated(address newPriceFeed);
     event StalenessThresholdUpdated(uint256 newThreshold);
     event SaleStatusChanged(bool active);
+    event AllowlistOnlyUpdated(bool enabled);
     event AcceptedTokenUpdated(address indexed token, bool allowed);
     event VestingConfigUpdated(address indexed vestingContract, uint256 threshold, uint256 cliff, uint256 duration);
     event InvestorTermsSet(address indexed investor, uint256 maxAmount, uint256 rate, uint256 cliff, uint256 duration);
@@ -189,11 +193,13 @@ contract Sale is Ownable, ReentrancyGuard {
         uint256 normalizedAmount = dec == 6
             ? amount
             : (dec < 6 ? amount * 10 ** (6 - dec) : amount / 10 ** (dec - 6));
+        if (normalizedAmount == 0) revert Sale__ZeroAmount();
 
         if (raised + normalizedAmount > cap) revert Sale__CapExceeded();
 
         // Check allowlist terms
         InvestorTerms memory terms = investorTerms[msg.sender];
+        if (allowlistOnly && !terms.active) revert Sale__NotAllowlisted();
         if (terms.active && terms.maxAmount > 0) {
             if (terms.spent + normalizedAmount > terms.maxAmount) revert Sale__AllowlistCapExceeded();
         }
@@ -201,6 +207,7 @@ contract Sale is Ownable, ReentrancyGuard {
         // Use custom rate if allowlisted, otherwise default
         uint256 effectiveRate = (terms.active && terms.rate > 0) ? terms.rate : rate;
         uint256 tokenAmount = (normalizedAmount * 1e18) / effectiveRate;
+        if (tokenAmount == 0) revert Sale__ZeroAmount();
 
         raised += normalizedAmount;
 
@@ -243,6 +250,7 @@ contract Sale is Ownable, ReentrancyGuard {
 
         // Check allowlist terms
         InvestorTerms memory terms = investorTerms[msg.sender];
+        if (allowlistOnly && !terms.active) revert Sale__NotAllowlisted();
         if (terms.active && terms.maxAmount > 0) {
             if (terms.spent + usdEquivalent > terms.maxAmount) revert Sale__AllowlistCapExceeded();
         }
@@ -250,6 +258,7 @@ contract Sale is Ownable, ReentrancyGuard {
         // Use custom rate if allowlisted, otherwise default
         uint256 effectiveRate = (terms.active && terms.rate > 0) ? terms.rate : rate;
         uint256 tokenAmount = (usdEquivalent * 1e18) / effectiveRate;
+        if (tokenAmount == 0) revert Sale__ZeroAmount();
 
         raised += usdEquivalent;
 
@@ -279,6 +288,15 @@ contract Sale is Ownable, ReentrancyGuard {
         emit SaleStatusChanged(_active);
     }
 
+    /// @notice Restrict purchases to wallets with active investor terms.
+    function setAllowlistOnly(bool enabled) external onlyOwner {
+        allowlistOnly = enabled;
+        emit AllowlistOnlyUpdated(enabled);
+    }
+
+    /// @notice Set the public price on this deployed sale. `30000` is $0.03 per FVC.
+    /// @dev Owner call. This does not require a new deployment. A wallet with an active
+    ///      investor term and `rate > 0` keeps that custom price.
     function setRate(uint256 newRate) external onlyOwner {
         if (newRate == 0) revert Sale__ZeroRate();
         rate = newRate;
@@ -353,7 +371,8 @@ contract Sale is Ownable, ReentrancyGuard {
     // ============ ALLOWLIST MANAGEMENT ============
 
     /**
-     * @notice Set custom terms for an investor. They can then use the UI to buy at their terms.
+     * @notice Set one wallet's price and vesting on this deployed sale. Owner call. No new deployment.
+     *         `customRate` of 0 means the wallet pays the public `rate`.
      * @param investor      Wallet address
      * @param maxAmount     Max USD they can invest (6 decimals). 0 = unlimited
      * @param customRate    Custom price per FVC (6 decimals). 0 = use default rate
@@ -533,13 +552,15 @@ contract Sale is Ownable, ReentrancyGuard {
     function _getEthUsdPriceWithSource() internal view returns (uint256 price, bool fromOracle) {
         if (address(priceFeed) != address(0)) {
             try priceFeed.latestRoundData() returns (
-                uint80,
+                uint80 roundId,
                 int256 answer,
                 uint256,
                 uint256 updatedAt,
-                uint80
+                uint80 answeredInRound
             ) {
-                bool fresh = (block.timestamp - updatedAt) <= stalenessThreshold;
+                bool fresh = updatedAt != 0
+                    && answeredInRound >= roundId
+                    && (block.timestamp - updatedAt) <= stalenessThreshold;
                 if (answer > 0 && fresh) {
                     uint8 feedDecimals = priceFeed.decimals();
                     // Normalise to 6 decimals

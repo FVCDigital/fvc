@@ -17,6 +17,7 @@ contracts have been live on Ethereum mainnet since March 2026 and hold real inve
 | Whitepaper | [docs/Whitepaper.pdf](./docs/Whitepaper.pdf) |
 | Sale terms | [docs/FVC_Token_Sale_Terms_and_Conditions.pdf](./docs/FVC_Token_Sale_Terms_and_Conditions.pdf) |
 | Contract properties | [contracts/INVARIANTS.md](./contracts/INVARIANTS.md) |
+| Solidity TDD / security pipeline | [contracts/SOL_DEVELOPMENT.md](./contracts/SOL_DEVELOPMENT.md) |
 | Security posture | [SECURITY.md](./SECURITY.md) |
 | Legal entity | FVC Asset Group Ltd, British Virgin Islands |
 
@@ -45,7 +46,7 @@ at 0.03 USD per FVC.
 | Source | What it does |
 |---|---|
 | [`src/core/FVC.sol`](./contracts/src/core/FVC.sol) | ERC-20 token. Hard cap of 1,000,000,000 enforced by `ERC20Capped`. Mint and burn are gated by `MINTER_ROLE` and `BURNER_ROLE`. Not upgradeable and has no pause, blacklist, or transfer hook. |
-| [`src/sale/Sale.sol`](./contracts/src/sale/Sale.sol) | Fixed-price sale in USDC, USDT and ETH. ETH is priced from a Chainlink ETH/USD feed with a one-hour staleness check and an owner-set fallback rate. Proceeds are forwarded to the treasury in the same transaction. Supports per-investor terms (custom rate, spend limit, custom vesting) and owner-only OTC minting. |
+| [`src/sale/Sale.sol`](./contracts/src/sale/Sale.sol) | Fixed-price sale in USDC, USDT and ETH. The public price is `rate` on the deployed contract. The treasury Safe changes it with `setRate`. A wallet pays that price unless the Safe has set a different one with `setInvestorTerms`. Do not deploy a new Sale to change the price. |
 | [`src/vesting/Vesting.sol`](./contracts/src/vesting/Vesting.sol) | Any number of independent schedules per beneficiary, each with its own amount, cliff and linear duration. Beneficiaries call `release(scheduleId)`. The owner can modify or revoke a schedule, which refunds the unvested remainder. |
 | [`src/staking/Staking.sol`](./contracts/src/staking/Staking.sol) | Synthetix `StakingRewards` pattern. Stake FVC, earn USDC over a seven-day reward period funded by `notifyRewardAmount`. `recoverERC20` cannot touch the staking or rewards token. |
 | [`src/testnet/FVCFaucet.sol`](./contracts/src/testnet/FVCFaucet.sol) | Testnet faucet. Never deployed to mainnet. |
@@ -73,20 +74,28 @@ Read this section before assuming anything about decentralisation.
 - Vesting is owned by the primary Sale contract, which is what lets a purchase mint and create a
   schedule atomically. Schedule changes therefore have to go through the Sale owner functions.
 - The Sale owner can change price, cap, accepted tokens, oracle settings and investor terms, and can
-  mint OTC allocations outside the recorded raise.
+  mint OTC allocations outside the recorded raise. These are calls on the sale that is already
+  deployed. `setRate(30000)` sets the public price to $0.03 per FVC. `setInvestorTerms` sets a
+  different price for one wallet. A custom rate of `0` means that wallet pays the public price.
+  Deploying another Sale does not replace the old one: both stay callable, and both mint the same
+  FVC token if the new sale is given `MINTER_ROLE`. Turn the old sale off with `setActive(false)`.
+  Vesting is owned by the primary Sale, so a new Sale cannot create schedules on the existing
+  Vesting contract.
 - Governance is off-chain today. The quadratic voting model in the whitepaper is a roadmap item, and
   no governance contract is deployed.
-- Investor eligibility (KYC and AML) is checked off-chain during onboarding and enforced at purchase
-  time through the owner-managed allowlist in Sale. There is no on-chain KYC registry.
+- Investor eligibility (KYC and AML) is checked off-chain during onboarding. The sale is public
+  unless the owner turns on `allowlistOnly`, which then rejects wallets that have no investor terms.
+  There is no on-chain KYC registry.
 
 ### Known operational issues
 
 - The allowlist sale at `0xdf95...709d1` routes to Vesting, but Vesting is owned by the primary Sale,
   so its vesting purchases revert. It has raised nothing and is not in use. Negotiated allocations
   are handled through OTC minting on the primary contracts instead.
-- `Sale.setCap` does not require the new cap to be at or above `raised`, so lowering the cap below
-  the amount already raised breaks the `raised <= cap` property. Found by the Foundry fuzzer and
-  recorded in [INVARIANTS.md](./contracts/INVARIANTS.md).
+- On the deployed mainnet sales, `setCap` can be set below `raised`. Current source reverts with
+  `Sale__CapBelowRaised`. That source fix is not on mainnet. Recorded in
+  [INVARIANTS.md](./contracts/INVARIANTS.md). Changing the cap, like changing the price, is still a
+  Safe call to the existing sale. It is not a reason to deploy a new one.
 - Vesting v1 on mainnet is immutable and carries the accounting gaps listed in INVARIANTS.md. Release
   works correctly for existing schedules. A corrected v2 with a proper admin split is planned before
   the first cliff unlocks in March 2027.

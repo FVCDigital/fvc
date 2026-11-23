@@ -1,0 +1,161 @@
+Ancova: facts for Thursday 23 October 2026
+
+For Abdul. First meeting. Internal notes, not a script to read out.
+
+
+1. THE SHORT VERSION
+
+What this section is for: everything Abdul needs if he reads only one paragraph.
+
+Ancova is a Dubai wealth firm with a Cayman fund. They are not a venture fund that leads startup rounds. All-Stars, the product in the factsheet, buys and sells large US shares and stock options: about 30 to 40 names, roughly two-thirds owned and one-third sold short, with options as a hedge.
+
+The split they show clients is a comparison, not the fund's holdings: property at about 4.7% a year, shares at about 9%, bonds at about 3.2%, and All-Stars at 14.5%. That 9% is a long-run average. Over 2017 to 2025 the S&P 500 with dividends was about 15% a year.
+
+On their own table, $1 million in All-Stars after fees became $3.39 million. The same $1 million in the S&P 500 with dividends became about $3.56 million. Their gross figures beat the price-only S&P in 7 of 9 years. 2022 is the year they will talk about: the fund was up 11.9% while the index fell 19.4%.
+
+The door that fits FVC is the other one. They also host outside managers, and they already name venture and digital assets among those strategies.
+
+
+2. WHO THEY ARE
+
+What this section is for: the basic facts about the company, so Abdul knows who is across the table.
+
+- Ancova Capital Management is a wealth firm based in Dubai (DIFC), with its fund registered in the Cayman Islands.
+- Founder and CEO: Eva Maria Kullmann. She came from Ryze Family Office in the DIFC, where she started in 2016.
+- Fund entity: Ancova Capital Management SPC. Registered with CIMA (the Cayman regulator) on 24 March 2022, licence 1954293.
+- Clients: wealthy individuals, family offices, and investment advisers.
+- They advertise $800 million under management and $3.8 billion under advice, across 11 Bloomberg-listed funds. These are figures for the whole firm, not for one fund.
+- Sister businesses: Ancova Associates (company setup, co-founded with Enis Sljivo) and Ancova Luxury Properties (Dubai real estate).
+
+
+3. WHO RUNS THE MONEY
+
+What this section is for: the names behind the fund, so Abdul knows who to ask for on a Zoom.
+
+- Ronnie Chowdhury: lead portfolio manager. Used to run Deutsche Bank's metals derivatives desk in London.
+- Anthony Silver: co-founder of the strategy. Background in maths and computer science.
+- Andrew Bradley and Simon Kaufmann: run the systems and back office.
+- Abhinav Vivek: vice president of platform operations. Practical contact for anything involving their fund platform. av@ancovacapital.com, +971 54 399 1333.
+- Chowdhury and Silver started the strategy in 2017 with $1 million to $2 million of their own money. The Cayman fund came later, in 2022.
+
+
+4. WHAT THEY INVEST IN
+
+What this section is for: Ancova has four separate lines of business, and only one of them is the fund in the factsheet.
+
+1. All-Stars Fund: their own fund, investing in large US shares and stock options.
+2. Real estate advice: Dubai prime property (they name Emaar, Omniyat, and Nakheel), plus London and Germany.
+3. Fund platform for outside managers: other managers can launch their fund inside Ancova's Cayman structure. Kullmann has said these funds cover private equity, venture capital, digital assets, foreign exchange, and equities.
+4. Family services: residency, trusts, tax planning, and introductions to private banks (UBS, Coutts, LGT, Emirates NBD).
+
+They do not lead startup funding rounds like a typical venture capital firm.
+
+
+5. HOW THE ALL-STARS FUND WORKS
+
+What this section is for: what the fund actually holds, in plain words.
+
+- 30 to 40 large US companies, chosen from the S&P 500.
+- Roughly two-thirds of those positions are owned outright. Roughly one-third are sold short, which means they make money if that share falls.
+- Stock options sit on top as insurance against falls.
+- Trading decisions are made by computer models (AI and statistical models), not by a manager picking stocks by hand.
+- It still moves with the US stock market. It is not market-neutral, so it tends to lag in strong bull years.
+
+
+6. HOW THEY PITCH THE SPLIT TO CLIENTS
+
+What this section is for: the "investment split" in their materials. This is how they suggest a client spreads their wealth, not what the fund owns.
+
+Asset        Return they use     Ease of selling
+Property     about 4.7% a year   hard to sell quickly
+Shares       about 9% a year     daily
+Bonds        about 3.2% a year   daily
+All-Stars    14.5% a year        quarterly
+
+The 9% figure for shares is a long-run average. Over the same years as the fund's record (2017 to 2025), the S&P 500 with dividends returned about 15% a year.
+
+
+7. PERFORMANCE AGAINST THE S&P 500
+
+What this section is for: the main numbers Abdul may want to look up during the meeting.
+
+Year    All-Stars before fees    Investor keeps after fees    S&P 500 with dividends
+2017    +28.9%                   +18.3%                       +21.8%
+2018    +6.5%                    +6.3%                        -4.4%
+2019    +36.5%                   +22.0%                       +31.5%
+2020    +20.8%                   +14.2%                       +18.4%
+2021    +33.8%                   +20.7%                       +28.7%
+2022    +11.9%                   +9.8%                        -18.1%
+2023    +16.7%                   +12.2%                       +26.3%
+2024    +12.5%                   +10.1%                       +25.0%
+2025    +28.9%                   +18.3%                       +17.9%
+
+- $1 million invested in January 2017 grew to $3.39 million in All-Stars (after fees) and to about $3.56 million in the S&P 500 with dividends.
+- 2022 is their strongest story: the fund was up 11.9% while the S&P fell 19.4% (price only, without dividends).
+- 2026 so far (January to August): +31.3% before fees.
+
+
+8. FEES AND INVESTMENT TERMS
+
+What this section is for: what it costs and how money goes in and out, in case they pitch the fund to us.
+
+- Minimum investment: $1 million.
+- Entry fee: 2.5%. No annual management fee.
+- Performance fee: nothing on the first 6% of each year's gain, 30% of the gain between 6% and 10%, and 50% of anything above 10%.
+- Withdrawals: quarterly, with 30 days' notice.
+
+
+9. CREDIBILITY MARKERS
+
+What this section is for: the outside firms they name, so Abdul can recognise them if they come up.
+
+- Regulator: CIMA (Cayman Islands Monetary Authority).
+- Administrator: NAV Fund Administration.
+- Auditor: Berman Fisher, which is on CIMA's list of approved fund auditors.
+- Lawyers: Carey Olsen.
+- Broker: TradeStation.
+- Award: Hedge Fund Journal, 2023, best fund in the category "Market Neutral AI US Equities and Options."
+
+
+10. WHAT THEY CAN OFFER US
+
+What this section is for: why this meeting matters to FVC.
+
+- Access to wealthy families and family offices in Dubai and abroad, which is their core client base.
+- Their fund platform, which already hosts venture and digital-asset funds. FVC could potentially sit there as a regulated vehicle.
+- Introductions to private banks and to the Dubai investor network.
+- Credibility by association with a CIMA-regulated platform.
+
+
+11. WHAT WE CAN OFFER THEM
+
+What this section is for: what Abdul brings to the conversation. Check every figure with Abdul before he says it out loud.
+
+- A different kind of investment for their clients: interest-free funding of small and medium-sized businesses through revenue-share agreements, rather than another US share fund.
+- Sharia-friendly by design. Capital goes out interest-free, and the business pays back a share of its revenue. That is the structure Muslim family offices in Dubai already use, and FVC is built that way from the start. For a Gulf wealth firm, this is a product their clients can actually hold.
+- Live on Ethereum since March 2026: the token, the sale, and vesting, with real investor allocations in them.
+- In build now, for the payments partner. Traditional businesses repay in pounds or Swiss francs. His firm converts that into a pound- or franc-backed stablecoin and sends it to FVC's treasury. Two contracts make that sign-up real:
+  - Loan registry: the public record of each funding agreement and each repayment, so every settlement can be matched to the right business. The design is written. This is the contract his compliance team needs before repayments can run. Do not say it is live.
+  - Staking: already written and tested. It pays those repayments out to token holders. It goes on Ethereum with the first repayment, not before.
+- An independent audit by Hashlock is underway. No final report yet, so do not say "audited".
+- Real-world asset exposure, which their clients cannot get through All-Stars.
+
+
+12. QUESTIONS TO ASK ON THURSDAY
+
+What this section is for: five simple first-meeting questions that open the door to the Zoom.
+
+1. Who at Ancova looks at outside managers or new strategies on the platform?
+2. Do your clients invest in venture capital or digital assets today?
+3. What would a manager like FVC need to join your platform?
+4. Who should we meet on the Zoom?
+5. Could you share the investor pack and the monthly performance figures?
+
+
+SOURCES
+
+- Ancova All-Stars factsheet, September 2026
+- https://ancovacapital.com/allstarsfund
+- The Hedge Fund Journal, "AVO: An AI-Driven US Equity and Option Strategy," 11 March 2025
+- CIMA list of registered mutual funds, 2022
+- Slickcharts, S&P 500 annual returns

@@ -1,0 +1,354 @@
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names,table}{xcolor}
+\documentclass[paper=a4,captions=tableheading]{scrartcl}
+\usepackage{xcolor}
+\usepackage{datetime}
+\usepackage[margin=2.5cm,includehead=true,includefoot=true,centering]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{textcomp}
+\usepackage{lmodern}
+\IfFileExists{sourcesanspro.sty}{\usepackage[default]{sourcesanspro}}{\renewcommand{\familydefault}{\sfdefault}}
+\usepackage[]{microtype}
+\usepackage{setspace}
+\setstretch{1.2}
+\KOMAoptions{parskip=half}
+\usepackage{graphicx}
+\usepackage{float}
+\floatplacement{figure}{H}
+\setlength{\emergencystretch}{3em}
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{enumitem}
+\setlist{itemsep=2pt,topsep=4pt}
+\usepackage{bookmark}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=[HTML]{2B2153},
+  urlcolor=[HTML]{6E1F9E},
+  breaklinks=true,
+  pdftitle={FVC Token: Seed to Listing},
+  pdfauthor={FVC Asset Group Ltd},
+  pdfcreator={LaTeX}}
+
+\definecolor{caption-color}{HTML}{777777}
+\usepackage[font={stretch=1.2}, textfont={color=caption-color}, position=top, skip=4mm, labelfont=bf, singlelinecheck=false, justification=raggedright]{caption}
+\setcapindent{0em}
+
+\definecolor{FVCCyan}{HTML}{43CBFF}
+\definecolor{FVCPurple}{HTML}{9708CC}
+\definecolor{FVCPurpleDeep}{HTML}{6E1F9E}
+\definecolor{FVCInk}{HTML}{2B2153}
+\definecolor{FVCGrey}{HTML}{6E6E73}
+\definecolor{FVCRule}{HTML}{D8D8DC}
+\colorlet{FVCMid}{FVCCyan!50!FVCPurple}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\pgfkeys{/pgf/number format/assume math mode=true}
+\usepgfplotslibrary{fillbetween}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\renewcommand{\arraystretch}{1.25}
+
+\newcommand{\fvcgradientrule}[2]{%
+  \begin{tikzpicture}
+    \shade[left color=FVCCyan, right color=FVCPurple] (0,0) rectangle (#1,#2);
+  \end{tikzpicture}}
+
+\definecolor{heading-color}{HTML}{2B2153}
+\addtokomafont{disposition}{\normalfont\color{heading-color}\bfseries}
+
+\pgfplotsset{
+  fvc/.style={
+    width=0.86\linewidth,
+    axis lines*=left,
+    axis line style={FVCRule},
+    tick style={FVCRule},
+    tick label style={font=\small, text=FVCGrey},
+    label style={font=\small, text=FVCInk},
+    ymajorgrids,
+    grid style={FVCRule!60, dashed},
+    legend style={draw=none, fill=none, font=\small, text=FVCInk},
+    legend cell align=left,
+  },
+}
+
+\usepackage[headsepline,footsepline]{scrlayer-scrpage}
+\newpairofpagestyles{fvc-header-footer}{
+  \clearpairofpagestyles
+  \ihead*{\smash{\raisebox{-0.18em}{\includegraphics[height=1.05em]{images/fvc-logo-grey.pdf}}}\hspace{0.55em}First Venture Capital}
+  \ohead*{Seed to Listing}
+  \ifoot*{fvcdigital.com}
+  \ofoot*{\thepage}
+  \addtokomafont{pageheadfoot}{\upshape\footnotesize\color{FVCGrey}}
+}
+\pagestyle{fvc-header-footer}
+
+\usepackage[pages=all]{background}
+\backgroundsetup{scale=1, angle=0, opacity=1, contents={}}
+
+\begin{document}
+
+% ── Cover ────────────────────────────────────────────────────────────────────
+\begin{titlepage}
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[opacity=0.05, anchor=south east, xshift=5.5cm, yshift=-4.5cm]
+      at (current page.south east)
+      {\includegraphics[width=17cm]{images/fvc-logo-grey.pdf}};
+  \end{tikzpicture}%
+  \centering
+  \vspace*{2.4cm}
+  \includegraphics[width=3.9cm]{images/fvc-logo.pdf}\par
+  \vspace{1.7cm}
+  {\color{FVCInk}\huge\bfseries The FVC Token\par}
+  \vspace{0.55em}
+  {\color{FVCPurpleDeep}\LARGE\bfseries Seed to Listing\par}
+  \vspace{1.35cm}
+  \fvcgradientrule{0.38\textwidth}{1.4pt}\par
+  \vspace{1.35cm}
+  {\color{FVCInk}\large FVC Asset Group Ltd\par}
+  \vspace{0.45em}
+  {\color{FVCGrey}\normalsize Investor brief\, \textperiodcentered\, \monthname\ \the\year\par}
+  {\color{FVCGrey}\normalsize \href{https://fvcdigital.com}{fvcdigital.com}\, \textperiodcentered\, \href{mailto:info@fvcdigital.com}{info@fvcdigital.com}\par}
+  \vspace*{1.6cm}
+\end{titlepage}
+
+\backgroundsetup{
+  scale=1, angle=0, opacity=0.05,
+  contents={\includegraphics[width=10.5cm]{images/fvc-logo-grey.pdf}}
+}
+
+\section{Summary}
+
+FVC funds small and medium-sized businesses without charging interest. Each business pays back a share of its revenue, and part of those repayments is paid to FVC holders who stake. The token, the sale and investor vesting have been live on Ethereum since March 2026.
+
+Seed buyers enter below every later round. The default price is \textbf{\$0.03} per FVC, and the lead tranche is \textbf{\$0.025}, half the \textbf{\$0.05} listing target. Price, lock period and release schedule are negotiable for larger tickets, and the live contract already supports bespoke terms for each investor.
+
+\section{The token}
+
+\begin{itemize}
+\tightlist
+\item \textbf{Standard:} ERC-20 on Ethereum, capped at 1,000,000,000 FVC.
+\item \textbf{Payment:} USDC, USDT or ETH. The cash moves to a multisig treasury in the same transaction.
+\item \textbf{Price:} \$0.03 by default. Larger tickets can negotiate a lower price, down to the \$0.025 lead tranche.
+\item \textbf{Terms:} price, lock period and release schedule are agreed per investor and set on-chain for that wallet.
+\item \textbf{Delivery:} tokens go straight into the vesting contract, not into a wallet that can sell them.
+\item \textbf{Seed allocation:} 100 million FVC, 10\% of supply.
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Seed tranche} & \textbf{Tokens} & \textbf{Price} & \textbf{Below listing target} \\
+\midrule
+Lead & 30M & \$0.0250 & 50\% \\
+Standard & 50M & \$0.0300 & 40\% \\
+Late & 20M & \$0.0325 & 35\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+FVC does not give ownership of the company or of the businesses it funds.
+
+\begin{figure}
+\caption{Where the 1 billion FVC go}
+\centering
+\begin{tikzpicture}
+\begin{axis}[fvc,
+  xbar, bar width=9pt,
+  height=7.2cm,
+  xmin=0, xmax=30,
+  xlabel={Share of total supply (\%)},
+  symbolic y coords={Buy and burn,Security reserve,Liquidity,Seed round,Marketing,Protocol reserve,Public presale,Ecosystem,Team and partners},
+  ytick={Buy and burn,Security reserve,Liquidity,Seed round,Marketing,Protocol reserve,Public presale,Ecosystem,Team and partners},
+  y tick label style={font=\small, text=FVCInk},
+  ymajorgrids=false, xmajorgrids,
+  nodes near coords={\pgfmathprintnumber{\pgfplotspointmeta}\%},
+  nodes near coords style={font=\footnotesize, text=FVCInk},
+  enlarge y limits=0.07,
+]
+\addplot[fill=FVCMid!70, draw=none, bar shift=0pt] coordinates {
+  (3,Buy and burn) (3.5,Security reserve) (5,Liquidity) (10,Marketing)
+  (10.5,Protocol reserve) (15,Public presale) (18,Ecosystem) (25,Team and partners)};
+\addplot[fill=FVCPurple, draw=none, bar shift=0pt] coordinates {(10,Seed round)};
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
+\section{Roadmap}
+
+\begin{enumerate}
+\tightlist
+\item \textbf{Seed, open now.} From \$0.025. This is the round a fund would join.
+\item \textbf{Public presale, after the seed.} 150 million FVC across six tiers, from \$0.030 to \$0.048, averaging about \$0.0405. Lock: 6 months, then 6 months of release.
+\item \textbf{Listing, after the presale.} Target price \$0.05, a \$50 million fully diluted valuation. Exchange applications prepared for KuCoin and Bitget target a window of Q4 2026 to Q1 2027, subject to the presale and exchange approval.
+\end{enumerate}
+
+\begin{figure}
+\caption{Price at each stage}
+\centering
+\begin{tikzpicture}
+\begin{axis}[fvc,
+  ybar, bar width=1.6cm,
+  height=6.4cm,
+  ymin=0, ymax=0.06,
+  ylabel={Price per FVC (USD)},
+  xmin=0.5, xmax=4.5,
+  xtick={1,2,3,4},
+  xticklabels={Seed lead,Seed default,Presale avg,Listing target},
+  x tick label style={font=\small, text=FVCInk},
+  yticklabel={\$\pgfmathprintnumber[fixed,precision=2,zerofill]{\tick}},
+  scaled y ticks=false,
+  nodes near coords={\$\pgfmathprintnumber[fixed,precision=4]{\pgfplotspointmeta}},
+  nodes near coords style={font=\small\bfseries, text=FVCInk},
+]
+\addplot[fill=FVCCyan, draw=none, bar shift=0pt] coordinates {(1,0.025)};
+\addplot[fill=FVCCyan!70!FVCPurple, draw=none, bar shift=0pt] coordinates {(2,0.03)};
+\addplot[fill=FVCMid, draw=none, bar shift=0pt] coordinates {(3,0.0405)};
+\addplot[fill=FVCPurple, draw=none, bar shift=0pt] coordinates {(4,0.05)};
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
+A seed buyer enters 40\% to 50\% below the listing target. Figure~3 shows what that means for a \$100,000 ticket at the default price. At the lead price of \$0.025, the same ticket buys 4,000,000 FVC, worth \$200,000 at the listing target.
+
+\begin{figure}
+\caption{A \$100,000 ticket at the default price (illustrative, not a forecast)}
+\centering
+\begin{tikzpicture}
+\begin{axis}[fvc,
+  ybar, bar width=1.6cm,
+  height=6.4cm,
+  ymin=0, ymax=200000,
+  ylabel={Value of 3,333,333 FVC (USD)},
+  xmin=0.5, xmax=3.5,
+  xtick={1,2,3},
+  xticklabels={Today at \$0.03,At presale \$0.0405,At listing \$0.05},
+  x tick label style={font=\small, text=FVCInk},
+  yticklabel={\$\pgfmathprintnumber[fixed,1000 sep={,}]{\tick}},
+  scaled y ticks=false,
+  nodes near coords={\$\pgfmathprintnumber[fixed,precision=0,1000 sep={,}]{\pgfplotspointmeta}},
+  nodes near coords style={font=\small\bfseries, text=FVCInk},
+]
+\addplot[fill=FVCCyan, draw=none, bar shift=0pt] coordinates {(1,100000)};
+\addplot[fill=FVCMid, draw=none, bar shift=0pt] coordinates {(2,135000)};
+\addplot[fill=FVCPurple, draw=none, bar shift=0pt] coordinates {(3,166667)};
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
+\section{Where the money goes}
+
+The largest single use of the \$8.93 million pre-listing raise is the business funding pool: \textbf{40\%, about \$3.6 million}. Each business signs an interest-free agreement and pays a share of its revenue back to the treasury. The treasury pays part of those repayments to stakers in USDC, and uses the rest for reserves and buying back FVC. Staking is built and tested, and it goes live with the first repayments.
+
+The rest covers engineering and the audit, exchange listings and liquidity, marketing, and legal work. Hashlock is auditing the contracts now.
+
+\begin{figure}
+\caption{Use of the \$8.93 million pre-listing raise}
+\centering
+\begin{tikzpicture}
+\begin{axis}[fvc,
+  xbar, bar width=9pt,
+  height=6.4cm,
+  xmin=0, xmax=48,
+  xlabel={Share of the raise (\%)},
+  symbolic y coords={Reserve and contingency,Partnerships,Legal and compliance,Marketing,DEX liquidity,Exchange listings,Engineering and audits,Business funding pool},
+  ytick={Reserve and contingency,Partnerships,Legal and compliance,Marketing,DEX liquidity,Exchange listings,Engineering and audits,Business funding pool},
+  y tick label style={font=\small, text=FVCInk},
+  ymajorgrids=false, xmajorgrids,
+  nodes near coords={\pgfmathprintnumber{\pgfplotspointmeta}\%},
+  nodes near coords style={font=\footnotesize, text=FVCInk},
+  enlarge y limits=0.08,
+]
+\addplot[fill=FVCMid!70, draw=none, bar shift=0pt] coordinates {
+  (5,Reserve and contingency) (5,Partnerships) (5,Legal and compliance) (7.5,Marketing)
+  (7.5,DEX liquidity) (10,Exchange listings) (20,Engineering and audits)};
+\addplot[fill=FVCPurple, draw=none, bar shift=0pt] coordinates {(40,Business funding pool)};
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
+\begin{figure}
+\caption{How money moves through FVC}
+\centering
+\begin{tikzpicture}[
+  box/.style={rectangle, rounded corners=4pt, draw=none, fill=#1, text=white,
+              font=\small\bfseries, minimum height=1.05cm, text width=2.2cm, align=center},
+  arr/.style={-{Stealth[length=2.4mm]}, thick, draw=FVCGrey},
+  lbl/.style={font=\footnotesize, text=FVCGrey, align=center},
+  node distance=1.7cm,
+]
+\node[box=FVCCyan] (fund) {Fund buys FVC};
+\node[box=FVCCyan!65!FVCPurple, right=of fund] (tre) {Multisig treasury};
+\node[box=FVCCyan!35!FVCPurple, right=of tre] (sme) {Small businesses};
+\node[box=FVCPurple, below=1.5cm of sme] (rev) {Revenue share};
+\node[box=FVCPurpleDeep, left=of rev] (stk) {Staking};
+\node[box=FVCInk, left=of stk] (hold) {FVC holders};
+\draw[arr] (fund) -- node[lbl, above] {USDC} (tre);
+\draw[arr] (tre) -- node[lbl, above] {no interest} (sme);
+\draw[arr] (sme) -- node[lbl, right] {repays} (rev);
+\draw[arr] (rev) -- (stk);
+\draw[arr] (stk) -- node[lbl, above] {USDC} (hold);
+\draw[arr, dashed] (fund.south) -- node[lbl, left] {tokens vest} (hold.north);
+\end{tikzpicture}
+\end{figure}
+
+\section{Vesting while the raise and listing are ahead}
+
+The lock runs per purchase. The clock starts on the day that buyer pays, not on one date for the whole round. The default terms are already in the live contract:
+
+\begin{itemize}
+\tightlist
+\item \textbf{First 12 months:} nothing can be claimed. A purchase in October 2026 stays locked until October 2027.
+\item \textbf{Next 12 months:} tokens release in a straight line and are fully released 24 months after purchase.
+\item \textbf{Claiming:} the buyer claims each release. The schedule is visible at \href{https://fvcdigital.com/buy-fvc}{fvcdigital.com/buy-fvc}.
+\item \textbf{Listing:} a listing in the first year does not unlock anything. That keeps seed tokens out of the first trading.
+\end{itemize}
+
+\textbf{These terms are negotiable.} A larger ticket can agree a shorter lock, a different release length and a lower price. The contract sets those terms for that investor's wallet alone, so a bespoke deal needs no new contract.
+
+\begin{figure}
+\caption{Share of a purchase that can be claimed, by month}
+\centering
+\begin{tikzpicture}
+\begin{axis}[fvc,
+  height=6.6cm,
+  xmin=0, xmax=30, ymin=0, ymax=105,
+  xtick={0,6,12,18,24,30},
+  ytick={0,25,50,75,100},
+  xlabel={Months after purchase},
+  ylabel={Claimable (\%)},
+  legend pos=south east,
+]
+\fill[FVCCyan, opacity=0.08] (axis cs:0,0) rectangle (axis cs:12,105);
+\node[font=\footnotesize, text=FVCGrey, align=center] at (axis cs:3,55) {Seed lock\\nothing\\claimable};
+\addplot[FVCPurple, very thick] coordinates {(0,0) (12,0) (24,100) (30,100)};
+\addlegendentry{Seed (default terms, negotiable)}
+\addplot[FVCCyan, very thick, dashed] coordinates {(0,0) (6,0) (12,100) (30,100)};
+\addlegendentry{Public presale (planned)}
+\end{axis}
+\end{tikzpicture}
+\end{figure}
+
+\section{Shariah}
+
+The business agreements charge no interest. Each business pays a share of its revenue instead. The structure is Shariah-friendly by design.
+
+\section{In one sentence}
+
+\begin{center}
+\fvcgradientrule{0.38\textwidth}{1.4pt}\par\vspace{0.8em}
+{\color{FVCInk}\large Seed buyers enter from \$0.025 against a \$0.05 listing target, on terms negotiated for their ticket, and 40\% of the raise funds real businesses that pay back a share of their revenue.\par}
+\vspace{0.8em}\fvcgradientrule{0.38\textwidth}{1.4pt}
+\end{center}
+
+\vfill
+{\footnotesize\color{FVCGrey}FVC is a utility token, not equity or a deposit. Holders have no legal claim on FVC Asset Group Ltd or the businesses it funds; staking rewards are distributed by the treasury. Presale and listing prices and dates are targets. Figures are illustrative and token value can fall. This brief is not an offer in any jurisdiction where such an offer is not permitted.\par}
+
+\end{document}

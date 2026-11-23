@@ -11,7 +11,7 @@ import { TabId } from '@/constants/tabs';
 /**
  * Supported asset types for bonding and trading
  */
-export type AssetSymbol = 'USDC' | 'ETH' | 'FVC';
+export type AssetSymbol = 'USDC' | 'USDT' | 'ETH' | 'FVC';
 
 /**
  * Asset configuration interface

@@ -11,6 +11,7 @@ import { RoadmapFlowchart } from '@/components/roadmap';
 import { TabId } from '@/constants/tabs';
 import StakingView from '@/screen-view/StakingView';
 import DashboardView from '@/screen-view/DashboardView';
+import VestingView from '@/screen-view/VestingView';
 import PortfolioView from '@/screen-view/PortfolioView';
 
 /**
@@ -35,6 +36,8 @@ export default function TabContent({ activeTab, isConnected, address }: TabConte
   switch (activeTab) {
     case 'dashboard':
       return <DashboardView />;
+    case 'vesting':
+      return <VestingView isConnected={isConnected} address={address} />;
     // case 'private-sale':
     //   return <PrivateSaleCard />;
     case 'staking':

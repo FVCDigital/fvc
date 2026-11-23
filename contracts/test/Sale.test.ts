@@ -802,4 +802,26 @@ describe("Ethereum Presale ? Sale Contract", function () {
       expect(await fvc.balanceOf(buyer.address)).to.equal(0);
     });
   });
+
+  describe("allowlist-only mode", function () {
+    it("rejects a buyer who has no terms while the restriction is on", async () => {
+      await sale.connect(beneficiary).setAllowlistOnly(true);
+      const amount = ethers.parseUnits("1000", 6);
+      await usdc.connect(buyer).approve(await sale.getAddress(), amount);
+
+      await expect(
+        sale.connect(buyer).buy(await usdc.getAddress(), amount)
+      ).to.be.revertedWithCustomError(sale, "Sale__NotAllowlisted");
+    });
+
+    it("lets an allowlisted buyer purchase while the restriction is on", async () => {
+      await sale.connect(beneficiary).setAllowlistOnly(true);
+      await sale.connect(beneficiary).setInvestorTerms(buyer.address, 0, 0, 0, 0);
+      const amount = ethers.parseUnits("1000", 6);
+      await usdc.connect(buyer).approve(await sale.getAddress(), amount);
+
+      await sale.connect(buyer).buy(await usdc.getAddress(), amount);
+      expect(await fvc.balanceOf(buyer.address)).to.be.gt(0);
+    });
+  });
 });

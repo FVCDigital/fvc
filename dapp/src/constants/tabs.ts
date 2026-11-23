@@ -7,7 +7,7 @@ import { TabConfig } from '@/types';
 /**
  * Valid tab IDs for hash-based routing
  */
-export const VALID_TAB_IDS = ['dashboard', 'private-sale', 'staking', 'governance', 'portfolio', 'roadmap'] as const;
+export const VALID_TAB_IDS = ['dashboard', 'vesting', 'private-sale', 'staking', 'governance', 'portfolio', 'roadmap'] as const;
 
 /**
  * Tab ID type for type safety
@@ -19,6 +19,7 @@ export type TabId = typeof VALID_TAB_IDS[number];
  */
 export const MOBILE_TABS: TabConfig[] = [
   { id: 'dashboard', label: 'Dashboard' },
+  { id: 'vesting', label: 'Investor' },
   { id: 'private-sale', label: 'Private Sale' },
   { id: 'staking', label: 'Staking' },
   { id: 'governance', label: 'Governance' },

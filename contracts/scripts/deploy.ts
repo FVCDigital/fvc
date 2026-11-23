@@ -25,14 +25,14 @@ async function main() {
   // CONFIGURATION
   const SAFE_ADDRESS = process.env.SAFE_ADDRESS || deployer.address; // Use deployer if no Safe configured
   const USDC_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"; // Base Sepolia USDC
-  const INITIAL_RATE = 25_000; // $0.025 per FVC
+  const INITIAL_RATE = 30_000; // $0.03 per FVC
   const INITIAL_CAP = ethers.parseUnits("1000000", 6); // 1M USDC
 
   console.log("📋 CONFIGURATION");
   console.log("─────────────────────────────────────────────────────────────");
   console.log("Safe Address:  ", SAFE_ADDRESS);
   console.log("USDC Address:  ", USDC_ADDRESS);
-  console.log("Initial Rate:  ", INITIAL_RATE, "($0.025 per FVC)");
+  console.log("Initial Rate:  ", INITIAL_RATE, "($0.03 per FVC)");
   console.log("Initial Cap:   ", ethers.formatUnits(INITIAL_CAP, 6), "USDC");
   console.log();
 

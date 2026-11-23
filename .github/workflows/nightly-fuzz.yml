@@ -62,7 +62,7 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           pip install crytic-compile==0.4.2
-          curl -sSL -o /tmp/medusa.tgz "https://github.com/crytic/medusa/releases/download/${MEDUSA_VERSION}/medusa-linux-x64.tar.gz"
+          curl -fsSL --retry 5 --retry-all-errors -o /tmp/medusa.tgz "https://github.com/crytic/medusa/releases/download/${MEDUSA_VERSION}/medusa-linux-x64.tar.gz"
           mkdir -p "$HOME/bin"
           tar -xzf /tmp/medusa.tgz -C "$HOME/bin" medusa
           echo "$HOME/bin" >> "$GITHUB_PATH"

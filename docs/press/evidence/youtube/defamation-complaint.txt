@@ -1,0 +1,78 @@
+YOUTUBE DEFAMATION COMPLAINT: COPY INTO THE FORM
+Path: Help Center > Legal policies > Defamation > "submit a legal complaint" (product: YouTube, issue: Defamation)
+File one complaint per video if the form only accepts one URL; use the matching text below.
+Before filing: report each video in the YouTube app (... > Report > Spam or misleading > Scams or fraud).
+
+======================================================================
+YOUR DETAILS
+======================================================================
+Full legal name:         Igli Kristo
+Company you represent:   FVC Asset Group Ltd (trading as First Venture Capital, fvcdigital.com)
+Your role:               Authorised representative
+Contact email:           marketing@fvcdigital.com
+Country of residence:    Switzerland
+Company registered in:   British Virgin Islands (company no. 2203627)
+
+======================================================================
+COMPLAINT 1 (stronger): Liberty Daily Watch
+======================================================================
+URL: https://www.youtube.com/watch?v=6lbNkSSPzf0
+Title: "FVC (First Venture Capital) reviews, fvcdigital.com scam - trader scam - #fvcdigital scam?"
+Channel: Liberty Daily Watch (https://www.youtube.com/channel/UCb0hbeaMEsPafcYeTeK8JiQ)
+Uploaded: 3 June 2026
+
+Explanation (paste into "explain why this content is unlawful"):
+
+This video makes false statements of fact about FVC Asset Group Ltd, which operates First Venture Capital (fvcdigital.com). The statements are presented as fact, not opinion, and damage the company's reputation with businesses, partners and the public.
+
+False statements, in the title, description and audio:
+
+1. Description: "Victims have reported total financial losses with no returns." This is false. No victim, complaint or loss has ever been reported to FVC, and the video identifies none.
+
+2. Description: "There are numerous fraud reports about FVC (First Venture Capital), including cases where users couldn't withdraw their money." This is false. There are no fraud reports and no withdrawal cases. The video cites none.
+
+3. Description: "FVC (First Venture Capital) claims to be a trust, but is actually a highly deceptive scam operation." This is false and accuses the company of criminal fraud without any evidence.
+
+4. Audio at 0:08: calls FVC "another fake company". Audio at 0:53: "This is a very simple, completely false scam". Audio at 0:59: "yet another offshore broker who masterfully plays around with his clients quietly making money on them." All false. FVC is not a broker, offers no trading, and does not hold client trading accounts.
+
+5. Title: "fvcdigital.com scam - trader scam". FVC is not a trading platform; the label is false.
+
+The video contains no investigation: it is a 94-second generic script read by synthetic voices, uses the same template as the channel's other videos, and directs viewers to a paid "fund recovery" and "chargeback" service (liberty-reviews.com, Telegram liberty_review). The only content specific to FVC is a single sentence copied from our website.
+
+FVC Asset Group Ltd is a company registered in the British Virgin Islands. It publishes its contract addresses, treasury controls and audit status at https://fvcdigital.com/security, and its company information at https://fvcdigital.com/press.
+
+We request removal of the video, or at minimum removal of the false statements from the title, description and audio.
+
+======================================================================
+COMPLAINT 2: OSINT Intelligence Asset Recovery
+======================================================================
+URL: https://www.youtube.com/watch?v=uFrLneMFkME
+Title: "FVCDigital.com Scam Investigation | Withdrawal Problems & Investor Warning"
+Channel: OSINT Intelligence Asset Recovery (https://www.youtube.com/@OSINTIntelligenceRecovery)
+Uploaded: 25 July 2026
+
+Explanation:
+
+This video's title states as fact that fvcdigital.com is a scam with "Withdrawal Problems". This is false and damages the reputation of FVC Asset Group Ltd, which operates First Venture Capital (fvcdigital.com).
+
+1. Title: "FVCDigital.com Scam Investigation | Withdrawal Problems". No user has ever reported a withdrawal problem, and the video identifies none. The title asserts problems that do not exist.
+
+2. The video presents itself as an "investigation", but contains no findings about FVC. It mispronounces the domain as "fxc-digital.com" and reads a generic script that the channel uses for over 2,400 different websites, changing only the name.
+
+3. The description and audio direct viewers who believe they are victims to contact the channel by Telegram and WhatsApp for a paid "case assessment". The false "withdrawal problems" claim is used to attract people to that service.
+
+We request removal of the video, or at minimum removal of "Scam" and "Withdrawal Problems" from the title and description.
+
+======================================================================
+SIGNATURE / DECLARATION
+======================================================================
+Tick the declaration boxes and sign as: Igli Kristo
+
+======================================================================
+IN-APP REPORT TEXT (Report > Spam or misleading > Scams or fraud; under 500 characters)
+======================================================================
+OSINT video (uFrLneMFkME):
+Recovery scam channel. Its 2,400+ videos are one AI script with only the site name swapped, accusing small projects of "withdrawal problems" with no evidence (it even mispronounces our domain as "fxc-digital.com"). The goal is to get worried viewers to contact a Telegram/WhatsApp for paid "fund recovery", a fraud the FBI and FTC warn about. We are FVC Asset Group Ltd (fvcdigital.com); no user has ever reported a withdrawal issue.
+
+Liberty video (6lbNkSSPzf0):
+Recovery scam channel. 94-second AI-voiced template that calls our company a "fake company" and "completely false scam" and invents "victims" and "numerous fraud reports" that do not exist. Every video uses the same script with the name swapped, then sends viewers to liberty-reviews.com and Telegram for paid "chargeback" and "fund recovery" services. We are FVC Asset Group Ltd (fvcdigital.com). We are not a broker and offer no trading.

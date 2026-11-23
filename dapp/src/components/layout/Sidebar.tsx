@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaDiscord, FaTelegram, FaXTwitter, FaXmark } from 'react-icons/fa6';
-import { BriefcaseBusiness, LayoutDashboard, Lock, Map as MapIcon } from 'lucide-react';
+import { BriefcaseBusiness, LayoutDashboard, Lock, Map as MapIcon, TrendingUp } from 'lucide-react';
 import { TabId } from '@/constants/tabs';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'vesting', label: 'Investor', icon: TrendingUp },
     { id: 'staking', label: 'Staking', icon: Lock },
     { id: 'portfolio', label: 'Portfolio', icon: BriefcaseBusiness },
     { id: 'roadmap', label: 'Roadmap', icon: MapIcon },
