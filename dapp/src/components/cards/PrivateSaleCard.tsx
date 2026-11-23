@@ -5,7 +5,7 @@ import { parseUnits, formatUnits } from 'viem';
 import { BaseCardProps, Asset } from '@/types';
 import FVCAllocationChart from './FVCAllocationChart/FVCAllocationChart';
 import AssetSelector from './TradingCard/AssetSelector';
-import { CONTRACTS, useAllMilestones, useCurrentMilestone, useSaleProgress, usePrivateSaleActive, useCurrentPrices, useEthUsdPrice, BONDING_ABI, USDC_ABI } from '@/utils/contracts/bondingContract';
+import { CONTRACTS, useAllMilestones, useCurrentMilestone, useSaleProgress, usePrivateSaleActive, useCurrentPrices, useEthUsdPrice, BONDING_ABI, USDC_ABI, USDT_ABI } from '@/utils/contracts/bondingContract';
 import { calculateFVCAmountFromUSDC, calculateFVCAmountFromETH, calculatePercentageAmount } from '@/utils';
 
 interface PrivateSaleCardProps extends BaseCardProps {
@@ -20,6 +20,14 @@ const ASSETS: Asset[] = [
     decimals: 6,
     logo: '/assets/usdc-logo.png',
     color: '#2775CA'
+  },
+  { 
+    symbol: 'USDT', 
+    name: 'Tether', 
+    address: CONTRACTS.USDT as `0x${string}`, 
+    decimals: 6,
+    logo: '/assets/usdt-logo.png',
+    color: '#26A17B'
   },
   { 
     symbol: 'ETH', 
@@ -69,10 +77,12 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   // Contract interaction hooks
   const { writeContract: writeBonding, isPending: isBondingPending, data: bondingHash } = useWriteContract();
   const { writeContract: writeUSDC, isPending: isUSDCPending, data: usdcHash } = useWriteContract();
+  const { writeContract: writeUSDT, isPending: isUSDTPending, data: usdtHash } = useWriteContract();
   
-  // Wait for transaction receipts
+  // Wait for transaction receipts - use the appropriate hash based on selected asset
+  const approvalHash = selectedAsset.symbol === 'USDT' ? usdtHash : usdcHash;
   const { isLoading: isApprovalPending, isSuccess: isApprovalSuccess, isError: isApprovalError } = useWaitForTransactionReceipt({
-    hash: usdcHash,
+    hash: approvalHash,
   });
   
   const { isLoading: isBondingPendingReceipt, isSuccess: isBondingSuccess, isError: isBondingError } = useWaitForTransactionReceipt({
@@ -90,9 +100,17 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
     token: CONTRACTS.USDC as `0x${string}`,
     query: { enabled: !!address }
   });
+
+  const usdtBalance = useBalance({ 
+    address: address as `0x${string}` | undefined,
+    token: CONTRACTS.USDT as `0x${string}`,
+    query: { enabled: !!address }
+  });
   
   const balance = selectedAsset.symbol === 'ETH' 
     ? ethBalance
+    : selectedAsset.symbol === 'USDT'
+    ? usdtBalance
     : usdcBalance;
 
   // Percentage buttons
@@ -113,10 +131,10 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   const calculateFVCAmount = (amount: string) => {
     if (!amount || parseFloat(amount) <= 0) return '0';
     
-    if (selectedAsset.symbol === 'USDC') {
-      const usdcValue = parseFloat(amount);
-      // FVC = USDC / price per FVC
-      const fvcAmount = usdcValue / currentPrice;
+    if (selectedAsset.symbol === 'USDC' || selectedAsset.symbol === 'USDT') {
+      const stablecoinValue = parseFloat(amount);
+      // FVC = stablecoin / price per FVC
+      const fvcAmount = stablecoinValue / currentPrice;
       return fvcAmount.toFixed(2);
     } else if (selectedAsset.symbol === 'ETH' && currentMilestoneData) {
       // For ETH bonding, use ETH/USD price from Chainlink or fallback to reasonable estimate
@@ -178,8 +196,8 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
 
     // Check wallet cap (2M USDC equivalent)
     const amountValue = parseFloat(bondAmount);
-    if (selectedAsset.symbol === 'USDC' && amountValue > 2000000) {
-      setError('Maximum investment per wallet is 2M USDC');
+    if ((selectedAsset.symbol === 'USDC' || selectedAsset.symbol === 'USDT') && amountValue > 2000000) {
+      setError('Maximum investment per wallet is 2M USDC equivalent');
       return;
     } else if (selectedAsset.symbol === 'ETH' && currentPrices && currentPrices[1] > 0n) {
       // Calculate ETH/USD price from existing data
@@ -212,6 +230,17 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
           functionName: 'approve',
           args: [CONTRACTS.BONDING as `0x${string}`, usdcAmountBigInt],
         });
+      } else if (selectedAsset.symbol === 'USDT') {
+        const usdtAmountBigInt = parseUnits(bondAmount, 6);
+        
+        // First, approve USDT spending
+        console.log('Approving USDT spending...');
+        writeUSDT({
+          address: CONTRACTS.USDT as `0x${string}`,
+          abi: USDT_ABI,
+          functionName: 'approve',
+          args: [CONTRACTS.BONDING as `0x${string}`, usdtAmountBigInt],
+        });
       } else if (selectedAsset.symbol === 'ETH') {
         // For ETH bonding, use bondWithETH function
         const fvcAmountBigInt = parseUnits(fvcAmount, 18);
@@ -234,19 +263,19 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
     }
   };
 
-  // Handle approval success and initiate bonding (USDC only)
+  // Handle approval success and initiate bonding (USDC and USDT)
   useEffect(() => {
-    if (isApprovalSuccess && !isBondingPending && !bondingHash && selectedAsset.symbol === 'USDC') {
-      console.log('USDC approval successful, initiating bonding...');
+    if (isApprovalSuccess && !isBondingPending && !bondingHash && (selectedAsset.symbol === 'USDC' || selectedAsset.symbol === 'USDT')) {
+      console.log(`${selectedAsset.symbol} approval successful, initiating bonding...`);
       
-      const usdcAmountBigInt = parseUnits(bondAmount, 6);
+      const stablecoinAmountBigInt = parseUnits(bondAmount, 6);
       
-      // Then, bond USDC for FVC
+      // Then, bond stablecoin for FVC
       writeBonding({
         address: CONTRACTS.BONDING as `0x${string}`,
         abi: BONDING_ABI,
-        functionName: 'bond',
-        args: [usdcAmountBigInt],
+        functionName: selectedAsset.symbol === 'USDT' ? 'bondWithUSDT' : 'bond',
+        args: [stablecoinAmountBigInt],
       });
     }
   }, [isApprovalSuccess, isBondingPending, bondingHash, bondAmount, selectedAsset.symbol]);
@@ -254,11 +283,11 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
   // Handle approval error
   useEffect(() => {
     if (isApprovalError) {
-      console.error('USDC approval failed');
-      setError('USDC approval failed. Please try again.');
+      console.error(`${selectedAsset.symbol} approval failed`);
+      setError(`${selectedAsset.symbol} approval failed. Please try again.`);
       setIsProcessing(false);
     }
-  }, [isApprovalError]);
+  }, [isApprovalError, selectedAsset.symbol]);
 
   // Handle bonding error
   useEffect(() => {
@@ -303,6 +332,8 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
         refetchMilestones();
         if (selectedAsset.symbol === 'USDC') {
           usdcBalance.refetch();
+        } else if (selectedAsset.symbol === 'USDT') {
+          usdtBalance.refetch();
         } else {
           ethBalance.refetch();
         }
@@ -312,7 +343,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
         setIsSuccess(false);
       }, 5000);
     }
-  }, [isBondingSuccess, refetchSaleProgress, refetchCurrentMilestone, refetchMilestones, selectedAsset.symbol, usdcBalance, ethBalance]);
+  }, [isBondingSuccess, refetchSaleProgress, refetchCurrentMilestone, refetchMilestones, selectedAsset.symbol, usdcBalance, usdtBalance, ethBalance]);
 
   // Progressive loading - show interface immediately, load data progressively
   const isLoading = milestonesLoading || currentMilestoneLoading || progressLoading || saleActiveLoading;
@@ -614,17 +645,17 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
 
         <button
           onClick={handleInvestment}
-          disabled={isProcessing || isBondingPending || isUSDCPending || isApprovalPending || isBondingPendingReceipt || !bondAmount || parseFloat(bondAmount) <= 0}
+          disabled={isProcessing || isBondingPending || isUSDCPending || isUSDTPending || isApprovalPending || isBondingPendingReceipt || !bondAmount || parseFloat(bondAmount) <= 0}
           style={{
             width: '100%',
             padding: '14px 24px',
-            background: isProcessing || isBondingPending || isUSDCPending || isApprovalPending || isBondingPendingReceipt ? theme.darkBorder : theme.modalButton,
+            background: isProcessing || isBondingPending || isUSDCPending || isUSDTPending || isApprovalPending || isBondingPendingReceipt ? theme.darkBorder : theme.modalButton,
             color: theme.primaryText,
             border: 'none',
             borderRadius: 8,
             fontSize: 16,
             fontWeight: 600,
-            cursor: isProcessing || isBondingPending || isUSDCPending || isApprovalPending || isBondingPendingReceipt ? 'not-allowed' : 'pointer',
+            cursor: isProcessing || isBondingPending || isUSDCPending || isUSDTPending || isApprovalPending || isBondingPendingReceipt ? 'not-allowed' : 'pointer',
             transition: 'all 0.2s ease',
           }}
         >
@@ -632,7 +663,7 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
         </button>
 
         {/* Transaction Status */}
-        {(isProcessing || isBondingPending || isUSDCPending || isApprovalPending || isBondingPendingReceipt) && (
+        {(isProcessing || isBondingPending || isUSDCPending || isUSDTPending || isApprovalPending || isBondingPendingReceipt) && (
           <div style={{
             background: '#dbeafe',
             color: '#1e40af',
@@ -642,11 +673,11 @@ const PrivateSaleCard: React.FC<PrivateSaleCardProps> = ({ className = '' }) => 
             fontSize: 14,
             border: '1px solid #93c5fd',
           }}>
-            {isApprovalPending && selectedAsset.symbol === 'USDC' && '⏳ Waiting for USDC approval confirmation...'}
-            {isApprovalSuccess && isBondingPending && selectedAsset.symbol === 'USDC' && '⏳ USDC approved! Waiting for bonding transaction...'}
-            {isBondingPendingReceipt && '⏳ Bonding transaction submitted! Waiting for confirmation...'}
-            {selectedAsset.symbol === 'ETH' && isBondingPending && '⏳ ETH bonding transaction submitted! Waiting for confirmation...'}
-            {!isApprovalPending && !isBondingPending && !isBondingPendingReceipt && '⏳ Processing...'}
+            {isApprovalPending && (selectedAsset.symbol === 'USDC' || selectedAsset.symbol === 'USDT') && `Waiting for ${selectedAsset.symbol} approval confirmation...`}
+            {isApprovalSuccess && isBondingPending && (selectedAsset.symbol === 'USDC' || selectedAsset.symbol === 'USDT') && `${selectedAsset.symbol} approved! Waiting for bonding transaction...`}
+            {isBondingPendingReceipt && 'Bonding transaction submitted! Waiting for confirmation...'}
+            {selectedAsset.symbol === 'ETH' && isBondingPending && 'ETH bonding transaction submitted! Waiting for confirmation...'}
+            {!isApprovalPending && !isBondingPending && !isBondingPendingReceipt && 'Processing...'}
           </div>
         )}
 

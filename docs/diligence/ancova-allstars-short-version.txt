@@ -1,0 +1,47 @@
+Due Diligence on Ancova Allstars
+
+Ancova is a Dubai wealth firm, founded in 2021, with a Cayman fund regulated since 2022. Clients are wealthy families, family offices and advisers. Besides its own fund it offers property advice, residency and tax help, and a platform where outside managers launch their own funds. It says it manages $800 million across the firm.
+
+Who's behind it
+
+- Eva Maria Kullmann, founder and CEO. Ran Ryze Family Office in Dubai from 2016, started Ancova in 2021. She runs the clients and the business.
+- Ronnie Chowdhury, lead portfolio manager. Computer science and AI at UCL, then Deutsche Bank's metals derivatives desk in London. He designed the models.
+- Anthony Silver, co-founder of the strategy. Maths and computer science at Melbourne, then Barclays, BNP Paribas and Citigroup. He and Chowdhury make the trading decisions.
+- Andrew Bradley and Simon Kaufmann run the systems and back office. Enis Sljivo co-founded Ancova Associates, which sets up businesses in the UAE.
+
+Chowdhury and Silver started in 2017 with $1 million to $2 million of their own money. The Cayman fund came in 2022.
+
+All-Stars
+
+The factsheet fund holds 30 to 40 large US companies plus stock options: about two-thirds owned, one-third sold short, options as a hedge.
+
+Their sales chart shows what each asset usually earns, so All-Stars looks like the best place for part of a client's money:
+
+- Property: about 4.7% a year. Prime real estate, slow to sell.
+- Shares: about 9% a year. Global stocks, averaged over many decades.
+- Bonds: about 3.2% a year. Safe government and company loans.
+- All-Stars: about 14.5% a year. What investors kept from 2017 to 2025, after fees.
+
+The pitch is to keep property, shares and bonds, and move part of the money into All-Stars. The 9% is a decades-long average. Over the same nine years the S&P 500 with dividends made about 15% a year, slightly more than All-Stars. Expect them to answer with 2022: the fund was up 11.9% while the S&P 500 fell 19.4%.
+
+Credibility: CIMA (Cayman regulator). Administrator, NAV Fund Administration. Auditor, Berman Fisher, on CIMA's approved list. Lawyers, Carey Olsen. Broker, TradeStation. Hedge Fund Journal, 2023, best fund in "Market Neutral AI US Equities and Options."
+
+The opportunity for FVC
+
+All-Stars trades large US shares. The door for FVC is the fund platform. Outside managers launch inside Ancova's licensed Cayman structure, and Ancova supplies the legal setup, administration, audit and lawyers. Kullmann has said it already hosts venture and digital-asset funds, which is where FVC sits.
+
+They can offer access to wealthy families and family offices in Dubai and abroad, a regulated vehicle, introductions to private banks and the Dubai network, and the credibility of a CIMA platform.
+
+What Ancova's clients are missing: Ancova's clients are wealthy families in Dubai. They already own property, shares and bonds. Ancova's own fund, All-Stars, adds US shares. But none of this puts money into real small businesses. And none of it is designed for families who avoid interest for religious reasons.
+
+What FVC offers: FVC lends money to small businesses without charging interest. In return, each business pays back a share of what it earns. That money goes back to FVC holders. FVC's token, sale and vesting have been running on Ethereum since March 2026.
+
+Why FVC suits Ancova: many of Ancova's clients avoid interest, and FVC charges none. The clients can keep All-Stars for US shares and add FVC for income from real businesses. Ancova already offers venture and digital-asset funds on its platform, so FVC fits in easily.
+
+Questions to ask
+
+1. Who at Ancova looks at outside managers or new strategies on the platform?
+2. Do your clients invest in venture capital or digital assets today?
+3. What would a manager like FVC need to join your platform?
+4. Who on Ancova's side should be on the follow-up Zoom?
+5. Could you share the investor pack and the monthly performance figures?

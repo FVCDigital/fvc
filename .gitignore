@@ -177,3 +177,6 @@ telegram-*.txt
 website-fix-report.txt
 solana-student-day-ideathon-framework.md
 scripts/fix-github-profile-contributions.sh
+
+# Internal research wiki (private notes, never commit)
+wiki/

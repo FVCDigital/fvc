@@ -4,6 +4,7 @@ import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 
 export const CONTRACTS = {
   BONDING: (process.env.NEXT_PUBLIC_BONDING_ADDRESS || '') as string,
   USDC: (process.env.NEXT_PUBLIC_USDC_ADDRESS || '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48') as string,
+  USDT: (process.env.NEXT_PUBLIC_USDT_ADDRESS || '0xdAC17F958D2ee523a2206206994597C13D831ec7') as string,
   FVC: (process.env.NEXT_PUBLIC_FVC_ADDRESS || '') as string,
   VESTING: (process.env.NEXT_PUBLIC_VESTING_ADDRESS || '') as string,
   SALE: (process.env.NEXT_PUBLIC_SALE_ADDRESS || '') as string,
@@ -118,6 +119,19 @@ export const BONDING_ABI = [
     "name": "bondWithETH",
     "outputs": [],
     "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "usdtAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "bondWithUSDT",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -452,6 +466,47 @@ export const USDC_ABI = [
     "name": "mint",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  }
+];
+
+// USDT ABI (minimal for approval operations - note: USDT approve returns void, not bool)
+export const USDT_ABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "spender",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "approve",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "balanceOf",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ];

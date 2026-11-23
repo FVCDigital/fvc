@@ -1,0 +1,26 @@
+LINKEDIN POST
+Post from the FVC company page, then reshare from your personal profile with one line of your own.
+Do not attach an image; it replaces the link preview card.
+
+Small businesses often struggle to access fair funding, and when they do, the costs and terms are rarely transparent.
+
+At First Venture Capital (FVC), we are building infrastructure that lets startups and SMEs receive funding without paying interest, and lets every funding agreement and repayment be recorded transparently.
+
+The businesses we expect to work with are mostly traditional SMEs. They will repay in regular currency, by bank transfer or direct debit, and will not need to hold or understand digital assets.
+
+Over the coming weeks we are releasing three components:
+
+1. A loan registry that records each funding agreement on a public blockchain and tracks repayments against it.
+2. Automated reconciliation that matches each repayment to the right business and prepares the record for our treasury signers to approve.
+3. Security testing built into the process, so the registry is fuzz-tested and security-tested on every code change from day one.
+
+Funds settle to a multi-signature treasury controlled by several signers, so no single person can move them alone. Our contract addresses, treasury controls and audit status are public, and an independent audit by Hashlock is in progress.
+
+Read the full announcement: https://fvcdigital.com/announcements/fvc-company-press-release
+
+#SMEfunding #InterestFree #Fintech #Transparency #StartupFunding
+
+
+PERSONAL RESHARE LINE (example)
+
+Proud of what the team is building: interest-free funding for SMEs, with every repayment on record.

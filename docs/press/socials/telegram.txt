@@ -1,0 +1,17 @@
+TELEGRAM POST
+Pin it in the channel after posting.
+
+📢 New announcement: First Venture Capital is building open infrastructure for interest-free SME funding
+
+Most of the businesses we expect to fund are traditional SMEs. They will repay in ordinary money, by bank transfer or direct debit, without needing to hold or understand digital assets.
+
+What we are building for release in the coming weeks:
+
+🔹 Loan registry: records each funding agreement on a public blockchain and tracks repayments against it
+🔹 Automated reconciliation: matches each incoming repayment to the right business and prepares it for the treasury signers to approve
+🔹 Security testing: the registry is fuzz-tested and security-tested on every code change from day one
+
+Funds settle to a multi-signature treasury, so no single person can move them alone. Contract addresses, treasury controls and audit status are public on our security page, and an independent audit by Hashlock is in progress.
+
+Read the full release 👇
+https://fvcdigital.com/announcements/fvc-company-press-release

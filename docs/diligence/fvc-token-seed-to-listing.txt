@@ -1,0 +1,52 @@
+FVC token: seed, presale, listing
+
+All-Stars can pay investors out on a schedule. An FVC seed allocation cannot. The tokens stay locked while the rest of the raise is completed and a listing is prepared. The default price is $0.03. Later rounds are planned above it, and the lock is why.
+
+
+The token
+
+FVC is an ERC-20 token on Ethereum, capped at 1 billion. The token, the sale and the vesting contract have been live since March 2026. A buyer pays in USDC, USDT or ETH. The cash goes to a multisig treasury the same day. The tokens go into the vesting contract. They do not arrive in a wallet that can sell them.
+
+FVC does not give ownership of the company or of the businesses it funds.
+
+The default price is $0.03 per FVC. Every buyer pays that unless the treasury has set a different price for that wallet. The seed allocation is 100 million FVC, 10% of supply, about $3 million if that round fills at the default price.
+
+
+Roadmap
+
+1. Seed, open now. Buyers pay the default price of $0.03. This is the round a fund would join.
+2. Public presale, next. 150 million FVC, planned at an average of about $0.0405, above the default price. Planned lock: 6 months with nothing released, then 6 months releasing in a straight line.
+3. Listing, after the presale. The working target is $0.05 per FVC. The date is not set.
+
+The listing target of $0.05 sits two-thirds above the default price of $0.03. That gap is what a buyer at the default price is positioning for. It is the plan. It is not a promised price, and a listing is not guaranteed.
+
+
+Where the money goes
+
+Cash from the sale funds small and medium-sized businesses. Each business signs an interest-free agreement and pays a share of its revenue back to the treasury. There is no interest. Those repayments are what token holders receive once they stake. Staking is written and tested, and it turns on when the first repayments come in, so a buyer does not earn that revenue on day one.
+
+Ahead of listing, the raise also covers the audit, operations, legal work and the listing itself. Hashlock is reviewing the contracts now.
+
+
+Vesting, while the raise and the listing are still ahead
+
+The lock is per purchase. The clock starts on the day that buyer pays, not on one date for the whole round.
+
+Standard terms, already in the contract:
+
+- First 12 months: nothing can be claimed. A purchase in October 2026 stays locked until October 2027.
+- Next 12 months: the tokens release in a straight line, and are fully released 24 months after purchase.
+- The buyer claims each release. Until they claim, the tokens stay in the vesting contract. The schedule is visible at fvcdigital.com/buy-fvc.
+- A listing during the first year does not unlock them. They can see a market and still be unable to sell. That is what keeps seed tokens out of the first trading.
+
+A larger ticket can ask for its own cliff and release length. The contract already allows a schedule per wallet.
+
+
+Shariah
+
+The business agreements charge no interest. The business pays a share of revenue. The structure is Shariah-friendly by design.
+
+
+In one sentence
+
+The default price is $0.03, against a listing target of $0.05. The tokens vest for a year before anything can be sold, and the money funds real businesses that pay back a share of revenue.

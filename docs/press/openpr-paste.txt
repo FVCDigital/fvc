@@ -1,0 +1,76 @@
+openPR: COPY EACH BLOCK INTO ITS FIELD
+(plain text only; openPR adds "(openPR) - " in front of the text by itself)
+
+======================================================================
+TITLE
+======================================================================
+FVC Develops Public Loan Registry and Repayment Tracking for Interest-Free SME Funding
+
+======================================================================
+TEXT  (paste everything between the lines)
+======================================================================
+First Venture Capital (FVC), operated by FVC Asset Group Ltd, is developing infrastructure that lets startups and small and medium-sized businesses (SMEs) receive funding without paying interest, and lets every funding agreement and repayment be recorded transparently.
+
+Many small businesses struggle to access fair funding, and when they do, costs and terms are often opaque. FVC's model replaces interest with revenue-sharing agreements and treasury-backed grants, supported by a community-governed approach to selecting who is funded.
+
+
+BUILT FOR BUSINESSES THAT PAY IN ORDINARY MONEY
+
+Most of the SMEs FVC expects to work with are traditional businesses. They will make repayments in regular currency, by bank transfer or direct debit, and will not need to hold or understand digital assets.
+
+FVC is working toward a regulated payments setup in which each business receives its own payment reference, repayments are converted into a GBP or CHF-backed stablecoin, and the funds are settled to a multi-signature treasury wallet controlled by several signers, so that no single person can move funds alone.
+
+
+THREE COMPONENTS, BUILT IN THE OPEN
+
+FVC is building three components for release in the coming weeks:
+
+1) LOAN REGISTRY: a smart contract that records each funding agreement on a public blockchain and tracks repayments against it.
+
+2) AUTOMATED RECONCILIATION: software that watches incoming settlements, matches each to the right business using its payment reference, and prepares the repayment record for signers to approve.
+
+3) SECURITY TESTING: the registry is fuzz-tested and security-tested on every code change from day one, building on the testing already applied to FVC's existing contracts.
+
+FVC publishes its contract addresses, treasury controls and audit status at https://fvcdigital.com/security. An independent audit by Hashlock is in progress.
+
+
+MORE INFORMATION
+
+Press kit (company description, key facts, logos): https://fvcdigital.com/press
+Original announcement: https://fvcdigital.com/announcements/fvc-company-press-release
+Media enquiries: marketing@fvcdigital.com
+
+
+This release is for information only and is not investment advice or an offer of securities. FVC services are subject to eligibility requirements and jurisdictional restrictions; see https://fvcdigital.com/fvc-restricted-jurisdictions-policy
+----------------------------------------------------------------------
+
+(Link count in the text: security, press, original announcement, policy = 4. The About field below adds the 5th. Do not add more.)
+
+======================================================================
+IMAGE
+======================================================================
+File:    docs/press/assets/fvc-howitworks-1200x900.jpg
+Caption: How FVC works: choose who is funded, fund the business, and record every repayment on a public loan registry.
+
+======================================================================
+PRESSCONTACT / FULL POSTAL ADDRESS  (required; they refuse releases without a full address)
+======================================================================
+FVC Asset Group Ltd
+c/o Quijano & Associates (BVI) Limited
+Quijano Chambers, P.O. Box 3159
+Road Town, Tortola
+British Virgin Islands
+
+Press contact: Igli Kristo
+Email: marketing@fvcdigital.com
+Phone: +41 44 499 03 64
+
+======================================================================
+ABOUT / PORTRAIT OF THE COMPANY  (5th and last link)
+======================================================================
+First Venture Capital (FVC) connects venture funding, decentralised finance and real-world businesses. It funds startups and SMEs through revenue-sharing agreements and treasury-backed grants rather than interest. FVC is operated by FVC Asset Group Ltd. Learn more at https://fvcdigital.com
+
+======================================================================
+NOTES (editors only)
+======================================================================
+Release date: 5 October 2026. Original announcement: https://fvcdigital.com/announcements/fvc-company-press-release

@@ -3,7 +3,7 @@ import '@/styles/globals.css';
 import '@rainbow-me/rainbowkit/styles.css';
 import type { AppProps } from 'next/app';
 import { getDefaultConfig, RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider, http } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { theme } from '@/constants/theme';
@@ -14,6 +14,11 @@ const config = getDefaultConfig({
   appName: 'FVC',
   projectId,
   chains: [mainnet],
+  transports: {
+    [mainnet.id]: http(
+      process.env.NEXT_PUBLIC_ETH_RPC_URL || 'https://ethereum.publicnode.com'
+    ),
+  },
   ssr: true,
 });
 

@@ -44,11 +44,16 @@ Investors should read these before treating the protocol as trustless.
 - The Vesting contract is owned by the primary Sale contract so that purchases can mint and create a
   schedule atomically. Vesting administration therefore runs through Sale's owner functions.
 - The Sale owner can change price, cap, accepted tokens, oracle configuration and per-investor terms
-  at any time, and can mint OTC allocations that do not increment the recorded raise.
+  at any time, and can mint OTC allocations that do not increment the recorded raise. Price and terms
+  are changed on the deployed sale. `setRate(30000)` is $0.03 per FVC for every wallet that has no
+  custom rate. `setInvestorTerms` is the per-wallet price. Do not deploy a new Sale to change either.
+- Purchases are public unless the owner turns on `allowlistOnly`. The allowlist then rejects any
+  wallet without active investor terms. Custom terms still apply only to wallets on the list.
 - ETH pricing depends on the Chainlink ETH/USD feed. If the answer is older than one hour or
   non-positive, the contract falls back to an owner-set rate, which is a trusted input.
-- Mainnet contracts are not upgradeable. Fixing a contract means deploying a replacement and
-  migrating, not patching in place.
+- Mainnet contracts are not upgradeable. A bug in the bytecode needs a new deployment and a
+  migration. Owner settings do not. `setRate`, `setInvestorTerms`, `setCap`, `setActive`, and the
+  oracle setters already exist on the deployed sales, and the Safe calls them there.
 - Governance is off-chain. There is no on-chain vote, timelock, or on-chain KYC registry today.
 
 ## Known issues

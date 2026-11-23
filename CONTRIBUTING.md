@@ -3,6 +3,9 @@
 The contracts in this repository hold real investor allocations. The workflow below exists so that
 changes are provably safe before they reach a deployment.
 
+For the full TDD and security pipeline (Trail of Bits + OpenZeppelin style, mapped to the tools in
+this repo), follow [contracts/SOL_DEVELOPMENT.md](./contracts/SOL_DEVELOPMENT.md).
+
 ## Setup
 
 ```bash
